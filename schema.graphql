@@ -1,0 +1,181 @@
+type User @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Admin"], operations: [read, update] }
+]) {
+  id: ID!
+  username: String!
+  email: String!
+  name: String
+  type: UserType!
+  major: String
+  year: String
+  interests: [String]
+  bio: String
+  profilePicture: String
+  documents: [Document] @hasMany
+  applications: [Application] @hasMany
+  projects: [Project] @hasMany(indexName: "byUser", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum UserType {
+  STUDENT
+  FACULTY
+  ADMIN
+}
+
+type Document @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Admin"], operations: [read] }
+]) {
+  id: ID!
+  userId: ID! @index(name: "byUser")
+  name: String!
+  type: String!
+  key: String!
+  size: Int
+  uploadDate: AWSDateTime!
+  user: User @belongsTo(fields: ["userId"])
+}
+
+type ResearchOpportunity @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: private, operations: [read] },
+  { allow: groups, groups: ["Admin"], operations: [read, update] }
+]) {
+  id: ID!
+  title: String!
+  description: String!
+  facultyId: ID! @index(name: "byFaculty")
+  faculty: User @belongsTo(fields: ["facultyId"])
+  department: String!
+  requirements: String
+  deadline: AWSDateTime
+  startDate: AWSDateTime
+  endDate: AWSDateTime
+  status: OpportunityStatus!
+  categories: [String]!
+  skills: [String]
+  applications: [Application] @hasMany(indexName: "byOpportunity", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum OpportunityStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  CANCELLED
+}
+
+type Application @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: private, operations: [read] },
+  { allow: groups, groups: ["Admin"], operations: [read, update] }
+]) {
+  id: ID!
+  opportunityId: ID! @index(name: "byOpportunity")
+  opportunity: ResearchOpportunity @belongsTo(fields: ["opportunityId"])
+  userId: ID! @index(name: "byUser")
+  user: User @belongsTo(fields: ["userId"])
+  status: ApplicationStatus!
+  statement: String
+  resumeId: ID
+  resume: Document @hasOne(fields: ["resumeId"])
+  submissionDate: AWSDateTime!
+  lastUpdated: AWSDateTime!
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+type Project @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: private, operations: [read] },
+  { allow: groups, groups: ["Admin"], operations: [read, update] }
+]) {
+  id: ID!
+  title: String!
+  description: String!
+  userId: ID! @index(name: "byUser")
+  user: User @belongsTo(fields: ["userId"])
+  facultyId: ID! @index(name: "byFaculty")
+  faculty: User @belongsTo(fields: ["facultyId"])
+  status: ProjectStatus!
+  startDate: AWSDateTime!
+  endDate: AWSDateTime
+  files: [ProjectFile] @hasMany
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+type ProjectFile @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: private, operations: [read] }
+]) {
+  id: ID!
+  projectId: ID! @index(name: "byProject")
+  project: Project @belongsTo(fields: ["projectId"])
+  name: String!
+  key: String!
+  type: String!
+  size: Int
+  uploadDate: AWSDateTime!
+  uploader: String!
+}
+
+type Event @model @auth(rules: [
+  { allow: groups, groups: ["Admin"], operations: [create, read, update, delete] },
+  { allow: private, operations: [read] }
+]) {
+  id: ID!
+  title: String!
+  description: String!
+  date: AWSDateTime!
+  location: String
+  registrationRequired: Boolean!
+  registrationUrl: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Notification @model @auth(rules: [
+  { allow: owner, operations: [read, update, delete] },
+  { allow: groups, groups: ["Admin"], operations: [create] }
+]) {
+  id: ID!
+  userId: ID! @index(name: "byUser")
+  user: User @belongsTo(fields: ["userId"])
+  type: NotificationType!
+  title: String!
+  message: String!
+  read: Boolean!
+  relatedItemId: ID
+  relatedItemType: String
+  createdAt: AWSDateTime!
+}
+
+enum NotificationType {
+  APPLICATION_UPDATE
+  PROJECT_UPDATE
+  DEADLINE_REMINDER
+  SYSTEM_ANNOUNCEMENT
+}
+
+type Query {
+  searchOpportunities(query: String!, category: String, limit: Int): [ResearchOpportunity] @function(name: "searchOpportunities")
+  getRecommendedOpportunities(userId: ID!, limit: Int): [ResearchOpportunity] @function(name: "getRecommendedOpportunities")
+}

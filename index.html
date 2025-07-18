@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URAF - Grand Canyon University</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/aws-amplify@5.0.4/dist/aws-amplify.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>Undergraduate Research and Fellowships</h1>
+                <h2>Grand Canyon University</h2>
+            </div>
+            <nav id="pre-login-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="pages/general-info.html">General Information</a></li>
+                    <li><a href="pages/students.html">Students</a></li>
+                    <li><a href="pages/faculty.html">Faculty & Mentors</a></li>
+                    <li><a href="pages/about.html">About</a></li>
+                    <li><a href="pages/contact.html">Contact</a></li>
+                    <li><a href="#" id="login-btn" class="btn">Login</a></li>
+                </ul>
+            </nav>
+            <nav id="post-login-nav" style="display: none;">
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="pages/profile.html">My Profile</a></li>
+                    <li><a href="pages/search.html">Search Opportunities</a></li>
+                    <li><a href="pages/my-activity.html">My Activity</a></li>
+                    <li><a href="#" id="logout-btn" class="btn">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h2>Creating a diverse and inclusive undergraduate research community</h2>
+                <p>URAF is committed to providing tools, opportunities, and support for every student to thrive in research.</p>
+                <a href="pages/apply.html" class="btn btn-large">Apply Now</a>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <div class="feature-box">
+                    <h3>For Students</h3>
+                    <p>Discover research opportunities, connect with faculty mentors, and develop valuable skills.</p>
+                    <a href="pages/students.html" class="btn">Learn More</a>
+                </div>
+                <div class="feature-box">
+                    <h3>For Faculty</h3>
+                    <p>Post research projects, find qualified student researchers, and access mentorship resources.</p>
+                    <a href="pages/faculty.html" class="btn">Learn More</a>
+                </div>
+                <div class="feature-box">
+                    <h3>Upcoming Deadlines</h3>
+                    <ul id="deadlines-list">
+                        <li>Summer Research Program - April 15</li>
+                        <li>Fall Fellowship Applications - May 30</li>
+                        <li>Research Showcase Registration - June 10</li>
+                    </ul>
+                    <a href="pages/deadlines.html" class="btn">View All</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="spotlight">
+            <div class="container">
+                <h2>Research Spotlight</h2>
+                <div class="spotlight-content">
+                    <img src="images/spotlight-placeholder.jpg" alt="Research Spotlight">
+                    <div>
+                        <h3>Innovative Research in Renewable Energy</h3>
+                        <p>Led by Dr. Sarah Johnson and undergraduate researcher Michael Chen, this project explores new methods for solar energy storage.</p>
+                        <a href="pages/spotlight.html" class="btn">Read More</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Email: uraf@gcu.edu</p>
+                    <p>Phone: (555) 123-4567</p>
+                    <p>Office: Research Building, Room 305</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="pages/faq.html">FAQ</a></li>
+                        <li><a href="pages/resources.html">Resources</a></li>
+                        <li><a href="pages/events.html">Events</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">Facebook</a>
+                        <a href="#" class="social-icon">Twitter</a>
+                        <a href="#" class="social-icon">Instagram</a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Grand Canyon University. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
