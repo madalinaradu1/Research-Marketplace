@@ -8,6 +8,13 @@
       "cognitoUserPoolId": "authResearchMarketplace"
     },
     "conflictResolution": {},
-    "additionalAuthTypes": []
+    "additionalAuthTypes": [
+      {
+        "mode": "API_KEY",
+        "expirationTime": 365,
+        "apiKeyExpirationDate": "2026-07-21T20:42:17.978Z",
+        "keyDescription": "Research Marketplace API Key"
+      }
+    ]
   }
 }
