@@ -66,7 +66,7 @@ const Header = ({ user, signOut }) => {
         <Link to="/dashboard">
           <Image
             alt="URAF Logo"
-            src="/logo.png"
+            src="/logo192.png"
             height="40px"
             width="40px"
             objectFit="contain"
