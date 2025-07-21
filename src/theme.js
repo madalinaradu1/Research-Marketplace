@@ -5,13 +5,13 @@ export const theme = createTheme({
   tokens: {
     colors: {
       primary: {
-        10: '#e8f0ff',
-        20: '#c5d9ff',
-        40: '#81a7ff',
-        60: '#4a6da7',
-        80: '#3a5a8f',
-        90: '#2a4677',
-        100: '#1a325f'
+        10: '#f5e8ff',
+        20: '#e5c5ff',
+        40: '#c881ff',
+        60: '#9a4ad7',
+        80: '#7a3ab0',
+        90: '#5a2a8f',
+        100: '#3a1a6f'
       },
       neutral: {
         10: '#f5f5f5',

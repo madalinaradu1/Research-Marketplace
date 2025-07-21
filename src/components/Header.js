@@ -144,9 +144,9 @@ const Header = ({ user, signOut }) => {
             aria-label="Navigation Menu"
           >
             <Flex direction="column" gap="4px">
-              <View height="2px" width="24px" backgroundColor={tokens.colors.neutral[80]} />
-              <View height="2px" width="24px" backgroundColor={tokens.colors.neutral[80]} />
-              <View height="2px" width="24px" backgroundColor={tokens.colors.neutral[80]} />
+              <View height="2px" width="24px" backgroundColor={tokens.colors.primary[80]} />
+              <View height="2px" width="24px" backgroundColor={tokens.colors.primary[80]} />
+              <View height="2px" width="24px" backgroundColor={tokens.colors.primary[80]} />
             </Flex>
           </MenuButton>
           <View>

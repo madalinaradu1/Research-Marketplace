@@ -15,7 +15,7 @@ body {
 }
 
 header {
-  background-color: #4a6da7;
+  background-color: #9a4ad7;
   color: white;
   padding: 1rem 2rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -34,7 +34,7 @@ header h2 {
 
 header button {
   background-color: white;
-  color: #4a6da7;
+  color: #7a3ab0;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -52,8 +52,16 @@ main {
 }
 
 footer {
-  background-color: #333;
+  background-color: #5a2a8f;
   color: white;
   padding: 1rem 2rem;
   text-align: center;
+}
+
+button.amplify-button--primary {
+  background-color: #9a4ad7;
+}
+
+button.amplify-button--primary:hover {
+  background-color: #7a3ab0;
 }
