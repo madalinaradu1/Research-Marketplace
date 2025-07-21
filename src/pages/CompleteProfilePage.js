@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { API, graphqlOperation } from 'aws-amplify';
+import { API, graphqlOperation, Auth } from 'aws-amplify';
 import { 
   Flex, 
   Heading, 
@@ -10,7 +10,7 @@ import {
   Text,
   useTheme
 } from '@aws-amplify/ui-react';
-import { updateUser } from '../graphql/operations';
+import { createUser, updateUser } from '../graphql/operations';
 import { useNavigate } from 'react-router-dom';
 
 const CompleteProfilePage = ({ user }) => {
@@ -37,13 +37,17 @@ const CompleteProfilePage = ({ user }) => {
     setError(null);
 
     try {
+      // Get current authenticated user
+      const currentUser = await Auth.currentAuthenticatedUser();
+      
       // Convert GPA to float
       const gpa = formState.gpa ? parseFloat(formState.gpa) : null;
       
-      // Prepare input for updateUser mutation
+      // Prepare input for user mutation
       const input = {
-        id: user.username,
+        id: currentUser.username,
         name: formState.name,
+        email: currentUser.attributes.email,
         major: formState.major,
         gpa,
         affiliation: formState.affiliation,
@@ -51,8 +55,14 @@ const CompleteProfilePage = ({ user }) => {
         profileComplete: true
       };
 
-      // Update user in DynamoDB
-      await API.graphql(graphqlOperation(updateUser, { input }));
+      try {
+        // Try to update the user first
+        await API.graphql(graphqlOperation(updateUser, { input }));
+      } catch (updateError) {
+        console.log('Update failed, trying to create user:', updateError);
+        // If update fails, try to create the user
+        await API.graphql(graphqlOperation(createUser, { input }));
+      }
       
       // Redirect to dashboard
       navigate('/dashboard');

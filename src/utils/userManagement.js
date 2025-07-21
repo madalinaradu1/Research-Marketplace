@@ -18,12 +18,30 @@ export async function createUserAfterSignUp(userData) {
       profileComplete: false
     };
     
-    const result = await API.graphql(graphqlOperation(createUser, { input: userInput }));
-    console.log('User record created successfully:', result.data.createUser);
-    return result.data.createUser;
+    // Check if user already exists
+    try {
+      const userExists = await checkUserExists(username);
+      
+      if (userExists) {
+        console.log('User already exists, skipping creation');
+        return null;
+      }
+      
+      const result = await API.graphql(graphqlOperation(createUser, { input: userInput }));
+      console.log('User record created successfully:', result.data.createUser);
+      return result.data.createUser;
+    } catch (graphQLError) {
+      // If there's a conflict (user already exists), don't throw an error
+      if (graphQLError.errors && graphQLError.errors[0].errorType === 'DynamoDB:ConditionalCheckFailedException') {
+        console.log('User already exists (conditional check failed)');
+        return null;
+      }
+      throw graphQLError;
+    }
   } catch (error) {
     console.error('Error creating user record:', error);
-    throw error;
+    // Don't throw the error, just return null to prevent app crashes
+    return null;
   }
 }
 
