@@ -1,5 +1,5 @@
 import { API, graphqlOperation } from 'aws-amplify';
-import { createUser } from '../graphql/mutations';
+import { createUser, getUser } from '../graphql/operations';
 
 /**
  * Creates a User record in DynamoDB after a user signs up with Cognito
@@ -34,7 +34,6 @@ export async function createUserAfterSignUp(userData) {
  */
 export async function checkUserExists(userId) {
   try {
-    const { getUser } = await import('../graphql/queries');
     const result = await API.graphql(graphqlOperation(getUser, { id: userId }));
     return !!result.data.getUser;
   } catch (error) {

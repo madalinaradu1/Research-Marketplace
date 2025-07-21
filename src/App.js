@@ -20,6 +20,7 @@ import CompleteProfilePage from './pages/CompleteProfilePage';
 
 // Import utilities
 import { createUserAfterSignUp, checkUserExists } from './utils/userManagement';
+import { testApiAccess } from './utils/testApi';
 
 // Import AWS configuration
 import awsconfig from './aws-exports';
@@ -30,6 +31,9 @@ function App({ signOut, user }) {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
+    // Test API access
+    testApiAccess();
+    
     // Set up listener for auth events
     const listener = Hub.listen('auth', async (data) => {
       const { payload } = data;
@@ -74,7 +78,7 @@ function App({ signOut, user }) {
     // Fetch user profile data
     const fetchUserProfile = async () => {
       try {
-        const { getUser } = await import('./graphql/queries');
+        const { getUser } = await import('./graphql/operations');
         const userData = await Auth.currentAuthenticatedUser();
         
         const result = await API.graphql(graphqlOperation(getUser, { id: userData.username }));

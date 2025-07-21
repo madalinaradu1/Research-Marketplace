@@ -59,7 +59,7 @@ const Header = ({ user, signOut }) => {
       boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
       position="sticky"
       top="0"
-      zIndex="100"
+      style={{ zIndex: 100 }}
     >
       {/* Logo and Title */}
       <Flex direction="row" alignItems="center" gap={tokens.space.small}>

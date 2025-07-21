@@ -10,7 +10,7 @@ import {
   Text,
   useTheme
 } from '@aws-amplify/ui-react';
-import { updateUser } from '../graphql/mutations';
+import { updateUser } from '../graphql/operations';
 import { useNavigate } from 'react-router-dom';
 
 const CompleteProfilePage = ({ user }) => {
