@@ -16,7 +16,25 @@ import { useNavigate } from 'react-router-dom';
 const Header = ({ user, signOut }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { tokens } = useTheme();
+  const { tokens = {
+    colors: {
+      primary: { 80: '#3a5a8f' },
+      neutral: { 80: '#424242' },
+      white: '#ffffff'
+    },
+    space: {
+      small: '0.5rem',
+      medium: '1rem'
+    },
+    fontSizes: {
+      small: '0.875rem',
+      large: '1.25rem'
+    },
+    fontWeights: {
+      normal: '400',
+      bold: '700'
+    }
+  }} = useTheme() || {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Check if the current path matches the given path
