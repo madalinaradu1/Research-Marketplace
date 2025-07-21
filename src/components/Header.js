@@ -8,7 +8,6 @@ import {
   Menu,
   MenuButton,
   MenuItem,
-  MenuItems,
   useTheme,
   View
 } from '@aws-amplify/ui-react';
@@ -132,13 +131,13 @@ const Header = ({ user, signOut }) => {
               <View height="2px" width="24px" backgroundColor={tokens.colors.neutral[80]} />
             </Flex>
           </MenuButton>
-          <MenuItems>
+          <View>
             <MenuItem onClick={() => navigate('/dashboard')}>Dashboard</MenuItem>
             <MenuItem onClick={() => navigate('/search')}>Search</MenuItem>
             <MenuItem onClick={() => navigate('/activity')}>My Activity</MenuItem>
             <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
             <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
-          </MenuItems>
+          </View>
         </Menu>
       </View>
     </Flex>
