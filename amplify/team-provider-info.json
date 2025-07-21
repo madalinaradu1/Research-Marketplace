@@ -10,6 +10,11 @@
       "StackName": "amplify-researchmarketplace-dev-d0489",
       "StackId": "arn:aws:cloudformation:us-east-1:648937260943:stack/amplify-researchmarketplace-dev-d0489/62a9cda0-63f8-11f0-93d2-0affe2f2e12f",
       "AmplifyAppId": "d33ubw0r59z0k8"
+    },
+    "categories": {
+      "auth": {
+        "ResearchMarketplace": {}
+      }
     }
   }
 }
