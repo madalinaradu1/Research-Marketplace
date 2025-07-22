@@ -1,14 +1,32 @@
 {
+  "temp": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-researchmarketplace-temp-50a5b-authRole",
+      "UnauthRoleArn": "arn:aws:iam::648937260943:role/amplify-researchmarketplace-temp-50a5b-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::648937260943:role/amplify-researchmarketplace-temp-50a5b-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-researchmarketplace-temp-50a5b-deployment",
+      "UnauthRoleName": "amplify-researchmarketplace-temp-50a5b-unauthRole",
+      "StackName": "amplify-researchmarketplace-temp-50a5b",
+      "StackId": "arn:aws:cloudformation:us-east-1:648937260943:stack/amplify-researchmarketplace-temp-50a5b/865ee090-671e-11f0-bf58-0affc9b95623",
+      "AmplifyAppId": "d33ubw0r59z0k8"
+    },
+    "categories": {
+      "auth": {
+        "ResearchMarketplace": {}
+      }
+    }
+  },
   "dev": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-researchmarketplace-dev-d0489-authRole",
-      "UnauthRoleArn": "arn:aws:iam::648937260943:role/amplify-researchmarketplace-dev-d0489-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::648937260943:role/amplify-researchmarketplace-dev-d0489-authRole",
+      "AuthRoleName": "amplify-researchmarketplace-dev-0c85c-authRole",
+      "UnauthRoleArn": "arn:aws:iam::648937260943:role/amplify-researchmarketplace-dev-0c85c-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::648937260943:role/amplify-researchmarketplace-dev-0c85c-authRole",
       "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-madalinaradu1-dev-77046-deployment",
-      "UnauthRoleName": "amplify-researchmarketplace-dev-d0489-unauthRole",
-      "StackName": "amplify-researchmarketplace-dev-d0489",
-      "StackId": "arn:aws:cloudformation:us-east-1:648937260943:stack/amplify-researchmarketplace-dev-d0489/62a9cda0-63f8-11f0-93d2-0affe2f2e12f",
+      "DeploymentBucketName": "amplify-researchmarketplace-dev-0c85c-deployment",
+      "UnauthRoleName": "amplify-researchmarketplace-dev-0c85c-unauthRole",
+      "StackName": "amplify-researchmarketplace-dev-0c85c",
+      "StackId": "arn:aws:cloudformation:us-east-1:648937260943:stack/amplify-researchmarketplace-dev-0c85c/3bfc1a30-671f-11f0-8ed3-0afffee27add",
       "AmplifyAppId": "d33ubw0r59z0k8"
     },
     "categories": {
