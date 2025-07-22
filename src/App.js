@@ -23,6 +23,8 @@ import AdminPage from './pages/AdminPage';
 import { createUserAfterSignUp, checkUserExists } from './utils/userManagement';
 import { testApiAccess } from './utils/testApi';
 import { syncUserGroupsToRole } from './utils/syncUserGroups';
+import { debugAuth } from './utils/debugAuth';
+import { isUserAdmin } from './utils/isUserAdmin';
 
 // Import AWS configuration
 import awsconfig from './aws-exports';
@@ -41,6 +43,9 @@ function App({ signOut, user }) {
   useEffect(() => {
     // Test API access
     testApiAccess();
+    
+    // Debug authentication
+    debugAuth();
     
     // Set up listener for auth events
     const listener = Hub.listen('auth', async (data) => {
@@ -111,8 +116,12 @@ function App({ signOut, user }) {
   
   // Redirect to complete profile if needed
   // Skip for admin users or if profile is already complete
-  const isAdmin = user?.attributes?.['cognito:groups']?.includes('Admin');
+  // Check if user is admin using utility function
+  const isAdmin = isUserAdmin(user, userProfile);
   const shouldCompleteProfile = !isAdmin && userProfile && userProfile.profileComplete === false;
+  
+  console.log('User profile:', userProfile);
+  console.log('Is admin:', isAdmin);
   
   if (loading) {
     return <div>Loading...</div>;

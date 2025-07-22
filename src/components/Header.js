@@ -12,6 +12,7 @@ import {
   View
 } from '@aws-amplify/ui-react';
 import { useNavigate } from 'react-router-dom';
+import { isUserAdmin } from '../utils/isUserAdmin';
 
 const Header = ({ user, signOut }) => {
   const location = useLocation();
@@ -128,7 +129,7 @@ const Header = ({ user, signOut }) => {
             Profile
           </Text>
         </Link>
-        {user?.attributes?.['cognito:groups']?.includes('Admin') && (
+        {isUserAdmin(user, user) && (
           <Link to="/admin">
             <Text
               color={isActive('/admin') ? tokens.colors.primary[80] : tokens.colors.neutral[80]}
@@ -164,7 +165,7 @@ const Header = ({ user, signOut }) => {
             <MenuItem onClick={() => navigate('/search')}>Search</MenuItem>
             <MenuItem onClick={() => navigate('/activity')}>My Activity</MenuItem>
             <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
-            {user?.attributes?.['cognito:groups']?.includes('Admin') && (
+            {isUserAdmin(user, user) && (
               <MenuItem onClick={() => navigate('/admin')}>Admin</MenuItem>
             )}
             <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
