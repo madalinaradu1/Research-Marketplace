@@ -16,11 +16,13 @@ import {
 import { listUsers } from '../graphql/queries';
 import { updateUserRole } from '../utils/updateUserRole';
 import { updateProfileCompletion } from '../utils/updateUserProfile';
+import { syncUserGroupsToRole } from '../utils/syncUserGroups';
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null);
   const [selectedRoles, setSelectedRoles] = useState({});
 
   useEffect(() => {
@@ -77,6 +79,18 @@ const AdminPage = () => {
       setError('Failed to update profile completion. Please try again.');
     }
   };
+  
+  const handleSyncGroups = async (userId) => {
+    try {
+      await syncUserGroupsToRole(userId);
+      // Refresh the user list
+      fetchUsers();
+      setMessage('User role synced with Cognito groups successfully!');
+    } catch (err) {
+      console.error('Error syncing user groups:', err);
+      setError('Failed to sync user groups. Please try again.');
+    }
+  };
 
   if (loading) return <Text>Loading users...</Text>;
   if (error) return <Text variation="error">{error}</Text>;
@@ -84,6 +98,9 @@ const AdminPage = () => {
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
       <Heading level={2}>User Management</Heading>
+      
+      {message && <Text color="green">{message}</Text>}
+      {error && <Text color="red">{error}</Text>}
       
       <Card>
         <Table>
@@ -133,6 +150,13 @@ const AdminPage = () => {
                         Mark Complete
                       </Button>
                     )}
+                    <Button
+                      onClick={() => handleSyncGroups(user.id)}
+                      size="small"
+                      variation="link"
+                    >
+                      Sync Groups
+                    </Button>
                   </Flex>
                 </TableCell>
               </TableRow>
