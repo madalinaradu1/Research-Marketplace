@@ -5,7 +5,7 @@
       "UnauthRoleArn": "arn:aws:iam::648937260943:role/amplify-researchmarketplace-dev-d0489-unauthRole",
       "AuthRoleArn": "arn:aws:iam::648937260943:role/amplify-researchmarketplace-dev-d0489-authRole",
       "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-researchmarketplace-dev-d0489-deployment",
+      "DeploymentBucketName": "amplify-madalinaradu1-dev-77046-deployment",
       "UnauthRoleName": "amplify-researchmarketplace-dev-d0489-unauthRole",
       "StackName": "amplify-researchmarketplace-dev-d0489",
       "StackId": "arn:aws:cloudformation:us-east-1:648937260943:stack/amplify-researchmarketplace-dev-d0489/62a9cda0-63f8-11f0-93d2-0affe2f2e12f",

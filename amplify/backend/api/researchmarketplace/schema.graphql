@@ -5,11 +5,20 @@ type User @model @auth(rules: [
   id: ID!
   name: String!
   email: String!
-  role: String!
+  role: String!  # Student, Faculty, Coordinator, Admin
+  department: String
   major: String
+  academicYear: String
   gpa: Float
+  skills: [String]
+  researchInterests: [String]
+  resumeKey: String
   affiliation: String
   profileComplete: Boolean
+  projects: [Project] @hasMany(indexName: "byFaculty", fields: ["id"])
+  applications: [Application] @hasMany(indexName: "byStudent", fields: ["id"])
+  receivedMessages: [Message] @hasMany(indexName: "byReceiver", fields: ["id"])
+  sentMessages: [Message] @hasMany(indexName: "bySender", fields: ["id"])
 }
 
 type Project @model @auth(rules: [
@@ -23,21 +32,29 @@ type Project @model @auth(rules: [
   skillsRequired: [String]
   duration: String
   applicationDeadline: AWSDateTime
-  facultyID: ID!
+  facultyID: ID! @index(name: "byFaculty")
+  faculty: User @belongsTo(fields: ["facultyID"])
   isActive: Boolean
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+  applications: [Application] @hasMany(indexName: "byProject", fields: ["id"])
 }
 
 type Application @model @auth(rules: [
   { allow: owner },
-  { allow: groups, groups: ["Faculty", "Coordinator"] }
+  { allow: groups, groups: ["Faculty", "Coordinator", "Admin"] }
 ]) {
   id: ID!
-  studentID: ID!
-  projectID: ID!
+  studentID: ID! @index(name: "byStudent")
+  student: User @belongsTo(fields: ["studentID"])
+  projectID: ID! @index(name: "byProject")
+  project: Project @belongsTo(fields: ["projectID"])
   statement: String!
-  transcriptLink: AWSURL
-  status: String!
+  resumeKey: String
+  status: String!  # Pending, Accepted, Rejected
+  facultyNotes: String
   createdAt: AWSDateTime
+  updatedAt: AWSDateTime
 }
 
 type Message @model @auth(rules: [
@@ -45,9 +62,40 @@ type Message @model @auth(rules: [
   { allow: groups, groups: ["Faculty", "Coordinator", "Admin"] }
 ]) {
   id: ID!
-  senderID: ID!
-  receiverID: ID!
+  senderID: ID! @index(name: "bySender")
+  sender: User @belongsTo(fields: ["senderID"])
+  receiverID: ID! @index(name: "byReceiver")
+  receiver: User @belongsTo(fields: ["receiverID"])
+  subject: String
   body: String!
+  isRead: Boolean
   sentAt: AWSDateTime
+  readAt: AWSDateTime
+}
+
+type Notification @model @auth(rules: [
+  { allow: owner },
+  { allow: groups, groups: ["Admin"] }
+]) {
+  id: ID!
+  userID: ID! @index(name: "byUser")
+  user: User @belongsTo(fields: ["userID"])
+  type: String!  # Application, Message, System
+  message: String!
+  isRead: Boolean
+  createdAt: AWSDateTime
+}
+
+type ActivityLog @model @auth(rules: [
+  { allow: groups, groups: ["Admin"] }
+]) {
+  id: ID!
+  userID: ID @index(name: "byUser")
+  user: User @belongsTo(fields: ["userID"])
+  action: String!  # Created, Updated, Deleted, Applied, etc.
+  resourceType: String!  # User, Project, Application, etc.
+  resourceID: ID
+  detail: String
+  timestamp: AWSDateTime!
 }
 
