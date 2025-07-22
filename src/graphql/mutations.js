@@ -11,12 +11,42 @@ export const createUser = /* GraphQL */ `
       name
       email
       role
+      department
       major
+      academicYear
       gpa
+      skills
+      researchInterests
+      resumeKey
       affiliation
       profileComplete
+      status
       createdAt
       updatedAt
+      facultyProjects {
+        nextToken
+        __typename
+      }
+      studentApplications {
+        nextToken
+        __typename
+      }
+      sentMessages {
+        nextToken
+        __typename
+      }
+      receivedMessages {
+        nextToken
+        __typename
+      }
+      notifications {
+        nextToken
+        __typename
+      }
+      activityLogs {
+        nextToken
+        __typename
+      }
       owner
       __typename
     }
@@ -32,12 +62,42 @@ export const updateUser = /* GraphQL */ `
       name
       email
       role
+      department
       major
+      academicYear
       gpa
+      skills
+      researchInterests
+      resumeKey
       affiliation
       profileComplete
+      status
       createdAt
       updatedAt
+      facultyProjects {
+        nextToken
+        __typename
+      }
+      studentApplications {
+        nextToken
+        __typename
+      }
+      sentMessages {
+        nextToken
+        __typename
+      }
+      receivedMessages {
+        nextToken
+        __typename
+      }
+      notifications {
+        nextToken
+        __typename
+      }
+      activityLogs {
+        nextToken
+        __typename
+      }
       owner
       __typename
     }
@@ -53,12 +113,42 @@ export const deleteUser = /* GraphQL */ `
       name
       email
       role
+      department
       major
+      academicYear
       gpa
+      skills
+      researchInterests
+      resumeKey
       affiliation
       profileComplete
+      status
       createdAt
       updatedAt
+      facultyProjects {
+        nextToken
+        __typename
+      }
+      studentApplications {
+        nextToken
+        __typename
+      }
+      sentMessages {
+        nextToken
+        __typename
+      }
+      receivedMessages {
+        nextToken
+        __typename
+      }
+      notifications {
+        nextToken
+        __typename
+      }
+      activityLogs {
+        nextToken
+        __typename
+      }
       owner
       __typename
     }
@@ -78,9 +168,33 @@ export const createProject = /* GraphQL */ `
       duration
       applicationDeadline
       facultyID
+      faculty {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
       isActive
       createdAt
       updatedAt
+      applications {
+        nextToken
+        __typename
+      }
       __typename
     }
   }
@@ -99,9 +213,33 @@ export const updateProject = /* GraphQL */ `
       duration
       applicationDeadline
       facultyID
+      faculty {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
       isActive
       createdAt
       updatedAt
+      applications {
+        nextToken
+        __typename
+      }
       __typename
     }
   }
@@ -120,9 +258,33 @@ export const deleteProject = /* GraphQL */ `
       duration
       applicationDeadline
       facultyID
+      faculty {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
       isActive
       createdAt
       updatedAt
+      applications {
+        nextToken
+        __typename
+      }
       __typename
     }
   }
@@ -135,10 +297,46 @@ export const createApplication = /* GraphQL */ `
     createApplication(input: $input, condition: $condition) {
       id
       studentID
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
       projectID
+      project {
+        id
+        title
+        description
+        department
+        skillsRequired
+        duration
+        applicationDeadline
+        facultyID
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
       statement
+      resumeKey
       transcriptLink
       status
+      facultyNotes
       createdAt
       updatedAt
       owner
@@ -154,10 +352,46 @@ export const updateApplication = /* GraphQL */ `
     updateApplication(input: $input, condition: $condition) {
       id
       studentID
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
       projectID
+      project {
+        id
+        title
+        description
+        department
+        skillsRequired
+        duration
+        applicationDeadline
+        facultyID
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
       statement
+      resumeKey
       transcriptLink
       status
+      facultyNotes
       createdAt
       updatedAt
       owner
@@ -173,10 +407,46 @@ export const deleteApplication = /* GraphQL */ `
     deleteApplication(input: $input, condition: $condition) {
       id
       studentID
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
       projectID
+      project {
+        id
+        title
+        description
+        department
+        skillsRequired
+        duration
+        applicationDeadline
+        facultyID
+        isActive
+        createdAt
+        updatedAt
+        __typename
+      }
       statement
+      resumeKey
       transcriptLink
       status
+      facultyNotes
       createdAt
       updatedAt
       owner
@@ -192,9 +462,52 @@ export const createMessage = /* GraphQL */ `
     createMessage(input: $input, condition: $condition) {
       id
       senderID
+      sender {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
       receiverID
+      receiver {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      subject
       body
+      isRead
       sentAt
+      readAt
       createdAt
       updatedAt
       owner
@@ -210,9 +523,52 @@ export const updateMessage = /* GraphQL */ `
     updateMessage(input: $input, condition: $condition) {
       id
       senderID
+      sender {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
       receiverID
+      receiver {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      subject
       body
+      isRead
       sentAt
+      readAt
       createdAt
       updatedAt
       owner
@@ -228,12 +584,286 @@ export const deleteMessage = /* GraphQL */ `
     deleteMessage(input: $input, condition: $condition) {
       id
       senderID
+      sender {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
       receiverID
+      receiver {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      subject
       body
+      isRead
       sentAt
+      readAt
       createdAt
       updatedAt
       owner
+      __typename
+    }
+  }
+`;
+export const createNotification = /* GraphQL */ `
+  mutation CreateNotification(
+    $input: CreateNotificationInput!
+    $condition: ModelNotificationConditionInput
+  ) {
+    createNotification(input: $input, condition: $condition) {
+      id
+      userID
+      user {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      type
+      message
+      isRead
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const updateNotification = /* GraphQL */ `
+  mutation UpdateNotification(
+    $input: UpdateNotificationInput!
+    $condition: ModelNotificationConditionInput
+  ) {
+    updateNotification(input: $input, condition: $condition) {
+      id
+      userID
+      user {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      type
+      message
+      isRead
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const deleteNotification = /* GraphQL */ `
+  mutation DeleteNotification(
+    $input: DeleteNotificationInput!
+    $condition: ModelNotificationConditionInput
+  ) {
+    deleteNotification(input: $input, condition: $condition) {
+      id
+      userID
+      user {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      type
+      message
+      isRead
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const createActivityLog = /* GraphQL */ `
+  mutation CreateActivityLog(
+    $input: CreateActivityLogInput!
+    $condition: ModelActivityLogConditionInput
+  ) {
+    createActivityLog(input: $input, condition: $condition) {
+      id
+      userID
+      user {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      action
+      resourceType
+      resourceID
+      detail
+      timestamp
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateActivityLog = /* GraphQL */ `
+  mutation UpdateActivityLog(
+    $input: UpdateActivityLogInput!
+    $condition: ModelActivityLogConditionInput
+  ) {
+    updateActivityLog(input: $input, condition: $condition) {
+      id
+      userID
+      user {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      action
+      resourceType
+      resourceID
+      detail
+      timestamp
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteActivityLog = /* GraphQL */ `
+  mutation DeleteActivityLog(
+    $input: DeleteActivityLogInput!
+    $condition: ModelActivityLogConditionInput
+  ) {
+    deleteActivityLog(input: $input, condition: $condition) {
+      id
+      userID
+      user {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      action
+      resourceType
+      resourceID
+      detail
+      timestamp
+      createdAt
+      updatedAt
       __typename
     }
   }
