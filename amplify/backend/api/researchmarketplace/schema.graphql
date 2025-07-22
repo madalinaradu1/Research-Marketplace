@@ -18,6 +18,13 @@ type User @model @auth(rules: [
   status: String # Active, Suspended
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
+  # Relationships
+  facultyProjects: [Project] @hasMany(indexName: "byFaculty", fields: ["id"])
+  studentApplications: [Application] @hasMany(indexName: "byStudent", fields: ["id"])
+  sentMessages: [Message] @hasMany(indexName: "bySender", fields: ["id"])
+  receivedMessages: [Message] @hasMany(indexName: "byReceiver", fields: ["id"])
+  notifications: [Notification] @hasMany(indexName: "byUser", fields: ["id"])
+  activityLogs: [ActivityLog] @hasMany(indexName: "byUser", fields: ["id"])
 }
 
 type Project @model @auth(rules: [
