@@ -128,6 +128,16 @@ const Header = ({ user, signOut }) => {
             Profile
           </Text>
         </Link>
+        {user?.attributes?.['cognito:groups']?.includes('Admin') && (
+          <Link to="/admin">
+            <Text
+              color={isActive('/admin') ? tokens.colors.primary[80] : tokens.colors.neutral[80]}
+              fontWeight={isActive('/admin') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
+            >
+              Admin
+            </Text>
+          </Link>
+        )}
         <Button onClick={handleSignOut} variation="primary">
           Sign Out
         </Button>
@@ -154,6 +164,9 @@ const Header = ({ user, signOut }) => {
             <MenuItem onClick={() => navigate('/search')}>Search</MenuItem>
             <MenuItem onClick={() => navigate('/activity')}>My Activity</MenuItem>
             <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
+            {user?.attributes?.['cognito:groups']?.includes('Admin') && (
+              <MenuItem onClick={() => navigate('/admin')}>Admin</MenuItem>
+            )}
             <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
           </View>
         </Menu>

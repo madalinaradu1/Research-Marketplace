@@ -17,6 +17,7 @@ import ProfilePage from './pages/ProfilePage';
 import ActivityPage from './pages/ActivityPage';
 import OpportunityDetails from './pages/OpportunityDetails';
 import CompleteProfilePage from './pages/CompleteProfilePage';
+import AdminPage from './pages/AdminPage';
 
 // Import utilities
 import { createUserAfterSignUp, checkUserExists } from './utils/userManagement';
@@ -130,6 +131,9 @@ function App({ signOut, user }) {
             <Route path="/opportunity/:id" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <OpportunityDetails user={userProfile || user} />} />
+            <Route path="/admin" element={userProfile?.role === 'Admin' ? 
+              <AdminPage /> : 
+              <Navigate to="/dashboard" />} />
           </Routes>
         </main>
         
