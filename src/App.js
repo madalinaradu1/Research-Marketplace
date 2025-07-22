@@ -30,6 +30,12 @@ Amplify.configure(awsconfig);
 function App({ signOut, user }) {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
+  
+  // Function to refresh user profile
+  const refreshUserProfile = () => {
+    setProfileRefreshTrigger(prev => prev + 1);
+  };
   
   useEffect(() => {
     // Test API access
@@ -97,7 +103,7 @@ function App({ signOut, user }) {
     return () => {
       Hub.remove('auth', listener);
     };
-  }, []);
+  }, [profileRefreshTrigger]); // Re-run when profileRefreshTrigger changes
   
   // Redirect to complete profile if needed
   // Skip for admin users or if profile is already complete
@@ -126,7 +132,7 @@ function App({ signOut, user }) {
             <Route path="/search" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <SearchPage user={userProfile || user} />} />
-            <Route path="/profile" element={<ProfilePage user={userProfile || user} />} />
+            <Route path="/profile" element={<ProfilePage user={userProfile || user} refreshProfile={refreshUserProfile} />} />
             <Route path="/activity" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <ActivityPage user={userProfile || user} />} />
