@@ -15,7 +15,7 @@ export async function createUserAfterSignUp(userData) {
       name: attributes.name || `${attributes.given_name || ''} ${attributes.family_name || ''}`.trim(),
       email: attributes.email,
       role: 'Student', // Default role
-      profileComplete: false
+      profileComplete: true // Set to true by default
     };
     
     // Check if user already exists

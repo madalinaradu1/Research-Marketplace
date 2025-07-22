@@ -15,6 +15,7 @@ import {
 } from '@aws-amplify/ui-react';
 import { listUsers } from '../graphql/queries';
 import { updateUserRole } from '../utils/updateUserRole';
+import { updateProfileCompletion } from '../utils/updateUserProfile';
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
@@ -65,6 +66,17 @@ const AdminPage = () => {
       setError('Failed to update user role. Please try again.');
     }
   };
+  
+  const handleCompleteProfile = async (userId) => {
+    try {
+      await updateProfileCompletion(userId, true);
+      // Refresh the user list
+      fetchUsers();
+    } catch (err) {
+      console.error('Error updating profile completion:', err);
+      setError('Failed to update profile completion. Please try again.');
+    }
+  };
 
   if (loading) return <Text>Loading users...</Text>;
   if (error) return <Text variation="error">{error}</Text>;
@@ -80,6 +92,7 @@ const AdminPage = () => {
               <TableCell as="th">Name</TableCell>
               <TableCell as="th">Email</TableCell>
               <TableCell as="th">Current Role</TableCell>
+              <TableCell as="th">Profile Complete</TableCell>
               <TableCell as="th">New Role</TableCell>
               <TableCell as="th">Actions</TableCell>
             </TableRow>
@@ -90,6 +103,7 @@ const AdminPage = () => {
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role || 'Student'}</TableCell>
+                <TableCell>{user.profileComplete ? 'Yes' : 'No'}</TableCell>
                 <TableCell>
                   <SelectField
                     value={selectedRoles[user.id]}
@@ -102,12 +116,24 @@ const AdminPage = () => {
                   </SelectField>
                 </TableCell>
                 <TableCell>
-                  <Button
-                    onClick={() => handleUpdateRole(user.id)}
-                    isDisabled={user.role === selectedRoles[user.id]}
-                  >
-                    Update Role
-                  </Button>
+                  <Flex direction="row" gap="0.5rem">
+                    <Button
+                      onClick={() => handleUpdateRole(user.id)}
+                      isDisabled={user.role === selectedRoles[user.id]}
+                      size="small"
+                    >
+                      Update Role
+                    </Button>
+                    {!user.profileComplete && (
+                      <Button
+                        onClick={() => handleCompleteProfile(user.id)}
+                        size="small"
+                        variation="primary"
+                      >
+                        Mark Complete
+                      </Button>
+                    )}
+                  </Flex>
                 </TableCell>
               </TableRow>
             ))}

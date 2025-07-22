@@ -100,7 +100,9 @@ function App({ signOut, user }) {
   }, []);
   
   // Redirect to complete profile if needed
-  const shouldCompleteProfile = userProfile && userProfile.profileComplete === false;
+  // Skip for admin users or if profile is already complete
+  const isAdmin = user?.attributes?.['cognito:groups']?.includes('Admin');
+  const shouldCompleteProfile = !isAdmin && userProfile && userProfile.profileComplete === false;
   
   if (loading) {
     return <div>Loading...</div>;
@@ -131,7 +133,7 @@ function App({ signOut, user }) {
             <Route path="/opportunity/:id" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <OpportunityDetails user={userProfile || user} />} />
-            <Route path="/admin" element={userProfile?.role === 'Admin' ? 
+            <Route path="/admin" element={isAdmin ? 
               <AdminPage /> : 
               <Navigate to="/dashboard" />} />
           </Routes>
