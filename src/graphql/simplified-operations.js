@@ -13,6 +13,7 @@ export const getUser = /* GraphQL */ `
       major
       academicYear
       gpa
+      careerInterests
       profileComplete
       status
       createdAt
@@ -123,6 +124,7 @@ export const updateUser = /* GraphQL */ `
       email
       role
       profileComplete
+      careerInterests
       updatedAt
     }
   }

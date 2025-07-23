@@ -9,6 +9,7 @@ type User @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin",
   gpa: Float
   skills: [String]
   researchInterests: [String]
+  careerInterests: [String]
   resumeKey: String
   affiliation: String
   profileComplete: Boolean
@@ -71,6 +72,7 @@ type Application @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["
   cancelledAt: AWSDateTime
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
+}
 
 type Message @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}]) {
   id: ID!

@@ -15,6 +15,7 @@ export const getUser = /* GraphQL */ `
       gpa
       skills
       researchInterests
+      careerInterests
       resumeKey
       affiliation
       profileComplete
@@ -202,6 +203,7 @@ export const createUser = /* GraphQL */ `
       gpa
       skills
       researchInterests
+      careerInterests
       resumeKey
       affiliation
       profileComplete
@@ -228,6 +230,7 @@ export const updateUser = /* GraphQL */ `
       gpa
       skills
       researchInterests
+      careerInterests
       resumeKey
       affiliation
       profileComplete

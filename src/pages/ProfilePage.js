@@ -11,7 +11,8 @@ const ProfilePage = ({ user, refreshProfile }) => {
     academicYear: '',
     gpa: '',
     affiliation: 'On-campus',
-    department: ''
+    department: '',
+    careerInterests: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
@@ -27,7 +28,8 @@ const ProfilePage = ({ user, refreshProfile }) => {
         academicYear: user.academicYear || '',
         gpa: user.gpa?.toString() || '',
         affiliation: user.affiliation || 'On-campus',
-        department: user.department || ''
+        department: user.department || '',
+        careerInterests: user.careerInterests ? user.careerInterests.join(', ') : ''
       });
     }
   }, [user]);
@@ -47,6 +49,11 @@ const ProfilePage = ({ user, refreshProfile }) => {
       // Convert GPA to float if provided
       const gpa = formState.gpa ? parseFloat(formState.gpa) : null;
       
+      // Convert careerInterests string to array
+      const careerInterests = formState.careerInterests
+        ? formState.careerInterests.split(',').map(item => item.trim()).filter(item => item)
+        : [];
+      
       // Prepare input for updateUser mutation
       const input = {
         id: user.id || user.username,
@@ -56,6 +63,7 @@ const ProfilePage = ({ user, refreshProfile }) => {
         gpa,
         affiliation: formState.affiliation,
         department: formState.department,
+        careerInterests,
         profileComplete: true
       };
 
@@ -151,6 +159,14 @@ const ProfilePage = ({ user, refreshProfile }) => {
                   <option value="On-campus">On-campus</option>
                   <option value="Off-campus">Off-campus</option>
                 </SelectField>
+                
+                <TextField
+                  name="careerInterests"
+                  label="Career Interests"
+                  placeholder="Enter career interests separated by commas"
+                  value={formState.careerInterests}
+                  onChange={handleChange}
+                />
               </>
             )}
             
