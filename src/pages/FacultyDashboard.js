@@ -24,6 +24,7 @@ const FacultyDashboard = ({ user }) => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [activeTab, setActiveTab] = useState('projects');
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -45,6 +46,7 @@ const FacultyDashboard = ({ user }) => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
     
     try {
       // Fetch faculty's projects
@@ -102,6 +104,7 @@ const FacultyDashboard = ({ user }) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+    setSuccessMessage(null);
     
     try {
       // Get current authenticated user to ensure we have the correct ID
@@ -118,9 +121,13 @@ const FacultyDashboard = ({ user }) => {
         : [];
       
       // Format the date properly for GraphQL
+      // Use UTC date to avoid timezone issues
       const deadline = projectForm.applicationDeadline 
-        ? new Date(projectForm.applicationDeadline).toISOString() 
+        ? new Date(projectForm.applicationDeadline + 'T00:00:00Z').toISOString() 
         : null;
+      
+      console.log('Original date input:', projectForm.applicationDeadline);
+      console.log('Formatted deadline for API:', deadline);
       
       // Prepare input with proper types
       const input = {
@@ -140,12 +147,18 @@ const FacultyDashboard = ({ user }) => {
       if (selectedProject) {
         // Update existing project
         input.id = selectedProject.id;
+        console.log('Updating project with ID:', selectedProject.id);
+        console.log('Update input:', JSON.stringify(input, null, 2));
+        
         result = await API.graphql(graphqlOperation(updateProject, { input }));
         console.log('Project updated:', result);
+        setSuccessMessage('Project updated successfully!');
       } else {
         // Create new project
+        console.log('Creating new project with input:', JSON.stringify(input, null, 2));
         result = await API.graphql(graphqlOperation(createProject, { input }));
         console.log('Project created:', result);
+        setSuccessMessage('Project created successfully!');
       }
       
       setIsCreatingProject(false);
@@ -227,6 +240,7 @@ const FacultyDashboard = ({ user }) => {
       <Text>Welcome, {user.name}!</Text>
       
       {error && <Text color="red">{error}</Text>}
+      {successMessage && <Text color="green">{successMessage}</Text>}
       
       <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
         <Card variation="elevated" flex="1">
@@ -434,7 +448,7 @@ const FacultyDashboard = ({ user }) => {
                         
                         <Flex justifyContent="space-between" alignItems="center">
                           <Text fontSize="0.9rem">
-                            Deadline: {new Date(project.applicationDeadline).toLocaleDateString()}
+                            Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString('en-US', { timeZone: 'UTC' }) : 'Not specified'}
                           </Text>
                           <Flex gap="0.5rem">
                             <Button 
