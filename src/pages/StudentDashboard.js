@@ -22,7 +22,7 @@ const StudentDashboard = ({ user }) => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('applications');
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
   
   useEffect(() => {
     fetchData();
@@ -157,13 +157,13 @@ const StudentDashboard = ({ user }) => {
         <Card variation="elevated" flex="1">
           <Heading level={4}>Quick Links</Heading>
           <Flex direction="column" gap="0.5rem" marginTop="1rem">
-            <Button variation="primary" onClick={() => setActiveTab('opportunities')}>
+            <Button variation="primary" onClick={() => setActiveTabIndex(1)}>
               Browse Research Opportunities
             </Button>
-            <Button onClick={() => setActiveTab('applications')}>
+            <Button onClick={() => setActiveTabIndex(0)}>
               View My Applications
             </Button>
-            <Button onClick={() => setActiveTab('guide')}>
+            <Button onClick={() => setActiveTabIndex(2)}>
               Application Status Guide
             </Button>
           </Flex>
@@ -171,8 +171,8 @@ const StudentDashboard = ({ user }) => {
       </Flex>
       
       <Tabs
-        currentIndex={activeTab === 'applications' ? 0 : activeTab === 'opportunities' ? 1 : 2}
-        onChange={(index) => setActiveTab(index === 0 ? 'applications' : index === 1 ? 'opportunities' : 'guide')}
+        currentIndex={activeTabIndex}
+        onChange={(index) => setActiveTabIndex(index)}
       >
         <TabItem title="My Applications">
           {applications.length === 0 ? (
@@ -180,7 +180,7 @@ const StudentDashboard = ({ user }) => {
               <Text>You haven't submitted any applications yet.</Text>
               <Button 
                 variation="primary" 
-                onClick={() => setActiveTab('opportunities')}
+                onClick={() => setActiveTabIndex(1)}
                 marginTop="1rem"
               >
                 Browse Opportunities
