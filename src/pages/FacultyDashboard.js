@@ -13,7 +13,8 @@ import {
   TabItem,
   TextField,
   TextAreaField,
-  SelectField
+  SelectField,
+  Badge
 } from '@aws-amplify/ui-react';
 import { listProjects, listApplications } from '../graphql/queries';
 import { createProject, updateProject } from '../graphql/mutations';
