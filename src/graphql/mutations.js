@@ -332,11 +332,53 @@ export const createApplication = /* GraphQL */ `
         updatedAt
         __typename
       }
-      statement
-      resumeKey
-      transcriptLink
+      term
+      facultySupervisorID
+      facultySupervisor {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      department
+      location
+      directSupervisorName
+      directSupervisorEmail
+      paymentType
+      paymentAmount
+      creditHours
+      projectTitle
+      proposalText
+      proposalFileKey
+      requiresTravel
+      travelDetails
       status
+      statusDetail
+      withdrawReason
       facultyNotes
+      coordinatorNotes
+      adminNotes
+      submittedToFacultyAt
+      submittedToDepartmentAt
+      submittedToAdminAt
+      approvedAt
+      returnedAt
+      rejectedAt
+      cancelledAt
       createdAt
       updatedAt
       owner
@@ -387,11 +429,53 @@ export const updateApplication = /* GraphQL */ `
         updatedAt
         __typename
       }
-      statement
-      resumeKey
-      transcriptLink
+      term
+      facultySupervisorID
+      facultySupervisor {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      department
+      location
+      directSupervisorName
+      directSupervisorEmail
+      paymentType
+      paymentAmount
+      creditHours
+      projectTitle
+      proposalText
+      proposalFileKey
+      requiresTravel
+      travelDetails
       status
+      statusDetail
+      withdrawReason
       facultyNotes
+      coordinatorNotes
+      adminNotes
+      submittedToFacultyAt
+      submittedToDepartmentAt
+      submittedToAdminAt
+      approvedAt
+      returnedAt
+      rejectedAt
+      cancelledAt
       createdAt
       updatedAt
       owner
@@ -442,11 +526,53 @@ export const deleteApplication = /* GraphQL */ `
         updatedAt
         __typename
       }
-      statement
-      resumeKey
-      transcriptLink
+      term
+      facultySupervisorID
+      facultySupervisor {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      department
+      location
+      directSupervisorName
+      directSupervisorEmail
+      paymentType
+      paymentAmount
+      creditHours
+      projectTitle
+      proposalText
+      proposalFileKey
+      requiresTravel
+      travelDetails
       status
+      statusDetail
+      withdrawReason
       facultyNotes
+      coordinatorNotes
+      adminNotes
+      submittedToFacultyAt
+      submittedToDepartmentAt
+      submittedToAdminAt
+      approvedAt
+      returnedAt
+      rejectedAt
+      cancelledAt
       createdAt
       updatedAt
       owner
