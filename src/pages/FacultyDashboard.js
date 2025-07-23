@@ -25,7 +25,7 @@ const FacultyDashboard = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const [activeTab, setActiveTab] = useState('projects');
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [projectForm, setProjectForm] = useState({
@@ -199,7 +199,7 @@ const FacultyDashboard = ({ user }) => {
       isActive: project.isActive
     });
     setIsCreatingProject(true);
-    setActiveTab('projects');
+    setActiveTabIndex(0);
   };
   
   // Count applications by status
@@ -292,7 +292,7 @@ const FacultyDashboard = ({ user }) => {
             >
               Create New Project
             </Button>
-            <Button onClick={() => setActiveTab('applications')}>
+            <Button onClick={() => setActiveTabIndex(1)}>
               Review Applications
             </Button>
           </Flex>
@@ -300,8 +300,8 @@ const FacultyDashboard = ({ user }) => {
       </Flex>
       
       <Tabs
-        currentIndex={activeTab === 'projects' ? 0 : 1}
-        onChange={(index) => setActiveTab(index === 0 ? 'projects' : 'applications')}
+        currentIndex={activeTabIndex}
+        onChange={(index) => setActiveTabIndex(index)}
       >
         <TabItem title="My Projects">
           {isCreatingProject ? (
@@ -461,7 +461,7 @@ const FacultyDashboard = ({ user }) => {
                               size="small"
                               variation="primary"
                               onClick={() => {
-                                setActiveTab('applications');
+                                setActiveTabIndex(1);
                               }}
                             >
                               View Applications
