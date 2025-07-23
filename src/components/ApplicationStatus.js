@@ -12,7 +12,7 @@ import {
   useTheme,
   View
 } from '@aws-amplify/ui-react';
-import { updateApplication } from '../graphql/mutations';
+import { updateApplication } from '../graphql/operations';
 
 const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
   const [withdrawReason, setWithdrawReason] = useState('');

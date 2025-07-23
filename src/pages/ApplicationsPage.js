@@ -11,7 +11,7 @@ import {
   Tabs,
   TabItem
 } from '@aws-amplify/ui-react';
-import { listApplications } from '../graphql/queries';
+import { listApplications } from '../graphql/operations';
 import { ApplicationStatus, ApplicationStatusGuide } from '../components';
 
 const ApplicationsPage = ({ user }) => {

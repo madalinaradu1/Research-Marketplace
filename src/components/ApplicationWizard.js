@@ -16,8 +16,7 @@ import {
   View,
   Loader
 } from '@aws-amplify/ui-react';
-import { createApplication, updateApplication } from '../graphql/mutations';
-import { getUser, listUsers } from '../graphql/queries';
+import { createApplication, updateApplication, getUser, listUsers } from '../graphql/operations';
 
 const ApplicationWizard = ({ user, projectId, onComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);

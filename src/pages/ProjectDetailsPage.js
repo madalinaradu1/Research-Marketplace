@@ -10,7 +10,7 @@ import {
   Divider,
   Loader
 } from '@aws-amplify/ui-react';
-import { getProject } from '../graphql/queries';
+import { getProject } from '../graphql/operations';
 import { ApplicationWizard } from '../components';
 
 const ProjectDetailsPage = ({ user }) => {

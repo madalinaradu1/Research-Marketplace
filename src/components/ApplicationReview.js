@@ -12,7 +12,7 @@ import {
   useTheme,
   View
 } from '@aws-amplify/ui-react';
-import { updateApplication } from '../graphql/mutations';
+import { updateApplication } from '../graphql/operations';
 
 const ApplicationReview = ({ application, userRole, onUpdate }) => {
   const [notes, setNotes] = useState('');

@@ -16,8 +16,7 @@ import {
   SelectField,
   Badge
 } from '@aws-amplify/ui-react';
-import { listProjects, listApplications } from '../graphql/queries';
-import { createProject, updateProject } from '../graphql/mutations';
+import { listProjects, listApplications, createProject, updateProject } from '../graphql/operations';
 import ApplicationReview from '../components/ApplicationReview';
 
 const FacultyDashboard = ({ user }) => {

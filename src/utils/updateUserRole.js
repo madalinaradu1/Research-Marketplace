@@ -1,5 +1,5 @@
 import { API, graphqlOperation } from 'aws-amplify';
-import { updateUser } from '../graphql/mutations';
+import { updateUser } from '../graphql/operations';
 
 /**
  * Updates a user's role in the database

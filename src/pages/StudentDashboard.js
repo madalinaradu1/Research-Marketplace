@@ -13,7 +13,7 @@ import {
   Tabs,
   TabItem
 } from '@aws-amplify/ui-react';
-import { listApplications, listProjects } from '../graphql/queries';
+import { listApplications, listProjects } from '../graphql/operations';
 import ApplicationStatus from '../components/ApplicationStatus';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 
