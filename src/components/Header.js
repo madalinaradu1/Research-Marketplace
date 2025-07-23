@@ -121,6 +121,14 @@ const Header = ({ user, signOut }) => {
             My Activity
           </Text>
         </Link>
+        <Link to="/applications">
+          <Text
+            color={isActive('/applications') ? tokens.colors.primary[80] : tokens.colors.neutral[80]}
+            fontWeight={isActive('/applications') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
+          >
+            Applications
+          </Text>
+        </Link>
         <Link to="/profile">
           <Text
             color={isActive('/profile') ? tokens.colors.primary[80] : tokens.colors.neutral[80]}
@@ -164,6 +172,7 @@ const Header = ({ user, signOut }) => {
             <MenuItem onClick={() => navigate('/dashboard')}>Dashboard</MenuItem>
             <MenuItem onClick={() => navigate('/search')}>Search</MenuItem>
             <MenuItem onClick={() => navigate('/activity')}>My Activity</MenuItem>
+            <MenuItem onClick={() => navigate('/applications')}>Applications</MenuItem>
             <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
             {isUserAdmin(user, user) && (
               <MenuItem onClick={() => navigate('/admin')}>Admin</MenuItem>

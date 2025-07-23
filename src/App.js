@@ -11,7 +11,9 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 
 // Import pages
-import Dashboard from './pages/Dashboard';
+import { Dashboard } from './pages';
+import ProjectDetailsPage from './pages/ProjectDetailsPage';
+import ApplicationsPage from './pages/ApplicationsPage';
 import SearchPage from './pages/SearchPage';
 import ProfilePage from './pages/ProfilePage';
 import ActivityPage from './pages/ActivityPage';
@@ -151,7 +153,10 @@ function App({ signOut, user }) {
               <ActivityPage user={userProfile || user} />} />
             <Route path="/opportunity/:id" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
-              <OpportunityDetails user={userProfile || user} />} />
+              <ProjectDetailsPage user={userProfile || user} />} />
+            <Route path="/applications" element={shouldCompleteProfile ? 
+              <Navigate to="/complete-profile" /> : 
+              <ApplicationsPage user={userProfile || user} />} />
             <Route path="/admin" element={isAdmin ? 
               <AdminPage /> : 
               <Navigate to="/dashboard" />} />
