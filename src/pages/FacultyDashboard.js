@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API, graphqlOperation } from 'aws-amplify';
+import { API, graphqlOperation, Auth } from 'aws-amplify';
 import { 
   Flex, 
   Heading, 
@@ -49,7 +49,7 @@ const FacultyDashboard = ({ user }) => {
     try {
       // Fetch faculty's projects
       const projectFilter = {
-        facultyID: { eq: user.username }
+        facultyID: { eq: user.id || user.username }
       };
       
       const projectResult = await API.graphql(graphqlOperation(listProjects, { 
@@ -104,6 +104,11 @@ const FacultyDashboard = ({ user }) => {
     setError(null);
     
     try {
+      // Get current authenticated user to ensure we have the correct ID
+      const currentUser = await Auth.currentAuthenticatedUser();
+      const userId = currentUser.username;
+      console.log('Current authenticated user ID:', userId);
+      
       // Convert skills string to array
       const skillsArray = projectForm.skillsRequired
         ? projectForm.skillsRequired
@@ -125,7 +130,7 @@ const FacultyDashboard = ({ user }) => {
         skillsRequired: skillsArray,
         duration: projectForm.duration || null,
         applicationDeadline: deadline,
-        facultyID: user.username || user.id,
+        facultyID: userId,
         isActive: projectForm.isActive === true || projectForm.isActive === 'true'
       };
       
