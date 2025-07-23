@@ -55,11 +55,46 @@ type Application @model @auth(rules: [
   student: User @belongsTo(fields: ["studentID"])
   projectID: ID! @index(name: "byProject")
   project: Project @belongsTo(fields: ["projectID"])
-  statement: String!
-  resumeKey: String
-  transcriptLink: AWSURL
-  status: String! # Pending, Faculty Review, Dept Review, Admin Review, Approved, Returned, Rejected
+  
+  # Step 1 fields
+  term: String!
+  facultySupervisorID: ID!
+  facultySupervisor: User @belongsTo(fields: ["facultySupervisorID"])
+  department: String!
+  
+  # Step 2 fields
+  location: String
+  directSupervisorName: String
+  directSupervisorEmail: String
+  paymentType: String # Pay, Credit, Volunteer
+  paymentAmount: Float
+  creditHours: Int
+  projectTitle: String!
+  proposalText: String!
+  proposalFileKey: String
+  
+  # Step 3 fields
+  requiresTravel: Boolean
+  travelDetails: String
+  
+  # Application status
+  status: String! # Draft, Faculty Review, Department Review, Admin Review, Approved, Returned, Rejected, Cancelled, Expired
+  statusDetail: String # Additional status details like "info missing", "travel forms missing", etc.
+  withdrawReason: String
+  
+  # Notes
   facultyNotes: String
+  coordinatorNotes: String
+  adminNotes: String
+  
+  # Timestamps
+  submittedToFacultyAt: AWSDateTime
+  submittedToDepartmentAt: AWSDateTime
+  submittedToAdminAt: AWSDateTime
+  approvedAt: AWSDateTime
+  returnedAt: AWSDateTime
+  rejectedAt: AWSDateTime
+  cancelledAt: AWSDateTime
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }
