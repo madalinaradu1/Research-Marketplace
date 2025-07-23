@@ -7,13 +7,14 @@
       "mode": "AMAZON_COGNITO_USER_POOLS",
       "cognitoUserPoolId": "authResearchMarketplace"
     },
-    "conflictResolution": {},
+    "conflictResolution": {
+      "defaultResolutionStrategy": {
+        "type": "NONE"
+      }
+    },
     "additionalAuthTypes": [
       {
-        "mode": "API_KEY",
-        "expirationTime": 365,
-        "apiKeyExpirationDate": "2026-07-22T18:20:29.562Z",
-        "keyDescription": "Research Marketplace API key"
+        "mode": "AWS_IAM"
       }
     ]
   }

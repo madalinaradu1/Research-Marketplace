@@ -2,7 +2,7 @@
   "AppSyncApiName": "researchmarketplace",
   "DynamoDBBillingMode": "PAY_PER_REQUEST",
   "DynamoDBEnableServerSideEncryption": false,
-  "AuthModeLastUpdated": "2025-07-22T18:19:42.055Z",
+  "AuthModeLastUpdated": "2025-07-23T18:41:52.432Z",
   "AuthCognitoUserPoolId": {
     "Fn::GetAtt": [
       "authResearchMarketplace",

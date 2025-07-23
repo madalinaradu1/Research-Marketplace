@@ -14,12 +14,7 @@
         "authConfig": {
           "additionalAuthenticationProviders": [
             {
-              "apiKeyConfig": {
-                "apiKeyExpirationDate": "2026-07-22T18:20:29.562Z",
-                "apiKeyExpirationDays": 365,
-                "description": "Research Marketplace API key"
-              },
-              "authenticationType": "API_KEY"
+              "authenticationType": "AWS_IAM"
             }
           ],
           "defaultAuthentication": {

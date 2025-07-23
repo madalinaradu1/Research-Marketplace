@@ -1,11 +1,8 @@
-type User @model @auth(rules: [
-  { allow: owner },
-  { allow: groups, groups: ["Admin", "Coordinator"] }
-]) {
+type User @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin", "Coordinator"]}]) {
   id: ID!
   name: String!
   email: String!
-  role: String! # Student, Faculty, Coordinator, Admin
+  role: String!
   department: String
   major: String
   academicYear: String
@@ -13,12 +10,11 @@ type User @model @auth(rules: [
   skills: [String]
   researchInterests: [String]
   resumeKey: String
-  affiliation: String # On-campus / Off-campus
+  affiliation: String
   profileComplete: Boolean
-  status: String # Active, Suspended
+  status: String
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
-  # Relationships
   facultyProjects: [Project] @hasMany(indexName: "byFaculty", fields: ["id"])
   studentApplications: [Application] @hasMany(indexName: "byStudent", fields: ["id"])
   sentMessages: [Message] @hasMany(indexName: "bySender", fields: ["id"])
@@ -27,10 +23,7 @@ type User @model @auth(rules: [
   activityLogs: [ActivityLog] @hasMany(indexName: "byUser", fields: ["id"])
 }
 
-type Project @model @auth(rules: [
-  { allow: groups, groups: ["Faculty", "Coordinator", "Admin"] },
-  { allow: private, operations: [read] }
-]) {
+type Project @model @auth(rules: [{allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}, {allow: private, operations: [read]}]) {
   id: ID!
   title: String!
   description: String!
@@ -46,63 +39,22 @@ type Project @model @auth(rules: [
   applications: [Application] @hasMany(indexName: "byProject", fields: ["id"])
 }
 
-type Application @model @auth(rules: [
-  { allow: owner },
-  { allow: groups, groups: ["Faculty", "Coordinator", "Admin"] }
-]) {
+type Application @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}]) {
   id: ID!
   studentID: ID! @index(name: "byStudent")
   student: User @belongsTo(fields: ["studentID"])
   projectID: ID! @index(name: "byProject")
   project: Project @belongsTo(fields: ["projectID"])
-  
-  # Step 1 fields
-  term: String!
-  facultySupervisorID: ID!
-  facultySupervisor: User @belongsTo(fields: ["facultySupervisorID"])
-  department: String!
-  
-  # Step 2 fields
-  location: String
-  directSupervisorName: String
-  directSupervisorEmail: String
-  paymentType: String # Pay, Credit, Volunteer
-  paymentAmount: Float
-  creditHours: Int
-  projectTitle: String!
-  proposalText: String!
-  proposalFileKey: String
-  
-  # Step 3 fields
-  requiresTravel: Boolean
-  travelDetails: String
-  
-  # Application status
-  status: String! # Draft, Faculty Review, Department Review, Admin Review, Approved, Returned, Rejected, Cancelled, Expired
-  statusDetail: String # Additional status details like "info missing", "travel forms missing", etc.
-  withdrawReason: String
-  
-  # Notes
+  statement: String!
+  resumeKey: String
+  transcriptLink: AWSURL
+  status: String!
   facultyNotes: String
-  coordinatorNotes: String
-  adminNotes: String
-  
-  # Timestamps
-  submittedToFacultyAt: AWSDateTime
-  submittedToDepartmentAt: AWSDateTime
-  submittedToAdminAt: AWSDateTime
-  approvedAt: AWSDateTime
-  returnedAt: AWSDateTime
-  rejectedAt: AWSDateTime
-  cancelledAt: AWSDateTime
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }
 
-type Message @model @auth(rules: [
-  { allow: owner },
-  { allow: groups, groups: ["Faculty", "Coordinator", "Admin"] }
-]) {
+type Message @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}]) {
   id: ID!
   senderID: ID! @index(name: "bySender")
   sender: User @belongsTo(fields: ["senderID"])
@@ -115,28 +67,23 @@ type Message @model @auth(rules: [
   readAt: AWSDateTime
 }
 
-type Notification @model @auth(rules: [
-  { allow: owner },
-  { allow: groups, groups: ["Admin"] }
-]) {
+type Notification @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {
   id: ID!
   userID: ID! @index(name: "byUser")
   user: User @belongsTo(fields: ["userID"])
-  type: String! # Application, Message, System
+  type: String!
   message: String!
   isRead: Boolean
   createdAt: AWSDateTime
 }
 
-type ActivityLog @model @auth(rules: [
-  { allow: groups, groups: ["Admin"] }
-]) {
+type ActivityLog @model @auth(rules: [{allow: groups, groups: ["Admin"]}]) {
   id: ID!
   userID: ID @index(name: "byUser")
   user: User @belongsTo(fields: ["userID"])
-  action: String! # Created, Updated, Deleted, Applied, etc.
-  resourceType: String! # User, Project, Application, etc.
+  action: String!
+  resourceType: String!
   resourceID: ID
   detail: String
   timestamp: AWSDateTime!
-}
+} 
