@@ -13,7 +13,7 @@ import {
   Tabs,
   TabItem
 } from '@aws-amplify/ui-react';
-import { listApplications, listProjects } from '../graphql/operations';
+import { listApplications, listProjects } from '../graphql/simplified-operations';
 import ApplicationStatus from '../components/ApplicationStatus';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 
@@ -34,30 +34,52 @@ const StudentDashboard = ({ user }) => {
     
     try {
       // Fetch student's applications
-      const applicationFilter = {
-        studentID: { eq: user.username }
-      };
-      
-      const applicationResult = await API.graphql(graphqlOperation(listApplications, { 
-        filter: applicationFilter,
-        limit: 100
-      }));
-      
-      setApplications(applicationResult.data.listApplications.items);
+      try {
+        const applicationFilter = {
+          studentID: { eq: user.username }
+        };
+        
+        const applicationResult = await API.graphql(graphqlOperation(listApplications, { 
+          filter: applicationFilter,
+          limit: 100
+        }));
+        
+        if (applicationResult.data && applicationResult.data.listApplications) {
+          setApplications(applicationResult.data.listApplications.items || []);
+        } else {
+          console.warn('No application data returned');
+          setApplications([]);
+        }
+      } catch (appErr) {
+        console.error('Error fetching applications:', appErr);
+        // Continue with other operations even if this fails
+        setApplications([]);
+      }
       
       // Fetch active projects
-      const projectFilter = {
-        isActive: { eq: true }
-      };
-      
-      const projectResult = await API.graphql(graphqlOperation(listProjects, { 
-        filter: projectFilter,
-        limit: 10
-      }));
-      
-      setProjects(projectResult.data.listProjects.items);
+      try {
+        const projectFilter = {
+          isActive: { eq: true }
+        };
+        
+        const projectResult = await API.graphql(graphqlOperation(listProjects, { 
+          filter: projectFilter,
+          limit: 10
+        }));
+        
+        if (projectResult.data && projectResult.data.listProjects) {
+          setProjects(projectResult.data.listProjects.items || []);
+        } else {
+          console.warn('No project data returned');
+          setProjects([]);
+        }
+      } catch (projErr) {
+        console.error('Error fetching projects:', projErr);
+        // Continue even if this fails
+        setProjects([]);
+      }
     } catch (err) {
-      console.error('Error fetching data:', err);
+      console.error('Error in fetchData:', err);
       setError('Failed to load dashboard data. Please try again.');
     } finally {
       setLoading(false);
@@ -218,7 +240,7 @@ const StudentDashboard = ({ user }) => {
                     <Divider />
                     <Flex justifyContent="space-between" alignItems="center">
                       <Text fontSize="0.9rem">
-                        Deadline: {new Date(project.applicationDeadline).toLocaleDateString()}
+                        Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}
                       </Text>
                       <Button variation="primary" size="small">
                         View Details

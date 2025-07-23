@@ -11,7 +11,7 @@ import {
   Tabs,
   TabItem
 } from '@aws-amplify/ui-react';
-import { listApplications } from '../graphql/operations';
+import { listApplications } from '../graphql/simplified-operations';
 import { ApplicationStatus, ApplicationStatusGuide } from '../components';
 
 const ApplicationsPage = ({ user }) => {
@@ -33,15 +33,26 @@ const ApplicationsPage = ({ user }) => {
         studentID: { eq: user.username }
       };
       
+      console.log('Fetching applications with filter:', filter);
+      
       const result = await API.graphql(graphqlOperation(listApplications, { 
         filter,
         limit: 100
       }));
       
-      setApplications(result.data.listApplications.items);
+      console.log('Application result:', result);
+      
+      if (result.data && result.data.listApplications) {
+        setApplications(result.data.listApplications.items || []);
+      } else {
+        console.warn('No application data returned');
+        setApplications([]);
+      }
     } catch (err) {
       console.error('Error fetching applications:', err);
+      console.error('Error details:', JSON.stringify(err, null, 2));
       setError('Failed to load applications. Please try again.');
+      setApplications([]);
     } finally {
       setLoading(false);
     }

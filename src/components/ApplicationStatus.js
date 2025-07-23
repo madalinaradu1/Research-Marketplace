@@ -23,6 +23,8 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
   
   // Get status color
   const getStatusColor = (status) => {
+    if (!status) return tokens.colors.neutral[60];
+    
     switch (status) {
       case 'Draft':
         return tokens.colors.neutral[60];
@@ -93,7 +95,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
     <Card>
       <Flex direction="column" gap="1rem">
         <Flex justifyContent="space-between" alignItems="center">
-          <Heading level={4}>{application.projectTitle}</Heading>
+          <Heading level={4}>{application.projectTitle || 'Research Application'}</Heading>
           <Badge
             backgroundColor={getStatusColor(application.status)}
             color="white"
@@ -129,25 +131,25 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
         <Flex direction="column" gap="0.5rem">
           <Text fontWeight="bold">Status Timeline</Text>
           {application.submittedToFacultyAt && (
-            <Text>Submitted to Faculty: {new Date(application.submittedToFacultyAt).toLocaleString()}</Text>
+            <Text>Submitted to Faculty: {application.submittedToFacultyAt ? new Date(application.submittedToFacultyAt).toLocaleString() : 'Unknown'}</Text>
           )}
           {application.submittedToDepartmentAt && (
-            <Text>Submitted to Department: {new Date(application.submittedToDepartmentAt).toLocaleString()}</Text>
+            <Text>Submitted to Department: {application.submittedToDepartmentAt ? new Date(application.submittedToDepartmentAt).toLocaleString() : 'Unknown'}</Text>
           )}
           {application.submittedToAdminAt && (
-            <Text>Submitted to Admin: {new Date(application.submittedToAdminAt).toLocaleString()}</Text>
+            <Text>Submitted to Admin: {application.submittedToAdminAt ? new Date(application.submittedToAdminAt).toLocaleString() : 'Unknown'}</Text>
           )}
           {application.approvedAt && (
-            <Text>Approved: {new Date(application.approvedAt).toLocaleString()}</Text>
+            <Text>Approved: {application.approvedAt ? new Date(application.approvedAt).toLocaleString() : 'Unknown'}</Text>
           )}
           {application.returnedAt && (
-            <Text>Returned: {new Date(application.returnedAt).toLocaleString()}</Text>
+            <Text>Returned: {application.returnedAt ? new Date(application.returnedAt).toLocaleString() : 'Unknown'}</Text>
           )}
           {application.rejectedAt && (
-            <Text>Rejected: {new Date(application.rejectedAt).toLocaleString()}</Text>
+            <Text>Rejected: {application.rejectedAt ? new Date(application.rejectedAt).toLocaleString() : 'Unknown'}</Text>
           )}
           {application.cancelledAt && (
-            <Text>Cancelled: {new Date(application.cancelledAt).toLocaleString()}</Text>
+            <Text>Cancelled: {application.cancelledAt ? new Date(application.cancelledAt).toLocaleString() : 'Unknown'}</Text>
           )}
         </Flex>
         

@@ -129,7 +129,18 @@ export const getApplication = /* GraphQL */ `
       resumeKey
       transcriptLink
       status
+      statusDetail
       facultyNotes
+      coordinatorNotes
+      adminNotes
+      withdrawReason
+      submittedToFacultyAt
+      submittedToDepartmentAt
+      submittedToAdminAt
+      approvedAt
+      returnedAt
+      rejectedAt
+      cancelledAt
       createdAt
       updatedAt
     }
@@ -161,7 +172,11 @@ export const listApplications = /* GraphQL */ `
         resumeKey
         transcriptLink
         status
+        statusDetail
         facultyNotes
+        submittedToFacultyAt
+        approvedAt
+        returnedAt
         createdAt
         updatedAt
       }
@@ -280,6 +295,7 @@ export const createApplication = /* GraphQL */ `
       resumeKey
       transcriptLink
       status
+      statusDetail
       facultyNotes
       createdAt
       updatedAt
@@ -300,7 +316,18 @@ export const updateApplication = /* GraphQL */ `
       resumeKey
       transcriptLink
       status
+      statusDetail
       facultyNotes
+      coordinatorNotes
+      adminNotes
+      withdrawReason
+      submittedToFacultyAt
+      submittedToDepartmentAt
+      submittedToAdminAt
+      approvedAt
+      returnedAt
+      rejectedAt
+      cancelledAt
       createdAt
       updatedAt
     }

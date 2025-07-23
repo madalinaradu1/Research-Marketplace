@@ -45,14 +45,32 @@ type Application @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["
   student: User @belongsTo(fields: ["studentID"])
   projectID: ID! @index(name: "byProject")
   project: Project @belongsTo(fields: ["projectID"])
+  
+  # Application content
   statement: String!
   resumeKey: String
   transcriptLink: AWSURL
-  status: String!
+  
+  # Status tracking
+  status: String! # Draft, Faculty Review, Department Review, Admin Review, Approved, Returned, Rejected, Cancelled, Expired
+  statusDetail: String
+  
+  # Notes
   facultyNotes: String
+  coordinatorNotes: String
+  adminNotes: String
+  withdrawReason: String
+  
+  # Timestamps
+  submittedToFacultyAt: AWSDateTime
+  submittedToDepartmentAt: AWSDateTime
+  submittedToAdminAt: AWSDateTime
+  approvedAt: AWSDateTime
+  returnedAt: AWSDateTime
+  rejectedAt: AWSDateTime
+  cancelledAt: AWSDateTime
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
-}
 
 type Message @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}]) {
   id: ID!
