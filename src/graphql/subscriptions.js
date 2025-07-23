@@ -17,6 +17,7 @@ export const onCreateUser = /* GraphQL */ `
       gpa
       skills
       researchInterests
+      careerInterests
       resumeKey
       affiliation
       profileComplete
@@ -68,6 +69,7 @@ export const onUpdateUser = /* GraphQL */ `
       gpa
       skills
       researchInterests
+      careerInterests
       resumeKey
       affiliation
       profileComplete
@@ -119,6 +121,7 @@ export const onDeleteUser = /* GraphQL */ `
       gpa
       skills
       researchInterests
+      careerInterests
       resumeKey
       affiliation
       profileComplete
@@ -176,6 +179,7 @@ export const onCreateProject = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -218,6 +222,7 @@ export const onUpdateProject = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -260,6 +265,7 @@ export const onDeleteProject = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -299,6 +305,7 @@ export const onCreateApplication = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -323,46 +330,15 @@ export const onCreateApplication = /* GraphQL */ `
         updatedAt
         __typename
       }
-      term
-      facultySupervisorID
-      facultySupervisor {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      department
-      location
-      directSupervisorName
-      directSupervisorEmail
-      paymentType
-      paymentAmount
-      creditHours
-      projectTitle
-      proposalText
-      proposalFileKey
-      requiresTravel
-      travelDetails
+      statement
+      resumeKey
+      transcriptLink
       status
       statusDetail
-      withdrawReason
       facultyNotes
       coordinatorNotes
       adminNotes
+      withdrawReason
       submittedToFacultyAt
       submittedToDepartmentAt
       submittedToAdminAt
@@ -396,6 +372,7 @@ export const onUpdateApplication = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -420,46 +397,15 @@ export const onUpdateApplication = /* GraphQL */ `
         updatedAt
         __typename
       }
-      term
-      facultySupervisorID
-      facultySupervisor {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      department
-      location
-      directSupervisorName
-      directSupervisorEmail
-      paymentType
-      paymentAmount
-      creditHours
-      projectTitle
-      proposalText
-      proposalFileKey
-      requiresTravel
-      travelDetails
+      statement
+      resumeKey
+      transcriptLink
       status
       statusDetail
-      withdrawReason
       facultyNotes
       coordinatorNotes
       adminNotes
+      withdrawReason
       submittedToFacultyAt
       submittedToDepartmentAt
       submittedToAdminAt
@@ -493,6 +439,7 @@ export const onDeleteApplication = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -517,46 +464,15 @@ export const onDeleteApplication = /* GraphQL */ `
         updatedAt
         __typename
       }
-      term
-      facultySupervisorID
-      facultySupervisor {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      department
-      location
-      directSupervisorName
-      directSupervisorEmail
-      paymentType
-      paymentAmount
-      creditHours
-      projectTitle
-      proposalText
-      proposalFileKey
-      requiresTravel
-      travelDetails
+      statement
+      resumeKey
+      transcriptLink
       status
       statusDetail
-      withdrawReason
       facultyNotes
       coordinatorNotes
       adminNotes
+      withdrawReason
       submittedToFacultyAt
       submittedToDepartmentAt
       submittedToAdminAt
@@ -590,6 +506,7 @@ export const onCreateMessage = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -611,6 +528,7 @@ export const onCreateMessage = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -651,6 +569,7 @@ export const onUpdateMessage = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -672,6 +591,7 @@ export const onUpdateMessage = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -712,6 +632,7 @@ export const onDeleteMessage = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -733,6 +654,7 @@ export const onDeleteMessage = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -773,6 +695,7 @@ export const onCreateNotification = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -811,6 +734,7 @@ export const onUpdateNotification = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -849,6 +773,7 @@ export const onDeleteNotification = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -886,6 +811,7 @@ export const onCreateActivityLog = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -924,6 +850,7 @@ export const onUpdateActivityLog = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
@@ -962,6 +889,7 @@ export const onDeleteActivityLog = /* GraphQL */ `
         gpa
         skills
         researchInterests
+        careerInterests
         resumeKey
         affiliation
         profileComplete
