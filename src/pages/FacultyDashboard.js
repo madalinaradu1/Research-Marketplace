@@ -104,24 +104,43 @@ const FacultyDashboard = ({ user }) => {
     setError(null);
     
     try {
+      // Convert skills string to array
       const skillsArray = projectForm.skillsRequired
-        .split(',')
-        .map(skill => skill.trim())
-        .filter(skill => skill);
+        ? projectForm.skillsRequired
+            .split(',')
+            .map(skill => skill.trim())
+            .filter(skill => skill)
+        : [];
       
+      // Format the date properly for GraphQL
+      const deadline = projectForm.applicationDeadline 
+        ? new Date(projectForm.applicationDeadline).toISOString() 
+        : null;
+      
+      // Prepare input with proper types
       const input = {
-        ...projectForm,
-        facultyID: user.username,
-        skillsRequired: skillsArray
+        title: projectForm.title,
+        description: projectForm.description,
+        department: projectForm.department,
+        skillsRequired: skillsArray,
+        duration: projectForm.duration || null,
+        applicationDeadline: deadline,
+        facultyID: user.username || user.id,
+        isActive: projectForm.isActive === true || projectForm.isActive === 'true'
       };
       
+      console.log('Project input:', input);
+      
+      let result;
       if (selectedProject) {
         // Update existing project
         input.id = selectedProject.id;
-        await API.graphql(graphqlOperation(updateProject, { input }));
+        result = await API.graphql(graphqlOperation(updateProject, { input }));
+        console.log('Project updated:', result);
       } else {
         // Create new project
-        await API.graphql(graphqlOperation(createProject, { input }));
+        result = await API.graphql(graphqlOperation(createProject, { input }));
+        console.log('Project created:', result);
       }
       
       setIsCreatingProject(false);
@@ -139,7 +158,12 @@ const FacultyDashboard = ({ user }) => {
       fetchData();
     } catch (err) {
       console.error('Error saving project:', err);
-      setError('Failed to save project. Please try again.');
+      if (err.errors && err.errors.length > 0) {
+        console.error('GraphQL error details:', err.errors);
+        setError(`Failed to save project: ${err.errors[0].message}`);
+      } else {
+        setError('Failed to save project. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -264,7 +288,7 @@ const FacultyDashboard = ({ user }) => {
           {isCreatingProject ? (
             <Card>
               <Heading level={4}>{selectedProject ? 'Edit Project' : 'Create New Project'}</Heading>
-              <Divider marginY="1rem" />
+              <Divider margin="1rem 0" />
               
               <form onSubmit={handleSubmitProject}>
                 <Flex direction="column" gap="1rem">

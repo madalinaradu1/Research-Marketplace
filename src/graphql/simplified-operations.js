@@ -139,7 +139,15 @@ export const createProject = /* GraphQL */ `
     createProject(input: $input, condition: $condition) {
       id
       title
+      description
+      department
+      skillsRequired
+      duration
+      applicationDeadline
+      facultyID
+      isActive
       createdAt
+      updatedAt
     }
   }
 `;

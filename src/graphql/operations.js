@@ -256,6 +256,11 @@ export const createProject = /* GraphQL */ `
       duration
       applicationDeadline
       facultyID
+      faculty {
+        id
+        name
+        email
+      }
       isActive
       createdAt
       updatedAt
@@ -277,6 +282,11 @@ export const updateProject = /* GraphQL */ `
       duration
       applicationDeadline
       facultyID
+      faculty {
+        id
+        name
+        email
+      }
       isActive
       createdAt
       updatedAt
