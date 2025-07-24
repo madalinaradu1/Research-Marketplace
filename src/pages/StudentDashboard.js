@@ -216,10 +216,10 @@ const StudentDashboard = ({ user }) => {
         <Card variation="elevated" flex="1">
           <Heading level={4}>Quick Links</Heading>
           <Flex direction="column" gap="0.5rem" marginTop="1rem">
-            <Button variation="primary" onClick={() => setActiveTabIndex(1)}>
+            <Button variation="primary" onClick={() => setActiveTabIndex(0)}>
               Browse Research Opportunities
             </Button>
-            <Button onClick={() => setActiveTabIndex(0)}>
+            <Button onClick={() => setActiveTabIndex(1)}>
               View My Applications
             </Button>
             <Button onClick={() => setActiveTabIndex(2)}>
@@ -233,38 +233,6 @@ const StudentDashboard = ({ user }) => {
         currentIndex={activeTabIndex}
         onChange={(index) => setActiveTabIndex(index)}
       >
-        <TabItem title="My Applications">
-          {applications.length === 0 ? (
-            <Card>
-              <Text>You haven't submitted any applications yet.</Text>
-              <Button 
-                variation="primary" 
-                onClick={() => setActiveTabIndex(1)}
-                marginTop="1rem"
-              >
-                Browse Opportunities
-              </Button>
-            </Card>
-          ) : (
-            <Collection
-              items={applications}
-              type="list"
-              gap="1rem"
-              wrap="nowrap"
-              direction="column"
-            >
-              {(application) => (
-                <ApplicationStatus 
-                  key={application.id}
-                  application={application}
-                  isStudent={true}
-                  onUpdate={handleApplicationUpdate}
-                />
-              )}
-            </Collection>
-          )}
-        </TabItem>
-        
         <TabItem title="Research Opportunities">
           {projects.length === 0 ? (
             <Card>
@@ -312,6 +280,38 @@ const StudentDashboard = ({ user }) => {
                     </Flex>
                   </Flex>
                 </Card>
+              )}
+            </Collection>
+          )}
+        </TabItem>
+        
+        <TabItem title="My Applications">
+          {applications.length === 0 ? (
+            <Card>
+              <Text>You haven't submitted any applications yet.</Text>
+              <Button 
+                variation="primary" 
+                onClick={() => setActiveTabIndex(0)}
+                marginTop="1rem"
+              >
+                Browse Opportunities
+              </Button>
+            </Card>
+          ) : (
+            <Collection
+              items={applications}
+              type="list"
+              gap="1rem"
+              wrap="nowrap"
+              direction="column"
+            >
+              {(application) => (
+                <ApplicationStatus 
+                  key={application.id}
+                  application={application}
+                  isStudent={true}
+                  onUpdate={handleApplicationUpdate}
+                />
               )}
             </Collection>
           )}
