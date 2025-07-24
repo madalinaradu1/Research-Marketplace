@@ -160,7 +160,13 @@ export const listApplications = /* GraphQL */ `
         studentID
         projectID
         statement
+        resumeKey
+        transcriptLink
         status
+        statusDetail
+        facultyNotes
+        coordinatorNotes
+        adminNotes
         createdAt
         updatedAt
       }

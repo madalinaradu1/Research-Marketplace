@@ -21,16 +21,16 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
   const [error, setError] = useState(null);
   const { tokens } = useTheme();
   
-  // Download proposal file
+  // Download resume file
   const downloadProposal = async () => {
-    if (!application.proposalFileKey) return;
+    if (!application.resumeKey) return;
     
     try {
-      const url = await Storage.get(application.proposalFileKey, { expires: 60 });
+      const url = await Storage.get(application.resumeKey, { expires: 60 });
       window.open(url, '_blank');
     } catch (err) {
-      console.error('Error downloading proposal:', err);
-      setError('Failed to download proposal. Please try again.');
+      console.error('Error downloading resume:', err);
+      setError('Failed to download resume. Please try again.');
     }
   };
   
@@ -119,52 +119,76 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
   return (
     <Card>
       <Flex direction="column" gap="1rem">
-        <Heading level={4}>Review Application: {application.projectTitle}</Heading>
+        <Heading level={4}>Review Application</Heading>
         
         <Divider />
         
         <Flex direction="column" gap="0.5rem">
           <Text fontWeight="bold">Student Information</Text>
-          <Text>Name: {application.student?.name}</Text>
-          <Text>Email: {application.student?.email}</Text>
-          {application.student?.major && (
-            <Text>Major: {application.student.major}</Text>
+          {application.student ? (
+            <>
+              <Text>Name: {application.student.name}</Text>
+              <Text>Email: {application.student.email}</Text>
+              {application.student.major && (
+                <Text>Major: {application.student.major}</Text>
+              )}
+              {application.student.gpa && (
+                <Text>GPA: {application.student.gpa}</Text>
+              )}
+            </>
+          ) : (
+            <Text>Student ID: {application.studentID}</Text>
           )}
-          {application.student?.gpa && (
-            <Text>GPA: {application.student.gpa}</Text>
-          )}
+
         </Flex>
         
         <Divider />
         
         <Flex direction="column" gap="0.5rem">
           <Text fontWeight="bold">Application Details</Text>
-          <Text>Term: {application.term}</Text>
-          <Text>Department: {application.department}</Text>
-          <Text>Payment Type: {application.paymentType}</Text>
-          {application.paymentType === 'Pay' && application.paymentAmount && (
-            <Text>Payment Amount: ${application.paymentAmount}</Text>
+          {application.project && (
+            <>
+              <Text>Project: {application.project.title}</Text>
+              <Text>Department: {application.project.department}</Text>
+            </>
           )}
-          {application.paymentType === 'Credit' && application.creditHours && (
-            <Text>Credit Hours: {application.creditHours}</Text>
+          <Text>Status: {application.status}</Text>
+          {application.statusDetail && (
+            <Text>Status Detail: {application.statusDetail}</Text>
           )}
-          {application.requiresTravel && (
-            <Text>Requires Travel: Yes - {application.travelDetails}</Text>
-          )}
+          <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
         </Flex>
         
         <Divider />
         
         <Flex direction="column" gap="0.5rem">
-          <Text fontWeight="bold">Proposal</Text>
-          {application.proposalFileKey ? (
-            <Button onClick={downloadProposal}>Download Proposal</Button>
-          ) : (
-            <Card variation="outlined">
-              <Text>{application.proposalText}</Text>
-            </Card>
-          )}
+          <Text fontWeight="bold">Application Statement</Text>
+          <Card variation="outlined">
+            <Text>{application.statement || 'No statement provided'}</Text>
+          </Card>
         </Flex>
+        
+        {application.resumeKey && (
+          <>
+            <Divider />
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Resume</Text>
+              <Button onClick={downloadProposal}>Download Resume</Button>
+            </Flex>
+          </>
+        )}
+        
+        {application.transcriptLink && (
+          <>
+            <Divider />
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Transcript</Text>
+              <Button onClick={() => window.open(application.transcriptLink, '_blank')}>
+                View Transcript
+              </Button>
+            </Flex>
+          </>
+        )}
         
         <Divider />
         

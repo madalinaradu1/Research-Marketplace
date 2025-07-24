@@ -16,7 +16,7 @@ import {
   SelectField,
   Badge
 } from '@aws-amplify/ui-react';
-import { listProjects, listApplications, createProject, updateProject } from '../graphql/operations';
+import { listProjects, listApplications, createProject, updateProject, getUser } from '../graphql/operations';
 import ApplicationReview from '../components/ApplicationReview';
 
 const FacultyDashboard = ({ user }) => {
@@ -79,7 +79,29 @@ const FacultyDashboard = ({ user }) => {
           limit: 100
         }));
         
-        setApplications(applicationResult.data.listApplications.items);
+        // Enrich applications with project and student data
+        const enrichedApplications = await Promise.all(
+          applicationResult.data.listApplications.items.map(async (app) => {
+            const project = projectResult.data.listProjects.items.find(p => p.id === app.projectID);
+            
+            // Fetch student data
+            let student = null;
+            try {
+              const studentResult = await API.graphql(graphqlOperation(getUser, { id: app.studentID }));
+              student = studentResult.data.getUser;
+            } catch (err) {
+              console.error('Error fetching student:', err);
+            }
+            
+            return {
+              ...app,
+              project,
+              student
+            };
+          })
+        );
+        
+        setApplications(enrichedApplications);
       }
     } catch (err) {
       console.error('Error fetching data:', err);
