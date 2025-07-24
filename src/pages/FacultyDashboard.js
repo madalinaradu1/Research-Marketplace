@@ -49,9 +49,14 @@ const FacultyDashboard = ({ user }) => {
     setSuccessMessage(null);
     
     try {
+      // Get current authenticated user to ensure we have the correct ID
+      const currentUser = await Auth.currentAuthenticatedUser();
+      const userId = currentUser.username;
+      console.log('Fetching projects for faculty ID:', userId);
+      
       // Fetch faculty's projects
       const projectFilter = {
-        facultyID: { eq: user.id || user.username }
+        facultyID: { eq: userId }
       };
       
       const projectResult = await API.graphql(graphqlOperation(listProjects, { 
@@ -78,7 +83,12 @@ const FacultyDashboard = ({ user }) => {
       }
     } catch (err) {
       console.error('Error fetching data:', err);
-      setError('Failed to load dashboard data. Please try again.');
+      if (err.errors && err.errors.length > 0) {
+        console.error('GraphQL errors:', err.errors);
+        setError(`Failed to load dashboard data: ${err.errors[0].message}`);
+      } else {
+        setError('Failed to load dashboard data. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

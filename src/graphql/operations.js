@@ -158,26 +158,9 @@ export const listApplications = /* GraphQL */ `
       items {
         id
         studentID
-        student {
-          id
-          name
-          email
-        }
         projectID
-        project {
-          id
-          title
-          department
-        }
         statement
-        resumeKey
-        transcriptLink
         status
-        statusDetail
-        facultyNotes
-        submittedToFacultyAt
-        approvedAt
-        returnedAt
         createdAt
         updatedAt
       }
