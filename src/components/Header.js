@@ -52,43 +52,53 @@ const Header = ({ user, signOut }) => {
   return (
     <Flex
       as="header"
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      padding={tokens.space.medium}
-      backgroundColor={tokens.colors.white}
+      direction="column"
+      backgroundColor="#552b9a"
       boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
       position="sticky"
       top="0"
       style={{ zIndex: 100 }}
     >
-      {/* Logo and Title */}
-      <Flex direction="row" alignItems="center" gap={tokens.space.small}>
-        <Link to="/dashboard">
-          <Image
-            alt="URAF Logo"
-            src="/logo192.png"
-            height="40px"
-            width="40px"
-            objectFit="contain"
-          />
-        </Link>
+      {/* Top banner with logo and title */}
+      <Flex
+        direction="row"
+        alignItems="center"
+        justifyContent="flex-start"
+        padding={tokens.space.small}
+        gap={tokens.space.small}
+      >
+        <Image
+          alt="GCU Logo"
+          src="/GCU_WHITE.png"
+          height="40px"
+          objectFit="contain"
+        />
         <Flex direction="column">
           <Text
             fontSize={tokens.fontSizes.large}
             fontWeight={tokens.fontWeights.bold}
-            color={tokens.colors.primary[80]}
+            color="white"
           >
             Undergraduate Research
           </Text>
           <Text
             fontSize={tokens.fontSizes.small}
-            color={tokens.colors.neutral[80]}
+            color="white"
           >
             Grand Canyon University
           </Text>
         </Flex>
       </Flex>
+      
+      {/* Navigation bar */}
+      <Flex
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        padding={`0 ${tokens.space.small} ${tokens.space.small}`}
+      >
+      {/* Navigation spacer */}
+      <View />
 
       {/* Desktop Navigation */}
       <Flex
@@ -99,7 +109,7 @@ const Header = ({ user, signOut }) => {
       >
         <Link to="/dashboard">
           <Text
-            color={isActive('/dashboard') ? tokens.colors.primary[80] : tokens.colors.neutral[80]}
+            color={isActive('/dashboard') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/dashboard') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
           >
             Dashboard
@@ -107,7 +117,7 @@ const Header = ({ user, signOut }) => {
         </Link>
         <Link to="/search">
           <Text
-            color={isActive('/search') ? tokens.colors.primary[80] : tokens.colors.neutral[80]}
+            color={isActive('/search') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/search') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
           >
             Search
@@ -115,7 +125,7 @@ const Header = ({ user, signOut }) => {
         </Link>
         <Link to="/activity">
           <Text
-            color={isActive('/activity') ? tokens.colors.primary[80] : tokens.colors.neutral[80]}
+            color={isActive('/activity') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/activity') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
           >
             My Activity
@@ -123,7 +133,7 @@ const Header = ({ user, signOut }) => {
         </Link>
         <Link to="/applications">
           <Text
-            color={isActive('/applications') ? tokens.colors.primary[80] : tokens.colors.neutral[80]}
+            color={isActive('/applications') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/applications') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
           >
             Applications
@@ -131,7 +141,7 @@ const Header = ({ user, signOut }) => {
         </Link>
         <Link to="/profile">
           <Text
-            color={isActive('/profile') ? tokens.colors.primary[80] : tokens.colors.neutral[80]}
+            color={isActive('/profile') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/profile') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
           >
             Profile
@@ -140,7 +150,7 @@ const Header = ({ user, signOut }) => {
         {isUserAdmin(user, user) && (
           <Link to="/admin">
             <Text
-              color={isActive('/admin') ? tokens.colors.primary[80] : tokens.colors.neutral[80]}
+              color={isActive('/admin') ? "white" : "rgba(255,255,255,0.8)"}
               fontWeight={isActive('/admin') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
             >
               Admin
@@ -150,6 +160,7 @@ const Header = ({ user, signOut }) => {
         <Button onClick={handleSignOut} variation="primary">
           Sign Out
         </Button>
+      </Flex>
       </Flex>
 
       {/* Mobile Navigation */}

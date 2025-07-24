@@ -6,14 +6,15 @@ import {
   Text,
   Grid,
   useTheme,
-  View
+  View,
+  Image
 } from '@aws-amplify/ui-react';
 
 const Footer = () => {
   const { tokens } = useTheme();
   
   return (
-    <View as="footer" backgroundColor={tokens.colors.neutral[90]} color={tokens.colors.white}>
+    <View as="footer" backgroundColor="#D7D7D7" color={tokens.colors.neutral[90]}>
       <Flex
         direction="column"
         padding={tokens.space.xl}
@@ -21,6 +22,22 @@ const Footer = () => {
         marginLeft="auto"
         marginRight="auto"
       >
+        {/* Footer Header with Logo */}
+        <Flex
+          direction="row"
+          alignItems="center"
+          justifyContent="center"
+          gap={tokens.space.medium}
+          marginBottom={tokens.space.large}
+        >
+          <Image
+            alt="FYP Logo"
+            src="/FYP.png"
+            height="40px"
+            objectFit="contain"
+          />
+        </Flex>
+        
         {/* Footer Content */}
         <Grid
           templateColumns={{ base: '1fr', medium: '1fr 1fr 1fr' }}
@@ -107,16 +124,18 @@ const Footer = () => {
           alignItems={{ base: 'flex-start', medium: 'center' }}
           gap={tokens.space.small}
         >
-          <Text>&copy; {new Date().getFullYear()} Grand Canyon University. All rights reserved.</Text>
+          <Flex direction="row" alignItems="center" gap={tokens.space.medium}>
+            <Text>&copy; {new Date().getFullYear()} Grand Canyon University. All rights reserved.</Text>
+          </Flex>
           <Flex direction="row" gap={tokens.space.medium}>
             <Link to="/privacy">
-              <Text color={tokens.colors.white}>Privacy Policy</Text>
+              <Text color={tokens.colors.neutral[90]}>Privacy Policy</Text>
             </Link>
             <Link to="/terms">
-              <Text color={tokens.colors.white}>Terms of Use</Text>
+              <Text color={tokens.colors.neutral[90]}>Terms of Use</Text>
             </Link>
             <Link to="/accessibility">
-              <Text color={tokens.colors.white}>Accessibility</Text>
+              <Text color={tokens.colors.neutral[90]}>Accessibility</Text>
             </Link>
           </Flex>
         </Flex>
