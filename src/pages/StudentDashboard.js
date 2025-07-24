@@ -133,7 +133,7 @@ const StudentDashboard = ({ user }) => {
       const input = {
         studentID: userId,
         projectID: selectedProject.id,
-        statement: `Hours per week: ${applicationForm.hoursPerWeek}\n\nWhy I'm interested: ${applicationForm.statement}`,
+        statement: `Hours per week: ${applicationForm.hoursPerWeek}\n\n${applicationForm.statement}`,
         status: 'Draft'
       };
       

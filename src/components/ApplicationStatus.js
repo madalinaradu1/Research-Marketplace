@@ -95,7 +95,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
     <Card>
       <Flex direction="column" gap="1rem">
         <Flex justifyContent="space-between" alignItems="center">
-          <Heading level={4}>{application.projectTitle || 'Research Application'}</Heading>
+          <Heading level={4}>{application.project?.title || 'Research Application'}</Heading>
           <Badge
             backgroundColor={getStatusColor(application.status)}
             color="white"
@@ -112,17 +112,15 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
         
         <Flex direction="column" gap="0.5rem">
           <Text fontWeight="bold">Application Details</Text>
-          <Text>Term: {application.term}</Text>
-          <Text>Department: {application.department}</Text>
-          <Text>Payment Type: {application.paymentType}</Text>
-          {application.paymentType === 'Pay' && application.paymentAmount && (
-            <Text>Payment Amount: ${application.paymentAmount}</Text>
+          {application.project?.department && (
+            <Text>Department: {application.project.department}</Text>
           )}
-          {application.paymentType === 'Credit' && application.creditHours && (
-            <Text>Credit Hours: {application.creditHours}</Text>
-          )}
-          {application.requiresTravel && (
-            <Text>Requires Travel: Yes</Text>
+          <Text>Applied: {new Date(application.createdAt).toLocaleDateString()}</Text>
+          {application.statement && (
+            <>
+              <Text fontWeight="bold">Application Statement:</Text>
+              <Text>{application.statement.replace('Why I\'m interested: ', '')}</Text>
+            </>
           )}
         </Flex>
         
@@ -130,26 +128,21 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
         
         <Flex direction="column" gap="0.5rem">
           <Text fontWeight="bold">Status Timeline</Text>
+          <Text>Created: {new Date(application.createdAt).toLocaleString()}</Text>
+          {application.updatedAt !== application.createdAt && (
+            <Text>Last Updated: {new Date(application.updatedAt).toLocaleString()}</Text>
+          )}
           {application.submittedToFacultyAt && (
-            <Text>Submitted to Faculty: {application.submittedToFacultyAt ? new Date(application.submittedToFacultyAt).toLocaleString() : 'Unknown'}</Text>
-          )}
-          {application.submittedToDepartmentAt && (
-            <Text>Submitted to Department: {application.submittedToDepartmentAt ? new Date(application.submittedToDepartmentAt).toLocaleString() : 'Unknown'}</Text>
-          )}
-          {application.submittedToAdminAt && (
-            <Text>Submitted to Admin: {application.submittedToAdminAt ? new Date(application.submittedToAdminAt).toLocaleString() : 'Unknown'}</Text>
+            <Text>Submitted to Faculty: {new Date(application.submittedToFacultyAt).toLocaleString()}</Text>
           )}
           {application.approvedAt && (
-            <Text>Approved: {application.approvedAt ? new Date(application.approvedAt).toLocaleString() : 'Unknown'}</Text>
+            <Text>Approved: {new Date(application.approvedAt).toLocaleString()}</Text>
           )}
           {application.returnedAt && (
-            <Text>Returned: {application.returnedAt ? new Date(application.returnedAt).toLocaleString() : 'Unknown'}</Text>
-          )}
-          {application.rejectedAt && (
-            <Text>Rejected: {application.rejectedAt ? new Date(application.rejectedAt).toLocaleString() : 'Unknown'}</Text>
+            <Text>Returned: {new Date(application.returnedAt).toLocaleString()}</Text>
           )}
           {application.cancelledAt && (
-            <Text>Cancelled: {application.cancelledAt ? new Date(application.cancelledAt).toLocaleString() : 'Unknown'}</Text>
+            <Text>Cancelled: {new Date(application.cancelledAt).toLocaleString()}</Text>
           )}
         </Flex>
         
