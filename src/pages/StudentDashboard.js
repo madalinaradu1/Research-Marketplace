@@ -16,6 +16,7 @@ import {
   TextAreaField
 } from '@aws-amplify/ui-react';
 import { listApplications, listProjects, createApplication } from '../graphql/simplified-operations';
+import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 import ApplicationStatus from '../components/ApplicationStatus';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 
@@ -195,20 +196,12 @@ const StudentDashboard = ({ user }) => {
           <Heading level={4}>My Applications</Heading>
           <Flex wrap="wrap" gap="1rem" marginTop="1rem">
             <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5} color="blue">{statusCounts.draft}</Heading>
-              <Text>Drafts</Text>
-            </Card>
-            <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5} color="orange">{statusCounts.pending}</Heading>
-              <Text>Pending</Text>
+              <Heading level={5}>{user.applicationCount || 0}/3</Heading>
+              <Text>Applications Used</Text>
             </Card>
             <Card variation="outlined" padding="1rem" flex="1">
               <Heading level={5} color="green">{statusCounts.approved}</Heading>
               <Text>Approved</Text>
-            </Card>
-            <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5} color="red">{statusCounts.returned}</Heading>
-              <Text>Returned</Text>
             </Card>
           </Flex>
         </Card>
@@ -273,8 +266,13 @@ const StudentDashboard = ({ user }) => {
                         <Button size="small" onClick={() => handleViewDetails(project)}>
                           View Details
                         </Button>
-                        <Button variation="primary" size="small" onClick={() => handleApply(project)}>
-                          Apply
+                        <Button 
+                          variation="primary" 
+                          size="small" 
+                          onClick={() => handleApply(project)}
+                          isDisabled={(user.applicationCount || 0) >= 3}
+                        >
+                          {(user.applicationCount || 0) >= 3 ? 'Limit Reached' : 'Apply'}
                         </Button>
                       </Flex>
                     </Flex>
@@ -380,7 +378,13 @@ const StudentDashboard = ({ user }) => {
                 
                 <Flex gap="1rem" marginTop="1rem">
                   <Button onClick={() => setSelectedProject(null)}>Close</Button>
-                  <Button variation="primary" onClick={() => handleApply(selectedProject)}>Apply Now</Button>
+                  <Button 
+                    variation="primary" 
+                    onClick={() => handleApply(selectedProject)}
+                    isDisabled={(user.applicationCount || 0) >= 3}
+                  >
+                    {(user.applicationCount || 0) >= 3 ? 'Application Limit Reached' : 'Apply Now'}
+                  </Button>
                 </Flex>
               </Flex>
             </Card>
@@ -388,8 +392,48 @@ const StudentDashboard = ({ user }) => {
         </View>
       )}
       
-      {/* Application Form Overlay */}
+      {/* Enhanced Application Form Overlay */}
       {showApplicationForm && selectedProject && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setShowApplicationForm(false)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="800px"
+              width="100%"
+              maxHeight="90vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <EnhancedApplicationForm 
+                project={selectedProject}
+                user={user}
+                onClose={() => setShowApplicationForm(false)}
+                onSuccess={() => {
+                  setShowApplicationForm(false);
+                  setSelectedProject(null);
+                  fetchData();
+                }}
+              />
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* Legacy Application Form Overlay */}
+      {false && showApplicationForm && selectedProject && (
         <View
           position="fixed"
           top="0"

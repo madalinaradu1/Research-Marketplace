@@ -22,6 +22,7 @@ export const createUser = /* GraphQL */ `
       affiliation
       profileComplete
       status
+      applicationCount
       createdAt
       updatedAt
       facultyProjects {
@@ -45,6 +46,10 @@ export const createUser = /* GraphQL */ `
         __typename
       }
       activityLogs {
+        nextToken
+        __typename
+      }
+      messageBoards {
         nextToken
         __typename
       }
@@ -74,6 +79,7 @@ export const updateUser = /* GraphQL */ `
       affiliation
       profileComplete
       status
+      applicationCount
       createdAt
       updatedAt
       facultyProjects {
@@ -97,6 +103,10 @@ export const updateUser = /* GraphQL */ `
         __typename
       }
       activityLogs {
+        nextToken
+        __typename
+      }
+      messageBoards {
         nextToken
         __typename
       }
@@ -126,6 +136,7 @@ export const deleteUser = /* GraphQL */ `
       affiliation
       profileComplete
       status
+      applicationCount
       createdAt
       updatedAt
       facultyProjects {
@@ -152,6 +163,10 @@ export const deleteUser = /* GraphQL */ `
         nextToken
         __typename
       }
+      messageBoards {
+        nextToken
+        __typename
+      }
       owner
       __typename
     }
@@ -168,6 +183,7 @@ export const createProject = /* GraphQL */ `
       description
       department
       skillsRequired
+      qualifications
       duration
       applicationDeadline
       facultyID
@@ -187,15 +203,21 @@ export const createProject = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
         __typename
       }
       isActive
+      requiresTranscript
       createdAt
       updatedAt
       applications {
+        nextToken
+        __typename
+      }
+      messageBoards {
         nextToken
         __typename
       }
@@ -214,6 +236,7 @@ export const updateProject = /* GraphQL */ `
       description
       department
       skillsRequired
+      qualifications
       duration
       applicationDeadline
       facultyID
@@ -233,15 +256,21 @@ export const updateProject = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
         __typename
       }
       isActive
+      requiresTranscript
       createdAt
       updatedAt
       applications {
+        nextToken
+        __typename
+      }
+      messageBoards {
         nextToken
         __typename
       }
@@ -260,6 +289,7 @@ export const deleteProject = /* GraphQL */ `
       description
       department
       skillsRequired
+      qualifications
       duration
       applicationDeadline
       facultyID
@@ -279,15 +309,21 @@ export const deleteProject = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
         __typename
       }
       isActive
+      requiresTranscript
       createdAt
       updatedAt
       applications {
+        nextToken
+        __typename
+      }
+      messageBoards {
         nextToken
         __typename
       }
@@ -319,6 +355,7 @@ export const createApplication = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -331,10 +368,12 @@ export const createApplication = /* GraphQL */ `
         description
         department
         skillsRequired
+        qualifications
         duration
         applicationDeadline
         facultyID
         isActive
+        requiresTranscript
         createdAt
         updatedAt
         __typename
@@ -342,6 +381,14 @@ export const createApplication = /* GraphQL */ `
       statement
       resumeKey
       transcriptLink
+      relevantCourses {
+        courseName
+        courseNumber
+        grade
+        semester
+        year
+        __typename
+      }
       status
       statusDetail
       facultyNotes
@@ -357,6 +404,22 @@ export const createApplication = /* GraphQL */ `
       cancelledAt
       createdAt
       updatedAt
+      learningContract {
+        id
+        applicationID
+        researchSchedule
+        researchRequirements
+        learningObjectives
+        evaluationCriteria
+        mentorApproved
+        studentConfirmed
+        submittedAt
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      applicationLearningContractId
       owner
       __typename
     }
@@ -386,6 +449,7 @@ export const updateApplication = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -398,10 +462,12 @@ export const updateApplication = /* GraphQL */ `
         description
         department
         skillsRequired
+        qualifications
         duration
         applicationDeadline
         facultyID
         isActive
+        requiresTranscript
         createdAt
         updatedAt
         __typename
@@ -409,6 +475,14 @@ export const updateApplication = /* GraphQL */ `
       statement
       resumeKey
       transcriptLink
+      relevantCourses {
+        courseName
+        courseNumber
+        grade
+        semester
+        year
+        __typename
+      }
       status
       statusDetail
       facultyNotes
@@ -424,6 +498,22 @@ export const updateApplication = /* GraphQL */ `
       cancelledAt
       createdAt
       updatedAt
+      learningContract {
+        id
+        applicationID
+        researchSchedule
+        researchRequirements
+        learningObjectives
+        evaluationCriteria
+        mentorApproved
+        studentConfirmed
+        submittedAt
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      applicationLearningContractId
       owner
       __typename
     }
@@ -453,6 +543,7 @@ export const deleteApplication = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -465,10 +556,12 @@ export const deleteApplication = /* GraphQL */ `
         description
         department
         skillsRequired
+        qualifications
         duration
         applicationDeadline
         facultyID
         isActive
+        requiresTranscript
         createdAt
         updatedAt
         __typename
@@ -476,6 +569,14 @@ export const deleteApplication = /* GraphQL */ `
       statement
       resumeKey
       transcriptLink
+      relevantCourses {
+        courseName
+        courseNumber
+        grade
+        semester
+        year
+        __typename
+      }
       status
       statusDetail
       facultyNotes
@@ -491,7 +592,335 @@ export const deleteApplication = /* GraphQL */ `
       cancelledAt
       createdAt
       updatedAt
+      learningContract {
+        id
+        applicationID
+        researchSchedule
+        researchRequirements
+        learningObjectives
+        evaluationCriteria
+        mentorApproved
+        studentConfirmed
+        submittedAt
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      applicationLearningContractId
       owner
+      __typename
+    }
+  }
+`;
+export const createLearningContract = /* GraphQL */ `
+  mutation CreateLearningContract(
+    $input: CreateLearningContractInput!
+    $condition: ModelLearningContractConditionInput
+  ) {
+    createLearningContract(input: $input, condition: $condition) {
+      id
+      applicationID
+      application {
+        id
+        studentID
+        projectID
+        statement
+        resumeKey
+        transcriptLink
+        status
+        statusDetail
+        facultyNotes
+        coordinatorNotes
+        adminNotes
+        withdrawReason
+        submittedToFacultyAt
+        submittedToDepartmentAt
+        submittedToAdminAt
+        approvedAt
+        returnedAt
+        rejectedAt
+        cancelledAt
+        createdAt
+        updatedAt
+        applicationLearningContractId
+        owner
+        __typename
+      }
+      researchSchedule
+      researchRequirements
+      learningObjectives
+      evaluationCriteria
+      mentorApproved
+      studentConfirmed
+      submittedAt
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const updateLearningContract = /* GraphQL */ `
+  mutation UpdateLearningContract(
+    $input: UpdateLearningContractInput!
+    $condition: ModelLearningContractConditionInput
+  ) {
+    updateLearningContract(input: $input, condition: $condition) {
+      id
+      applicationID
+      application {
+        id
+        studentID
+        projectID
+        statement
+        resumeKey
+        transcriptLink
+        status
+        statusDetail
+        facultyNotes
+        coordinatorNotes
+        adminNotes
+        withdrawReason
+        submittedToFacultyAt
+        submittedToDepartmentAt
+        submittedToAdminAt
+        approvedAt
+        returnedAt
+        rejectedAt
+        cancelledAt
+        createdAt
+        updatedAt
+        applicationLearningContractId
+        owner
+        __typename
+      }
+      researchSchedule
+      researchRequirements
+      learningObjectives
+      evaluationCriteria
+      mentorApproved
+      studentConfirmed
+      submittedAt
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const deleteLearningContract = /* GraphQL */ `
+  mutation DeleteLearningContract(
+    $input: DeleteLearningContractInput!
+    $condition: ModelLearningContractConditionInput
+  ) {
+    deleteLearningContract(input: $input, condition: $condition) {
+      id
+      applicationID
+      application {
+        id
+        studentID
+        projectID
+        statement
+        resumeKey
+        transcriptLink
+        status
+        statusDetail
+        facultyNotes
+        coordinatorNotes
+        adminNotes
+        withdrawReason
+        submittedToFacultyAt
+        submittedToDepartmentAt
+        submittedToAdminAt
+        approvedAt
+        returnedAt
+        rejectedAt
+        cancelledAt
+        createdAt
+        updatedAt
+        applicationLearningContractId
+        owner
+        __typename
+      }
+      researchSchedule
+      researchRequirements
+      learningObjectives
+      evaluationCriteria
+      mentorApproved
+      studentConfirmed
+      submittedAt
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const createMessageBoard = /* GraphQL */ `
+  mutation CreateMessageBoard(
+    $input: CreateMessageBoardInput!
+    $condition: ModelMessageBoardConditionInput
+  ) {
+    createMessageBoard(input: $input, condition: $condition) {
+      id
+      facultyID
+      faculty {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        applicationCount
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      projectID
+      project {
+        id
+        title
+        description
+        department
+        skillsRequired
+        qualifications
+        duration
+        applicationDeadline
+        facultyID
+        isActive
+        requiresTranscript
+        createdAt
+        updatedAt
+        __typename
+      }
+      title
+      content
+      isPublic
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateMessageBoard = /* GraphQL */ `
+  mutation UpdateMessageBoard(
+    $input: UpdateMessageBoardInput!
+    $condition: ModelMessageBoardConditionInput
+  ) {
+    updateMessageBoard(input: $input, condition: $condition) {
+      id
+      facultyID
+      faculty {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        applicationCount
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      projectID
+      project {
+        id
+        title
+        description
+        department
+        skillsRequired
+        qualifications
+        duration
+        applicationDeadline
+        facultyID
+        isActive
+        requiresTranscript
+        createdAt
+        updatedAt
+        __typename
+      }
+      title
+      content
+      isPublic
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteMessageBoard = /* GraphQL */ `
+  mutation DeleteMessageBoard(
+    $input: DeleteMessageBoardInput!
+    $condition: ModelMessageBoardConditionInput
+  ) {
+    deleteMessageBoard(input: $input, condition: $condition) {
+      id
+      facultyID
+      faculty {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        applicationCount
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      projectID
+      project {
+        id
+        title
+        description
+        department
+        skillsRequired
+        qualifications
+        duration
+        applicationDeadline
+        facultyID
+        isActive
+        requiresTranscript
+        createdAt
+        updatedAt
+        __typename
+      }
+      title
+      content
+      isPublic
+      createdAt
+      updatedAt
       __typename
     }
   }
@@ -520,6 +949,7 @@ export const createMessage = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -542,6 +972,7 @@ export const createMessage = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -583,6 +1014,7 @@ export const updateMessage = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -605,6 +1037,7 @@ export const updateMessage = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -646,6 +1079,7 @@ export const deleteMessage = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -668,6 +1102,7 @@ export const deleteMessage = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -709,6 +1144,7 @@ export const createNotification = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -748,6 +1184,7 @@ export const updateNotification = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -787,6 +1224,7 @@ export const deleteNotification = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -826,6 +1264,7 @@ export const createActivityLog = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -866,6 +1305,7 @@ export const updateActivityLog = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -906,6 +1346,7 @@ export const deleteActivityLog = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner

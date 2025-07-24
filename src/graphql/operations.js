@@ -224,6 +224,7 @@ export const updateUser = /* GraphQL */ `
       affiliation
       profileComplete
       status
+      applicationCount
       createdAt
       updatedAt
     }
@@ -242,10 +243,12 @@ export const createProject = /* GraphQL */ `
       description
       department
       skillsRequired
+      qualifications
       duration
       applicationDeadline
       facultyID
       isActive
+      requiresTranscript
       createdAt
       updatedAt
     }
@@ -286,9 +289,55 @@ export const createApplication = /* GraphQL */ `
       statement
       resumeKey
       transcriptLink
+      relevantCourses {
+        courseName
+        courseNumber
+        grade
+        semester
+        year
+      }
       status
       statusDetail
       facultyNotes
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const createLearningContract = /* GraphQL */ `
+  mutation CreateLearningContract(
+    $input: CreateLearningContractInput!
+    $condition: ModelLearningContractConditionInput
+  ) {
+    createLearningContract(input: $input, condition: $condition) {
+      id
+      applicationID
+      researchSchedule
+      researchRequirements
+      learningObjectives
+      evaluationCriteria
+      mentorApproved
+      studentConfirmed
+      submittedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const createMessageBoard = /* GraphQL */ `
+  mutation CreateMessageBoard(
+    $input: CreateMessageBoardInput!
+    $condition: ModelMessageBoardConditionInput
+  ) {
+    createMessageBoard(input: $input, condition: $condition) {
+      id
+      facultyID
+      projectID
+      title
+      content
+      isPublic
       createdAt
       updatedAt
     }

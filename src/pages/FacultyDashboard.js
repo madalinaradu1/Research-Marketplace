@@ -33,8 +33,10 @@ const FacultyDashboard = ({ user }) => {
     description: '',
     department: user.department || '',
     skillsRequired: '',
+    qualifications: '',
     duration: '',
     applicationDeadline: '',
+    requiresTranscript: false,
     isActive: true
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -167,8 +169,10 @@ const FacultyDashboard = ({ user }) => {
         description: projectForm.description,
         department: projectForm.department,
         skillsRequired: skillsArray,
+        qualifications: projectForm.qualifications || null,
         duration: projectForm.duration || null,
         applicationDeadline: deadline,
+        requiresTranscript: projectForm.requiresTranscript,
         facultyID: userId,
         isActive: projectForm.isActive === true || projectForm.isActive === 'true'
       };
@@ -200,8 +204,10 @@ const FacultyDashboard = ({ user }) => {
         description: '',
         department: user.department || '',
         skillsRequired: '',
+        qualifications: '',
         duration: '',
         applicationDeadline: '',
+        requiresTranscript: false,
         isActive: true
       });
       
@@ -376,6 +382,15 @@ const FacultyDashboard = ({ user }) => {
                     placeholder="e.g. Python, Data Analysis, Machine Learning"
                   />
                   
+                  <TextAreaField
+                    name="qualifications"
+                    label="Required Qualifications/Prerequisites"
+                    value={projectForm.qualifications}
+                    onChange={handleProjectFormChange}
+                    placeholder="e.g. Completion of PSYC 101, minimum GPA of 3.0, upper-division standing"
+                    rows={3}
+                  />
+                  
                   <TextField
                     name="duration"
                     label="Project Duration"
@@ -392,6 +407,19 @@ const FacultyDashboard = ({ user }) => {
                     onChange={handleProjectFormChange}
                     required
                   />
+                  
+                  <SelectField
+                    name="requiresTranscript"
+                    label="Requires Transcript Upload"
+                    value={projectForm.requiresTranscript.toString()}
+                    onChange={(e) => setProjectForm(prev => ({ 
+                      ...prev, 
+                      requiresTranscript: e.target.value === 'true' 
+                    }))}
+                  >
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                  </SelectField>
                   
                   <SelectField
                     name="isActive"

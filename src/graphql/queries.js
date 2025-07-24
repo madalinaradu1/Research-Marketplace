@@ -19,6 +19,7 @@ export const getUser = /* GraphQL */ `
       affiliation
       profileComplete
       status
+      applicationCount
       createdAt
       updatedAt
       facultyProjects {
@@ -42,6 +43,10 @@ export const getUser = /* GraphQL */ `
         __typename
       }
       activityLogs {
+        nextToken
+        __typename
+      }
+      messageBoards {
         nextToken
         __typename
       }
@@ -73,6 +78,7 @@ export const listUsers = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -91,6 +97,7 @@ export const getProject = /* GraphQL */ `
       description
       department
       skillsRequired
+      qualifications
       duration
       applicationDeadline
       facultyID
@@ -110,15 +117,21 @@ export const getProject = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
         __typename
       }
       isActive
+      requiresTranscript
       createdAt
       updatedAt
       applications {
+        nextToken
+        __typename
+      }
+      messageBoards {
         nextToken
         __typename
       }
@@ -139,10 +152,12 @@ export const listProjects = /* GraphQL */ `
         description
         department
         skillsRequired
+        qualifications
         duration
         applicationDeadline
         facultyID
         isActive
+        requiresTranscript
         createdAt
         updatedAt
         __typename
@@ -173,10 +188,12 @@ export const projectsByFacultyID = /* GraphQL */ `
         description
         department
         skillsRequired
+        qualifications
         duration
         applicationDeadline
         facultyID
         isActive
+        requiresTranscript
         createdAt
         updatedAt
         __typename
@@ -207,6 +224,7 @@ export const getApplication = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -219,10 +237,12 @@ export const getApplication = /* GraphQL */ `
         description
         department
         skillsRequired
+        qualifications
         duration
         applicationDeadline
         facultyID
         isActive
+        requiresTranscript
         createdAt
         updatedAt
         __typename
@@ -230,6 +250,14 @@ export const getApplication = /* GraphQL */ `
       statement
       resumeKey
       transcriptLink
+      relevantCourses {
+        courseName
+        courseNumber
+        grade
+        semester
+        year
+        __typename
+      }
       status
       statusDetail
       facultyNotes
@@ -245,6 +273,22 @@ export const getApplication = /* GraphQL */ `
       cancelledAt
       createdAt
       updatedAt
+      learningContract {
+        id
+        applicationID
+        researchSchedule
+        researchRequirements
+        learningObjectives
+        evaluationCriteria
+        mentorApproved
+        studentConfirmed
+        submittedAt
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      applicationLearningContractId
       owner
       __typename
     }
@@ -279,6 +323,7 @@ export const listApplications = /* GraphQL */ `
         cancelledAt
         createdAt
         updatedAt
+        applicationLearningContractId
         owner
         __typename
       }
@@ -324,6 +369,7 @@ export const applicationsByStudentID = /* GraphQL */ `
         cancelledAt
         createdAt
         updatedAt
+        applicationLearningContractId
         owner
         __typename
       }
@@ -369,7 +415,257 @@ export const applicationsByProjectID = /* GraphQL */ `
         cancelledAt
         createdAt
         updatedAt
+        applicationLearningContractId
         owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getLearningContract = /* GraphQL */ `
+  query GetLearningContract($id: ID!) {
+    getLearningContract(id: $id) {
+      id
+      applicationID
+      application {
+        id
+        studentID
+        projectID
+        statement
+        resumeKey
+        transcriptLink
+        status
+        statusDetail
+        facultyNotes
+        coordinatorNotes
+        adminNotes
+        withdrawReason
+        submittedToFacultyAt
+        submittedToDepartmentAt
+        submittedToAdminAt
+        approvedAt
+        returnedAt
+        rejectedAt
+        cancelledAt
+        createdAt
+        updatedAt
+        applicationLearningContractId
+        owner
+        __typename
+      }
+      researchSchedule
+      researchRequirements
+      learningObjectives
+      evaluationCriteria
+      mentorApproved
+      studentConfirmed
+      submittedAt
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listLearningContracts = /* GraphQL */ `
+  query ListLearningContracts(
+    $filter: ModelLearningContractFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listLearningContracts(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        applicationID
+        researchSchedule
+        researchRequirements
+        learningObjectives
+        evaluationCriteria
+        mentorApproved
+        studentConfirmed
+        submittedAt
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const learningContractsByApplicationID = /* GraphQL */ `
+  query LearningContractsByApplicationID(
+    $applicationID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelLearningContractFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    learningContractsByApplicationID(
+      applicationID: $applicationID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        applicationID
+        researchSchedule
+        researchRequirements
+        learningObjectives
+        evaluationCriteria
+        mentorApproved
+        studentConfirmed
+        submittedAt
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getMessageBoard = /* GraphQL */ `
+  query GetMessageBoard($id: ID!) {
+    getMessageBoard(id: $id) {
+      id
+      facultyID
+      faculty {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        applicationCount
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      projectID
+      project {
+        id
+        title
+        description
+        department
+        skillsRequired
+        qualifications
+        duration
+        applicationDeadline
+        facultyID
+        isActive
+        requiresTranscript
+        createdAt
+        updatedAt
+        __typename
+      }
+      title
+      content
+      isPublic
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listMessageBoards = /* GraphQL */ `
+  query ListMessageBoards(
+    $filter: ModelMessageBoardFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listMessageBoards(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        facultyID
+        projectID
+        title
+        content
+        isPublic
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const messageBoardsByFacultyID = /* GraphQL */ `
+  query MessageBoardsByFacultyID(
+    $facultyID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelMessageBoardFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    messageBoardsByFacultyID(
+      facultyID: $facultyID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        facultyID
+        projectID
+        title
+        content
+        isPublic
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const messageBoardsByProjectID = /* GraphQL */ `
+  query MessageBoardsByProjectID(
+    $projectID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelMessageBoardFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    messageBoardsByProjectID(
+      projectID: $projectID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        facultyID
+        projectID
+        title
+        content
+        isPublic
+        createdAt
+        updatedAt
         __typename
       }
       nextToken
@@ -398,6 +694,7 @@ export const getMessage = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -420,6 +717,7 @@ export const getMessage = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -552,6 +850,7 @@ export const getNotification = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -642,6 +941,7 @@ export const getActivityLog = /* GraphQL */ `
         affiliation
         profileComplete
         status
+        applicationCount
         createdAt
         updatedAt
         owner

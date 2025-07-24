@@ -190,6 +190,30 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
           </>
         )}
         
+        {application.relevantCourses && application.relevantCourses.length > 0 && (
+          <>
+            <Divider />
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Relevant Coursework</Text>
+              <Collection
+                items={application.relevantCourses}
+                type="list"
+                gap="0.5rem"
+                direction="column"
+              >
+                {(course) => (
+                  <Card key={course.courseName} variation="outlined" padding="0.5rem">
+                    <Flex justifyContent="space-between">
+                      <Text>{course.courseName} ({course.courseNumber})</Text>
+                      <Text>Grade: {course.grade} | {course.semester} {course.year}</Text>
+                    </Flex>
+                  </Card>
+                )}
+              </Collection>
+            </Flex>
+          </>
+        )}
+        
         <Divider />
         
         {application.facultyNotes && (
