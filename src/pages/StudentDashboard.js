@@ -11,9 +11,11 @@ import {
   Loader,
   View,
   Tabs,
-  TabItem
+  TabItem,
+  TextField,
+  TextAreaField
 } from '@aws-amplify/ui-react';
-import { listApplications, listProjects } from '../graphql/simplified-operations';
+import { listApplications, listProjects, createApplication } from '../graphql/simplified-operations';
 import ApplicationStatus from '../components/ApplicationStatus';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 
@@ -23,6 +25,13 @@ const StudentDashboard = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [applicationForm, setApplicationForm] = useState({
+    hoursPerWeek: '',
+    statement: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
     fetchData();
@@ -35,8 +44,11 @@ const StudentDashboard = ({ user }) => {
     try {
       // Fetch student's applications
       try {
+        const userId = user.id || user.username;
+        console.log('Fetching applications for user ID:', userId);
+        
         const applicationFilter = {
-          studentID: { eq: user.username }
+          studentID: { eq: userId }
         };
         
         const applicationResult = await API.graphql(graphqlOperation(listApplications, { 
@@ -52,6 +64,9 @@ const StudentDashboard = ({ user }) => {
         }
       } catch (appErr) {
         console.error('Error fetching applications:', appErr);
+        if (appErr.errors && appErr.errors.length > 0) {
+          console.error('GraphQL errors:', appErr.errors);
+        }
         // Continue with other operations even if this fails
         setApplications([]);
       }
@@ -88,6 +103,50 @@ const StudentDashboard = ({ user }) => {
   
   const handleApplicationUpdate = () => {
     fetchData();
+  };
+  
+  const handleViewDetails = (project) => {
+    setSelectedProject(project);
+  };
+  
+  const handleApply = (project) => {
+    setSelectedProject(project);
+    setApplicationForm({
+      hoursPerWeek: '',
+      statement: ''
+    });
+    setShowApplicationForm(true);
+  };
+  
+  const handleApplicationFormChange = (e) => {
+    const { name, value } = e.target;
+    setApplicationForm(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSubmitApplication = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const userId = user.id || user.username;
+      
+      const input = {
+        studentID: userId,
+        projectID: selectedProject.id,
+        statement: `Hours per week: ${applicationForm.hoursPerWeek}\n\nWhy I'm interested: ${applicationForm.statement}`,
+        status: 'Draft'
+      };
+      
+      await API.graphql(graphqlOperation(createApplication, { input }));
+      
+      setShowApplicationForm(false);
+      setSelectedProject(null);
+      fetchData();
+    } catch (err) {
+      console.error('Error submitting application:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   // Count applications by status
@@ -223,7 +282,7 @@ const StudentDashboard = ({ user }) => {
                   <Flex direction="column" gap="0.5rem">
                     <Heading level={5}>{project.title}</Heading>
                     <Text fontWeight="bold">Department: {project.department}</Text>
-                    <Text noOfLines={3}>{project.description}</Text>
+                    <Text>{project.description.length > 150 ? project.description.substring(0, 150) + '...' : project.description}</Text>
                     <Divider />
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.skillsRequired?.map((skill, index) => (
@@ -242,9 +301,14 @@ const StudentDashboard = ({ user }) => {
                       <Text fontSize="0.9rem">
                         Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}
                       </Text>
-                      <Button variation="primary" size="small">
-                        View Details
-                      </Button>
+                      <Flex gap="0.5rem">
+                        <Button size="small" onClick={() => handleViewDetails(project)}>
+                          View Details
+                        </Button>
+                        <Button variation="primary" size="small" onClick={() => handleApply(project)}>
+                          Apply
+                        </Button>
+                      </Flex>
                     </Flex>
                   </Flex>
                 </Card>
@@ -257,6 +321,145 @@ const StudentDashboard = ({ user }) => {
           <ApplicationStatusGuide />
         </TabItem>
       </Tabs>
+      
+      {/* Project Details Overlay */}
+      {selectedProject && !showApplicationForm && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setSelectedProject(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="600px"
+              width="100%"
+              maxHeight="80vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Heading level={3}>{selectedProject.title}</Heading>
+              <Divider margin="1rem 0" />
+              
+              <Flex direction="column" gap="1rem">
+                <Text><strong>Department:</strong> {selectedProject.department}</Text>
+                <Text><strong>Description:</strong> {selectedProject.description}</Text>
+                
+                {selectedProject.skillsRequired && selectedProject.skillsRequired.length > 0 && (
+                  <>
+                    <Text><strong>Skills Required:</strong></Text>
+                    <Flex wrap="wrap" gap="0.5rem">
+                      {selectedProject.skillsRequired.map((skill, index) => (
+                        <Card 
+                          key={index}
+                          backgroundColor="rgba(0, 0, 0, 0.05)"
+                          padding="0.25rem 0.5rem"
+                          borderRadius="1rem"
+                        >
+                          <Text fontSize="0.8rem">{skill}</Text>
+                        </Card>
+                      ))}
+                    </Flex>
+                  </>
+                )}
+                
+                {selectedProject.duration && (
+                  <Text><strong>Duration:</strong> {selectedProject.duration}</Text>
+                )}
+                
+                <Text><strong>Application Deadline:</strong> {selectedProject.applicationDeadline ? new Date(selectedProject.applicationDeadline).toLocaleDateString() : 'Not specified'}</Text>
+                
+                <Flex gap="1rem" marginTop="1rem">
+                  <Button onClick={() => setSelectedProject(null)}>Close</Button>
+                  <Button variation="primary" onClick={() => handleApply(selectedProject)}>Apply Now</Button>
+                </Flex>
+              </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* Application Form Overlay */}
+      {showApplicationForm && selectedProject && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setShowApplicationForm(false)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="600px"
+              width="100%"
+              maxHeight="80vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Heading level={3}>Apply to {selectedProject.title}</Heading>
+              <Divider margin="1rem 0" />
+              
+              <form onSubmit={handleSubmitApplication}>
+                <Flex direction="column" gap="1rem">
+                  <Text><strong>Your Information:</strong></Text>
+                  <Text>Name: {user.name}</Text>
+                  <Text>Email: {user.email}</Text>
+                  {user.major && <Text>Major: {user.major}</Text>}
+                  {user.academicYear && <Text>Academic Year: {user.academicYear}</Text>}
+                  {user.gpa && <Text>GPA: {user.gpa}</Text>}
+                  
+                  <Divider />
+                  
+                  <TextField
+                    name="hoursPerWeek"
+                    label="How many hours per week can you dedicate to this project? *"
+                    value={applicationForm.hoursPerWeek}
+                    onChange={handleApplicationFormChange}
+                    type="number"
+                    min="1"
+                    max="40"
+                    required
+                  />
+                  
+                  <TextAreaField
+                    name="statement"
+                    label="Why are you interested in this project? *"
+                    value={applicationForm.statement}
+                    onChange={handleApplicationFormChange}
+                    rows={5}
+                    required
+                    placeholder="Please explain your interest in this research project and how it aligns with your academic and career goals..."
+                  />
+                  
+                  <Flex gap="1rem" marginTop="1rem">
+                    <Button onClick={() => setShowApplicationForm(false)}>Cancel</Button>
+                    <Button type="submit" variation="primary" isLoading={isSubmitting}>
+                      Submit Application
+                    </Button>
+                  </Flex>
+                </Flex>
+              </form>
+            </Card>
+          </Flex>
+        </View>
+      )}
     </Flex>
   );
 };
