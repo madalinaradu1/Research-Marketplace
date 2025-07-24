@@ -14,6 +14,7 @@ type User @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin",
   affiliation: String
   profileComplete: Boolean
   status: String
+  applicationCount: Int # Track number of applications (max 3)
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
   facultyProjects: [Project] @hasMany(indexName: "byFaculty", fields: ["id"])
@@ -22,6 +23,7 @@ type User @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin",
   receivedMessages: [Message] @hasMany(indexName: "byReceiver", fields: ["id"])
   notifications: [Notification] @hasMany(indexName: "byUser", fields: ["id"])
   activityLogs: [ActivityLog] @hasMany(indexName: "byUser", fields: ["id"])
+  messageBoards: [MessageBoard] @hasMany(indexName: "byFaculty", fields: ["id"])
 }
 
 type Project @model @auth(rules: [{allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}, {allow: private, operations: [read]}]) {
@@ -30,14 +32,17 @@ type Project @model @auth(rules: [{allow: groups, groups: ["Faculty", "Coordinat
   description: String!
   department: String
   skillsRequired: [String]
+  qualifications: String # Required qualifications/courses
   duration: String
   applicationDeadline: AWSDateTime
   facultyID: ID! @index(name: "byFaculty")
   faculty: User @belongsTo(fields: ["facultyID"])
   isActive: Boolean
+  requiresTranscript: Boolean
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
   applications: [Application] @hasMany(indexName: "byProject", fields: ["id"])
+  messageBoards: [MessageBoard] @hasMany(indexName: "byProject", fields: ["id"])
 }
 
 type Application @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}]) {
@@ -51,6 +56,7 @@ type Application @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["
   statement: String!
   resumeKey: String
   transcriptLink: AWSURL
+  relevantCourses: [RelevantCourse]
   
   # Status tracking
   status: String! # Draft, Faculty Review, Department Review, Admin Review, Approved, Returned, Rejected, Cancelled, Expired
@@ -70,6 +76,45 @@ type Application @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["
   returnedAt: AWSDateTime
   rejectedAt: AWSDateTime
   cancelledAt: AWSDateTime
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+  
+  # Learning contract
+  learningContract: LearningContract @hasOne
+}
+
+type RelevantCourse {
+  courseName: String!
+  courseNumber: String
+  grade: String
+  semester: String
+  year: String
+}
+
+type LearningContract @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}]) {
+  id: ID!
+  applicationID: ID! @index(name: "byApplication")
+  application: Application @belongsTo(fields: ["applicationID"])
+  researchSchedule: String!
+  researchRequirements: String!
+  learningObjectives: String!
+  evaluationCriteria: String!
+  mentorApproved: Boolean
+  studentConfirmed: Boolean
+  submittedAt: AWSDateTime
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type MessageBoard @model @auth(rules: [{allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}, {allow: private, operations: [read]}]) {
+  id: ID!
+  facultyID: ID! @index(name: "byFaculty")
+  faculty: User @belongsTo(fields: ["facultyID"])
+  projectID: ID! @index(name: "byProject")
+  project: Project @belongsTo(fields: ["projectID"])
+  title: String!
+  content: String!
+  isPublic: Boolean
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }
