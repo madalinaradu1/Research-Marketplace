@@ -48,6 +48,28 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
     }
   };
   
+  // Handle submit to faculty
+  const handleSubmitToFaculty = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      const input = {
+        id: application.id,
+        status: 'Faculty Review',
+        submittedToFacultyAt: new Date().toISOString()
+      };
+      
+      await API.graphql(graphqlOperation(updateApplication, { input }));
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error submitting application:', err);
+      setError('Failed to submit application. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
   // Handle withdraw application
   const handleWithdraw = async () => {
     if (!withdrawReason) {
@@ -150,7 +172,18 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
           <Button onClick={downloadProposal}>Download Proposal</Button>
         )}
         
-        {isStudent && application.status !== 'Cancelled' && application.status !== 'Expired' && (
+        {isStudent && application.status === 'Draft' && (
+          <Button 
+            onClick={handleSubmitToFaculty}
+            variation="primary"
+            isLoading={isSubmitting}
+            width="auto"
+          >
+            Submit to Faculty
+          </Button>
+        )}
+        
+        {isStudent && application.status !== 'Cancelled' && application.status !== 'Expired' && application.status !== 'Draft' && (
           <View>
             {isWithdrawing ? (
               <Card variation="outlined">
