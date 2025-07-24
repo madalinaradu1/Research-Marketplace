@@ -10,7 +10,8 @@ import {
   TextAreaField,
   SelectField,
   useTheme,
-  View
+  View,
+  Collection
 } from '@aws-amplify/ui-react';
 import { updateApplication } from '../graphql/operations';
 
