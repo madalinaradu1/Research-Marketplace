@@ -62,10 +62,11 @@ const Header = ({ user, signOut }) => {
       {/* Top banner with logo and title */}
       <Flex
         direction="row"
-        alignItems="center"
+        alignItems="flex-end"
         justifyContent="flex-start"
-        padding={tokens.space.small}
+        padding="0.25rem 0.25rem 0.5rem"
         gap={tokens.space.small}
+        minHeight="40px"
       >
         <Image
           alt="GCU Logo"
@@ -73,13 +74,20 @@ const Header = ({ user, signOut }) => {
           height="40px"
           objectFit="contain"
         />
-        <Flex direction="column">
+        <Flex direction="column" gap="0">
           <Text
             fontSize={tokens.fontSizes.large}
             fontWeight={tokens.fontWeights.bold}
             color="white"
           >
             Undergraduate Research
+          </Text>
+          <Text
+            fontSize={tokens.fontSizes.large}
+            fontWeight={tokens.fontWeights.bold}
+            color="white"
+          >
+            Opportunity Program
           </Text>
           <Text
             fontSize={tokens.fontSizes.small}
@@ -95,7 +103,7 @@ const Header = ({ user, signOut }) => {
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        padding={`0 ${tokens.space.small} ${tokens.space.small}`}
+        padding="0 0.25rem 0.25rem"
       >
       {/* Navigation spacer */}
       <View />
