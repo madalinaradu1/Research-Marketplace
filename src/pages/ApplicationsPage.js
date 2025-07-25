@@ -29,21 +29,21 @@ const ApplicationsPage = ({ user }) => {
     setError(null);
     
     try {
-      const filter = {
-        studentID: { eq: user.username }
-      };
+      const userId = user.id || user.username;
       
-      console.log('Fetching applications with filter:', filter);
-      
+      // Fetch all applications and filter client-side to avoid DynamoDB filter issues
       const result = await API.graphql(graphqlOperation(listApplications, { 
-        filter,
         limit: 100
       }));
       
       console.log('Application result:', result);
       
       if (result.data && result.data.listApplications) {
-        setApplications(result.data.listApplications.items || []);
+        // Filter applications client-side
+        const userApplications = result.data.listApplications.items.filter(
+          app => app.studentID === userId
+        );
+        setApplications(userApplications);
       } else {
         console.warn('No application data returned');
         setApplications([]);
