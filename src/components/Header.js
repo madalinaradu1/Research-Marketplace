@@ -71,27 +71,28 @@ const Header = ({ user, signOut }) => {
         <Image
           alt="GCU Logo"
           src="/GCU_WHITE.png"
-          height="40px"
+          height="50px"
           objectFit="contain"
           marginBottom="10px"
+          paddingLeft="20px"
         />
         <Flex direction="column" gap="0">
           <Text
-            fontSize={tokens.fontSizes.large}
+            fontSize={tokens.fontSizes.medium}
             fontWeight={tokens.fontWeights.bold}
             color="white"
           >
             Undergraduate Research
           </Text>
           <Text
-            fontSize={tokens.fontSizes.large}
+            fontSize={tokens.fontSizes.medium}
             fontWeight={tokens.fontWeights.bold}
             color="white"
           >
             Opportunity Program
           </Text>
           <Text
-            fontSize={tokens.fontSizes.small}
+            fontSize={tokens.fontSizes.medium}
             color="white"
           >
             Grand Canyon University
@@ -105,7 +106,7 @@ const Header = ({ user, signOut }) => {
         alignItems="center"
         justifyContent="space-between"
         padding="0 0.25rem"
-        marginTop="-2.5rem"
+        marginTop="-3.5rem"
       >
       {/* Navigation spacer */}
       <View />
