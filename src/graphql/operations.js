@@ -20,6 +20,10 @@ export const getUser = /* GraphQL */ `
       affiliation
       profileComplete
       status
+      expectedGraduation
+      availability
+      personalStatement
+      certificates
       createdAt
       updatedAt
     }
