@@ -349,9 +349,8 @@ export const onDeleteProject = /* GraphQL */ `
 export const onCreateApplication = /* GraphQL */ `
   subscription OnCreateApplication(
     $filter: ModelSubscriptionApplicationFilterInput
-    $owner: String
   ) {
-    onCreateApplication(filter: $filter, owner: $owner) {
+    onCreateApplication(filter: $filter) {
       id
       studentID
       student {
@@ -439,7 +438,6 @@ export const onCreateApplication = /* GraphQL */ `
         __typename
       }
       applicationLearningContractId
-      owner
       __typename
     }
   }
@@ -447,9 +445,8 @@ export const onCreateApplication = /* GraphQL */ `
 export const onUpdateApplication = /* GraphQL */ `
   subscription OnUpdateApplication(
     $filter: ModelSubscriptionApplicationFilterInput
-    $owner: String
   ) {
-    onUpdateApplication(filter: $filter, owner: $owner) {
+    onUpdateApplication(filter: $filter) {
       id
       studentID
       student {
@@ -537,7 +534,6 @@ export const onUpdateApplication = /* GraphQL */ `
         __typename
       }
       applicationLearningContractId
-      owner
       __typename
     }
   }
@@ -545,9 +541,8 @@ export const onUpdateApplication = /* GraphQL */ `
 export const onDeleteApplication = /* GraphQL */ `
   subscription OnDeleteApplication(
     $filter: ModelSubscriptionApplicationFilterInput
-    $owner: String
   ) {
-    onDeleteApplication(filter: $filter, owner: $owner) {
+    onDeleteApplication(filter: $filter) {
       id
       studentID
       student {
@@ -635,7 +630,6 @@ export const onDeleteApplication = /* GraphQL */ `
         __typename
       }
       applicationLearningContractId
-      owner
       __typename
     }
   }
@@ -671,7 +665,6 @@ export const onCreateLearningContract = /* GraphQL */ `
         createdAt
         updatedAt
         applicationLearningContractId
-        owner
         __typename
       }
       researchSchedule
@@ -719,7 +712,6 @@ export const onUpdateLearningContract = /* GraphQL */ `
         createdAt
         updatedAt
         applicationLearningContractId
-        owner
         __typename
       }
       researchSchedule
@@ -767,7 +759,6 @@ export const onDeleteLearningContract = /* GraphQL */ `
         createdAt
         updatedAt
         applicationLearningContractId
-        owner
         __typename
       }
       researchSchedule

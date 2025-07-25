@@ -448,7 +448,6 @@ export const createApplication = /* GraphQL */ `
         __typename
       }
       applicationLearningContractId
-      owner
       __typename
     }
   }
@@ -546,7 +545,6 @@ export const updateApplication = /* GraphQL */ `
         __typename
       }
       applicationLearningContractId
-      owner
       __typename
     }
   }
@@ -644,7 +642,6 @@ export const deleteApplication = /* GraphQL */ `
         __typename
       }
       applicationLearningContractId
-      owner
       __typename
     }
   }
@@ -680,7 +677,6 @@ export const createLearningContract = /* GraphQL */ `
         createdAt
         updatedAt
         applicationLearningContractId
-        owner
         __typename
       }
       researchSchedule
@@ -728,7 +724,6 @@ export const updateLearningContract = /* GraphQL */ `
         createdAt
         updatedAt
         applicationLearningContractId
-        owner
         __typename
       }
       researchSchedule
@@ -776,7 +771,6 @@ export const deleteLearningContract = /* GraphQL */ `
         createdAt
         updatedAt
         applicationLearningContractId
-        owner
         __typename
       }
       researchSchedule

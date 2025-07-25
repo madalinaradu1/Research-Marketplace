@@ -305,7 +305,6 @@ export const getApplication = /* GraphQL */ `
         __typename
       }
       applicationLearningContractId
-      owner
       __typename
     }
   }
@@ -340,7 +339,6 @@ export const listApplications = /* GraphQL */ `
         createdAt
         updatedAt
         applicationLearningContractId
-        owner
         __typename
       }
       nextToken
@@ -386,7 +384,6 @@ export const applicationsByStudentID = /* GraphQL */ `
         createdAt
         updatedAt
         applicationLearningContractId
-        owner
         __typename
       }
       nextToken
@@ -432,7 +429,6 @@ export const applicationsByProjectID = /* GraphQL */ `
         createdAt
         updatedAt
         applicationLearningContractId
-        owner
         __typename
       }
       nextToken
@@ -468,7 +464,6 @@ export const getLearningContract = /* GraphQL */ `
         createdAt
         updatedAt
         applicationLearningContractId
-        owner
         __typename
       }
       researchSchedule

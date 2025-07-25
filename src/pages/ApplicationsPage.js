@@ -18,7 +18,7 @@ const ApplicationsPage = ({ user }) => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('applications');
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
   
   useEffect(() => {
     fetchApplications();
@@ -77,8 +77,8 @@ const ApplicationsPage = ({ user }) => {
       {error && <Text color="red">{error}</Text>}
       
       <Tabs
-        currentIndex={activeTab === 'applications' ? 0 : 1}
-        onChange={(index) => setActiveTab(index === 0 ? 'applications' : 'guide')}
+        currentIndex={activeTabIndex}
+        onChange={(index) => setActiveTabIndex(index)}
       >
         <TabItem title="Applications">
           {applications.length === 0 ? (
