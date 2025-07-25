@@ -64,15 +64,16 @@ const Header = ({ user, signOut }) => {
         direction="row"
         alignItems="flex-end"
         justifyContent="flex-start"
-        padding="0.25rem 0.25rem 0.5rem"
+        padding="0.05rem 0.25rem 0.1rem"
         gap={tokens.space.small}
-        minHeight="40px"
+        minHeight="20px"
       >
         <Image
           alt="GCU Logo"
           src="/GCU_WHITE.png"
           height="40px"
           objectFit="contain"
+          marginBottom="10px"
         />
         <Flex direction="column" gap="0">
           <Text
@@ -103,7 +104,8 @@ const Header = ({ user, signOut }) => {
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        padding="0 0.25rem 0.25rem"
+        padding="0 0.25rem"
+        marginTop="-0.5rem"
       >
       {/* Navigation spacer */}
       <View />
