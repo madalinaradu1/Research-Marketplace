@@ -105,7 +105,7 @@ const Header = ({ user, signOut }) => {
         alignItems="center"
         justifyContent="space-between"
         padding="0 0.25rem"
-        marginTop="-0.5rem"
+        marginTop="-2.5rem"
       >
       {/* Navigation spacer */}
       <View />
