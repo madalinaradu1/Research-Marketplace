@@ -48,21 +48,16 @@ const StudentDashboard = ({ user }) => {
         const userId = user.id || user.username;
         console.log('Fetching applications for user ID:', userId);
         
-        const applicationFilter = {
-          studentID: { eq: userId }
-        };
-        
         const applicationResult = await API.graphql(graphqlOperation(listApplications, { 
-          filter: applicationFilter,
           limit: 100
         }));
         
-        if (applicationResult.data && applicationResult.data.listApplications) {
-          setApplications(applicationResult.data.listApplications.items || []);
-        } else {
-          console.warn('No application data returned');
-          setApplications([]);
-        }
+        // Filter applications client-side for now
+        const userApplications = applicationResult.data?.listApplications?.items?.filter(
+          app => app.studentID === userId
+        ) || [];
+        
+        setApplications(userApplications);
       } catch (appErr) {
         console.error('Error fetching applications:', appErr);
         if (appErr.errors && appErr.errors.length > 0) {

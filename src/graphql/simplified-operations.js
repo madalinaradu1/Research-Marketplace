@@ -102,11 +102,6 @@ export const listApplications = /* GraphQL */ `
         id
         studentID
         projectID
-        project {
-          id
-          title
-          department
-        }
         statement
         status
         createdAt
