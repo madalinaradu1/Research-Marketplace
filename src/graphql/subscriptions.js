@@ -23,6 +23,10 @@ export const onCreateUser = /* GraphQL */ `
       profileComplete
       status
       applicationCount
+      expectedGraduation
+      availability
+      personalStatement
+      certificates
       createdAt
       updatedAt
       facultyProjects {
@@ -80,6 +84,10 @@ export const onUpdateUser = /* GraphQL */ `
       profileComplete
       status
       applicationCount
+      expectedGraduation
+      availability
+      personalStatement
+      certificates
       createdAt
       updatedAt
       facultyProjects {
@@ -137,6 +145,10 @@ export const onDeleteUser = /* GraphQL */ `
       profileComplete
       status
       applicationCount
+      expectedGraduation
+      availability
+      personalStatement
+      certificates
       createdAt
       updatedAt
       facultyProjects {
@@ -201,6 +213,10 @@ export const onCreateProject = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -251,6 +267,10 @@ export const onUpdateProject = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -301,6 +321,10 @@ export const onDeleteProject = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -347,6 +371,10 @@ export const onCreateApplication = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -441,6 +469,10 @@ export const onUpdateApplication = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -535,6 +567,10 @@ export const onDeleteApplication = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -772,6 +808,10 @@ export const onCreateMessageBoard = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -827,6 +867,10 @@ export const onUpdateMessageBoard = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -882,6 +926,10 @@ export const onDeleteMessageBoard = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -938,6 +986,10 @@ export const onCreateMessage = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -961,6 +1013,10 @@ export const onCreateMessage = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -1003,6 +1059,10 @@ export const onUpdateMessage = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -1026,6 +1086,10 @@ export const onUpdateMessage = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -1068,6 +1132,10 @@ export const onDeleteMessage = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -1091,6 +1159,10 @@ export const onDeleteMessage = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -1133,6 +1205,10 @@ export const onCreateNotification = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -1173,6 +1249,10 @@ export const onUpdateNotification = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -1213,6 +1293,10 @@ export const onDeleteNotification = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -1252,6 +1336,10 @@ export const onCreateActivityLog = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -1292,6 +1380,10 @@ export const onUpdateActivityLog = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -1332,6 +1424,10 @@ export const onDeleteActivityLog = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner

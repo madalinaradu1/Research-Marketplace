@@ -20,6 +20,10 @@ export const getUser = /* GraphQL */ `
       profileComplete
       status
       applicationCount
+      expectedGraduation
+      availability
+      personalStatement
+      certificates
       createdAt
       updatedAt
       facultyProjects {
@@ -79,6 +83,10 @@ export const listUsers = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -118,6 +126,10 @@ export const getProject = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -225,6 +237,10 @@ export const getApplication = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -557,6 +573,10 @@ export const getMessageBoard = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -695,6 +715,10 @@ export const getMessage = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -718,6 +742,10 @@ export const getMessage = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -851,6 +879,10 @@ export const getNotification = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
@@ -942,6 +974,10 @@ export const getActivityLog = /* GraphQL */ `
         profileComplete
         status
         applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         createdAt
         updatedAt
         owner
