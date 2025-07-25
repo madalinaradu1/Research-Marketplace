@@ -225,6 +225,10 @@ export const updateUser = /* GraphQL */ `
       profileComplete
       status
       applicationCount
+      expectedGraduation
+      availability
+      personalStatement
+      certificates
       createdAt
       updatedAt
     }

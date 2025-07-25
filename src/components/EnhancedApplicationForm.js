@@ -104,6 +104,17 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
             • Include relevant coursework (up to 10 courses)
           </Text>
         </Alert>
+        
+        <Card variation="outlined">
+          <Text fontWeight="bold">Student Profile Information:</Text>
+          <Text>Student ID: {user.id || user.username}</Text>
+          <Text>Program: {user.major || 'Not specified'}</Text>
+          <Text>Degree: {user.academicYear || 'Not specified'}</Text>
+          <Text>Expected Graduation: {user.expectedGraduation || 'Not specified'}</Text>
+          <Text>Research Interests: {user.researchInterests?.join(', ') || 'Not specified'}</Text>
+          <Text>Skills: {user.skills?.join(', ') || 'Not specified'}</Text>
+          <Text>Availability: {user.availability || 'Not specified'}</Text>
+        </Card>
 
         <Divider />
 

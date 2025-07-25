@@ -15,6 +15,10 @@ type User @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin",
   profileComplete: Boolean
   status: String
   applicationCount: Int # Track number of applications (max 3)
+  expectedGraduation: String
+  availability: String
+  personalStatement: String
+  certificates: [String]
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
   facultyProjects: [Project] @hasMany(indexName: "byFaculty", fields: ["id"])
