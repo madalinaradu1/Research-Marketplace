@@ -83,6 +83,22 @@ const ProfilePage = ({ user, refreshProfile }) => {
       console.log('Profile updated:', result.data.updateUser);
       setMessage('Profile updated successfully!');
       
+      // Update form state with the saved data to keep fields populated
+      const updatedUser = result.data.updateUser;
+      setFormState({
+        name: updatedUser.name || '',
+        email: updatedUser.email || '',
+        studentId: updatedUser.id || '',
+        currentProgram: updatedUser.major || '',
+        degreeType: updatedUser.academicYear || '',
+        expectedGraduation: updatedUser.expectedGraduation || '',
+        researchInterests: updatedUser.researchInterests ? updatedUser.researchInterests.join(', ') : '',
+        skillsExperience: updatedUser.skills ? updatedUser.skills.join(', ') : '',
+        availability: updatedUser.availability || '',
+        personalStatement: updatedUser.personalStatement || '',
+        certificates: updatedUser.certificates ? updatedUser.certificates.join(', ') : ''
+      });
+      
       // Refresh the user profile in the parent component
       if (refreshProfile) {
         refreshProfile();
