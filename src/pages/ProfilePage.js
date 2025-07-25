@@ -69,14 +69,16 @@ const ProfilePage = ({ user, refreshProfile }) => {
         name: formState.name,
         major: formState.currentProgram,
         academicYear: formState.degreeType,
-        expectedGraduation: formState.expectedGraduation,
+        expectedGraduation: formState.expectedGraduation || null,
         researchInterests,
         skills,
-        availability: formState.availability,
-        personalStatement: formState.personalStatement,
+        availability: formState.availability || null,
+        personalStatement: formState.personalStatement || null,
         certificates,
         profileComplete: true
       };
+      
+      console.log('Sending update input:', input);
 
       // Update user in DynamoDB
       const result = await API.graphql(graphqlOperation(updateUser, { input }));
