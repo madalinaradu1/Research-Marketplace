@@ -182,7 +182,7 @@ const StudentDashboard = ({ user }) => {
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
       <Heading level={2}>Student Dashboard</Heading>
-      <Text>Welcome, {user.name}!</Text>
+      <Text>Welcome, {user.name && user.name.trim() ? user.name : user.email?.split('@')[0]?.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Student'}!</Text>
       
       {error && <Text color="red">{error}</Text>}
       
