@@ -118,45 +118,26 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
   const statusOptions = getStatusOptions();
   
   return (
-    <Card variation="outlined" borderRadius="8px" borderWidth="2px">
-      <Flex direction="column" gap="1rem">
+    <Card variation="outlined" borderRadius="8px" borderWidth="2px" height="100%">
+      <Flex direction="column" gap="1rem" height="100%">
         <Heading level={4}>Review Application</Heading>
         
         <Divider />
         
         <Flex direction="column" gap="0.5rem">
           <Text fontWeight="bold">Student Information</Text>
-          {application.student ? (
-            <>
-              <Text>Student ID: {application.student.id}</Text>
-              <Text>Email: {application.student.email}</Text>
-              {application.student.major && (
-                <Text>Major: {application.student.major}</Text>
-              )}
-              {application.student.gpa && (
-                <Text>GPA: {application.student.gpa}</Text>
-              )}
-            </>
-          ) : (
-            <Text>Student ID: {application.studentID}</Text>
-          )}
-
+          <Text>Student ID: {application.student?.id || application.studentID}</Text>
+          <Text>Major: {application.student?.major || 'Not provided'}</Text>
+          <Text>GPA: {application.student?.gpa || 'Not provided'}</Text>
         </Flex>
         
         <Divider />
         
         <Flex direction="column" gap="0.5rem">
           <Text fontWeight="bold">Application Details</Text>
-          {application.project && (
-            <>
-              <Text>Project: {application.project.title}</Text>
-              <Text>Department: {application.project.department}</Text>
-            </>
-          )}
+          <Text>Project: {application.project?.title || 'Unknown Project'}</Text>
+          <Text>Department: {application.project?.department || 'Unknown Department'}</Text>
           <Text>Status: {application.status}</Text>
-          {application.statusDetail && (
-            <Text>Status Detail: {application.statusDetail}</Text>
-          )}
           <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
         </Flex>
         

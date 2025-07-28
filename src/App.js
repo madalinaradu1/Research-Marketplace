@@ -23,6 +23,7 @@ import AdminPage from './pages/AdminPage';
 
 // Import utilities
 import { createUserAfterSignUp, checkUserExists } from './utils/userManagement';
+import { getUser } from './graphql/operations';
 import { testApiAccess } from './utils/testApi';
 import { syncUserGroupsToRole } from './utils/syncUserGroups';
 import { debugAuth } from './utils/debugAuth';
@@ -93,16 +94,36 @@ function App({ signOut, user }) {
     // Fetch user profile data
     const fetchUserProfile = async () => {
       try {
-        const { getUser } = await import('./graphql/operations');
+        // getUser is already imported at the top
         const userData = await Auth.currentAuthenticatedUser();
         
         // Sync user's Cognito groups with their role in DynamoDB
         await syncUserGroupsToRole(userData.username);
         
         const result = await API.graphql(graphqlOperation(getUser, { id: userData.username }));
-        setUserProfile(result.data.getUser);
+        const userProfile = result.data.getUser;
+        
+        // If user doesn't exist or doesn't have a role, set default role
+        if (!userProfile || !userProfile.role) {
+          console.log('User profile missing or no role, creating/updating with Student role');
+          await createUserAfterSignUp(userData);
+          // Retry fetching the user
+          const retryResult = await API.graphql(graphqlOperation(getUser, { id: userData.username }));
+          setUserProfile(retryResult.data.getUser);
+        } else {
+          setUserProfile(userProfile);
+        }
       } catch (error) {
         console.error('Error fetching user profile:', error);
+        // If user doesn't exist, create them
+        try {
+          const userData = await Auth.currentAuthenticatedUser();
+          await createUserAfterSignUp(userData);
+          const result = await API.graphql(graphqlOperation(getUser, { id: userData.username }));
+          setUserProfile(result.data.getUser);
+        } catch (createError) {
+          console.error('Error creating user:', createError);
+        }
       } finally {
         setLoading(false);
       }

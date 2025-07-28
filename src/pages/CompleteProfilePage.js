@@ -22,6 +22,7 @@ const CompleteProfilePage = ({ user }) => {
     currentProgram: user?.major || '',
     degreeType: user?.academicYear || '',
     expectedGraduation: user?.expectedGraduation || '',
+    gpa: user?.gpa || '',
     researchInterests: user?.researchInterests?.join(', ') || '',
     skillsExperience: user?.skills?.join(', ') || '',
     availability: user?.availability || '',
@@ -66,6 +67,7 @@ const CompleteProfilePage = ({ user }) => {
         major: formState.currentProgram,
         academicYear: formState.degreeType,
         expectedGraduation: formState.expectedGraduation,
+        gpa: formState.gpa ? parseFloat(formState.gpa) : null,
         researchInterests,
         skills,
         availability: formState.availability,
@@ -150,6 +152,19 @@ const CompleteProfilePage = ({ user }) => {
                   label="Expected Graduation Date *"
                   placeholder="e.g., Spring 2025"
                   value={formState.expectedGraduation}
+                  onChange={handleChange}
+                  required
+                />
+                
+                <TextField
+                  name="gpa"
+                  label="GPA *"
+                  placeholder="Enter your GPA (0.0 - 4.0)"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="4.0"
+                  value={formState.gpa || ''}
                   onChange={handleChange}
                   required
                 />
