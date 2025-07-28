@@ -10,7 +10,8 @@ import {
   Divider, 
   TextAreaField,
   useTheme,
-  View
+  View,
+  Collection
 } from '@aws-amplify/ui-react';
 import { updateApplication } from '../graphql/operations';
 
@@ -134,17 +135,49 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
         
         <Flex direction="column" gap="0.5rem">
           <Text fontWeight="bold">Application Details</Text>
-          {application.project?.department && (
-            <Text>Department: {application.project.department}</Text>
+          <Text>Project: {application.project?.title || 'Unknown Project'}</Text>
+          <Text>Department: {application.project?.department || 'Unknown Department'}</Text>
+          <Text>Status: {application.status}</Text>
+          {application.statusDetail && (
+            <Text>Status Detail: {application.statusDetail}</Text>
           )}
-          <Text>Applied: {new Date(application.createdAt).toLocaleDateString()}</Text>
-          {application.statement && (
-            <>
-              <Text fontWeight="bold">Application Statement:</Text>
-              <Text>{application.statement.replace('Why I\'m interested: ', '')}</Text>
-            </>
-          )}
+          <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
         </Flex>
+        
+        {application.relevantCourses && application.relevantCourses.length > 0 && (
+          <>
+            <Divider />
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Relevant Coursework</Text>
+              {application.relevantCourses.map((course, index) => (
+                <Card key={index} variation="outlined" padding="0.5rem">
+                  <Flex justifyContent="space-between">
+                    <Text>{course.courseName} ({course.courseNumber})</Text>
+                    <Text>Grade: {course.grade} | {course.semester} {course.year}</Text>
+                  </Flex>
+                </Card>
+              ))}
+            </Flex>
+          </>
+        )}
+        
+        {(application.facultyNotes || application.coordinatorNotes || application.adminNotes) && (
+          <>
+            <Divider />
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Review Notes</Text>
+              {application.facultyNotes && (
+                <Text><strong>Faculty:</strong> {application.facultyNotes}</Text>
+              )}
+              {application.coordinatorNotes && (
+                <Text><strong>Coordinator:</strong> {application.coordinatorNotes}</Text>
+              )}
+              {application.adminNotes && (
+                <Text><strong>Admin:</strong> {application.adminNotes}</Text>
+              )}
+            </Flex>
+          </>
+        )}
         
         <Divider />
         

@@ -43,46 +43,55 @@ const StudentDashboard = ({ user }) => {
     setError(null);
     
     try {
+      const userId = user.id || user.username;
+      console.log('Fetching applications for user ID:', userId);
+      
+      let userApplications = [];
+      
       // Fetch student's applications
       try {
-        const userId = user.id || user.username;
-        console.log('Fetching applications for user ID:', userId);
-        
         const applicationResult = await API.graphql(graphqlOperation(listApplications, { 
           limit: 100
         }));
         
         // Filter applications client-side for now
-        const userApplications = applicationResult.data?.listApplications?.items?.filter(
+        userApplications = applicationResult.data?.listApplications?.items?.filter(
           app => app.studentID === userId
         ) || [];
-        
-        setApplications(userApplications);
       } catch (appErr) {
         console.error('Error fetching applications:', appErr);
         if (appErr.errors && appErr.errors.length > 0) {
           console.error('GraphQL errors:', appErr.errors);
         }
         // Continue with other operations even if this fails
-        setApplications([]);
+        userApplications = [];
       }
       
-      // Fetch active projects
+      // Fetch all projects for enriching applications
       try {
-        const projectFilter = {
-          isActive: { eq: true }
-        };
-        
         const projectResult = await API.graphql(graphqlOperation(listProjects, { 
-          filter: projectFilter,
-          limit: 10
+          limit: 100
         }));
         
         if (projectResult.data && projectResult.data.listProjects) {
-          setProjects(projectResult.data.listProjects.items || []);
+          const allProjects = projectResult.data.listProjects.items || [];
+          // Set active projects for display
+          setProjects(allProjects.filter(p => p.isActive));
+          
+          // Use all projects for enriching applications
+          const enrichedApplications = userApplications.map(app => {
+            const project = allProjects.find(p => p.id === app.projectID);
+            return {
+              ...app,
+              project: project || null
+            };
+          });
+          
+          setApplications(enrichedApplications);
         } else {
           console.warn('No project data returned');
           setProjects([]);
+          setApplications(userApplications);
         }
       } catch (projErr) {
         console.error('Error fetching projects:', projErr);
