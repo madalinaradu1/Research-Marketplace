@@ -122,6 +122,12 @@ function App({ signOut, user }) {
   const isAdmin = isUserAdmin(user, userProfile);
   const shouldCompleteProfile = !isAdmin && userProfile && userProfile.profileComplete === false;
   
+  // Debug role recognition
+  console.log('User from Cognito:', user);
+  console.log('User profile from DB:', userProfile);
+  console.log('User role:', userProfile?.role);
+  console.log('Should complete profile:', shouldCompleteProfile);
+  
   console.log('User profile:', userProfile);
   console.log('Is admin:', isAdmin);
   

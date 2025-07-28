@@ -8,6 +8,7 @@ import {
   Button, 
   Card,
   Text,
+  TextAreaField,
   useTheme
 } from '@aws-amplify/ui-react';
 import { createUser, updateUser } from '../graphql/operations';
@@ -18,9 +19,15 @@ const CompleteProfilePage = ({ user }) => {
   const { tokens } = useTheme();
   const [formState, setFormState] = useState({
     name: user?.name || '',
-    major: user?.major || '',
-    gpa: user?.gpa || '',
-    affiliation: user?.affiliation || 'On-campus',
+    currentProgram: user?.major || '',
+    degreeType: user?.academicYear || '',
+    expectedGraduation: user?.expectedGraduation || '',
+    researchInterests: user?.researchInterests?.join(', ') || '',
+    skillsExperience: user?.skills?.join(', ') || '',
+    availability: user?.availability || '',
+    personalStatement: user?.personalStatement || '',
+    facultyRecommendations: '',
+    certificates: user?.certificates?.join(', ') || '',
     role: user?.role || 'Student'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,17 +47,30 @@ const CompleteProfilePage = ({ user }) => {
       // Get current authenticated user
       const currentUser = await Auth.currentAuthenticatedUser();
       
-      // Convert GPA to float
-      const gpa = formState.gpa ? parseFloat(formState.gpa) : null;
+      // Convert arrays
+      const researchInterests = formState.researchInterests
+        ? formState.researchInterests.split(',').map(item => item.trim()).filter(item => item)
+        : [];
+      const skills = formState.skillsExperience
+        ? formState.skillsExperience.split(',').map(item => item.trim()).filter(item => item)
+        : [];
+      const certificates = formState.certificates
+        ? formState.certificates.split(',').map(item => item.trim()).filter(item => item)
+        : [];
       
       // Prepare input for user mutation
       const input = {
         id: currentUser.username,
         name: formState.name,
         email: currentUser.attributes.email,
-        major: formState.major,
-        gpa,
-        affiliation: formState.affiliation,
+        major: formState.currentProgram,
+        academicYear: formState.degreeType,
+        expectedGraduation: formState.expectedGraduation,
+        researchInterests,
+        skills,
+        availability: formState.availability,
+        personalStatement: formState.personalStatement,
+        certificates,
         role: formState.role,
         profileComplete: true
       };
@@ -64,8 +84,8 @@ const CompleteProfilePage = ({ user }) => {
         await API.graphql(graphqlOperation(createUser, { input }));
       }
       
-      // Redirect to dashboard
-      navigate('/dashboard');
+      // Force refresh of user profile and redirect to dashboard
+      window.location.href = '/dashboard';
     } catch (err) {
       console.error('Error updating user profile:', err);
       setError('An error occurred while updating your profile. Please try again.');
@@ -91,48 +111,102 @@ const CompleteProfilePage = ({ user }) => {
               required
             />
             
-            <SelectField
+            <TextField
               name="role"
               label="Role"
               value={formState.role}
-              onChange={handleChange}
-              required
-            >
-              <option value="Student">Student</option>
-              <option value="Faculty">Faculty</option>
-            </SelectField>
+              isReadOnly
+            />
             
             {formState.role === 'Student' && (
               <>
                 <TextField
-                  name="major"
-                  label="Major"
-                  placeholder="Enter your major"
-                  value={formState.major}
-                  onChange={handleChange}
+                  name="studentId"
+                  label="Student ID"
+                  value={user?.id || user?.username || ''}
+                  isReadOnly
                 />
                 
                 <TextField
-                  name="gpa"
-                  label="GPA"
-                  placeholder="Enter your GPA"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="4.0"
-                  value={formState.gpa}
+                  name="currentProgram"
+                  label="Current Academic Program *"
+                  placeholder="e.g., Computer Science, Biology"
+                  value={formState.currentProgram}
                   onChange={handleChange}
+                  required
                 />
                 
-                <SelectField
-                  name="affiliation"
-                  label="Affiliation"
-                  value={formState.affiliation}
+                <TextField
+                  name="degreeType"
+                  label="Degree Pursued *"
+                  placeholder="e.g., Bachelor's, Master's, PhD"
+                  value={formState.degreeType}
                   onChange={handleChange}
-                >
-                  <option value="On-campus">On-campus</option>
-                  <option value="Off-campus">Off-campus</option>
-                </SelectField>
+                  required
+                />
+                
+                <TextField
+                  name="expectedGraduation"
+                  label="Expected Graduation Date *"
+                  placeholder="e.g., Spring 2025"
+                  value={formState.expectedGraduation}
+                  onChange={handleChange}
+                  required
+                />
+                
+                <TextField
+                  name="researchInterests"
+                  label="Research Interests *"
+                  placeholder="Enter research interests separated by commas"
+                  value={formState.researchInterests}
+                  onChange={handleChange}
+                  required
+                />
+                
+                <TextField
+                  name="skillsExperience"
+                  label="Skills and Experience *"
+                  placeholder="Enter skills and experience separated by commas"
+                  value={formState.skillsExperience}
+                  onChange={handleChange}
+                  required
+                />
+                
+                <TextField
+                  name="availability"
+                  label="Availability *"
+                  placeholder="e.g., Fall 2024, Spring 2025"
+                  value={formState.availability}
+                  onChange={handleChange}
+                  required
+                />
+                
+                <TextAreaField
+                  name="personalStatement"
+                  label="Personal Statement *"
+                  placeholder="Brief description of your motivation for research and goals"
+                  value={formState.personalStatement}
+                  onChange={handleChange}
+                  rows={4}
+                  required
+                />
+                
+                <TextAreaField
+                  name="facultyRecommendations"
+                  label="Faculty Recommendations (Optional)"
+                  placeholder="Non-sensitive recommendations or endorsements from faculty"
+                  value={formState.facultyRecommendations}
+                  onChange={handleChange}
+                  rows={3}
+                />
+                
+                <TextField
+                  name="certificates"
+                  label="Certificates (Optional)"
+                  placeholder="Enter certificates separated by commas"
+                  value={formState.certificates}
+                  onChange={handleChange}
+                />
               </>
             )}
             

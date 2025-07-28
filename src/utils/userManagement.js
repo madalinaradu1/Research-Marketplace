@@ -12,11 +12,14 @@ export async function createUserAfterSignUp(userData) {
   try {
     const userInput = {
       id: username, // Use Cognito username as ID
-      name: attributes.name || `${attributes.given_name || ''} ${attributes.family_name || ''}`.trim(),
+      name: `${attributes.given_name || ''} ${attributes.family_name || ''}`.trim() || attributes.name || '',
       email: attributes.email,
       role: 'Student', // Default role
-      profileComplete: true // Set to true by default
+      profileComplete: false // Set to false so users must complete their profile
     };
+    
+    console.log('Creating user with attributes:', attributes);
+    console.log('User input:', userInput);
     
     // Check if user already exists
     try {
