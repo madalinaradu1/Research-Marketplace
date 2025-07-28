@@ -560,7 +560,7 @@ const FacultyDashboard = ({ user }) => {
                       <Collection
                         items={projectApplications}
                         type="grid"
-                        templateColumns={{ base: '1fr', medium: '1fr 1fr', large: '1fr 1fr 1fr' }}
+                        templateColumns="repeat(3, 1fr)"
                         gap="1rem"
                       >
                         {(application) => (

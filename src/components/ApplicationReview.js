@@ -118,7 +118,7 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
   const statusOptions = getStatusOptions();
   
   return (
-    <Card>
+    <Card variation="outlined" borderRadius="8px" borderWidth="2px">
       <Flex direction="column" gap="1rem">
         <Heading level={4}>Review Application</Heading>
         
