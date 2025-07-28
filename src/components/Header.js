@@ -68,36 +68,40 @@ const Header = ({ user, signOut }) => {
         gap={tokens.space.small}
         minHeight="20px"
       >
-        <Image
-          alt="GCU Logo"
-          src="/GCU_WHITE.png"
-          height="50px"
-          objectFit="contain"
-          marginBottom="10px"
-          paddingLeft="20px"
-        />
-        <Flex direction="column" gap="0">
-          <Text
-            fontSize={tokens.fontSizes.medium}
-            fontWeight={tokens.fontWeights.bold}
-            color="white"
-          >
-            Undergraduate Research
-          </Text>
-          <Text
-            fontSize={tokens.fontSizes.medium}
-            fontWeight={tokens.fontWeights.bold}
-            color="white"
-          >
-            Opportunity Program
-          </Text>
-          <Text
-            fontSize={tokens.fontSizes.medium}
-            color="white"
-          >
-            Grand Canyon University
-          </Text>
-        </Flex>
+        <Link to="/dashboard" style={{ textDecoration: 'none', position: 'relative', zIndex: 10 }}>
+          <Flex direction="row" alignItems="flex-end" gap={tokens.space.small}>
+            <Image
+              alt="GCU Logo"
+              src="/GCU_WHITE.png"
+              height="50px"
+              objectFit="contain"
+              marginBottom="10px"
+              paddingLeft="20px"
+            />
+            <Flex direction="column" gap="0">
+              <Text
+                fontSize={tokens.fontSizes.medium}
+                fontWeight={tokens.fontWeights.bold}
+                color="white"
+              >
+                Undergraduate Research
+              </Text>
+              <Text
+                fontSize={tokens.fontSizes.medium}
+                fontWeight={tokens.fontWeights.bold}
+                color="white"
+              >
+                Opportunity Program
+              </Text>
+              <Text
+                fontSize={tokens.fontSizes.medium}
+                color="white"
+              >
+                Grand Canyon University
+              </Text>
+            </Flex>
+          </Flex>
+        </Link>
       </Flex>
       
       {/* Navigation bar */}
