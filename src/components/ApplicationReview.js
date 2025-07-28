@@ -20,6 +20,7 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
   const [statusUpdate, setStatusUpdate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
   const { tokens } = useTheme();
   
   // Download resume file
@@ -127,19 +128,80 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
         <Flex direction="column" gap="0.5rem">
           <Text fontWeight="bold">Student Information</Text>
           <Text>Student ID: {application.student?.id || application.studentID}</Text>
-          <Text>Major: {application.student?.major || 'Not provided'}</Text>
-          <Text>GPA: {application.student?.gpa || 'Not provided'}</Text>
         </Flex>
         
         <Divider />
         
         <Flex direction="column" gap="0.5rem">
           <Text fontWeight="bold">Application Details</Text>
-          <Text>Project: {application.project?.title || 'Unknown Project'}</Text>
-          <Text>Department: {application.project?.department || 'Unknown Department'}</Text>
           <Text>Status: {application.status}</Text>
           <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
+          <Button size="small" onClick={() => setShowDetails(true)}>
+            View Details
+          </Button>
         </Flex>
+        
+        {showDetails && (
+          <View
+            position="fixed"
+            top="0"
+            left="0"
+            width="100vw"
+            height="100vh"
+            backgroundColor="rgba(0, 0, 0, 0.5)"
+            style={{ zIndex: 1000 }}
+            onClick={() => setShowDetails(false)}
+          >
+            <Flex
+              justifyContent="center"
+              alignItems="center"
+              height="100%"
+              padding="2rem"
+            >
+              <Card
+                maxWidth="600px"
+                width="100%"
+                maxHeight="80vh"
+                padding="2rem"
+                style={{ overflow: 'auto' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Flex direction="column" gap="1rem">
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Heading level={4}>Application Details</Heading>
+                    <Button size="small" onClick={() => setShowDetails(false)}>Close</Button>
+                  </Flex>
+                  
+                  <Divider />
+                  
+                  <Flex direction="column" gap="0.5rem">
+                    <Text fontWeight="bold">Student Profile Information</Text>
+                    <Text>Student ID: {application.student?.id || application.studentID}</Text>
+                    <Text>Program: {application.student?.major || 'Not provided'}</Text>
+                    <Text>Degree: {application.student?.academicYear || 'Not provided'}</Text>
+                    <Text>Expected Graduation: {application.student?.expectedGraduation || 'Not provided'}</Text>
+                    <Text>Research Interests: {application.student?.researchInterests?.join(', ') || 'Not provided'}</Text>
+                    <Text>Skills: {application.student?.skills?.join(', ') || 'Not provided'}</Text>
+                    <Text>Availability: {application.student?.availability || 'Not provided'}</Text>
+                    {console.log('Student data:', application.student)}
+                  </Flex>
+                  
+                  {application.statement && (
+                    <>
+                      <Divider />
+                      <Flex direction="column" gap="0.5rem">
+                        <Text fontWeight="bold">Statement of Interest</Text>
+                        <Card variation="outlined" padding="0.5rem">
+                          <Text>{application.statement}</Text>
+                        </Card>
+                      </Flex>
+                    </>
+                  )}
+                </Flex>
+              </Card>
+            </Flex>
+          </View>
+        )}
         
         
         {application.resumeKey && (

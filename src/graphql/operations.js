@@ -46,6 +46,12 @@ export const listUsers = /* GraphQL */ `
         major
         academicYear
         gpa
+        skills
+        researchInterests
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
         profileComplete
         status
         createdAt
