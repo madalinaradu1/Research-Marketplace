@@ -13,7 +13,7 @@ import {
   Collection,
   Alert
 } from '@aws-amplify/ui-react';
-import { createApplication, updateUser } from '../graphql/operations';
+import { createApplication, updateUser, listApplications } from '../graphql/operations';
 
 const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
   const [statement, setStatement] = useState('');
@@ -44,8 +44,16 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
     setError(null);
 
     try {
-      // Check application limit
-      if ((user.applicationCount || 0) >= 3) {
+      // Check application limit by counting current applications
+      const currentApplications = await API.graphql(graphqlOperation(listApplications, { 
+        limit: 100
+      }));
+      const userApplications = currentApplications.data.listApplications.items.filter(
+        app => app.studentID === (user.id || user.username) && 
+        !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)
+      );
+      
+      if (userApplications.length >= 3) {
         setError('You have reached the maximum of 3 applications.');
         return;
       }
@@ -72,14 +80,6 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       };
 
       await API.graphql(graphqlOperation(createApplication, { input: applicationInput }));
-
-      // Update user application count
-      await API.graphql(graphqlOperation(updateUser, { 
-        input: { 
-          id: userId, 
-          applicationCount: (user.applicationCount || 0) + 1 
-        } 
-      }));
 
       onSuccess();
     } catch (err) {

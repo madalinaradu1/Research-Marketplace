@@ -191,7 +191,7 @@ const StudentDashboard = ({ user }) => {
           <Heading level={4}>My Applications</Heading>
           <Flex wrap="wrap" gap="1rem" marginTop="1rem">
             <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5}>{user.applicationCount || 0}/3</Heading>
+              <Heading level={5}>{applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length}/3</Heading>
               <Text>Applications Used</Text>
             </Card>
             <Card variation="outlined" padding="1rem" flex="1">
@@ -265,9 +265,9 @@ const StudentDashboard = ({ user }) => {
                           variation="primary" 
                           size="small" 
                           onClick={() => handleApply(project)}
-                          isDisabled={(user.applicationCount || 0) >= 3}
+                          isDisabled={applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3}
                         >
-                          {(user.applicationCount || 0) >= 3 ? 'Limit Reached' : 'Apply'}
+                          {applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? 'Limit Reached' : 'Apply'}
                         </Button>
                       </Flex>
                     </Flex>
@@ -376,9 +376,9 @@ const StudentDashboard = ({ user }) => {
                   <Button 
                     variation="primary" 
                     onClick={() => handleApply(selectedProject)}
-                    isDisabled={(user.applicationCount || 0) >= 3}
+                    isDisabled={applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3}
                   >
-                    {(user.applicationCount || 0) >= 3 ? 'Application Limit Reached' : 'Apply Now'}
+                    {applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? 'Application Limit Reached' : 'Apply Now'}
                   </Button>
                 </Flex>
               </Flex>

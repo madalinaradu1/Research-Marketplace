@@ -28,6 +28,7 @@ const FacultyDashboard = ({ user }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [viewingApplicationsForProject, setViewingApplicationsForProject] = useState(null);
   const [projectForm, setProjectForm] = useState({
     title: '',
     description: '',
@@ -72,18 +73,19 @@ const FacultyDashboard = ({ user }) => {
       if (projectResult.data.listProjects.items.length > 0) {
         const projectIds = projectResult.data.listProjects.items.map(p => p.id);
         
-        const applicationFilter = {
-          or: projectIds.map(id => ({ projectID: { eq: id } }))
-        };
-        
+        // Fetch all applications and filter client-side to avoid DynamoDB issues
         const applicationResult = await API.graphql(graphqlOperation(listApplications, { 
-          filter: applicationFilter,
           limit: 100
         }));
         
+        // Filter applications for faculty's projects client-side
+        const facultyApplications = applicationResult.data.listApplications.items.filter(
+          app => projectIds.includes(app.projectID)
+        );
+        
         // Enrich applications with project and student data
         const enrichedApplications = await Promise.all(
-          applicationResult.data.listApplications.items.map(async (app) => {
+          facultyApplications.map(async (app) => {
             const project = projectResult.data.listProjects.items.find(p => p.id === app.projectID);
             
             // Fetch student data
@@ -521,6 +523,7 @@ const FacultyDashboard = ({ user }) => {
                               size="small"
                               variation="primary"
                               onClick={() => {
+                                setViewingApplicationsForProject(project);
                                 setActiveTabIndex(1);
                               }}
                             >
@@ -543,22 +546,37 @@ const FacultyDashboard = ({ user }) => {
               <Text>No applications have been submitted for your projects yet.</Text>
             </Card>
           ) : (
-            <Collection
-              items={applications}
-              type="list"
-              gap="1rem"
-              wrap="nowrap"
-              direction="column"
-            >
-              {(application) => (
-                <ApplicationReview 
-                  key={application.id}
-                  application={application}
-                  userRole="Faculty"
-                  onUpdate={handleApplicationUpdate}
-                />
-              )}
-            </Collection>
+            <Flex direction="column" gap="2rem">
+              {projects.map(project => {
+                const projectApplications = applications.filter(app => app.projectID === project.id);
+                return (
+                  <Card key={project.id}>
+                    <Heading level={4}>{project.title}</Heading>
+                    <Text>Department: {project.department}</Text>
+                    <Divider margin="1rem 0" />
+                    {projectApplications.length === 0 ? (
+                      <Text>No applications for this project yet.</Text>
+                    ) : (
+                      <Collection
+                        items={projectApplications}
+                        type="grid"
+                        templateColumns={{ base: '1fr', medium: '1fr 1fr', large: '1fr 1fr 1fr' }}
+                        gap="1rem"
+                      >
+                        {(application) => (
+                          <ApplicationReview 
+                            key={application.id}
+                            application={application}
+                            userRole="Faculty"
+                            onUpdate={handleApplicationUpdate}
+                          />
+                        )}
+                      </Collection>
+                    )}
+                  </Card>
+                );
+              })}
+            </Flex>
           )}
         </TabItem>
       </Tabs>

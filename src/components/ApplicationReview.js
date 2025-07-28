@@ -128,7 +128,7 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
           <Text fontWeight="bold">Student Information</Text>
           {application.student ? (
             <>
-              <Text>Name: {application.student.name}</Text>
+              <Text>Student ID: {application.student.id}</Text>
               <Text>Email: {application.student.email}</Text>
               {application.student.major && (
                 <Text>Major: {application.student.major}</Text>
@@ -160,14 +160,6 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
           <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
         </Flex>
         
-        <Divider />
-        
-        <Flex direction="column" gap="0.5rem">
-          <Text fontWeight="bold">Application Statement</Text>
-          <Card variation="outlined">
-            <Text>{application.statement || 'No statement provided'}</Text>
-          </Card>
-        </Flex>
         
         {application.resumeKey && (
           <>
