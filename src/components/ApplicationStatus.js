@@ -9,16 +9,19 @@ import {
   Card, 
   Divider, 
   TextAreaField,
+  TextField,
   useTheme,
   View,
   Collection
 } from '@aws-amplify/ui-react';
 import { updateApplication } from '../graphql/operations';
+import EnhancedApplicationForm from './EnhancedApplicationForm';
 
 const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
   const [withdrawReason, setWithdrawReason] = useState('');
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState(null);
   const { tokens } = useTheme();
   
@@ -216,6 +219,31 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
           </Button>
         )}
         
+        {isStudent && application.status === 'Returned' && (
+          <Card variation="outlined" backgroundColor="#fff3cd">
+            <Flex direction="column" gap="1rem">
+              <Text fontWeight="bold" color="#856404">Application Returned for Revision</Text>
+              {application.facultyNotes && (
+                <>
+                  <Text fontWeight="bold">Faculty Feedback:</Text>
+                  <Text backgroundColor="white" padding="0.5rem" borderRadius="4px">
+                    {application.facultyNotes}
+                  </Text>
+                </>
+              )}
+              <Text fontSize="0.9rem" color="#856404">
+                Please review the feedback above and make the necessary changes to your application.
+              </Text>
+              <Button 
+                variation="primary"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit & Resubmit Application
+              </Button>
+            </Flex>
+          </Card>
+        )}
+        
         {isStudent && application.status !== 'Cancelled' && application.status !== 'Expired' && application.status !== 'Draft' && (
           <View>
             {isWithdrawing ? (
@@ -259,8 +287,191 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
             )}
           </View>
         )}
+        
+        {/* Edit Application Overlay */}
+        {isEditing && (
+          <View
+            position="fixed"
+            top="0"
+            left="0"
+            width="100vw"
+            height="100vh"
+            backgroundColor="rgba(0, 0, 0, 0.5)"
+            style={{ zIndex: 1000 }}
+            onClick={() => setIsEditing(false)}
+          >
+            <Flex
+              justifyContent="center"
+              alignItems="center"
+              height="100%"
+              padding="2rem"
+            >
+              <Card
+                maxWidth="800px"
+                width="100%"
+                maxHeight="90vh"
+                style={{ overflow: 'auto' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <EditApplicationForm 
+                  application={application}
+                  onClose={() => setIsEditing(false)}
+                  onSuccess={() => {
+                    setIsEditing(false);
+                    if (onUpdate) onUpdate();
+                  }}
+                />
+              </Card>
+            </Flex>
+          </View>
+        )}
       </Flex>
     </Card>
+  );
+};
+
+// Component for editing returned applications
+const EditApplicationForm = ({ application, onClose, onSuccess }) => {
+  const [statement, setStatement] = useState(application.statement || '');
+  const [courses, setCourses] = useState(
+    application.relevantCourses && application.relevantCourses.length > 0 
+      ? application.relevantCourses 
+      : [{ courseName: '', courseNumber: '', grade: '', semester: '', year: '' }]
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  const addCourse = () => {
+    if (courses.length < 10) {
+      setCourses([...courses, { courseName: '', courseNumber: '', grade: '', semester: '', year: '' }]);
+    }
+  };
+
+  const removeCourse = (index) => {
+    setCourses(courses.filter((_, i) => i !== index));
+  };
+
+  const updateCourse = (index, field, value) => {
+    const updatedCourses = courses.map((course, i) => 
+      i === index ? { ...course, [field]: value } : course
+    );
+    setCourses(updatedCourses);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const wordCount = statement.trim().split(/\s+/).length;
+      if (wordCount < 300) {
+        setError('Your statement should be at least 300 words. Current count: ' + wordCount);
+        return;
+      }
+
+      const validCourses = courses.filter(course => course.courseName.trim());
+
+      const input = {
+        id: application.id,
+        statement,
+        relevantCourses: validCourses,
+        status: 'Faculty Review',
+        submittedToFacultyAt: new Date().toISOString()
+      };
+
+      await API.graphql(graphqlOperation(updateApplication, { input }));
+      onSuccess();
+    } catch (err) {
+      console.error('Error updating application:', err);
+      setError('Failed to update application. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Flex direction="column" gap="1rem">
+      <Heading level={3}>Edit Application: {application.project?.title}</Heading>
+      
+      {application.facultyNotes && (
+        <Card variation="outlined" backgroundColor="#fff3cd">
+          <Text fontWeight="bold" color="#856404">Faculty Feedback:</Text>
+          <Text color="#856404">{application.facultyNotes}</Text>
+        </Card>
+      )}
+      
+      <form onSubmit={handleSubmit}>
+        <Flex direction="column" gap="1rem">
+          <TextAreaField
+            label="Statement of Interest *"
+            value={statement}
+            onChange={(e) => setStatement(e.target.value)}
+            rows={10}
+            required
+          />
+          <Text fontSize="0.9rem" color="gray">
+            Word count: {statement.trim().split(/\s+/).filter(word => word).length} (aim for ~450 words)
+          </Text>
+
+          <Divider />
+
+          <Heading level={4}>Relevant Coursework</Heading>
+          {courses.map((course, index) => (
+            <Card key={index} variation="outlined">
+              <Flex direction="column" gap="0.5rem">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Text fontWeight="bold">Course {index + 1}</Text>
+                  {courses.length > 1 && (
+                    <Button size="small" onClick={() => removeCourse(index)}>
+                      Remove
+                    </Button>
+                  )}
+                </Flex>
+                
+                <Flex direction={{ base: 'column', large: 'row' }} gap="0.5rem">
+                  <TextField
+                    label="Course Name"
+                    value={course.courseName}
+                    onChange={(e) => updateCourse(index, 'courseName', e.target.value)}
+                    flex="2"
+                  />
+                  <TextField
+                    label="Course Number"
+                    value={course.courseNumber}
+                    onChange={(e) => updateCourse(index, 'courseNumber', e.target.value)}
+                    flex="1"
+                  />
+                  <TextField
+                    label="Grade"
+                    value={course.grade}
+                    onChange={(e) => updateCourse(index, 'grade', e.target.value)}
+                    flex="1"
+                  />
+                </Flex>
+              </Flex>
+            </Card>
+          ))}
+
+          {courses.length < 10 && (
+            <Button onClick={addCourse} variation="link">
+              + Add Course
+            </Button>
+          )}
+
+          {error && <Text color="red">{error}</Text>}
+
+          <Flex gap="1rem">
+            <Button onClick={onClose} variation="link">
+              Cancel
+            </Button>
+            <Button type="submit" variation="primary" isLoading={isSubmitting}>
+              Resubmit Application
+            </Button>
+          </Flex>
+        </Flex>
+      </form>
+    </Flex>
   );
 };
 
