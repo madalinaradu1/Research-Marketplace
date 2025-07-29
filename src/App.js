@@ -175,7 +175,9 @@ function App({ signOut, user }) {
             <Route path="/search" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <SearchPage user={userProfile || user} />} />
-            <Route path="/profile" element={<ProfilePage user={userProfile || user} refreshProfile={refreshUserProfile} />} />
+            <Route path="/profile" element={userProfile?.role === 'Student' ? 
+              <ProfilePage user={userProfile || user} refreshProfile={refreshUserProfile} /> : 
+              <Navigate to="/dashboard" />} />
             <Route path="/activity" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <ActivityPage user={userProfile || user} />} />

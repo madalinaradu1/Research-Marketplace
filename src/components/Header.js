@@ -154,14 +154,16 @@ const Header = ({ user, signOut }) => {
             Applications
           </Text>
         </Link>
-        <Link to="/profile">
-          <Text
-            color={isActive('/profile') ? "white" : "rgba(255,255,255,0.8)"}
-            fontWeight={isActive('/profile') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-          >
-            Profile
-          </Text>
-        </Link>
+        {user?.role === 'Student' && (
+          <Link to="/profile">
+            <Text
+              color={isActive('/profile') ? "white" : "rgba(255,255,255,0.8)"}
+              fontWeight={isActive('/profile') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
+            >
+              Profile
+            </Text>
+          </Link>
+        )}
         {isUserAdmin(user, user) && (
           <Link to="/admin">
             <Text
@@ -199,7 +201,9 @@ const Header = ({ user, signOut }) => {
             <MenuItem onClick={() => navigate('/search')}>Search</MenuItem>
             <MenuItem onClick={() => navigate('/activity')}>My Activity</MenuItem>
             <MenuItem onClick={() => navigate('/applications')}>Applications</MenuItem>
-            <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
+            {user?.role === 'Student' && (
+              <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
+            )}
             {isUserAdmin(user, user) && (
               <MenuItem onClick={() => navigate('/admin')}>Admin</MenuItem>
             )}
