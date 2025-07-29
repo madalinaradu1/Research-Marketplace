@@ -138,10 +138,11 @@ function App({ signOut, user }) {
   }, [profileRefreshTrigger]); // Re-run when profileRefreshTrigger changes
   
   // Redirect to complete profile if needed
-  // Skip for admin users or if profile is already complete
+  // Skip for admin users, faculty users, or if profile is already complete
   // Check if user is admin using utility function
   const isAdmin = isUserAdmin(user, userProfile);
-  const shouldCompleteProfile = !isAdmin && userProfile && userProfile.profileComplete === false;
+  const isFaculty = userProfile?.role === 'Faculty';
+  const shouldCompleteProfile = !isAdmin && !isFaculty && userProfile && userProfile.profileComplete === false;
   
   // Debug role recognition
   console.log('User from Cognito:', user);
