@@ -164,24 +164,25 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
           </>
         )}
         
-        {/* Debug: Always show this section to check data */}
-        <Divider />
-        <Flex direction="column" gap="0.5rem">
-          <Text fontWeight="bold">Review Notes</Text>
-          <Text fontSize="0.8rem" color="gray">Debug - Faculty Notes: {application.facultyNotes || 'None'}</Text>
-          <Text fontSize="0.8rem" color="gray">Debug - Status: {application.status}</Text>
-          {application.facultyNotes && (
-            <Card backgroundColor="#fff3cd" padding="0.5rem">
-              <Text><strong>Faculty:</strong> {application.facultyNotes}</Text>
-            </Card>
-          )}
-          {application.coordinatorNotes && (
-            <Text><strong>Coordinator:</strong> {application.coordinatorNotes}</Text>
-          )}
-          {application.adminNotes && (
-            <Text><strong>Admin:</strong> {application.adminNotes}</Text>
-          )}
-        </Flex>
+        {(application.facultyNotes || application.coordinatorNotes || application.adminNotes) && (
+          <>
+            <Divider />
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Review Notes</Text>
+              {application.facultyNotes && (
+                <Card backgroundColor="#fff3cd" padding="0.5rem">
+                  <Text><strong>Faculty:</strong> {application.facultyNotes}</Text>
+                </Card>
+              )}
+              {application.coordinatorNotes && (
+                <Text><strong>Coordinator:</strong> {application.coordinatorNotes}</Text>
+              )}
+              {application.adminNotes && (
+                <Text><strong>Admin:</strong> {application.adminNotes}</Text>
+              )}
+            </Flex>
+          </>
+        )}
         
         <Divider />
         
@@ -225,15 +226,8 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
             <Flex direction="column" gap="1rem">
               <Heading level={5} color="#856404">⚠️ Application Returned for Revision</Heading>
               
-              <Card backgroundColor="white" padding="1rem" borderRadius="8px" border="1px solid #ffc107">
-                <Text fontWeight="bold" color="#856404" marginBottom="0.5rem">Faculty Feedback:</Text>
-                <Text color="#333" lineHeight="1.5">
-                  {application.facultyNotes || 'No specific feedback provided. Please contact your faculty member for clarification.'}
-                </Text>
-              </Card>
-              
               <Text fontSize="0.9rem" color="#856404" fontStyle="italic">
-                📝 Please review the feedback above and make the necessary changes to your application before resubmitting.
+                📝 Please review the feedback in the Review Notes section and make the necessary changes to your application before resubmitting.
               </Text>
               
               <Button 

@@ -104,6 +104,16 @@ export const listApplications = /* GraphQL */ `
         projectID
         statement
         status
+        facultyNotes
+        coordinatorNotes
+        adminNotes
+        relevantCourses {
+          courseName
+          courseNumber
+          grade
+          semester
+          year
+        }
         createdAt
         updatedAt
       }
