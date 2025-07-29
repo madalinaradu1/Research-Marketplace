@@ -33,6 +33,8 @@ const StudentDashboard = ({ user }) => {
     statement: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasUnseenChanges, setHasUnseenChanges] = useState(false);
+  const [lastViewedTime, setLastViewedTime] = useState(null);
   
   useEffect(() => {
     fetchData();
@@ -88,6 +90,19 @@ const StudentDashboard = ({ user }) => {
           });
           
           setApplications(enrichedApplications);
+          
+          // Check for unseen changes
+          const storedLastViewed = localStorage.getItem(`lastViewedApplications_${userId}`);
+          const lastViewed = storedLastViewed ? new Date(storedLastViewed) : new Date(0);
+          setLastViewedTime(lastViewed);
+          
+          const hasChanges = enrichedApplications.some(app => {
+            const updatedAt = new Date(app.updatedAt);
+            const createdAt = new Date(app.createdAt);
+            return updatedAt > lastViewed && updatedAt > createdAt;
+          });
+          
+          setHasUnseenChanges(hasChanges);
         } else {
           console.warn('No project data returned');
           setProjects([]);
@@ -228,7 +243,14 @@ const StudentDashboard = ({ user }) => {
       
       <Tabs
         currentIndex={activeTabIndex}
-        onChange={(index) => setActiveTabIndex(index)}
+        onChange={(index) => {
+          setActiveTabIndex(index);
+          if (index === 1) { // My Applications tab
+            setHasUnseenChanges(false);
+            const userId = user.id || user.username;
+            localStorage.setItem(`lastViewedApplications_${userId}`, new Date().toISOString());
+          }
+        }}
       >
         <TabItem title="Research Opportunities">
           {projects.length === 0 ? (
@@ -287,7 +309,22 @@ const StudentDashboard = ({ user }) => {
           )}
         </TabItem>
         
-        <TabItem title="My Applications">
+        <TabItem title={
+          <Flex alignItems="center" gap="0.5rem" position="relative">
+            <Text>My Applications</Text>
+            {hasUnseenChanges && (
+              <View
+                width="8px"
+                height="8px"
+                borderRadius="50%"
+                backgroundColor="#ffc107"
+                position="absolute"
+                top="-2px"
+                left="-8px"
+              />
+            )}
+          </Flex>
+        }>
           {applications.length === 0 ? (
             <Card>
               <Text>You haven't submitted any applications yet.</Text>
