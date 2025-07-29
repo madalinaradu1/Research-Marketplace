@@ -142,7 +142,8 @@ function App({ signOut, user }) {
   // Check if user is admin using utility function
   const isAdmin = isUserAdmin(user, userProfile);
   const isFaculty = userProfile?.role === 'Faculty';
-  const shouldCompleteProfile = !isAdmin && !isFaculty && userProfile && userProfile.profileComplete === false;
+  const isCoordinator = userProfile?.role === 'Coordinator';
+  const shouldCompleteProfile = !isAdmin && !isFaculty && !isCoordinator && userProfile && userProfile.profileComplete === false;
   
   // Debug role recognition
   console.log('User from Cognito:', user);

@@ -2,6 +2,7 @@ import React from 'react';
 import { Flex, Heading, Card, Text, Loader } from '@aws-amplify/ui-react';
 import StudentDashboard from './StudentDashboard';
 import FacultyDashboard from './FacultyDashboard';
+import CoordinatorDashboard from './CoordinatorDashboard';
 // Import other dashboards as needed
 
 const Dashboard = ({ user }) => {
@@ -20,13 +21,7 @@ const Dashboard = ({ user }) => {
     case 'Faculty':
       return <FacultyDashboard user={user} />;
     case 'Coordinator':
-      // TODO: Implement CoordinatorDashboard
-      return (
-        <Card padding="2rem">
-          <Heading level={2}>Coordinator Dashboard</Heading>
-          <Text>Coordinator dashboard is under development.</Text>
-        </Card>
-      );
+      return <CoordinatorDashboard user={user} />;
     case 'Admin':
       // TODO: Implement AdminDashboard
       return (
