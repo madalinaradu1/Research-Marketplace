@@ -13,9 +13,9 @@ export async function createUserAfterSignUp(userData) {
     // Determine role based on email domain
     const email = attributes.email;
     let role = 'Student'; // Default role
-    if (email.endsWith('@gcu.com')) {
+    if (email.endsWith('@gcu.edu')) {
       role = 'Faculty';
-    } else if (email.endsWith('@gcu.edu')) {
+    } else if (email.endsWith('@mygcu.edu')) {
       role = 'Student';
     }
     
