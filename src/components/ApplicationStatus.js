@@ -164,23 +164,24 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
           </>
         )}
         
-        {(application.facultyNotes || application.coordinatorNotes || application.adminNotes) && (
-          <>
-            <Divider />
-            <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">Review Notes</Text>
-              {application.facultyNotes && (
-                <Text><strong>Faculty:</strong> {application.facultyNotes}</Text>
-              )}
-              {application.coordinatorNotes && (
-                <Text><strong>Coordinator:</strong> {application.coordinatorNotes}</Text>
-              )}
-              {application.adminNotes && (
-                <Text><strong>Admin:</strong> {application.adminNotes}</Text>
-              )}
-            </Flex>
-          </>
-        )}
+        {/* Debug: Always show this section to check data */}
+        <Divider />
+        <Flex direction="column" gap="0.5rem">
+          <Text fontWeight="bold">Review Notes</Text>
+          <Text fontSize="0.8rem" color="gray">Debug - Faculty Notes: {application.facultyNotes || 'None'}</Text>
+          <Text fontSize="0.8rem" color="gray">Debug - Status: {application.status}</Text>
+          {application.facultyNotes && (
+            <Card backgroundColor="#fff3cd" padding="0.5rem">
+              <Text><strong>Faculty:</strong> {application.facultyNotes}</Text>
+            </Card>
+          )}
+          {application.coordinatorNotes && (
+            <Text><strong>Coordinator:</strong> {application.coordinatorNotes}</Text>
+          )}
+          {application.adminNotes && (
+            <Text><strong>Admin:</strong> {application.adminNotes}</Text>
+          )}
+        </Flex>
         
         <Divider />
         
@@ -220,23 +221,25 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
         )}
         
         {isStudent && application.status === 'Returned' && (
-          <Card variation="outlined" backgroundColor="#fff3cd">
+          <Card variation="outlined" backgroundColor="#fff3cd" padding="1rem">
             <Flex direction="column" gap="1rem">
-              <Text fontWeight="bold" color="#856404">Application Returned for Revision</Text>
-              {application.facultyNotes && (
-                <>
-                  <Text fontWeight="bold">Faculty Feedback:</Text>
-                  <Text backgroundColor="white" padding="0.5rem" borderRadius="4px">
-                    {application.facultyNotes}
-                  </Text>
-                </>
-              )}
-              <Text fontSize="0.9rem" color="#856404">
-                Please review the feedback above and make the necessary changes to your application.
+              <Heading level={5} color="#856404">⚠️ Application Returned for Revision</Heading>
+              
+              <Card backgroundColor="white" padding="1rem" borderRadius="8px" border="1px solid #ffc107">
+                <Text fontWeight="bold" color="#856404" marginBottom="0.5rem">Faculty Feedback:</Text>
+                <Text color="#333" lineHeight="1.5">
+                  {application.facultyNotes || 'No specific feedback provided. Please contact your faculty member for clarification.'}
+                </Text>
+              </Card>
+              
+              <Text fontSize="0.9rem" color="#856404" fontStyle="italic">
+                📝 Please review the feedback above and make the necessary changes to your application before resubmitting.
               </Text>
+              
               <Button 
                 variation="primary"
                 onClick={() => setIsEditing(true)}
+                size="large"
               >
                 Edit & Resubmit Application
               </Button>
@@ -333,11 +336,13 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
 // Component for editing returned applications
 const EditApplicationForm = ({ application, onClose, onSuccess }) => {
   const [statement, setStatement] = useState(application.statement || '');
-  const [courses, setCourses] = useState(
-    application.relevantCourses && application.relevantCourses.length > 0 
-      ? application.relevantCourses 
-      : [{ courseName: '', courseNumber: '', grade: '', semester: '', year: '' }]
-  );
+  const [courses, setCourses] = useState(() => {
+    // Ensure we always have the existing courses pre-filled
+    if (application.relevantCourses && application.relevantCourses.length > 0) {
+      return [...application.relevantCourses];
+    }
+    return [{ courseName: '', courseNumber: '', grade: '', semester: '', year: '' }];
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -395,9 +400,16 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
       <Heading level={3}>Edit Application: {application.project?.title}</Heading>
       
       {application.facultyNotes && (
-        <Card variation="outlined" backgroundColor="#fff3cd">
-          <Text fontWeight="bold" color="#856404">Faculty Feedback:</Text>
-          <Text color="#856404">{application.facultyNotes}</Text>
+        <Card variation="outlined" backgroundColor="#fff3cd" padding="1rem" marginBottom="1rem">
+          <Heading level={5} color="#856404" marginBottom="0.5rem">📋 Faculty Feedback</Heading>
+          <Card backgroundColor="white" padding="1rem" borderRadius="8px">
+            <Text color="#333" lineHeight="1.5" whiteSpace="pre-wrap">
+              {application.facultyNotes}
+            </Text>
+          </Card>
+          <Text fontSize="0.8rem" color="#856404" marginTop="0.5rem" fontStyle="italic">
+            Please address the points mentioned above in your revised application.
+          </Text>
         </Card>
       )}
       
