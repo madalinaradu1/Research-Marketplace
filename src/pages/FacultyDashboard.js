@@ -14,7 +14,8 @@ import {
   TextField,
   TextAreaField,
   SelectField,
-  Badge
+  Badge,
+  View
 } from '@aws-amplify/ui-react';
 import { listProjects, listApplications, createProject, updateProject, getUser, listUsers } from '../graphql/operations';
 import ApplicationReview from '../components/ApplicationReview';
@@ -41,10 +42,13 @@ const FacultyDashboard = ({ user }) => {
     isActive: true
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasUnseenApplications, setHasUnseenApplications] = useState(false);
   
   useEffect(() => {
     fetchData();
   }, [user]);
+  
+
   
   const fetchData = async () => {
     setLoading(true);
@@ -110,6 +114,19 @@ const FacultyDashboard = ({ user }) => {
         console.log('Enriched applications:', enrichedApplications);
         
         setApplications(enrichedApplications);
+        
+        // Check for unseen applications
+        const storedLastViewed = localStorage.getItem(`lastViewedFacultyApplications_${userId}`);
+        const lastViewed = storedLastViewed ? new Date(storedLastViewed) : new Date(0);
+        
+        const hasNewApplications = enrichedApplications.some(app => {
+          const createdAt = new Date(app.createdAt);
+          const updatedAt = new Date(app.updatedAt);
+          // Show notification for new applications or applications that were updated (re-submitted)
+          return createdAt > lastViewed || (updatedAt > lastViewed && updatedAt > createdAt);
+        });
+        
+        setHasUnseenApplications(hasNewApplications);
       }
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -345,7 +362,14 @@ const FacultyDashboard = ({ user }) => {
       
       <Tabs
         currentIndex={activeTabIndex}
-        onChange={(index) => setActiveTabIndex(index)}
+        onChange={(index) => {
+          setActiveTabIndex(index);
+          if (index === 1) { // Applications tab
+            setHasUnseenApplications(false);
+            const userId = user.id || user.username;
+            localStorage.setItem(`lastViewedFacultyApplications_${userId}`, new Date().toISOString());
+          }
+        }}
       >
         <TabItem title="My Projects">
           {isCreatingProject ? (
@@ -544,7 +568,22 @@ const FacultyDashboard = ({ user }) => {
           )}
         </TabItem>
         
-        <TabItem title="Applications">
+        <TabItem title={
+          <Flex alignItems="center" gap="0.5rem" position="relative">
+            <Text>Applications</Text>
+            {hasUnseenApplications && (
+              <View
+                width="8px"
+                height="8px"
+                borderRadius="50%"
+                backgroundColor="#ffc107"
+                position="absolute"
+                top="-2px"
+                left="-8px"
+              />
+            )}
+          </Flex>
+        }>
           {applications.length === 0 ? (
             <Card>
               <Text>No applications have been submitted for your projects yet.</Text>

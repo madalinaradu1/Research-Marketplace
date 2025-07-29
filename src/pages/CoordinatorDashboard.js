@@ -50,26 +50,35 @@ const CoordinatorDashboard = ({ user }) => {
       const allUsers = usersResult.data.listUsers.items;
       
       // Filter applications for coordinator's department and enrich with data
-      const departmentApplications = allApplications
-        .map(app => {
-          const project = allProjects.find(p => p.id === app.projectID);
-          const student = allUsers.find(u => u.id === app.studentID);
-          const faculty = allUsers.find(u => u.id === project?.facultyID);
-          
-          return {
-            ...app,
-            project,
-            student,
-            faculty
-          };
-        })
-        .filter(app => 
-          app.project && 
-          app.student && 
-          app.project.department === user.department &&
-          app.status === 'Department Review'
-        );
+      const enrichedApplications = allApplications.map(app => {
+        const project = allProjects.find(p => p.id === app.projectID);
+        const student = allUsers.find(u => u.id === app.studentID);
+        const faculty = allUsers.find(u => u.id === project?.facultyID);
+        
+        return {
+          ...app,
+          project,
+          student,
+          faculty
+        };
+      });
       
+      console.log('Coordinator user department:', user.department);
+      console.log('All applications:', allApplications.length);
+      console.log('Enriched applications:', enrichedApplications);
+      console.log('Applications with Department Review status:', enrichedApplications.filter(app => app.status === 'Department Review'));
+      
+      const departmentApplications = enrichedApplications.filter(app => {
+        const hasProject = !!app.project;
+        const hasStudent = !!app.student;
+        const statusMatch = app.status === 'Department Review';
+        // If coordinator has no department set, show all applications
+        const departmentMatch = !user.department || app.project?.department === user.department;
+        
+        return hasProject && hasStudent && statusMatch && departmentMatch;
+      });
+      
+      console.log('Final filtered applications:', departmentApplications);
       setApplications(departmentApplications);
     } catch (err) {
       console.error('Error fetching data:', err);
