@@ -93,17 +93,19 @@ const FacultyDashboard = ({ user }) => {
           console.error('Error fetching users:', err);
         }
         
-        // Enrich applications with project and student data
-        const enrichedApplications = facultyApplications.map(app => {
-          const project = projectResult.data.listProjects.items.find(p => p.id === app.projectID);
-          const student = allUsers.find(u => u.id === app.studentID);
-          
-          return {
-            ...app,
-            project,
-            student
-          };
-        });
+        // Enrich applications with project and student data, filter out applications with missing students
+        const enrichedApplications = facultyApplications
+          .map(app => {
+            const project = projectResult.data.listProjects.items.find(p => p.id === app.projectID);
+            const student = allUsers.find(u => u.id === app.studentID);
+            
+            return {
+              ...app,
+              project,
+              student
+            };
+          })
+          .filter(app => app.student); // Filter out applications where student no longer exists
         
         console.log('Enriched applications:', enrichedApplications);
         
