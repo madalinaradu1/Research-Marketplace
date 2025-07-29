@@ -10,11 +10,20 @@ export async function createUserAfterSignUp(userData) {
   const { username, attributes } = userData;
   
   try {
+    // Determine role based on email domain
+    const email = attributes.email;
+    let role = 'Student'; // Default role
+    if (email.endsWith('@gcu.com')) {
+      role = 'Faculty';
+    } else if (email.endsWith('@gcu.edu')) {
+      role = 'Student';
+    }
+    
     const userInput = {
       id: username, // Use Cognito username as ID
       name: `${attributes.given_name || ''} ${attributes.family_name || ''}`.trim() || attributes.name || '',
       email: attributes.email,
-      role: 'Student', // Default role
+      role: role,
       profileComplete: false // Set to false so users must complete their profile
     };
     
