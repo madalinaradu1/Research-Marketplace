@@ -40,6 +40,15 @@ const StudentDashboard = ({ user }) => {
     fetchData();
   }, [user]);
   
+  // Clear notification when My Applications tab is viewed
+  useEffect(() => {
+    if (activeTabIndex === 1 && hasUnseenChanges) {
+      setHasUnseenChanges(false);
+      const userId = user.id || user.username;
+      localStorage.setItem(`lastViewedApplications_${userId}`, new Date().toISOString());
+    }
+  }, [activeTabIndex, hasUnseenChanges, user]);
+  
   const fetchData = async () => {
     setLoading(true);
     setError(null);
