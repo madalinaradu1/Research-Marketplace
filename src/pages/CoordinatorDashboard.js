@@ -4,13 +4,15 @@ import {
   Flex, 
   Heading, 
   Text, 
+  Button,
   Card, 
   Divider,
   Collection,
   Loader,
   Tabs,
   TabItem,
-  Badge
+  Badge,
+  View
 } from '@aws-amplify/ui-react';
 import { listApplications, listProjects, listUsers } from '../graphql/operations';
 import ApplicationReview from '../components/ApplicationReview';
@@ -20,6 +22,7 @@ const CoordinatorDashboard = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [viewingApplication, setViewingApplication] = useState(null);
   
   useEffect(() => {
     fetchData();
@@ -30,8 +33,42 @@ const CoordinatorDashboard = ({ user }) => {
     setError(null);
     
     try {
-      // Fetch all applications
-      const applicationResult = await API.graphql(graphqlOperation(listApplications, { 
+      // Fetch all applications with relevant courses
+      const listApplicationsWithCourses = /* GraphQL */ `
+        query ListApplications(
+          $filter: ModelApplicationFilterInput
+          $limit: Int
+          $nextToken: String
+        ) {
+          listApplications(filter: $filter, limit: $limit, nextToken: $nextToken) {
+            items {
+              id
+              studentID
+              projectID
+              statement
+              resumeKey
+              transcriptLink
+              relevantCourses {
+                courseName
+                courseNumber
+                grade
+                semester
+                year
+              }
+              status
+              statusDetail
+              facultyNotes
+              coordinatorNotes
+              adminNotes
+              createdAt
+              updatedAt
+            }
+            nextToken
+          }
+        }
+      `;
+      
+      const applicationResult = await API.graphql(graphqlOperation(listApplicationsWithCourses, { 
         limit: 100
       }));
       
@@ -67,7 +104,7 @@ const CoordinatorDashboard = ({ user }) => {
         app.project && 
         app.student && 
         app.project.department === user.department &&
-        app.status === 'Department Review'
+        ['Department Review', 'Admin Review', 'Approved', 'Returned', 'Rejected'].includes(app.status)
       );
       setApplications(departmentApplications);
     } catch (err) {
@@ -207,13 +244,20 @@ const CoordinatorDashboard = ({ user }) => {
                         <strong>Submitted:</strong> {new Date(application.createdAt).toLocaleDateString()}
                       </Text>
                       
-                      {application.status === 'Department Review' && (
+                      {application.status === 'Department Review' ? (
                         <ApplicationReview 
                           application={application}
                           userRole="Coordinator"
                           onUpdate={handleApplicationUpdate}
                           compact={true}
                         />
+                      ) : (
+                        <Button 
+                          size="small"
+                          onClick={() => setViewingApplication(application)}
+                        >
+                          View Details
+                        </Button>
                       )}
                     </Flex>
                   </Card>
@@ -223,6 +267,50 @@ const CoordinatorDashboard = ({ user }) => {
           )}
         </TabItem>
       </Tabs>
+      
+      {/* View Application Details Modal */}
+      {viewingApplication && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setViewingApplication(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="800px"
+              width="100%"
+              maxHeight="90vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ApplicationReview 
+                application={viewingApplication}
+                userRole="Coordinator"
+                onUpdate={() => {
+                  handleApplicationUpdate();
+                  setViewingApplication(null);
+                }}
+              />
+              <Button 
+                onClick={() => setViewingApplication(null)}
+                marginTop="1rem"
+              >
+                Close
+              </Button>
+            </Card>
+          </Flex>
+        </View>
+      )}
     </Flex>
   );
 };

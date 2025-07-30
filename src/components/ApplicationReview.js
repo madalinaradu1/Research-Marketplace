@@ -137,7 +137,7 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
           <Text>Status: {application.status}</Text>
           <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
           <Button size="small" onClick={() => setShowDetails(true)}>
-            View Details
+            View Application Details
           </Button>
         </Flex>
         

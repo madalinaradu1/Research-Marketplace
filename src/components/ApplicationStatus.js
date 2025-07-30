@@ -22,6 +22,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [error, setError] = useState(null);
   const { tokens } = useTheme();
   
@@ -145,44 +146,10 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
             <Text>Status Detail: {application.statusDetail}</Text>
           )}
           <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
+          <Button size="small" onClick={() => setShowDetails(true)} marginTop="0.5rem">
+            View Details
+          </Button>
         </Flex>
-        
-        {application.relevantCourses && application.relevantCourses.length > 0 && (
-          <>
-            <Divider />
-            <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">Relevant Coursework</Text>
-              {application.relevantCourses.map((course, index) => (
-                <Card key={index} variation="outlined" padding="0.5rem">
-                  <Flex justifyContent="space-between">
-                    <Text>{course.courseName} ({course.courseNumber})</Text>
-                    <Text>Grade: {course.grade} | {course.semester} {course.year}</Text>
-                  </Flex>
-                </Card>
-              ))}
-            </Flex>
-          </>
-        )}
-        
-        {(application.facultyNotes || application.coordinatorNotes || application.adminNotes) && (
-          <>
-            <Divider />
-            <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">Review Notes</Text>
-              {application.facultyNotes && (
-                <Card backgroundColor="#fff3cd" padding="0.5rem">
-                  <Text><strong>Faculty:</strong> {application.facultyNotes}</Text>
-                </Card>
-              )}
-              {application.coordinatorNotes && (
-                <Text><strong>Coordinator:</strong> {application.coordinatorNotes}</Text>
-              )}
-              {application.adminNotes && (
-                <Text><strong>Admin:</strong> {application.adminNotes}</Text>
-              )}
-            </Flex>
-          </>
-        )}
         
         <Divider />
         
@@ -282,6 +249,106 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
                 Withdraw Application
               </Button>
             )}
+          </View>
+        )}
+        
+        {/* View Details Modal */}
+        {showDetails && (
+          <View
+            position="fixed"
+            top="0"
+            left="0"
+            width="100vw"
+            height="100vh"
+            backgroundColor="rgba(0, 0, 0, 0.5)"
+            style={{ zIndex: 1000 }}
+            onClick={() => setShowDetails(false)}
+          >
+            <Flex
+              justifyContent="center"
+              alignItems="center"
+              height="100%"
+              padding="2rem"
+            >
+              <Card
+                maxWidth="600px"
+                width="100%"
+                maxHeight="80vh"
+                padding="2rem"
+                style={{ overflow: 'auto' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Flex direction="column" gap="1rem">
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Heading level={4}>Application Details</Heading>
+                    <Button size="small" onClick={() => setShowDetails(false)}>Close</Button>
+                  </Flex>
+                  
+                  <Divider />
+                  
+                  <Flex direction="column" gap="0.5rem">
+                    <Text fontWeight="bold">Project Information</Text>
+                    <Text>Project: {application.project?.title || 'Unknown Project'}</Text>
+                    <Text>Department: {application.project?.department || 'Unknown Department'}</Text>
+                    <Text>Status: {application.status}</Text>
+                    <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
+                  </Flex>
+                  
+                  {application.statement && (
+                    <>
+                      <Divider />
+                      <Flex direction="column" gap="0.5rem">
+                        <Text fontWeight="bold">Statement of Interest</Text>
+                        <Card variation="outlined" padding="0.5rem">
+                          <Text>{application.statement}</Text>
+                        </Card>
+                      </Flex>
+                    </>
+                  )}
+                  
+                  {application.relevantCourses && application.relevantCourses.length > 0 && (
+                    <>
+                      <Divider />
+                      <Flex direction="column" gap="0.5rem">
+                        <Text fontWeight="bold">Relevant Coursework</Text>
+                        {application.relevantCourses.map((course, index) => (
+                          <Card key={index} variation="outlined" padding="0.5rem">
+                            <Flex justifyContent="space-between">
+                              <Text>{course.courseName} ({course.courseNumber})</Text>
+                              <Text>Grade: {course.grade} | {course.semester} {course.year}</Text>
+                            </Flex>
+                          </Card>
+                        ))}
+                      </Flex>
+                    </>
+                  )}
+                  
+                  {(application.facultyNotes || application.coordinatorNotes || application.adminNotes) && (
+                    <>
+                      <Divider />
+                      <Flex direction="column" gap="0.5rem">
+                        <Text fontWeight="bold">Review Notes</Text>
+                        {application.facultyNotes && (
+                          <Card backgroundColor="#fff3cd" padding="0.5rem">
+                            <Text><strong>Faculty:</strong> {application.facultyNotes}</Text>
+                          </Card>
+                        )}
+                        {application.coordinatorNotes && (
+                          <Card backgroundColor="#e7f3ff" padding="0.5rem">
+                            <Text><strong>Coordinator:</strong> {application.coordinatorNotes}</Text>
+                          </Card>
+                        )}
+                        {application.adminNotes && (
+                          <Card backgroundColor="#f0f8f0" padding="0.5rem">
+                            <Text><strong>Admin:</strong> {application.adminNotes}</Text>
+                          </Card>
+                        )}
+                      </Flex>
+                    </>
+                  )}
+                </Flex>
+              </Card>
+            </Flex>
           </View>
         )}
         

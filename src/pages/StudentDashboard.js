@@ -96,7 +96,7 @@ const StudentDashboard = ({ user }) => {
               ...app,
               project: project || null
             };
-          });
+          }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
           
           setApplications(enrichedApplications);
           
