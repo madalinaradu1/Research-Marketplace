@@ -17,6 +17,7 @@ import { listUsers } from '../graphql/queries';
 import { updateUserRole } from '../utils/updateUserRole';
 import { updateProfileCompletion } from '../utils/updateUserProfile';
 import { syncUserGroupsToRole } from '../utils/syncUserGroups';
+import { updateUser } from '../graphql/operations';
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
@@ -24,6 +25,7 @@ const AdminPage = () => {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [selectedRoles, setSelectedRoles] = useState({});
+  const [selectedDepartments, setSelectedDepartments] = useState({});
 
   useEffect(() => {
     fetchUsers();
@@ -35,14 +37,17 @@ const AdminPage = () => {
       const result = await API.graphql(graphqlOperation(listUsers));
       const userList = result.data.listUsers.items;
       
-      // Initialize selected roles with current roles
+      // Initialize selected roles and departments with current values
       const roles = {};
+      const departments = {};
       userList.forEach(user => {
         roles[user.id] = user.role || 'Student';
+        departments[user.id] = user.department || '';
       });
       
       setUsers(userList);
       setSelectedRoles(roles);
+      setSelectedDepartments(departments);
     } catch (err) {
       console.error('Error fetching users:', err);
       setError('Failed to load users. Please try again.');
@@ -58,6 +63,13 @@ const AdminPage = () => {
     }));
   };
 
+  const handleDepartmentChange = (userId, department) => {
+    setSelectedDepartments(prev => ({
+      ...prev,
+      [userId]: department
+    }));
+  };
+
   const handleUpdateRole = async (userId) => {
     try {
       await updateUserRole(userId, selectedRoles[userId]);
@@ -66,6 +78,21 @@ const AdminPage = () => {
     } catch (err) {
       console.error('Error updating role:', err);
       setError('Failed to update user role. Please try again.');
+    }
+  };
+
+  const handleUpdateDepartment = async (userId) => {
+    try {
+      const input = {
+        id: userId,
+        department: selectedDepartments[userId] || null
+      };
+      await API.graphql(graphqlOperation(updateUser, { input }));
+      setMessage('Department updated successfully!');
+      fetchUsers();
+    } catch (err) {
+      console.error('Error updating department:', err);
+      setError('Failed to update department. Please try again.');
     }
   };
   
@@ -108,9 +135,10 @@ const AdminPage = () => {
             <TableRow>
               <TableCell as="th">Name</TableCell>
               <TableCell as="th">Email</TableCell>
-              <TableCell as="th">Current Role</TableCell>
-              <TableCell as="th">Profile Complete</TableCell>
+              <TableCell as="th">Role</TableCell>
+              <TableCell as="th">Department</TableCell>
               <TableCell as="th">New Role</TableCell>
+              <TableCell as="th">New Department</TableCell>
               <TableCell as="th">Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -120,7 +148,7 @@ const AdminPage = () => {
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role || 'Student'}</TableCell>
-                <TableCell>{user.profileComplete ? 'Yes' : 'No'}</TableCell>
+                <TableCell>{user.department || 'None'}</TableCell>
                 <TableCell>
                   <SelectField
                     value={selectedRoles[user.id]}
@@ -133,30 +161,47 @@ const AdminPage = () => {
                   </SelectField>
                 </TableCell>
                 <TableCell>
-                  <Flex direction="row" gap="0.5rem">
-                    <Button
-                      onClick={() => handleUpdateRole(user.id)}
-                      isDisabled={user.role === selectedRoles[user.id]}
-                      size="small"
-                    >
-                      Update Role
-                    </Button>
-                    {!user.profileComplete && (
+                  <SelectField
+                    value={selectedDepartments[user.id]}
+                    onChange={(e) => handleDepartmentChange(user.id, e.target.value)}
+                  >
+                    <option value="">None</option>
+                    <option value="Social Sciences">Social Sciences</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Biology">Biology</option>
+                    <option value="Psychology">Psychology</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Business">Business</option>
+                  </SelectField>
+                </TableCell>
+                <TableCell>
+                  <Flex direction="column" gap="0.5rem">
+                    <Flex direction="row" gap="0.5rem">
                       <Button
-                        onClick={() => handleCompleteProfile(user.id)}
+                        onClick={() => handleUpdateRole(user.id)}
+                        isDisabled={user.role === selectedRoles[user.id]}
+                        size="small"
+                      >
+                        Update Role
+                      </Button>
+                      <Button
+                        onClick={() => handleUpdateDepartment(user.id)}
+                        isDisabled={user.department === selectedDepartments[user.id]}
                         size="small"
                         variation="primary"
                       >
-                        Mark Complete
+                        Update Dept
                       </Button>
-                    )}
-                    <Button
-                      onClick={() => handleSyncGroups(user.id)}
-                      size="small"
-                      variation="link"
-                    >
-                      Sync Groups
-                    </Button>
+                    </Flex>
+                    <Flex direction="row" gap="0.5rem">
+                      <Button
+                        onClick={() => handleSyncGroups(user.id)}
+                        size="small"
+                        variation="link"
+                      >
+                        Sync Groups
+                      </Button>
+                    </Flex>
                   </Flex>
                 </TableCell>
               </TableRow>
