@@ -137,7 +137,7 @@ type Message @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Facu
   threadID: String @index(name: "byThread")
   projectID: ID
   messageType: MessageType
-  parentMessageID: ID
+  parentMessageID: ID @index(name: "byParent")
   parentMessage: Message @belongsTo(fields: ["parentMessageID"])
   replies: [Message] @hasMany(indexName: "byParent", fields: ["id"])
 }
