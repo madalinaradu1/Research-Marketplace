@@ -7,7 +7,8 @@ export const sendEmailNotification = async (recipientEmail, recipientName, sende
     // For now, it creates a notification record that can trigger email sending
     
     const emailData = {
-      to: recipientEmail,
+      to: 'madalina.radu1@gcu.edu', // Force to verified email for testing
+      originalRecipient: recipientEmail, // Keep track of intended recipient
       toName: recipientName,
       from: 'madalina.radu1@gcu.edu', // Use your verified email address
       fromName: 'Research Marketplace',
@@ -15,6 +16,7 @@ export const sendEmailNotification = async (recipientEmail, recipientName, sende
       htmlBody: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #552b9a;">New Message from ${senderName}</h2>
+          <p style="background-color: #fff3cd; padding: 10px; border-radius: 4px;"><strong>Note:</strong> This email was intended for ${recipientEmail} but sent to your verified address for testing.</p>
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>Project:</strong> ${projectTitle}</p>
             <p><strong>From:</strong> ${senderName}</p>
