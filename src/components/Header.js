@@ -146,6 +146,14 @@ const Header = ({ user, signOut }) => {
             My Activity
           </Text>
         </Link>
+        <Link to="/messages">
+          <Text
+            color={isActive('/messages') ? "white" : "rgba(255,255,255,0.8)"}
+            fontWeight={isActive('/messages') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
+          >
+            Messages
+          </Text>
+        </Link>
         {(user?.role === 'Student' || user?.role === 'Faculty') && (
           <Link to="/applications">
             <Text
@@ -202,6 +210,7 @@ const Header = ({ user, signOut }) => {
             <MenuItem onClick={() => navigate('/dashboard')}>Dashboard</MenuItem>
             <MenuItem onClick={() => navigate('/search')}>Search</MenuItem>
             <MenuItem onClick={() => navigate('/activity')}>My Activity</MenuItem>
+            <MenuItem onClick={() => navigate('/messages')}>Messages</MenuItem>
             {(user?.role === 'Student' || user?.role === 'Faculty') && (
               <MenuItem onClick={() => navigate('/applications')}>Applications</MenuItem>
             )}

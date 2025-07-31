@@ -3,7 +3,7 @@ import { Flex, Heading, Card, Text, Loader } from '@aws-amplify/ui-react';
 import StudentDashboard from './StudentDashboard';
 import FacultyDashboard from './FacultyDashboard';
 import CoordinatorDashboard from './CoordinatorDashboard';
-// Import other dashboards as needed
+import AdminDashboard from './AdminDashboard';
 
 const Dashboard = ({ user }) => {
   if (!user) {
@@ -23,13 +23,7 @@ const Dashboard = ({ user }) => {
     case 'Coordinator':
       return <CoordinatorDashboard user={user} />;
     case 'Admin':
-      // TODO: Implement AdminDashboard
-      return (
-        <Card padding="2rem">
-          <Heading level={2}>Admin Dashboard</Heading>
-          <Text>Admin dashboard is under development.</Text>
-        </Card>
-      );
+      return <AdminDashboard user={user} />;
     default:
       return (
         <Card padding="2rem">

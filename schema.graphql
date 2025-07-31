@@ -175,6 +175,22 @@ enum NotificationType {
   SYSTEM_ANNOUNCEMENT
 }
 
+type Message @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: private, operations: [read] }
+]) {
+  id: ID!
+  senderID: ID!
+  recipientID: ID!
+  subject: String!
+  content: String!
+  isRead: Boolean!
+  threadID: String
+  projectID: ID
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
 type Query {
   searchOpportunities(query: String!, category: String, limit: Int): [ResearchOpportunity] @function(name: "searchOpportunities")
   getRecommendedOpportunities(userId: ID!, limit: Int): [ResearchOpportunity] @function(name: "getRecommendedOpportunities")

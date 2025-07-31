@@ -18,6 +18,7 @@ import {
   View
 } from '@aws-amplify/ui-react';
 import { listProjects, listApplications, createProject, updateProject, getUser, listUsers } from '../graphql/operations';
+import { createMessage, createNotification } from '../graphql/message-operations';
 import ApplicationReview from '../components/ApplicationReview';
 
 const FacultyDashboard = ({ user }) => {
@@ -43,6 +44,9 @@ const FacultyDashboard = ({ user }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnseenApplications, setHasUnseenApplications] = useState(false);
+  const [messagingStudent, setMessagingStudent] = useState(null);
+  const [messageText, setMessageText] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
   
   useEffect(() => {
     fetchData();
@@ -607,12 +611,23 @@ const FacultyDashboard = ({ user }) => {
                         gap="1rem"
                       >
                         {(application) => (
-                          <ApplicationReview 
-                            key={application.id}
-                            application={application}
-                            userRole="Faculty"
-                            onUpdate={handleApplicationUpdate}
-                          />
+                          <Card key={application.id}>
+                            <ApplicationReview 
+                              application={application}
+                              userRole="Faculty"
+                              onUpdate={handleApplicationUpdate}
+                            />
+                            {application.status === 'Approved' && (
+                              <Button 
+                                size="small"
+                                variation="primary"
+                                marginTop="1rem"
+                                onClick={() => setMessagingStudent({ application, student: application.student })}
+                              >
+                                Message Student
+                              </Button>
+                            )}
+                          </Card>
                         )}
                       </Collection>
                     )}
@@ -623,6 +638,111 @@ const FacultyDashboard = ({ user }) => {
           )}
         </TabItem>
       </Tabs>
+      
+      {/* Direct Message Modal */}
+      {messagingStudent && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setMessagingStudent(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="600px"
+              width="100%"
+              maxHeight="80vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Flex direction="column" gap="1rem">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Heading level={4}>Message Student</Heading>
+                  <Button size="small" onClick={() => setMessagingStudent(null)}>Close</Button>
+                </Flex>
+                
+                <Divider />
+                
+                <Flex direction="column" gap="0.5rem">
+                  <Text fontWeight="bold">To: {messagingStudent.student?.name || 'Student'}</Text>
+                  <Text>Email: {messagingStudent.student?.email}</Text>
+                  <Text>Project: {messagingStudent.application?.project?.title}</Text>
+                </Flex>
+                
+                <Divider />
+                
+                <TextAreaField
+                  label="Message"
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  rows={8}
+                  placeholder="Type your message to the student here..."
+                  required
+                />
+                
+                <Flex gap="1rem">
+                  <Button 
+                    onClick={() => {
+                      setMessagingStudent(null);
+                      setMessageText('');
+                    }}
+                    variation="link"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={async () => {
+                      if (!messageText.trim()) return;
+                      
+                      setIsSendingMessage(true);
+                      try {
+                        const userId = user.id || user.username;
+                        const studentId = messagingStudent.student?.id;
+                        const projectId = messagingStudent.application?.projectID;
+                        
+                        // Create notification for student (simplified messaging)
+                        const notificationInput = {
+                          userId: studentId,
+                          type: 'MESSAGE_RECEIVED',
+                          title: `Message from ${user.name}`,
+                          message: `${user.name}: ${messageText}`,
+                          read: false,
+                          relatedItemId: projectId,
+                          relatedItemType: 'PROJECT'
+                        };
+                        
+                        await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
+                        
+                        alert('Message sent successfully! The student will receive a notification.');
+                        setMessagingStudent(null);
+                        setMessageText('');
+                      } catch (err) {
+                        console.error('Error sending message:', err);
+                        setError('Failed to send message. Please try again.');
+                      } finally {
+                        setIsSendingMessage(false);
+                      }
+                    }}
+                    variation="primary"
+                    isLoading={isSendingMessage}
+                  >
+                    Send Message
+                  </Button>
+                </Flex>
+              </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
     </Flex>
   );
 };
