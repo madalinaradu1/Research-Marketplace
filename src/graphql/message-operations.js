@@ -15,10 +15,6 @@ export const createMessage = /* GraphQL */ `
       isRead
       sentAt
       readAt
-      threadID
-      projectID
-      messageType
-      parentMessageID
     }
   }
 `;

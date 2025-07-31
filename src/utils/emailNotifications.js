@@ -67,7 +67,7 @@ View and reply at: http://localhost:3000/messages
 // Function to send email via AWS SES Lambda
 export const sendSESEmail = async (emailData) => {
   try {
-    const response = await API.post('api', '/send-email', {
+    const response = await API.post('emailapi', '/send-email', {
       body: emailData
     });
     return response;

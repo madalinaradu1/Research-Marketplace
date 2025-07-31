@@ -765,6 +765,7 @@ const FacultyDashboard = ({ user }) => {
                         
                         // Send email notification
                         try {
+                          console.log('Attempting to send email to:', messagingStudent.student?.email);
                           await sendEmailNotification(
                             messagingStudent.student?.email,
                             messagingStudent.student?.name,
@@ -775,7 +776,7 @@ const FacultyDashboard = ({ user }) => {
                           );
                           console.log('Email notification sent successfully');
                         } catch (emailError) {
-                          console.log('Email notification prepared (SES integration pending):', emailError);
+                          console.error('Email notification failed:', emailError);
                         }
                         
                         alert('Message sent successfully! Student will receive an email notification.');

@@ -100,16 +100,15 @@ const MessagesPage = ({ user }) => {
     setIsReplying(true);
     try {
       const userId = user.id || user.username;
-      const recipientId = selectedMessage.isIncoming ? selectedMessage.senderID : selectedMessage.recipientID;
+      const recipientId = selectedMessage.isIncoming ? selectedMessage.senderID : selectedMessage.receiverID;
       
       const messageInput = {
         senderID: userId,
-        recipientID: recipientId,
+        receiverID: recipientId,
         subject: `Re: ${selectedMessage.subject}`,
-        content: replyText,
+        body: replyText,
         isRead: false,
-        projectID: selectedMessage.projectID,
-        threadID: selectedMessage.threadID
+        sentAt: new Date().toISOString()
       };
       
       await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
@@ -261,7 +260,7 @@ const MessagesPage = ({ user }) => {
                       {message.subject}
                     </Text>
                     <Text fontSize="0.9rem" color="gray">
-                      {message.content.substring(0, 100)}...
+                      {(message.body || message.content || '').substring(0, 100)}...
                     </Text>
                   </Flex>
                 </Card>
@@ -291,14 +290,14 @@ const MessagesPage = ({ user }) => {
                 >
                   <Flex direction="column" gap="0.5rem">
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Text>To: {message.recipient?.name || 'Unknown'}</Text>
+                      <Text>To: {message.receiver?.name || message.recipient?.name || 'Unknown'}</Text>
                       <Text fontSize="0.8rem">
-                        {new Date(message.createdAt).toLocaleDateString()}
+                        {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
                       </Text>
                     </Flex>
                     <Text fontWeight="bold">{message.subject}</Text>
                     <Text fontSize="0.9rem" color="gray">
-                      {message.content.substring(0, 100)}...
+                      {(message.body || message.content || '').substring(0, 100)}...
                     </Text>
                   </Flex>
                 </Card>
@@ -351,7 +350,7 @@ const MessagesPage = ({ user }) => {
                 <Divider />
                 
                 <Card variation="outlined" padding="1rem">
-                  <Text whiteSpace="pre-wrap">{selectedMessage.content}</Text>
+                  <Text whiteSpace="pre-wrap">{selectedMessage.body || selectedMessage.content || 'No content'}</Text>
                 </Card>
                 
                 <Divider />
