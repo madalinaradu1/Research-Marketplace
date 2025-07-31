@@ -179,21 +179,18 @@ const MessagesPage = ({ user }) => {
       
       {error && <Text color="red">{error}</Text>}
       
-      <Card>
-        <Heading level={4}>Messaging System Setup Required</Heading>
-        <Text marginTop="1rem">
-          To enable full messaging functionality, you need to add a Message type to your GraphQL schema.
-          Currently, faculty can send notifications to students, but full messaging requires:
-        </Text>
-        <Text marginTop="1rem">
-          • Message type in schema.graphql<br/>
-          • Proper sender/recipient relationships<br/>
-          • Message threading support<br/>
-          • Read/unread status tracking
-        </Text>
-        <Text marginTop="1rem">
-          For now, faculty can send messages to students via notifications in the Faculty Dashboard.
-        </Text>
+      <Card variation="elevated">
+        <Heading level={4}>Message Summary</Heading>
+        <Flex wrap="wrap" gap="1rem" marginTop="1rem">
+          <Card variation="outlined" padding="1rem" flex="1">
+            <Heading level={5} color="blue">{getUnreadCount()}</Heading>
+            <Text>Unread Messages</Text>
+          </Card>
+          <Card variation="outlined" padding="1rem" flex="1">
+            <Heading level={5}>{messages.length}</Heading>
+            <Text>Total Messages</Text>
+          </Card>
+        </Flex>
       </Card>
       
       <Tabs

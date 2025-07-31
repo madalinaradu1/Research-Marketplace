@@ -751,6 +751,32 @@ export const getMessage = /* GraphQL */ `
       isRead
       sentAt
       readAt
+      threadID
+      projectID
+      messageType
+      parentMessageID
+      parentMessage {
+        id
+        senderID
+        receiverID
+        subject
+        body
+        isRead
+        sentAt
+        readAt
+        threadID
+        projectID
+        messageType
+        parentMessageID
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      replies {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       owner
@@ -774,6 +800,10 @@ export const listMessages = /* GraphQL */ `
         isRead
         sentAt
         readAt
+        threadID
+        projectID
+        messageType
+        parentMessageID
         createdAt
         updatedAt
         owner
@@ -808,6 +838,10 @@ export const messagesBySenderID = /* GraphQL */ `
         isRead
         sentAt
         readAt
+        threadID
+        projectID
+        messageType
+        parentMessageID
         createdAt
         updatedAt
         owner
@@ -842,6 +876,86 @@ export const messagesByReceiverID = /* GraphQL */ `
         isRead
         sentAt
         readAt
+        threadID
+        projectID
+        messageType
+        parentMessageID
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const messagesByThreadID = /* GraphQL */ `
+  query MessagesByThreadID(
+    $threadID: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelMessageFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    messagesByThreadID(
+      threadID: $threadID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        senderID
+        receiverID
+        subject
+        body
+        isRead
+        sentAt
+        readAt
+        threadID
+        projectID
+        messageType
+        parentMessageID
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const messagesByParentMessageID = /* GraphQL */ `
+  query MessagesByParentMessageID(
+    $parentMessageID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelMessageFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    messagesByParentMessageID(
+      parentMessageID: $parentMessageID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        senderID
+        receiverID
+        subject
+        body
+        isRead
+        sentAt
+        readAt
+        threadID
+        projectID
+        messageType
+        parentMessageID
         createdAt
         updatedAt
         owner

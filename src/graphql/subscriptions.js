@@ -1018,6 +1018,32 @@ export const onCreateMessage = /* GraphQL */ `
       isRead
       sentAt
       readAt
+      threadID
+      projectID
+      messageType
+      parentMessageID
+      parentMessage {
+        id
+        senderID
+        receiverID
+        subject
+        body
+        isRead
+        sentAt
+        readAt
+        threadID
+        projectID
+        messageType
+        parentMessageID
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      replies {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       owner
@@ -1091,6 +1117,32 @@ export const onUpdateMessage = /* GraphQL */ `
       isRead
       sentAt
       readAt
+      threadID
+      projectID
+      messageType
+      parentMessageID
+      parentMessage {
+        id
+        senderID
+        receiverID
+        subject
+        body
+        isRead
+        sentAt
+        readAt
+        threadID
+        projectID
+        messageType
+        parentMessageID
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      replies {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       owner
@@ -1164,6 +1216,32 @@ export const onDeleteMessage = /* GraphQL */ `
       isRead
       sentAt
       readAt
+      threadID
+      projectID
+      messageType
+      parentMessageID
+      parentMessage {
+        id
+        senderID
+        receiverID
+        subject
+        body
+        isRead
+        sentAt
+        readAt
+        threadID
+        projectID
+        messageType
+        parentMessageID
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      replies {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       owner
