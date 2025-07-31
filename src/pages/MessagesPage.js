@@ -17,6 +17,7 @@ import {
 } from '@aws-amplify/ui-react';
 import { listUsers } from '../graphql/operations';
 import { listMessages, updateMessage, createMessage, createNotification, getMessageThread } from '../graphql/message-operations';
+import { sendEmailNotification } from '../utils/emailNotifications';
 
 const MessagesPage = ({ user }) => {
   const [messages, setMessages] = useState([]);
@@ -126,6 +127,22 @@ const MessagesPage = ({ user }) => {
       };
       
       await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
+      
+      // Send email notification for reply
+      try {
+        const recipient = users.find(u => u.id === recipientId);
+        await sendEmailNotification(
+          recipient?.email,
+          recipient?.name,
+          user.name,
+          `Re: ${selectedMessage.subject}`,
+          replyText,
+          selectedMessage.projectID ? 'Research Project' : 'Direct Message'
+        );
+        console.log('Reply email notification sent successfully');
+      } catch (emailError) {
+        console.log('Reply email notification prepared (SES integration pending):', emailError);
+      }
       
       setReplyText('');
       setSelectedMessage(null);
