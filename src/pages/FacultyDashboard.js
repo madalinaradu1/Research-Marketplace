@@ -709,20 +709,29 @@ const FacultyDashboard = ({ user }) => {
                         const studentId = messagingStudent.student?.id;
                         const projectId = messagingStudent.application?.projectID;
                         
-                        // Create notification for student (simplified messaging)
+                        // Create message in database
+                        const messageInput = {
+                          senderID: userId,
+                          receiverID: studentId,
+                          subject: `Research Project: ${messagingStudent.application?.project?.title}`,
+                          body: messageText,
+                          isRead: false,
+                          sentAt: new Date().toISOString()
+                        };
+                        
+                        await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
+                        
+                        // Also create notification
                         const notificationInput = {
-                          userId: studentId,
+                          userID: studentId,
                           type: 'MESSAGE_RECEIVED',
-                          title: `Message from ${user.name}`,
-                          message: `${user.name}: ${messageText}`,
-                          read: false,
-                          relatedItemId: projectId,
-                          relatedItemType: 'PROJECT'
+                          message: `New message from ${user.name} about ${messagingStudent.application?.project?.title}`,
+                          isRead: false
                         };
                         
                         await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
                         
-                        alert('Message sent successfully! The student will receive a notification.');
+                        alert('Message sent successfully!');
                         setMessagingStudent(null);
                         setMessageText('');
                       } catch (err) {

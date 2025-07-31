@@ -16,7 +16,7 @@ import {
   View
 } from '@aws-amplify/ui-react';
 import { listUsers } from '../graphql/operations';
-import { createNotification } from '../graphql/message-operations';
+import { listMessages, updateMessage, createMessage, createNotification } from '../graphql/message-operations';
 
 const MessagesPage = ({ user }) => {
   const [messages, setMessages] = useState([]);
@@ -39,12 +39,39 @@ const MessagesPage = ({ user }) => {
     try {
       const userId = user.id || user.username;
       
-      // For now, show a simple message that the full messaging system needs Message schema
-      setMessages([]);
-      setUsers([]);
+      // Fetch all messages for this user
+      const messageResult = await API.graphql(graphqlOperation(listMessages, { 
+        limit: 100
+      }));
+      
+      // Fetch all users for name lookup
+      const usersResult = await API.graphql(graphqlOperation(listUsers, { 
+        limit: 100
+      }));
+      
+      const allMessages = messageResult.data.listMessages.items;
+      const allUsers = usersResult.data.listUsers.items;
+      
+      // Filter messages for current user (sent or received)
+      const userMessages = allMessages
+        .filter(msg => msg.senderID === userId || msg.receiverID === userId)
+        .map(msg => {
+          const sender = allUsers.find(u => u.id === msg.senderID) || msg.sender;
+          const receiver = allUsers.find(u => u.id === msg.receiverID) || msg.receiver;
+          return {
+            ...msg,
+            sender,
+            receiver,
+            isIncoming: msg.receiverID === userId
+          };
+        })
+        .sort((a, b) => new Date(b.sentAt || b.createdAt) - new Date(a.sentAt || a.createdAt));
+      
+      setMessages(userMessages);
+      setUsers(allUsers);
     } catch (err) {
       console.error('Error fetching messages:', err);
-      setError('Messaging system requires Message table schema to be added to GraphQL.');
+      setError('Failed to load messages. Please try again.');
     } finally {
       setLoading(false);
     }

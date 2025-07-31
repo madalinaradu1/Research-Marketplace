@@ -1,42 +1,50 @@
 /* eslint-disable */
-// Simplified messaging using Notification table
+// Message operations using existing Message schema
 
 export const createMessage = /* GraphQL */ `
-  mutation CreateNotification(
-    $input: CreateNotificationInput!
-    $condition: ModelNotificationConditionInput
+  mutation CreateMessage(
+    $input: CreateMessageInput!
+    $condition: ModelMessageConditionInput
   ) {
-    createNotification(input: $input, condition: $condition) {
+    createMessage(input: $input, condition: $condition) {
       id
-      userId
-      type
-      title
-      message
-      read
-      relatedItemId
-      relatedItemType
-      createdAt
+      senderID
+      receiverID
+      subject
+      body
+      isRead
+      sentAt
+      readAt
     }
   }
 `;
 
 export const listMessages = /* GraphQL */ `
-  query ListNotifications(
-    $filter: ModelNotificationFilterInput
+  query ListMessages(
+    $filter: ModelMessageFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    listNotifications(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    listMessages(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        userId
-        type
-        title
-        message
-        read
-        relatedItemId
-        relatedItemType
-        createdAt
+        senderID
+        receiverID
+        subject
+        body
+        isRead
+        sentAt
+        readAt
+        sender {
+          id
+          name
+          email
+        }
+        receiver {
+          id
+          name
+          email
+        }
       }
       nextToken
     }
@@ -44,20 +52,19 @@ export const listMessages = /* GraphQL */ `
 `;
 
 export const updateMessage = /* GraphQL */ `
-  mutation UpdateNotification(
-    $input: UpdateNotificationInput!
-    $condition: ModelNotificationConditionInput
+  mutation UpdateMessage(
+    $input: UpdateMessageInput!
+    $condition: ModelMessageConditionInput
   ) {
-    updateNotification(input: $input, condition: $condition) {
+    updateMessage(input: $input, condition: $condition) {
       id
-      userId
-      type
-      title
-      message
-      read
-      relatedItemId
-      relatedItemType
-      createdAt
+      senderID
+      receiverID
+      subject
+      body
+      isRead
+      sentAt
+      readAt
     }
   }
 `;
@@ -69,13 +76,10 @@ export const createNotification = /* GraphQL */ `
   ) {
     createNotification(input: $input, condition: $condition) {
       id
-      userId
+      userID
       type
-      title
       message
-      read
-      relatedItemId
-      relatedItemType
+      isRead
       createdAt
     }
   }
