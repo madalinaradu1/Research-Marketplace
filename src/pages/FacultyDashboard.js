@@ -751,7 +751,10 @@ const FacultyDashboard = ({ user }) => {
                           messageType: 'PROJECT_RELATED'
                         };
                         
-                        await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
+                        console.log('Creating message with input:', messageInput);
+                        const messageResult = await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
+                        console.log('Message created successfully:', messageResult);
+                        console.log('Created message data:', messageResult.data.createMessage);
                         
                         // Also create notification
                         const notificationInput = {
@@ -784,6 +787,7 @@ const FacultyDashboard = ({ user }) => {
                         setMessageText('');
                       } catch (err) {
                         console.error('Error sending message:', err);
+                        console.error('Full error details:', JSON.stringify(err, null, 2));
                         setError('Failed to send message. Please try again.');
                       } finally {
                         setIsSendingMessage(false);

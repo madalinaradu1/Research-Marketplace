@@ -146,13 +146,24 @@ const Header = ({ user, signOut }) => {
             My Activity
           </Text>
         </Link>
-        <Link to="/messages">
+        <Link to="/messages" style={{ position: 'relative' }}>
           <Text
             color={isActive('/messages') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/messages') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
           >
             Messages
           </Text>
+          {/* Unread message badge - placeholder for now */}
+          <View
+            position="absolute"
+            top="-8px"
+            right="-8px"
+            width="16px"
+            height="16px"
+            borderRadius="50%"
+            backgroundColor="red"
+            style={{ display: 'none' }} // Will be controlled by unread count
+          />
         </Link>
         {(user?.role === 'Student' || user?.role === 'Faculty') && (
           <Link to="/applications">

@@ -43,21 +43,39 @@ const MessagesPage = ({ user }) => {
       const userId = user.id || user.username;
       
       // Fetch all messages for this user
+      console.log('Fetching messages...');
       const messageResult = await API.graphql(graphqlOperation(listMessages, { 
         limit: 100
       }));
+      console.log('Message result:', JSON.stringify(messageResult, null, 2));
+      
+      if (messageResult.errors) {
+        console.error('GraphQL errors in listMessages:', messageResult.errors);
+      }
       
       // Fetch all users for name lookup
       const usersResult = await API.graphql(graphqlOperation(listUsers, { 
         limit: 100
       }));
       
-      const allMessages = messageResult.data.listMessages.items;
+      const allMessages = messageResult.data?.listMessages?.items || [];
+      console.log('Items from listMessages:', messageResult.data?.listMessages);
       const allUsers = usersResult.data.listUsers.items;
       
+      console.log('Raw messages from DB:', allMessages);
+      console.log('Users:', allUsers);
+      
       // Filter messages for current user (sent or received)
+      console.log('Current user ID:', userId);
+      console.log('All messages:', allMessages);
+      
       const userMessages = allMessages
-        .filter(msg => msg.senderID === userId || msg.receiverID === userId)
+        .filter(msg => {
+          const isSender = msg.senderID === userId;
+          const isReceiver = msg.receiverID === userId;
+          console.log(`Message ${msg.id}: sender=${msg.senderID}, receiver=${msg.receiverID}, isSender=${isSender}, isReceiver=${isReceiver}`);
+          return isSender || isReceiver;
+        })
         .map(msg => {
           const sender = allUsers.find(u => u.id === msg.senderID) || msg.sender;
           const receiver = allUsers.find(u => u.id === msg.receiverID) || msg.receiver;
@@ -111,18 +129,17 @@ const MessagesPage = ({ user }) => {
         sentAt: new Date().toISOString()
       };
       
+      console.log('Sending message with input:', messageInput);
       await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
+      console.log('Message sent successfully');
       
       // Create notification
       const recipient = users.find(u => u.id === recipientId);
       const notificationInput = {
-        userId: recipientId,
+        userID: recipientId,
         type: 'MESSAGE_RECEIVED',
-        title: 'New Reply',
         message: `You have a new reply from ${user.name}`,
-        read: false,
-        relatedItemId: selectedMessage.projectID,
-        relatedItemType: 'PROJECT'
+        isRead: false
       };
       
       await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
@@ -148,6 +165,12 @@ const MessagesPage = ({ user }) => {
       fetchData(); // Refresh messages
     } catch (err) {
       console.error('Error sending reply:', err);
+      if (err.errors) {
+        err.errors.forEach((error, index) => {
+          console.error(`GraphQL Error ${index + 1}:`, error.message);
+          console.error('Error details:', error);
+        });
+      }
       setError('Failed to send reply. Please try again.');
     } finally {
       setIsReplying(false);

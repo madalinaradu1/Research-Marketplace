@@ -35,32 +35,8 @@ export const listMessages = /* GraphQL */ `
         isRead
         sentAt
         readAt
-        threadID
-        projectID
-        messageType
-        parentMessageID
-        sender {
-          id
-          name
-          email
-        }
-        receiver {
-          id
-          name
-          email
-        }
-        replies {
-          items {
-            id
-            senderID
-            body
-            sentAt
-            sender {
-              id
-              name
-            }
-          }
-        }
+        createdAt
+        updatedAt
       }
       nextToken
     }
