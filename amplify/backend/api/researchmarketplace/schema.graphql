@@ -134,6 +134,19 @@ type Message @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Facu
   isRead: Boolean
   sentAt: AWSDateTime
   readAt: AWSDateTime
+  threadID: String @index(name: "byThread")
+  projectID: ID
+  messageType: MessageType
+  parentMessageID: ID
+  parentMessage: Message @belongsTo(fields: ["parentMessageID"])
+  replies: [Message] @hasMany(indexName: "byParent", fields: ["id"])
+}
+
+enum MessageType {
+  DIRECT
+  PROJECT_RELATED
+  SYSTEM
+  REPLY
 }
 
 type Notification @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {

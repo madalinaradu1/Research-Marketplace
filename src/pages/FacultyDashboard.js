@@ -709,14 +709,18 @@ const FacultyDashboard = ({ user }) => {
                         const studentId = messagingStudent.student?.id;
                         const projectId = messagingStudent.application?.projectID;
                         
-                        // Create message in database
+                        // Create message in database with threading
+                        const threadId = `${userId}-${studentId}-${projectId}`;
                         const messageInput = {
                           senderID: userId,
                           receiverID: studentId,
                           subject: `Research Project: ${messagingStudent.application?.project?.title}`,
                           body: messageText,
                           isRead: false,
-                          sentAt: new Date().toISOString()
+                          sentAt: new Date().toISOString(),
+                          threadID: threadId,
+                          projectID: projectId,
+                          messageType: 'PROJECT_RELATED'
                         };
                         
                         await API.graphql(graphqlOperation(createMessage, { input: messageInput }));

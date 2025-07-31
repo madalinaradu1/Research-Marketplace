@@ -15,6 +15,10 @@ export const createMessage = /* GraphQL */ `
       isRead
       sentAt
       readAt
+      threadID
+      projectID
+      messageType
+      parentMessageID
     }
   }
 `;
@@ -35,6 +39,10 @@ export const listMessages = /* GraphQL */ `
         isRead
         sentAt
         readAt
+        threadID
+        projectID
+        messageType
+        parentMessageID
         sender {
           id
           name
@@ -44,6 +52,18 @@ export const listMessages = /* GraphQL */ `
           id
           name
           email
+        }
+        replies {
+          items {
+            id
+            senderID
+            body
+            sentAt
+            sender {
+              id
+              name
+            }
+          }
         }
       }
       nextToken
@@ -65,6 +85,39 @@ export const updateMessage = /* GraphQL */ `
       isRead
       sentAt
       readAt
+      threadID
+      projectID
+      messageType
+    }
+  }
+`;
+
+export const getMessageThread = /* GraphQL */ `
+  query GetMessageThread($threadID: String!) {
+    listMessages(filter: {threadID: {eq: $threadID}}) {
+      items {
+        id
+        senderID
+        receiverID
+        subject
+        body
+        isRead
+        sentAt
+        readAt
+        threadID
+        messageType
+        parentMessageID
+        sender {
+          id
+          name
+          email
+        }
+        receiver {
+          id
+          name
+          email
+        }
+      }
     }
   }
 `;

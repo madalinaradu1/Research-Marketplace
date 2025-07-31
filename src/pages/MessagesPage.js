@@ -16,7 +16,7 @@ import {
   View
 } from '@aws-amplify/ui-react';
 import { listUsers } from '../graphql/operations';
-import { listMessages, updateMessage, createMessage, createNotification } from '../graphql/message-operations';
+import { listMessages, updateMessage, createMessage, createNotification, getMessageThread } from '../graphql/message-operations';
 
 const MessagesPage = ({ user }) => {
   const [messages, setMessages] = useState([]);
@@ -27,6 +27,8 @@ const MessagesPage = ({ user }) => {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [isReplying, setIsReplying] = useState(false);
+  const [threadMessages, setThreadMessages] = useState([]);
+  const [showThread, setShowThread] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -139,6 +141,29 @@ const MessagesPage = ({ user }) => {
   const getInboxMessages = () => messages.filter(msg => msg.isIncoming);
   const getSentMessages = () => messages.filter(msg => !msg.isIncoming);
   const getUnreadCount = () => messages.filter(msg => msg.isIncoming && !msg.isRead).length;
+  
+  const viewThread = async (message) => {
+    if (!message.threadID) {
+      setSelectedMessage(message);
+      return;
+    }
+    
+    try {
+      const threadResult = await API.graphql(graphqlOperation(getMessageThread, { 
+        threadID: message.threadID 
+      }));
+      
+      const threadMsgs = threadResult.data.listMessages.items
+        .sort((a, b) => new Date(a.sentAt) - new Date(b.sentAt));
+      
+      setThreadMessages(threadMsgs);
+      setSelectedMessage(message);
+      setShowThread(true);
+    } catch (err) {
+      console.error('Error fetching thread:', err);
+      setSelectedMessage(message);
+    }
+  };
 
   if (loading) {
     return (
