@@ -48,6 +48,7 @@ const FacultyDashboard = ({ user }) => {
   const [messagingStudent, setMessagingStudent] = useState(null);
   const [messageText, setMessageText] = useState('');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [reviewingApplication, setReviewingApplication] = useState(null);
   
   useEffect(() => {
     fetchData();
@@ -606,28 +607,54 @@ const FacultyDashboard = ({ user }) => {
                       <Text>No applications for this project yet.</Text>
                     ) : (
                       <Collection
-                        items={projectApplications}
-                        type="grid"
-                        templateColumns="repeat(3, 1fr)"
+                        items={projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
+                        type="list"
                         gap="1rem"
+                        wrap="nowrap"
+                        direction="column"
                       >
                         {(application) => (
                           <Card key={application.id}>
-                            <ApplicationReview 
-                              application={application}
-                              userRole="Faculty"
-                              onUpdate={handleApplicationUpdate}
-                            />
-                            {application.status === 'Approved' && (
-                              <Button 
-                                size="small"
-                                variation="primary"
-                                marginTop="1rem"
-                                onClick={() => setMessagingStudent({ application, student: application.student })}
-                              >
-                                Message Student
-                              </Button>
-                            )}
+                            <Flex justifyContent="space-between" alignItems="center">
+                              <Flex direction="row" gap="3rem" alignItems="center">
+                                <Text fontWeight="bold" minWidth="150px">{application.student?.name || 'Unknown Student'}</Text>
+                                <Text fontSize="0.9rem" minWidth="200px">{application.student?.email}</Text>
+                                <Text fontSize="0.9rem" minWidth="100px">{new Date(application.createdAt).toLocaleDateString()}</Text>
+                              </Flex>
+                              
+                              <Flex gap="1rem" alignItems="center">
+                                <Badge 
+                                  backgroundColor={
+                                    application.status === 'Approved' ? 'green' :
+                                    application.status === 'Faculty Review' ? 'blue' :
+                                    application.status === 'Department Review' ? 'purple' :
+                                    application.status === 'Admin Review' ? 'orange' :
+                                    application.status === 'Returned' ? 'yellow' :
+                                    application.status === 'Rejected' ? 'red' : 'gray'
+                                  }
+                                  color="white"
+                                >
+                                  {application.status}
+                                </Badge>
+                                
+                                <Button 
+                                  size="small"
+                                  onClick={() => setReviewingApplication(application)}
+                                >
+                                  Review
+                                </Button>
+                                
+                                {application.status === 'Approved' && (
+                                  <Button 
+                                    size="small"
+                                    variation="primary"
+                                    onClick={() => setMessagingStudent({ application, student: application.student })}
+                                  >
+                                    Message
+                                  </Button>
+                                )}
+                              </Flex>
+                            </Flex>
                           </Card>
                         )}
                       </Collection>
@@ -768,6 +795,50 @@ const FacultyDashboard = ({ user }) => {
                   </Button>
                 </Flex>
               </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* Application Review Modal */}
+      {reviewingApplication && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setReviewingApplication(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="800px"
+              width="100%"
+              maxHeight="90vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ApplicationReview 
+                application={reviewingApplication}
+                userRole="Faculty"
+                onUpdate={() => {
+                  handleApplicationUpdate();
+                  setReviewingApplication(null);
+                }}
+              />
+              <Button 
+                onClick={() => setReviewingApplication(null)}
+                marginTop="1rem"
+              >
+                Close
+              </Button>
             </Card>
           </Flex>
         </View>

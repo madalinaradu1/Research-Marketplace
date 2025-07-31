@@ -83,9 +83,9 @@ const AdminDashboard = ({ user }) => {
       const allProjects = projectResult.data.listProjects.items;
       const allUsers = usersResult.data.listUsers.items;
       
-      // Filter applications for admin review and enrich with data
+      // Filter applications for admin level (Admin Review and Approved) and enrich with data
       const adminApplications = allApplications
-        .filter(app => app.status === 'Admin Review')
+        .filter(app => ['Admin Review', 'Approved'].includes(app.status))
         .map(app => {
           const project = allProjects.find(p => p.id === app.projectID);
           const student = allUsers.find(u => u.id === app.studentID);
