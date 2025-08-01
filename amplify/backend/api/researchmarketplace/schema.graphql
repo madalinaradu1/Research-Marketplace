@@ -123,7 +123,7 @@ type MessageBoard @model @auth(rules: [{allow: groups, groups: ["Faculty", "Coor
   updatedAt: AWSDateTime
 }
 
-type Message @model @auth(rules: [{allow: owner}, {allow: private, operations: [read, update]}, {allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}]) {
+type Message @model @auth(rules: [{allow: owner}, {allow: private, operations: [read, update, create]}, {allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}]) {
   id: ID!
   senderID: ID! @index(name: "bySender")
   sender: User @belongsTo(fields: ["senderID"])
