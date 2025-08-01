@@ -218,19 +218,7 @@ const MessagesPage = ({ user }) => {
       
       {error && <Text color="red">{error}</Text>}
       
-      <Card variation="elevated">
-        <Heading level={4}>Message Summary</Heading>
-        <Flex wrap="wrap" gap="1rem" marginTop="1rem">
-          <Card variation="outlined" padding="1rem" flex="1">
-            <Heading level={5} color="blue">{getUnreadCount()}</Heading>
-            <Text>Unread Messages</Text>
-          </Card>
-          <Card variation="outlined" padding="1rem" flex="1">
-            <Heading level={5}>{messages.length}</Heading>
-            <Text>Total Messages</Text>
-          </Card>
-        </Flex>
-      </Card>
+
       
       <Tabs
         currentIndex={activeTabIndex}
@@ -364,8 +352,8 @@ const MessagesPage = ({ user }) => {
                 <Divider />
                 
                 <Flex direction="column" gap="0.5rem">
-                  <Text><strong>From:</strong> {selectedMessage.sender?.name}</Text>
-                  <Text><strong>To:</strong> {selectedMessage.recipient?.name}</Text>
+                  <Text><strong>From:</strong> {selectedMessage.sender?.name || 'Unknown'}</Text>
+                  <Text><strong>To:</strong> {selectedMessage.receiver?.name || 'Unknown'}</Text>
                   <Text><strong>Subject:</strong> {selectedMessage.subject}</Text>
                   <Text><strong>Date:</strong> {new Date(selectedMessage.createdAt).toLocaleString()}</Text>
                 </Flex>
