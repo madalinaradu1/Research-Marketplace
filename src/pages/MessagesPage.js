@@ -410,7 +410,8 @@ const MessagesPage = ({ user }) => {
                   </Button>
                   <Button 
                     onClick={sendReply}
-                    variation="primary"
+                    backgroundColor="#552b9a"
+                    color="white"
                     isLoading={isReplying}
                     isDisabled={!replyText.trim()}
                   >
