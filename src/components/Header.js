@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { API, graphqlOperation } from 'aws-amplify';
+import { listMessages } from '../graphql/message-operations';
 import {
   Flex,
   Image,
@@ -37,6 +39,7 @@ const Header = ({ user, signOut }) => {
     }
   }} = useTheme() || {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Check if the current path matches the given path
   const isActive = (path) => {
@@ -48,6 +51,41 @@ const Header = ({ user, signOut }) => {
     signOut();
     navigate('/');
   };
+  
+  const fetchUnreadCount = async () => {
+    if (!user) return;
+    
+    try {
+      const userId = user.id || user.username;
+      const messageResult = await API.graphql(graphqlOperation(listMessages, { 
+        limit: 100
+      }));
+      
+      const allMessages = messageResult.data?.listMessages?.items || [];
+      const unreadMessages = allMessages.filter(msg => 
+        msg.receiverID === userId && !msg.isRead
+      );
+      
+      setUnreadCount(unreadMessages.length);
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchUnreadCount();
+    
+    // Poll for new messages every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+  
+  useEffect(() => {
+    // Clear unread count when visiting messages page
+    if (location.pathname === '/messages') {
+      setUnreadCount(0);
+    }
+  }, [location.pathname]);
 
   return (
     <Flex
@@ -153,17 +191,24 @@ const Header = ({ user, signOut }) => {
           >
             Messages
           </Text>
-          {/* Unread message badge - placeholder for now */}
-          <View
-            position="absolute"
-            top="-8px"
-            right="-8px"
-            width="16px"
-            height="16px"
-            borderRadius="50%"
-            backgroundColor="red"
-            style={{ display: 'none' }} // Will be controlled by unread count
-          />
+          {unreadCount > 0 && (
+            <View
+              position="absolute"
+              top="-8px"
+              right="-8px"
+              width="16px"
+              height="16px"
+              borderRadius="50%"
+              backgroundColor="red"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text fontSize="10px" color="white" fontWeight="bold">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </Text>
+            </View>
+          )}
         </Link>
         {(user?.role === 'Student' || user?.role === 'Faculty') && (
           <Link to="/applications">

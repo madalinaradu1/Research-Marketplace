@@ -107,8 +107,8 @@ const MessagesPage = ({ user }) => {
             thread: sortedThread,
             threadId: sortedThread[0].threadID || `${Math.min(latestMessage.senderID, latestMessage.receiverID)}-${Math.max(latestMessage.senderID, latestMessage.receiverID)}`,
             hasUnread: sortedThread.some(msg => msg.isIncoming && !msg.isRead),
-            // Categorize based on the latest message sender
-            isIncoming: latestMessage.receiverID === userId
+            // Keep all conversations in inbox
+            isIncoming: true
           };
         })
         .sort((a, b) => new Date(b.sentAt || b.createdAt) - new Date(a.sentAt || a.createdAt));
@@ -204,8 +204,8 @@ const MessagesPage = ({ user }) => {
     }
   };
 
-  const getInboxMessages = () => messages.filter(msg => msg.isIncoming);
-  const getSentMessages = () => messages.filter(msg => !msg.isIncoming);
+  const getInboxMessages = () => messages;
+  const getSentMessages = () => [];
   const getUnreadCount = () => messages.filter(msg => msg.hasUnread).length;
   
   const viewThread = async (message) => {
@@ -317,41 +317,10 @@ const MessagesPage = ({ user }) => {
           )}
         </TabItem>
         
-        <TabItem title="Sent">
-          {getSentMessages().length === 0 ? (
-            <Card>
-              <Text>No sent messages.</Text>
-            </Card>
-          ) : (
-            <Collection
-              items={getSentMessages()}
-              type="list"
-              gap="1rem"
-              wrap="nowrap"
-              direction="column"
-            >
-              {(message) => (
-                <Card 
-                  key={message.id}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => setSelectedMessage(message)}
-                >
-                  <Flex direction="column" gap="0.5rem">
-                    <Flex justifyContent="space-between" alignItems="center">
-                      <Text>To: {message.receiver?.name || message.recipient?.name || 'Unknown'}</Text>
-                      <Text fontSize="0.8rem">
-                        {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
-                      </Text>
-                    </Flex>
-                    <Text fontWeight="bold">{message.subject}</Text>
-                    <Text fontSize="0.9rem" color="gray">
-                      {(message.body || message.content || '').substring(0, 100)}...
-                    </Text>
-                  </Flex>
-                </Card>
-              )}
-            </Collection>
-          )}
+        <TabItem title="All Messages">
+          <Card>
+            <Text>All conversations are shown in the Inbox tab above.</Text>
+          </Card>
         </TabItem>
       </Tabs>
       
