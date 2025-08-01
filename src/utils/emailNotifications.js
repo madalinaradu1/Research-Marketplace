@@ -28,7 +28,7 @@ export const sendEmailNotification = async (recipientEmail, recipientName, sende
           </div>
           <div style="margin-top: 20px; padding: 15px; background-color: #e7f3ff; border-radius: 8px;">
             <p style="margin: 0; font-size: 14px;">
-              <a href="http://localhost:3000/messages" style="color: #552b9a; text-decoration: none;">
+              <a href="https://master.d33ubw0r59z0k8.amplifyapp.com/messages" style="color: #552b9a; text-decoration: none;">
                 Click here to view and reply to this message in the Research Marketplace
               </a>
             </p>
@@ -47,7 +47,7 @@ Subject: ${messageSubject}
 Message:
 ${messageBody}
 
-View and reply at: http://localhost:3000/messages
+View and reply at: https://master.d33ubw0r59z0k8.amplifyapp.com/messages
       `
     };
 
