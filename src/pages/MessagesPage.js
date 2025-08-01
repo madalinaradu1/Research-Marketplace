@@ -85,10 +85,33 @@ const MessagesPage = ({ user }) => {
             receiver,
             isIncoming: msg.receiverID === userId
           };
+        });
+      
+      // Group messages by thread
+      const threadGroups = {};
+      userMessages.forEach(msg => {
+        const threadId = msg.threadID || `${Math.min(msg.senderID, msg.receiverID)}-${Math.max(msg.senderID, msg.receiverID)}`;
+        if (!threadGroups[threadId]) {
+          threadGroups[threadId] = [];
+        }
+        threadGroups[threadId].push(msg);
+      });
+      
+      // Convert to array of conversations, showing latest message first
+      const conversations = Object.values(threadGroups)
+        .map(thread => {
+          const sortedThread = thread.sort((a, b) => new Date(a.sentAt || a.createdAt) - new Date(b.sentAt || b.createdAt));
+          const latestMessage = sortedThread[sortedThread.length - 1];
+          return {
+            ...latestMessage,
+            thread: sortedThread,
+            threadId: sortedThread[0].threadID || `${Math.min(latestMessage.senderID, latestMessage.receiverID)}-${Math.max(latestMessage.senderID, latestMessage.receiverID)}`,
+            hasUnread: sortedThread.some(msg => msg.isIncoming && !msg.isRead)
+          };
         })
         .sort((a, b) => new Date(b.sentAt || b.createdAt) - new Date(a.sentAt || a.createdAt));
       
-      setMessages(userMessages);
+      setMessages(conversations);
       setUsers(allUsers);
     } catch (err) {
       console.error('Error fetching messages:', err);
@@ -123,10 +146,12 @@ const MessagesPage = ({ user }) => {
       const messageInput = {
         senderID: userId,
         receiverID: recipientId,
-        subject: `Re: ${selectedMessage.subject}`,
+        subject: selectedMessage.subject.startsWith('Re:') ? selectedMessage.subject : `Re: ${selectedMessage.subject}`,
         body: replyText,
         isRead: false,
-        sentAt: new Date().toISOString()
+        sentAt: new Date().toISOString(),
+        threadID: selectedMessage.threadID || `${Math.min(userId, recipientId)}-${Math.max(userId, recipientId)}`,
+        messageType: 'REPLY'
       };
       
       console.log('Sending message with input:', messageInput);
@@ -179,7 +204,7 @@ const MessagesPage = ({ user }) => {
 
   const getInboxMessages = () => messages.filter(msg => msg.isIncoming);
   const getSentMessages = () => messages.filter(msg => !msg.isIncoming);
-  const getUnreadCount = () => messages.filter(msg => msg.isIncoming && !msg.isRead).length;
+  const getUnreadCount = () => messages.filter(msg => msg.hasUnread).length;
   
   const viewThread = async (message) => {
     if (!message.threadID) {
@@ -253,21 +278,31 @@ const MessagesPage = ({ user }) => {
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
                     setSelectedMessage(message);
-                    if (!message.isRead) {
-                      markAsRead(message.id);
-                    }
+                    // Mark all unread messages in thread as read
+                    message.thread?.forEach(msg => {
+                      if (msg.isIncoming && !msg.isRead) {
+                        markAsRead(msg.id);
+                      }
+                    });
                   }}
                 >
                   <Flex direction="column" gap="0.5rem">
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Text fontWeight={message.isRead ? 'normal' : 'bold'}>
-                        From: {message.sender?.name || 'Unknown'}
+                      <Text fontWeight={message.hasUnread ? 'bold' : 'normal'}>
+                        {message.isIncoming ? `From: ${message.sender?.name || 'Unknown'}` : `To: ${message.receiver?.name || 'Unknown'}`}
                       </Text>
-                      <Text fontSize="0.8rem">
-                        {new Date(message.createdAt).toLocaleDateString()}
-                      </Text>
+                      <Flex alignItems="center" gap="0.5rem">
+                        <Text fontSize="0.8rem">
+                          {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
+                        </Text>
+                        {message.thread && message.thread.length > 1 && (
+                          <Badge backgroundColor="blue" color="white" fontSize="0.7rem">
+                            {message.thread.length}
+                          </Badge>
+                        )}
+                      </Flex>
                     </Flex>
-                    <Text fontWeight={message.isRead ? 'normal' : 'bold'}>
+                    <Text fontWeight={message.hasUnread ? 'bold' : 'normal'}>
                       {message.subject}
                     </Text>
                     <Text fontSize="0.9rem" color="gray">
@@ -352,17 +387,35 @@ const MessagesPage = ({ user }) => {
                 <Divider />
                 
                 <Flex direction="column" gap="0.5rem">
-                  <Text><strong>From:</strong> {selectedMessage.sender?.name || 'Unknown'}</Text>
-                  <Text><strong>To:</strong> {selectedMessage.receiver?.name || 'Unknown'}</Text>
                   <Text><strong>Subject:</strong> {selectedMessage.subject}</Text>
-                  <Text><strong>Date:</strong> {new Date(selectedMessage.createdAt).toLocaleString()}</Text>
+                  <Text><strong>Conversation with:</strong> {selectedMessage.isIncoming ? selectedMessage.sender?.name : selectedMessage.receiver?.name}</Text>
                 </Flex>
                 
                 <Divider />
                 
-                <Card variation="outlined" padding="1rem">
-                  <Text whiteSpace="pre-wrap">{selectedMessage.body || selectedMessage.content || 'No content'}</Text>
-                </Card>
+                {/* Show full conversation thread */}
+                <Flex direction="column" gap="1rem" maxHeight="400px" style={{ overflowY: 'auto' }}>
+                  {(selectedMessage.thread || [selectedMessage]).map((msg, index) => (
+                    <Card 
+                      key={msg.id || index}
+                      variation="outlined" 
+                      padding="1rem"
+                      backgroundColor={msg.senderID === (user.id || user.username) ? '#f0f8ff' : '#f9f9f9'}
+                    >
+                      <Flex direction="column" gap="0.5rem">
+                        <Flex justifyContent="space-between" alignItems="center">
+                          <Text fontSize="0.9rem" fontWeight="bold">
+                            {msg.senderID === (user.id || user.username) ? 'You' : (msg.sender?.name || 'Unknown')}
+                          </Text>
+                          <Text fontSize="0.8rem" color="gray">
+                            {new Date(msg.sentAt || msg.createdAt).toLocaleString()}
+                          </Text>
+                        </Flex>
+                        <Text whiteSpace="pre-wrap">{msg.body || msg.content || 'No content'}</Text>
+                      </Flex>
+                    </Card>
+                  ))}
+                </Flex>
                 
                 <Divider />
                 
