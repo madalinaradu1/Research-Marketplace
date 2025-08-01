@@ -106,7 +106,9 @@ const MessagesPage = ({ user }) => {
             ...latestMessage,
             thread: sortedThread,
             threadId: sortedThread[0].threadID || `${Math.min(latestMessage.senderID, latestMessage.receiverID)}-${Math.max(latestMessage.senderID, latestMessage.receiverID)}`,
-            hasUnread: sortedThread.some(msg => msg.isIncoming && !msg.isRead)
+            hasUnread: sortedThread.some(msg => msg.isIncoming && !msg.isRead),
+            // Categorize based on the latest message sender
+            isIncoming: latestMessage.receiverID === userId
           };
         })
         .sort((a, b) => new Date(b.sentAt || b.createdAt) - new Date(a.sentAt || a.createdAt));
