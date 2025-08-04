@@ -16,6 +16,7 @@ import {
   View
 } from '@aws-amplify/ui-react';
 import { listProjects, listUsers } from '../graphql/operations';
+import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 
 const SearchPage = ({ user }) => {
   const [projects, setProjects] = useState([]);
@@ -29,6 +30,8 @@ const SearchPage = ({ user }) => {
   const [sortBy, setSortBy] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const resultsPerPage = 10;
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
 
   const departments = [
     'Computer Science',
@@ -262,9 +265,6 @@ const SearchPage = ({ user }) => {
         <Text>
           {filteredProjects.length} project{filteredProjects.length !== 1 ? 's' : ''} found
           {searchTerm && ` for "${searchTerm}"`}
-          {filteredProjects.length > resultsPerPage && (
-            <span> • Showing {startIndex + 1}-{Math.min(endIndex, filteredProjects.length)} of {filteredProjects.length}</span>
-          )}
         </Text>
         {totalPages > 1 && (
           <Text fontSize="0.9rem" color="gray">
@@ -345,8 +345,8 @@ const SearchPage = ({ user }) => {
                       size="small" 
                       variation="primary"
                       onClick={() => {
-                        // Navigate to application page
-                        window.location.href = `/apply/${project.id}`;
+                        setSelectedProject(project);
+                        setShowApplicationForm(true);
                       }}
                     >
                       Apply Now
@@ -357,6 +357,15 @@ const SearchPage = ({ user }) => {
             </Card>
           )}
         </Collection>
+        
+        {/* Results Counter */}
+        {filteredProjects.length > 0 && (
+          <Flex justifyContent="flex-end" marginTop="1rem">
+            <Text fontSize="0.9rem" color="gray">
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredProjects.length)} of {filteredProjects.length}
+            </Text>
+          </Flex>
+        )}
         
         {/* Pagination */}
         {totalPages > 1 && (
@@ -404,6 +413,46 @@ const SearchPage = ({ user }) => {
           </Flex>
         )}
         </>
+      )}
+      
+      {/* Application Form Modal */}
+      {showApplicationForm && selectedProject && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setShowApplicationForm(false)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="800px"
+              width="100%"
+              maxHeight="90vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <EnhancedApplicationForm 
+                project={selectedProject}
+                user={user}
+                onClose={() => setShowApplicationForm(false)}
+                onSuccess={() => {
+                  setShowApplicationForm(false);
+                  setSelectedProject(null);
+                  // Optionally refresh data or show success message
+                }}
+              />
+            </Card>
+          </Flex>
+        </View>
       )}
     </Flex>
   );

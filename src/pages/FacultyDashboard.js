@@ -52,6 +52,13 @@ const FacultyDashboard = ({ user }) => {
   
   useEffect(() => {
     fetchData();
+    
+    // Set up automatic refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchData();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, [user]);
   
 
@@ -147,8 +154,8 @@ const FacultyDashboard = ({ user }) => {
     }
   };
   
-  const handleApplicationUpdate = () => {
-    fetchData();
+  const handleApplicationUpdate = async () => {
+    await fetchData();
   };
   
   const handleProjectFormChange = (e) => {
@@ -833,9 +840,10 @@ const FacultyDashboard = ({ user }) => {
               <ApplicationReview 
                 application={reviewingApplication}
                 userRole="Faculty"
-                onUpdate={() => {
-                  handleApplicationUpdate();
+                onUpdate={async () => {
                   setReviewingApplication(null);
+                  // Force a complete data refresh
+                  await fetchData();
                 }}
               />
               <Button 

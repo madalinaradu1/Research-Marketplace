@@ -21,6 +21,7 @@ import OpportunityDetails from './pages/OpportunityDetails';
 import CompleteProfilePage from './pages/CompleteProfilePage';
 import AdminPage from './pages/AdminPage';
 import MessagesPage from './pages/MessagesPage';
+import ApplicationPage from './pages/ApplicationPage';
 
 // Import utilities
 import { createUserAfterSignUp, checkUserExists } from './utils/userManagement';
@@ -192,6 +193,9 @@ function App({ signOut, user }) {
             <Route path="/messages" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <MessagesPage user={userProfile || user} />} />
+            <Route path="/apply/:projectId" element={shouldCompleteProfile ? 
+              <Navigate to="/complete-profile" /> : 
+              <ApplicationPage user={userProfile || user} />} />
             <Route path="/admin" element={isAdmin ? 
               <AdminPage /> : 
               <Navigate to="/dashboard" />} />
