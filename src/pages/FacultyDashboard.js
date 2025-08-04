@@ -52,13 +52,6 @@ const FacultyDashboard = ({ user }) => {
   
   useEffect(() => {
     fetchData();
-    
-    // Set up automatic refresh every 30 seconds
-    const interval = setInterval(() => {
-      fetchData();
-    }, 30000);
-    
-    return () => clearInterval(interval);
   }, [user]);
   
 
