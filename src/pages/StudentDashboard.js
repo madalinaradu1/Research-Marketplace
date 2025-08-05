@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation } from 'aws-amplify';
+import { useNavigate } from 'react-router-dom';
 import { 
   Flex, 
   Heading, 
@@ -21,6 +22,7 @@ import ApplicationStatus from '../components/ApplicationStatus';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 
 const StudentDashboard = ({ user }) => {
+  const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -237,13 +239,13 @@ const StudentDashboard = ({ user }) => {
         <Card variation="elevated" flex="1">
           <Heading level={4}>Quick Links</Heading>
           <Flex direction="column" gap="0.5rem" marginTop="1rem">
-            <Button variation="primary" onClick={() => setActiveTabIndex(0)}>
+            <Button variation="primary" onClick={() => navigate('/search')}>
               Browse Research Opportunities
             </Button>
             <Button onClick={() => setActiveTabIndex(1)}>
               View My Applications
             </Button>
-            <Button onClick={() => setActiveTabIndex(2)}>
+            <Button onClick={() => setActiveTabIndex(3)}>
               Application Status Guide
             </Button>
           </Flex>
@@ -348,6 +350,31 @@ const StudentDashboard = ({ user }) => {
           ) : (
             <Collection
               items={applications}
+              type="list"
+              gap="1rem"
+              wrap="nowrap"
+              direction="column"
+            >
+              {(application) => (
+                <ApplicationStatus 
+                  key={application.id}
+                  application={application}
+                  isStudent={true}
+                  onUpdate={handleApplicationUpdate}
+                />
+              )}
+            </Collection>
+          )}
+        </TabItem>
+        
+        <TabItem title="Returned Applications">
+          {applications.filter(app => ['Returned', 'Rejected'].includes(app.status)).length === 0 ? (
+            <Card>
+              <Text>No returned or rejected applications.</Text>
+            </Card>
+          ) : (
+            <Collection
+              items={applications.filter(app => ['Returned', 'Rejected'].includes(app.status)).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
               type="list"
               gap="1rem"
               wrap="nowrap"

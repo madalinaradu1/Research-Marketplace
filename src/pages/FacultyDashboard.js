@@ -599,22 +599,7 @@ const FacultyDashboard = ({ user }) => {
           )}
         </TabItem>
         
-        <TabItem title={
-          <Flex alignItems="center" gap="0.5rem" position="relative">
-            <Text>Pending Review</Text>
-            {hasUnseenApplications && (
-              <View
-                width="8px"
-                height="8px"
-                borderRadius="50%"
-                backgroundColor="#ffc107"
-                position="absolute"
-                top="-2px"
-                left="-8px"
-              />
-            )}
-          </Flex>
-        }>
+        <TabItem title="Pending Review">
           {getReviewNeededApplications().length === 0 ? (
             <Card>
               <Text>No applications need your review at this time.</Text>

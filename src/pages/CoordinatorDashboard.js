@@ -202,6 +202,7 @@ const CoordinatorDashboard = ({ user }) => {
                   application={application}
                   userRole="Coordinator"
                   onUpdate={handleApplicationUpdate}
+                  hideRelevantCourses={true}
                 />
               )}
             </Collection>

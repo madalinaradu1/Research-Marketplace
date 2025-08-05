@@ -15,7 +15,7 @@ import {
 } from '@aws-amplify/ui-react';
 import { updateApplication } from '../graphql/operations';
 
-const ApplicationReview = ({ application, userRole, onUpdate }) => {
+const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourses = false }) => {
   const [notes, setNotes] = useState('');
   const [statusUpdate, setStatusUpdate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -137,7 +137,7 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
           <Text>Status: {application.status}</Text>
           <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
           <Button size="small" onClick={() => setShowDetails(true)}>
-            View Application Details
+            View Entire Application
           </Button>
         </Flex>
         
@@ -197,6 +197,30 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
                       </Flex>
                     </>
                   )}
+                  
+                  {application.relevantCourses && application.relevantCourses.length > 0 && (
+                    <>
+                      <Divider />
+                      <Flex direction="column" gap="0.5rem">
+                        <Text fontWeight="bold">Relevant Coursework</Text>
+                        <Collection
+                          items={application.relevantCourses}
+                          type="list"
+                          gap="0.5rem"
+                          direction="column"
+                        >
+                          {(course) => (
+                            <Card key={course.courseName} variation="outlined" padding="0.5rem">
+                              <Flex justifyContent="space-between">
+                                <Text>{course.courseName} ({course.courseNumber})</Text>
+                                <Text>Grade: {course.grade} | {course.semester} {course.year}</Text>
+                              </Flex>
+                            </Card>
+                          )}
+                        </Collection>
+                      </Flex>
+                    </>
+                  )}
                 </Flex>
               </Card>
             </Flex>
@@ -226,7 +250,7 @@ const ApplicationReview = ({ application, userRole, onUpdate }) => {
           </>
         )}
         
-        {application.relevantCourses && application.relevantCourses.length > 0 && (
+        {!hideRelevantCourses && application.relevantCourses && application.relevantCourses.length > 0 && (
           <>
             <Divider />
             <Flex direction="column" gap="0.5rem">
