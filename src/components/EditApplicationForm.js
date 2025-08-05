@@ -60,11 +60,38 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
         }
       }
 
+      // Determine which reviewer to return to based on who has notes (who returned it)
+      let newStatus = 'Faculty Review'; // Default to faculty
+      
+      // Check who provided feedback/notes - they are the ones who returned it
+      if (application.adminNotes && !application.coordinatorNotes && !application.facultyNotes) {
+        // Only admin has notes - admin returned it
+        newStatus = 'Admin Review';
+      } else if (application.coordinatorNotes && !application.adminNotes) {
+        // Coordinator has notes and no admin notes - coordinator returned it
+        newStatus = 'Department Review';
+      } else if (application.facultyNotes && !application.coordinatorNotes && !application.adminNotes) {
+        // Only faculty has notes - faculty returned it
+        newStatus = 'Faculty Review';
+      } else {
+        // Multiple notes or unclear - default to faculty
+        newStatus = 'Faculty Review';
+      }
+      
+      console.log('Resubmitting application:', {
+        applicationId: application.id,
+        currentStatus: application.status,
+        newStatus,
+        hasAdminNotes: !!application.adminNotes,
+        hasCoordinatorNotes: !!application.coordinatorNotes,
+        hasFacultyNotes: !!application.facultyNotes
+      });
+
       const updateInput = {
         id: application.id,
         statement,
         documentKey,
-        status: 'Faculty Review' // Resubmit to faculty for review
+        status: newStatus
       };
 
       await API.graphql(graphqlOperation(updateApplication, { input: updateInput }));

@@ -25,6 +25,8 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
   const [isEditing, setIsEditing] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [error, setError] = useState(null);
+  const [viewingDocument, setViewingDocument] = useState(false);
+  const [documentUrl, setDocumentUrl] = useState(null);
   const { tokens } = useTheme();
   
   // Get status color
@@ -189,7 +191,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
           </Button>
         )}
         
-        {isStudent && application.status === 'Returned' && showReturnedSection && (
+        {isStudent && (application.status === 'Returned' || application.status === 'Rejected') && showReturnedSection && (
           <Card variation="outlined" backgroundColor="#fff3cd" padding="1rem">
             <Flex direction="column" gap="1rem">
               <Heading level={5} color="#856404">⚠️ Application Returned for Revision</Heading>
@@ -324,6 +326,49 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                     </>
                   )}
                   
+                  {application.documentKey && (
+                    <>
+                      <Divider />
+                      <Flex direction="column" gap="0.5rem">
+                        <Text fontWeight="bold">Supporting Document</Text>
+                        <Flex gap="0.5rem">
+                          <Button size="small" onClick={async () => {
+                            try {
+                              const url = await Storage.get(application.documentKey, { 
+                                expires: 300
+                              });
+                              setDocumentUrl(url);
+                              setViewingDocument(true);
+                            } catch (err) {
+                              console.error('Error loading document:', err);
+                              setError('Failed to load document. Please try again.');
+                            }
+                          }}>View Document</Button>
+                          <Button size="small" variation="primary" onClick={async () => {
+                            try {
+                              const url = await Storage.get(application.documentKey, { 
+                                expires: 300
+                              });
+                              const response = await fetch(url);
+                              const blob = await response.blob();
+                              const downloadUrl = window.URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+                              link.href = downloadUrl;
+                              link.download = 'supporting-document';
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              window.URL.revokeObjectURL(downloadUrl);
+                            } catch (err) {
+                              console.error('Error downloading document:', err);
+                              setError('Failed to download document. Please try again.');
+                            }
+                          }}>Download</Button>
+                        </Flex>
+                      </Flex>
+                    </>
+                  )}
+                  
                   {(application.facultyNotes || application.coordinatorNotes || application.adminNotes) && (
                     <>
                       <Divider />
@@ -386,6 +431,76 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                     if (onUpdate) onUpdate();
                   }}
                 />
+              </Card>
+            </Flex>
+          </View>
+        )}
+        
+        {/* Document Viewer Modal */}
+        {viewingDocument && documentUrl && (
+          <View
+            position="fixed"
+            top="0"
+            left="0"
+            width="100vw"
+            height="100vh"
+            backgroundColor="rgba(0, 0, 0, 0.8)"
+            style={{ zIndex: 2000 }}
+            onClick={() => {
+              setViewingDocument(false);
+              setDocumentUrl(null);
+            }}
+          >
+            <Flex
+              justifyContent="center"
+              alignItems="center"
+              height="100%"
+              padding="2rem"
+            >
+              <Card
+                maxWidth="90vw"
+                width="100%"
+                maxHeight="90vh"
+                height="100%"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Flex direction="column" height="100%">
+                  <Flex justifyContent="space-between" alignItems="center" padding="1rem">
+                    <Heading level={4}>Supporting Document</Heading>
+                    <Flex gap="0.5rem">
+                      <Button size="small" onClick={async () => {
+                        try {
+                          const response = await fetch(documentUrl);
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.download = 'supporting-document';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          window.URL.revokeObjectURL(url);
+                        } catch (err) {
+                          console.error('Error downloading document:', err);
+                        }
+                      }}>Download</Button>
+                      <Button size="small" onClick={() => {
+                        setViewingDocument(false);
+                        setDocumentUrl(null);
+                      }}>Close</Button>
+                    </Flex>
+                  </Flex>
+                  <Divider />
+                  <View flex="1" style={{ overflow: 'hidden' }}>
+                    <iframe
+                      src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 'none' }}
+                      title="Supporting Document"
+                    />
+                  </View>
+                </Flex>
               </Card>
             </Flex>
           </View>

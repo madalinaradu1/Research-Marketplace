@@ -636,7 +636,7 @@ const FacultyDashboard = ({ user }) => {
                                 backgroundColor="orange"
                                 color="white"
                               >
-                                Needs Review
+                                {application.status}
                               </Badge>
                               
                               <Button 

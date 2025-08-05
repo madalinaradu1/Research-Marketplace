@@ -21,6 +21,8 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [viewingDocument, setViewingDocument] = useState(false);
+  const [documentUrl, setDocumentUrl] = useState(null);
   const { tokens } = useTheme();
   
   // Download resume file
@@ -137,7 +139,7 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
           <Text>Status: {application.status}</Text>
           <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
           <Button size="small" onClick={() => setShowDetails(true)}>
-            View Entire Application
+            View Details
           </Button>
         </Flex>
         
@@ -221,6 +223,49 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
                       </Flex>
                     </>
                   )}
+                  
+                  {application.documentKey && (
+                    <>
+                      <Divider />
+                      <Flex direction="column" gap="0.5rem">
+                        <Text fontWeight="bold">Supporting Document</Text>
+                        <Flex gap="0.5rem">
+                          <Button size="small" onClick={async () => {
+                            try {
+                              const url = await Storage.get(application.documentKey, { 
+                                expires: 300
+                              });
+                              setDocumentUrl(url);
+                              setViewingDocument(true);
+                            } catch (err) {
+                              console.error('Error loading document:', err);
+                              setError('Failed to load document. Please try again.');
+                            }
+                          }}>View Document</Button>
+                          <Button size="small" variation="primary" onClick={async () => {
+                            try {
+                              const url = await Storage.get(application.documentKey, { 
+                                expires: 300
+                              });
+                              const response = await fetch(url);
+                              const blob = await response.blob();
+                              const downloadUrl = window.URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+                              link.href = downloadUrl;
+                              link.download = 'supporting-document';
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              window.URL.revokeObjectURL(downloadUrl);
+                            } catch (err) {
+                              console.error('Error downloading document:', err);
+                              setError('Failed to download document. Please try again.');
+                            }
+                          }}>Download</Button>
+                        </Flex>
+                      </Flex>
+                    </>
+                  )}
                 </Flex>
               </Card>
             </Flex>
@@ -243,17 +288,18 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
             <Divider />
             <Flex direction="column" gap="0.5rem">
               <Text fontWeight="bold">Supporting Document</Text>
-              <Button onClick={async () => {
+              <Button size="small" onClick={async () => {
                 try {
                   const url = await Storage.get(application.documentKey, { 
-                    expires: 60
+                    expires: 300
                   });
-                  window.open(url, '_blank');
+                  setDocumentUrl(url);
+                  setViewingDocument(true);
                 } catch (err) {
-                  console.error('Error downloading document:', err);
-                  setError('Failed to download document. Please try again.');
+                  console.error('Error loading document:', err);
+                  setError('Failed to load document. Please try again.');
                 }
-              }}>Download Document</Button>
+              }}>View Document</Button>
             </Flex>
           </>
         )}
@@ -353,6 +399,77 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
               </Button>
             </Flex>
           </Card>
+        )}
+        
+
+        {/* Document Viewer Modal */}
+        {viewingDocument && documentUrl && (
+          <View
+            position="fixed"
+            top="0"
+            left="0"
+            width="100vw"
+            height="100vh"
+            backgroundColor="rgba(0, 0, 0, 0.8)"
+            style={{ zIndex: 2000 }}
+            onClick={() => {
+              setViewingDocument(false);
+              setDocumentUrl(null);
+            }}
+          >
+            <Flex
+              justifyContent="center"
+              alignItems="center"
+              height="100%"
+              padding="2rem"
+            >
+              <Card
+                maxWidth="90vw"
+                width="100%"
+                maxHeight="90vh"
+                height="100%"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Flex direction="column" height="100%">
+                  <Flex justifyContent="space-between" alignItems="center" padding="1rem">
+                    <Heading level={4}>Supporting Document</Heading>
+                    <Flex gap="0.5rem">
+                      <Button size="small" onClick={async () => {
+                        try {
+                          const response = await fetch(documentUrl);
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.download = 'supporting-document';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          window.URL.revokeObjectURL(url);
+                        } catch (err) {
+                          console.error('Error downloading document:', err);
+                        }
+                      }}>Download</Button>
+                      <Button size="small" onClick={() => {
+                        setViewingDocument(false);
+                        setDocumentUrl(null);
+                      }}>Close</Button>
+                    </Flex>
+                  </Flex>
+                  <Divider />
+                  <View flex="1" style={{ overflow: 'hidden' }}>
+                    <iframe
+                      src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 'none' }}
+                      title="Supporting Document"
+                    />
+                  </View>
+                </Flex>
+              </Card>
+            </Flex>
+          </View>
         )}
       </Flex>
     </Card>

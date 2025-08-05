@@ -48,6 +48,7 @@ const CoordinatorDashboard = ({ user }) => {
               statement
               resumeKey
               transcriptLink
+              documentKey
               relevantCourses {
                 courseName
                 courseNumber
@@ -106,6 +107,17 @@ const CoordinatorDashboard = ({ user }) => {
         app.project.department === user.department &&
         ['Department Review', 'Admin Review', 'Approved', 'Returned', 'Rejected'].includes(app.status)
       );
+      
+      console.log('CoordinatorDashboard - All applications:', allApplications.length);
+      console.log('CoordinatorDashboard - Department applications:', departmentApplications.length);
+      console.log('CoordinatorDashboard - Department Review applications:', 
+        departmentApplications.filter(app => app.status === 'Department Review').length
+      );
+      console.log('CoordinatorDashboard - User department:', user.department);
+      console.log('CoordinatorDashboard - Department application statuses:', 
+        departmentApplications.map(app => ({ id: app.id, status: app.status, hasCoordinatorNotes: !!app.coordinatorNotes }))
+      );
+      
       setApplications(departmentApplications);
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -182,7 +194,12 @@ const CoordinatorDashboard = ({ user }) => {
       
       <Tabs
         currentIndex={activeTabIndex}
-        onChange={(index) => setActiveTabIndex(index)}
+        onChange={(index) => {
+          setActiveTabIndex(index);
+          if (index === 0) { // Pending Review tab
+            fetchData(); // Refresh data when switching to pending review
+          }
+        }}
       >
         <TabItem title="Pending Review">
           {applications.filter(app => app.status === 'Department Review').length === 0 ? (
@@ -228,8 +245,8 @@ const CoordinatorDashboard = ({ user }) => {
                       <Heading level={5}>{application.project?.title}</Heading>
                       <Badge 
                         backgroundColor={
-                          application.status === 'Department Review' ? 'orange' :
-                          application.status === 'Admin Review' ? 'blue' :
+                          application.status === 'Department Review' ? 'purple' :
+                          application.status === 'Admin Review' ? 'orange' :
                           application.status === 'Approved' ? 'green' : 'red'
                         }
                         color="white"
@@ -255,9 +272,16 @@ const CoordinatorDashboard = ({ user }) => {
                     </Flex>
                     <Divider />
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Text fontSize="0.9rem">
-                        Submitted: {new Date(application.createdAt).toLocaleDateString()}
-                      </Text>
+                      <Flex direction="column" gap="0.25rem">
+                        <Text fontSize="0.9rem">
+                          Submitted: {new Date(application.createdAt).toLocaleDateString()}
+                        </Text>
+                        {application.updatedAt !== application.createdAt && (
+                          <Text fontSize="0.8rem">
+                            Last modified: {new Date(application.updatedAt).toLocaleString()}
+                          </Text>
+                        )}
+                      </Flex>
                       <Flex gap="0.5rem">
                         <Button 
                           size="small" 
