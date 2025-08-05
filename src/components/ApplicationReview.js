@@ -238,6 +238,24 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
           </>
         )}
         
+        {application.documentKey && (
+          <>
+            <Divider />
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Supporting Document</Text>
+              <Button onClick={async () => {
+                try {
+                  const url = await Storage.get(application.documentKey, { expires: 60 });
+                  window.open(url, '_blank');
+                } catch (err) {
+                  console.error('Error downloading document:', err);
+                  setError('Failed to download document. Please try again.');
+                }
+              }}>Download Document</Button>
+            </Flex>
+          </>
+        )}
+        
         {application.transcriptLink && (
           <>
             <Divider />

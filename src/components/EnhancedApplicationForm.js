@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { API, graphqlOperation, Auth } from 'aws-amplify';
+import { API, graphqlOperation, Auth, Storage } from 'aws-amplify';
 import { 
   Flex, 
   Heading, 
@@ -20,6 +20,8 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
   const [courses, setCourses] = useState([{ courseName: '', courseNumber: '', grade: '', semester: '', year: '' }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const addCourse = () => {
     if (courses.length < 10) {
@@ -71,11 +73,40 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       // Filter out empty courses
       const validCourses = courses.filter(course => course.courseName.trim());
 
+      let documentKey = null;
+      
+      // Upload document if provided
+      if (uploadedFile) {
+        setUploading(true);
+        try {
+          const fileExtension = uploadedFile.name.split('.').pop();
+          const fileName = `applications/${userId}/${project.id}/${Date.now()}.${fileExtension}`;
+          
+          const result = await Storage.put(fileName, uploadedFile, {
+            contentType: uploadedFile.type,
+            metadata: {
+              studentId: userId,
+              projectId: project.id,
+              originalName: uploadedFile.name
+            }
+          });
+          
+          documentKey = result.key;
+        } catch (uploadError) {
+          console.error('Error uploading document:', uploadError);
+          setError('Failed to upload document. Please try again.');
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
+
       const applicationInput = {
         studentID: userId,
         projectID: project.id,
         statement,
         relevantCourses: validCourses,
+        documentKey,
         status: 'Draft'
       };
 
@@ -226,6 +257,26 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
                 + Add Another Course
               </Button>
             )}
+            
+            <Divider />
+            
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Supporting Documents (Optional)</Text>
+              <Text fontSize="0.9rem" color="gray">
+                Upload additional documents that support your application (resume, portfolio, etc.)
+              </Text>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.txt"
+                onChange={(e) => setUploadedFile(e.target.files[0])}
+                style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
+              />
+              {uploadedFile && (
+                <Text fontSize="0.9rem" color="green">
+                  Selected: {uploadedFile.name}
+                </Text>
+              )}
+            </Flex>
 
             {error && <Text color="red">{error}</Text>}
 
@@ -238,9 +289,9 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
               <Button 
                 type="submit" 
                 variation="primary"
-                isLoading={isSubmitting}
+                isLoading={isSubmitting || uploading}
               >
-                Submit Application
+                {uploading ? 'Uploading Document...' : 'Submit Application'}
               </Button>
             </Flex>
           </Flex>
