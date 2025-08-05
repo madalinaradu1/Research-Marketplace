@@ -272,15 +272,19 @@ const FacultyDashboard = ({ user }) => {
   // Count applications by status
   const getApplicationCounts = () => {
     const counts = {
-      pending: 0,
+      reviewNeeded: 0,
       approved: 0,
       returned: 0,
       total: applications.length
     };
     
     applications.forEach(app => {
-      if (['Faculty Review', 'Department Review', 'Admin Review'].includes(app.status)) {
-        counts.pending++;
+      if (user.role === 'Faculty' && app.status === 'Faculty Review') {
+        counts.reviewNeeded++;
+      } else if (user.role === 'Coordinator' && app.status === 'Department Review') {
+        counts.reviewNeeded++;
+      } else if (user.role === 'Admin' && app.status === 'Admin Review') {
+        counts.reviewNeeded++;
       } else if (app.status === 'Approved') {
         counts.approved++;
       } else if (['Returned', 'Rejected'].includes(app.status)) {
@@ -289,6 +293,27 @@ const FacultyDashboard = ({ user }) => {
     });
     
     return counts;
+  };
+  
+  // Filter applications that need review by current user role
+  const getReviewNeededApplications = () => {
+    return applications.filter(app => {
+      if (user.role === 'Faculty') {
+        return app.status === 'Faculty Review';
+      } else if (user.role === 'Coordinator') {
+        return app.status === 'Department Review';
+      } else if (user.role === 'Admin') {
+        return app.status === 'Admin Review';
+      }
+      return false;
+    });
+  };
+  
+  // Filter applications that have been processed (approved, rejected, returned)
+  const getProcessedApplications = () => {
+    return applications.filter(app => 
+      ['Approved', 'Rejected', 'Returned'].includes(app.status)
+    );
   };
   
   const applicationCounts = getApplicationCounts();
@@ -328,8 +353,8 @@ const FacultyDashboard = ({ user }) => {
           <Heading level={4}>Applications</Heading>
           <Flex wrap="wrap" gap="1rem" marginTop="1rem">
             <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5} color="orange">{applicationCounts.pending}</Heading>
-              <Text>Pending Review</Text>
+              <Heading level={5} color="orange">{applicationCounts.reviewNeeded}</Heading>
+              <Text>Review Needed</Text>
             </Card>
             <Card variation="outlined" padding="1rem" flex="1">
               <Heading level={5} color="green">{applicationCounts.approved}</Heading>
@@ -370,7 +395,7 @@ const FacultyDashboard = ({ user }) => {
         currentIndex={activeTabIndex}
         onChange={(index) => {
           setActiveTabIndex(index);
-          if (index === 1) { // Applications tab
+          if (index === 1 || index === 2) { // Pending Review or Applications tab
             setHasUnseenApplications(false);
             const userId = user.id || user.username;
             localStorage.setItem(`lastViewedFacultyApplications_${userId}`, new Date().toISOString());
@@ -576,7 +601,7 @@ const FacultyDashboard = ({ user }) => {
         
         <TabItem title={
           <Flex alignItems="center" gap="0.5rem" position="relative">
-            <Text>Applications</Text>
+            <Text>Pending Review</Text>
             {hasUnseenApplications && (
               <View
                 width="8px"
@@ -590,75 +615,129 @@ const FacultyDashboard = ({ user }) => {
             )}
           </Flex>
         }>
-          {applications.length === 0 ? (
+          {getReviewNeededApplications().length === 0 ? (
             <Card>
-              <Text>No applications have been submitted for your projects yet.</Text>
+              <Text>No applications need your review at this time.</Text>
             </Card>
           ) : (
             <Flex direction="column" gap="2rem">
               {projects.map(project => {
-                const projectApplications = applications.filter(app => app.projectID === project.id);
+                const projectApplications = getReviewNeededApplications().filter(app => app.projectID === project.id);
+                if (projectApplications.length === 0) return null;
+                
                 return (
                   <Card key={project.id}>
                     <Heading level={4}>{project.title}</Heading>
                     <Text>Department: {project.department}</Text>
                     <Divider margin="1rem 0" />
-                    {projectApplications.length === 0 ? (
-                      <Text>No applications for this project yet.</Text>
-                    ) : (
-                      <Collection
-                        items={projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
-                        type="list"
-                        gap="1rem"
-                        wrap="nowrap"
-                        direction="column"
-                      >
-                        {(application) => (
-                          <Card key={application.id}>
-                            <Flex justifyContent="space-between" alignItems="center">
-                              <Flex direction="row" gap="3rem" alignItems="center">
-                                <Text fontWeight="bold" minWidth="150px">{application.student?.name || 'Unknown Student'}</Text>
-                                <Text fontSize="0.9rem" minWidth="200px">{application.student?.email}</Text>
-                                <Text fontSize="0.9rem" minWidth="100px">{new Date(application.createdAt).toLocaleDateString()}</Text>
-                              </Flex>
+                    <Collection
+                      items={projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
+                      type="list"
+                      gap="1rem"
+                      wrap="nowrap"
+                      direction="column"
+                    >
+                      {(application) => (
+                        <Card key={application.id}>
+                          <Flex justifyContent="space-between" alignItems="center">
+                            <Flex direction="row" gap="3rem" alignItems="center">
+                              <Text fontWeight="bold" minWidth="150px">{application.student?.name || 'Unknown Student'}</Text>
+                              <Text fontSize="0.9rem" minWidth="200px">{application.student?.email}</Text>
+                              <Text fontSize="0.9rem" minWidth="100px">{new Date(application.createdAt).toLocaleDateString()}</Text>
+                            </Flex>
+                            
+                            <Flex gap="1rem" alignItems="center">
+                              <Badge 
+                                backgroundColor="orange"
+                                color="white"
+                              >
+                                Needs Review
+                              </Badge>
                               
-                              <Flex gap="1rem" alignItems="center">
-                                <Badge 
-                                  backgroundColor={
-                                    application.status === 'Approved' ? 'green' :
-                                    application.status === 'Faculty Review' ? 'blue' :
-                                    application.status === 'Department Review' ? 'purple' :
-                                    application.status === 'Admin Review' ? 'orange' :
-                                    application.status === 'Returned' ? 'yellow' :
-                                    application.status === 'Rejected' ? 'red' : 'gray'
-                                  }
-                                  color="white"
-                                >
-                                  {application.status}
-                                </Badge>
-                                
+                              <Button 
+                                size="small"
+                                variation="primary"
+                                onClick={() => setReviewingApplication(application)}
+                              >
+                                Review Now
+                              </Button>
+                            </Flex>
+                          </Flex>
+                        </Card>
+                      )}
+                    </Collection>
+                  </Card>
+                );
+              })}
+            </Flex>
+          )}
+        </TabItem>
+        
+        <TabItem title="All Applications">
+          {getProcessedApplications().length === 0 ? (
+            <Card>
+              <Text>No processed applications yet.</Text>
+            </Card>
+          ) : (
+            <Flex direction="column" gap="2rem">
+              {projects.map(project => {
+                const projectApplications = getProcessedApplications().filter(app => app.projectID === project.id);
+                if (projectApplications.length === 0) return null;
+                
+                return (
+                  <Card key={project.id}>
+                    <Heading level={4}>{project.title}</Heading>
+                    <Text>Department: {project.department}</Text>
+                    <Divider margin="1rem 0" />
+                    <Collection
+                      items={projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
+                      type="list"
+                      gap="1rem"
+                      wrap="nowrap"
+                      direction="column"
+                    >
+                      {(application) => (
+                        <Card key={application.id}>
+                          <Flex justifyContent="space-between" alignItems="center">
+                            <Flex direction="row" gap="3rem" alignItems="center">
+                              <Text fontWeight="bold" minWidth="150px">{application.student?.name || 'Unknown Student'}</Text>
+                              <Text fontSize="0.9rem" minWidth="200px">{application.student?.email}</Text>
+                              <Text fontSize="0.9rem" minWidth="100px">{new Date(application.createdAt).toLocaleDateString()}</Text>
+                            </Flex>
+                            
+                            <Flex gap="1rem" alignItems="center">
+                              <Badge 
+                                backgroundColor={
+                                  application.status === 'Approved' ? 'green' :
+                                  application.status === 'Returned' ? 'yellow' :
+                                  application.status === 'Rejected' ? 'red' : 'gray'
+                                }
+                                color="white"
+                              >
+                                {application.status}
+                              </Badge>
+                              
+                              <Button 
+                                size="small"
+                                onClick={() => setReviewingApplication(application)}
+                              >
+                                View Details
+                              </Button>
+                              
+                              {application.status === 'Approved' && (
                                 <Button 
                                   size="small"
-                                  onClick={() => setReviewingApplication(application)}
+                                  variation="primary"
+                                  onClick={() => setMessagingStudent({ application, student: application.student })}
                                 >
-                                  Review
+                                  Message
                                 </Button>
-                                
-                                {application.status === 'Approved' && (
-                                  <Button 
-                                    size="small"
-                                    variation="primary"
-                                    onClick={() => setMessagingStudent({ application, student: application.student })}
-                                  >
-                                    Message
-                                  </Button>
-                                )}
-                              </Flex>
+                              )}
                             </Flex>
-                          </Card>
-                        )}
-                      </Collection>
-                    )}
+                          </Flex>
+                        </Card>
+                      )}
+                    </Collection>
                   </Card>
                 );
               })}

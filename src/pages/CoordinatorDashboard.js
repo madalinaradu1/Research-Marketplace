@@ -214,56 +214,71 @@ const CoordinatorDashboard = ({ user }) => {
               <Text>No applications found for your department.</Text>
             </Card>
           ) : (
-            <Flex direction="column" gap="1rem">
-              <Collection
-                items={applications}
-                type="grid"
-                templateColumns="repeat(auto-fit, minmax(350px, 1fr))"
-                gap="1rem"
-              >
-                {(application) => (
-                  <Card key={application.id}>
-                    <Flex direction="column" gap="0.5rem">
-                      <Flex justifyContent="space-between" alignItems="center">
-                        <Heading level={5}>{application.project?.title}</Heading>
-                        <Badge 
-                          backgroundColor={
-                            application.status === 'Department Review' ? 'orange' :
-                            application.status === 'Admin Review' ? 'blue' :
-                            application.status === 'Approved' ? 'green' : 'red'
-                          }
-                          color="white"
+            <Collection
+              items={applications}
+              type="grid"
+              templateColumns={{ base: '1fr', medium: '1fr 1fr' }}
+              gap="1rem"
+            >
+              {(application) => (
+                <Card key={application.id}>
+                  <Flex direction="column" gap="0.5rem">
+                    <Flex justifyContent="space-between" alignItems="flex-start">
+                      <Heading level={5}>{application.project?.title}</Heading>
+                      <Badge 
+                        backgroundColor={
+                          application.status === 'Department Review' ? 'orange' :
+                          application.status === 'Admin Review' ? 'blue' :
+                          application.status === 'Approved' ? 'green' : 'red'
+                        }
+                        color="white"
+                      >
+                        {application.status}
+                      </Badge>
+                    </Flex>
+                    <Text fontWeight="bold">Student: {application.student?.name}</Text>
+                    <Text fontWeight="bold">Faculty: {application.faculty?.name}</Text>
+                    <Text>{application.project?.description?.length > 150 ? application.project.description.substring(0, 150) + '...' : application.project?.description}</Text>
+                    <Divider />
+                    <Flex wrap="wrap" gap="0.5rem">
+                      {application.project?.skillsRequired?.map((skill, index) => (
+                        <Card 
+                          key={index}
+                          backgroundColor="rgba(0, 0, 0, 0.05)"
+                          padding="0.25rem 0.5rem"
+                          borderRadius="1rem"
                         >
-                          {application.status}
-                        </Badge>
-                      </Flex>
-                      
-                      <Text><strong>Student:</strong> {application.student?.name}</Text>
-                      <Text><strong>Faculty:</strong> {application.faculty?.name}</Text>
+                          <Text fontSize="0.8rem">{skill}</Text>
+                        </Card>
+                      ))}
+                    </Flex>
+                    <Divider />
+                    <Flex justifyContent="space-between" alignItems="center">
                       <Text fontSize="0.9rem">
-                        <strong>Submitted:</strong> {new Date(application.createdAt).toLocaleDateString()}
+                        Submitted: {new Date(application.createdAt).toLocaleDateString()}
                       </Text>
-                      
-                      {application.status === 'Department Review' ? (
-                        <ApplicationReview 
-                          application={application}
-                          userRole="Coordinator"
-                          onUpdate={handleApplicationUpdate}
-                          compact={true}
-                        />
-                      ) : (
+                      <Flex gap="0.5rem">
                         <Button 
-                          size="small"
+                          size="small" 
                           onClick={() => setViewingApplication(application)}
                         >
                           View Details
                         </Button>
-                      )}
+                        {application.status === 'Department Review' && (
+                          <Button 
+                            variation="primary" 
+                            size="small" 
+                            onClick={() => setViewingApplication(application)}
+                          >
+                            Review
+                          </Button>
+                        )}
+                      </Flex>
                     </Flex>
-                  </Card>
-                )}
-              </Collection>
-            </Flex>
+                  </Flex>
+                </Card>
+              )}
+            </Collection>
           )}
         </TabItem>
       </Tabs>
