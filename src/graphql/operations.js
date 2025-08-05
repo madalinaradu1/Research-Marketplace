@@ -172,6 +172,7 @@ export const listApplications = /* GraphQL */ `
         statement
         resumeKey
         transcriptLink
+        documentKey
         status
         statusDetail
         facultyNotes

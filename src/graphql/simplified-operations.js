@@ -104,6 +104,7 @@ export const listApplications = /* GraphQL */ `
         projectID
         statement
         status
+        documentKey
         facultyNotes
         coordinatorNotes
         adminNotes

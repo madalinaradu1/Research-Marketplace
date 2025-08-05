@@ -45,6 +45,7 @@ const AdminDashboard = ({ user }) => {
               statement
               resumeKey
               transcriptLink
+              documentKey
               relevantCourses {
                 courseName
                 courseNumber

@@ -196,36 +196,11 @@ const CoordinatorDashboard = ({ user }) => {
         currentIndex={activeTabIndex}
         onChange={(index) => {
           setActiveTabIndex(index);
-          if (index === 0) { // Pending Review tab
+          if (index === 1) { // Pending Review tab
             fetchData(); // Refresh data when switching to pending review
           }
         }}
       >
-        <TabItem title="Pending Review">
-          {applications.filter(app => app.status === 'Department Review').length === 0 ? (
-            <Card>
-              <Text>No applications pending review from your department.</Text>
-            </Card>
-          ) : (
-            <Collection
-              items={applications.filter(app => app.status === 'Department Review')}
-              type="grid"
-              templateColumns="repeat(auto-fit, minmax(350px, 1fr))"
-              gap="1rem"
-            >
-              {(application) => (
-                <ApplicationReview 
-                  key={application.id}
-                  application={application}
-                  userRole="Coordinator"
-                  onUpdate={handleApplicationUpdate}
-                  hideRelevantCourses={true}
-                />
-              )}
-            </Collection>
-          )}
-        </TabItem>
-        
         <TabItem title="All Applications">
           {applications.length === 0 ? (
             <Card>
@@ -302,6 +277,31 @@ const CoordinatorDashboard = ({ user }) => {
                     </Flex>
                   </Flex>
                 </Card>
+              )}
+            </Collection>
+          )}
+        </TabItem>
+        
+        <TabItem title="Pending Review">
+          {applications.filter(app => app.status === 'Department Review').length === 0 ? (
+            <Card>
+              <Text>No applications pending review from your department.</Text>
+            </Card>
+          ) : (
+            <Collection
+              items={applications.filter(app => app.status === 'Department Review')}
+              type="grid"
+              templateColumns="repeat(auto-fit, minmax(350px, 1fr))"
+              gap="1rem"
+            >
+              {(application) => (
+                <ApplicationReview 
+                  key={application.id}
+                  application={application}
+                  userRole="Coordinator"
+                  onUpdate={handleApplicationUpdate}
+                  hideRelevantCourses={true}
+                />
               )}
             </Collection>
           )}

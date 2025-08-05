@@ -330,7 +330,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                     <>
                       <Divider />
                       <Flex direction="column" gap="0.5rem">
-                        <Text fontWeight="bold">Supporting Document</Text>
+                        <Text fontWeight="bold">Supporting Documents</Text>
                         <Flex gap="0.5rem">
                           <Button size="small" onClick={async () => {
                             try {
@@ -343,7 +343,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                               console.error('Error loading document:', err);
                               setError('Failed to load document. Please try again.');
                             }
-                          }}>View Document</Button>
+                          }}>View</Button>
                           <Button size="small" variation="primary" onClick={async () => {
                             try {
                               const url = await Storage.get(application.documentKey, { 

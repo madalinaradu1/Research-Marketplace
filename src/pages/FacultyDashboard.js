@@ -257,13 +257,15 @@ const FacultyDashboard = ({ user }) => {
   const editProject = (project) => {
     setSelectedProject(project);
     setProjectForm({
-      title: project.title,
-      description: project.description,
+      title: project.title || '',
+      description: project.description || '',
       department: project.department || '',
       skillsRequired: project.skillsRequired?.join(', ') || '',
+      qualifications: project.qualifications || '',
       duration: project.duration || '',
       applicationDeadline: project.applicationDeadline ? new Date(project.applicationDeadline).toISOString().split('T')[0] : '',
-      isActive: project.isActive
+      requiresTranscript: project.requiresTranscript || false,
+      isActive: project.isActive !== undefined ? project.isActive : true
     });
     setIsCreatingProject(true);
     setActiveTabIndex(0);
@@ -384,7 +386,7 @@ const FacultyDashboard = ({ user }) => {
             >
               Create New Project
             </Button>
-            <Button onClick={() => setActiveTabIndex(1)}>
+            <Button onClick={() => setActiveTabIndex(2)}>
               Review Applications
             </Button>
           </Flex>
@@ -395,7 +397,7 @@ const FacultyDashboard = ({ user }) => {
         currentIndex={activeTabIndex}
         onChange={(index) => {
           setActiveTabIndex(index);
-          if (index === 1 || index === 2) { // Pending Review or Applications tab
+          if (index === 1 || index === 2) { // All Applications or Pending Review tab
             setHasUnseenApplications(false);
             const userId = user.id || user.username;
             localStorage.setItem(`lastViewedFacultyApplications_${userId}`, new Date().toISOString());
@@ -599,65 +601,6 @@ const FacultyDashboard = ({ user }) => {
           )}
         </TabItem>
         
-        <TabItem title="Pending Review">
-          {getReviewNeededApplications().length === 0 ? (
-            <Card>
-              <Text>No applications need your review at this time.</Text>
-            </Card>
-          ) : (
-            <Flex direction="column" gap="2rem">
-              {projects.map(project => {
-                const projectApplications = getReviewNeededApplications().filter(app => app.projectID === project.id);
-                if (projectApplications.length === 0) return null;
-                
-                return (
-                  <Card key={project.id}>
-                    <Heading level={4}>{project.title}</Heading>
-                    <Text>Department: {project.department}</Text>
-                    <Divider margin="1rem 0" />
-                    <Collection
-                      items={projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
-                      type="list"
-                      gap="1rem"
-                      wrap="nowrap"
-                      direction="column"
-                    >
-                      {(application) => (
-                        <Card key={application.id}>
-                          <Flex justifyContent="space-between" alignItems="center">
-                            <Flex direction="row" gap="3rem" alignItems="center">
-                              <Text fontWeight="bold" minWidth="150px">{application.student?.name || 'Unknown Student'}</Text>
-                              <Text fontSize="0.9rem" minWidth="200px">{application.student?.email}</Text>
-                              <Text fontSize="0.9rem" minWidth="100px">{new Date(application.createdAt).toLocaleDateString()}</Text>
-                            </Flex>
-                            
-                            <Flex gap="1rem" alignItems="center">
-                              <Badge 
-                                backgroundColor="orange"
-                                color="white"
-                              >
-                                {application.status}
-                              </Badge>
-                              
-                              <Button 
-                                size="small"
-                                variation="primary"
-                                onClick={() => setReviewingApplication(application)}
-                              >
-                                Review Now
-                              </Button>
-                            </Flex>
-                          </Flex>
-                        </Card>
-                      )}
-                    </Collection>
-                  </Card>
-                );
-              })}
-            </Flex>
-          )}
-        </TabItem>
-        
         <TabItem title="All Applications">
           {getProcessedApplications().length === 0 ? (
             <Card>
@@ -684,10 +627,10 @@ const FacultyDashboard = ({ user }) => {
                       {(application) => (
                         <Card key={application.id}>
                           <Flex justifyContent="space-between" alignItems="center">
-                            <Flex direction="row" gap="3rem" alignItems="center">
-                              <Text fontWeight="bold" minWidth="150px">{application.student?.name || 'Unknown Student'}</Text>
-                              <Text fontSize="0.9rem" minWidth="200px">{application.student?.email}</Text>
-                              <Text fontSize="0.9rem" minWidth="100px">{new Date(application.createdAt).toLocaleDateString()}</Text>
+                            <Flex direction="row" gap="2rem" alignItems="center" flex="1">
+                              <Text fontWeight="bold" width="180px">{application.student?.name || 'Unknown Student'}</Text>
+                              <Text fontSize="0.9rem" width="220px">{application.student?.email}</Text>
+                              <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
                             </Flex>
                             
                             <Flex gap="1rem" alignItems="center">
@@ -729,147 +672,68 @@ const FacultyDashboard = ({ user }) => {
             </Flex>
           )}
         </TabItem>
+        
+        <TabItem title="Pending Review">
+          {getReviewNeededApplications().length === 0 ? (
+            <Card>
+              <Text>No applications need your review at this time.</Text>
+            </Card>
+          ) : (
+            <Flex direction="column" gap="2rem">
+              {projects.map(project => {
+                const projectApplications = getReviewNeededApplications().filter(app => app.projectID === project.id);
+                if (projectApplications.length === 0) return null;
+                
+                return (
+                  <Card key={project.id}>
+                    <Heading level={4}>{project.title}</Heading>
+                    <Text>Department: {project.department}</Text>
+                    <Divider margin="1rem 0" />
+                    <Collection
+                      items={projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
+                      type="list"
+                      gap="1rem"
+                      wrap="nowrap"
+                      direction="column"
+                    >
+                      {(application) => (
+                        <Card key={application.id}>
+                          <Flex justifyContent="space-between" alignItems="center">
+                            <Flex direction="row" gap="2rem" alignItems="center" flex="1">
+                              <Text fontWeight="bold" width="180px">{application.student?.name || 'Unknown Student'}</Text>
+                              <Text fontSize="0.9rem" width="220px">{application.student?.email}</Text>
+                              <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
+                            </Flex>
+                            
+                            <Flex gap="1rem" alignItems="center">
+                              <Badge 
+                                backgroundColor="orange"
+                                color="white"
+                              >
+                                {application.status}
+                              </Badge>
+                              
+                              <Button 
+                                size="small"
+                                variation="primary"
+                                onClick={() => setReviewingApplication(application)}
+                              >
+                                Review Now
+                              </Button>
+                            </Flex>
+                          </Flex>
+                        </Card>
+                      )}
+                    </Collection>
+                  </Card>
+                );
+              })}
+            </Flex>
+          )}
+        </TabItem>
       </Tabs>
       
-      {/* Direct Message Modal */}
-      {messagingStudent && (
-        <View
-          position="fixed"
-          top="0"
-          left="0"
-          width="100vw"
-          height="100vh"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          style={{ zIndex: 1000 }}
-          onClick={() => setMessagingStudent(null)}
-        >
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-            padding="2rem"
-          >
-            <Card
-              maxWidth="600px"
-              width="100%"
-              maxHeight="80vh"
-              style={{ overflow: 'auto' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Flex direction="column" gap="1rem">
-                <Flex justifyContent="space-between" alignItems="center">
-                  <Heading level={4}>Message Student</Heading>
-                  <Button size="small" onClick={() => setMessagingStudent(null)}>Close</Button>
-                </Flex>
-                
-                <Divider />
-                
-                <Flex direction="column" gap="0.5rem">
-                  <Text fontWeight="bold">To: {messagingStudent.student?.name || 'Student'}</Text>
-                  <Text>Email: {messagingStudent.student?.email}</Text>
-                  <Text>Project: {messagingStudent.application?.project?.title}</Text>
-                </Flex>
-                
-                <Divider />
-                
-                <TextAreaField
-                  label="Message"
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  rows={8}
-                  placeholder="Type your message to the student here..."
-                  required
-                />
-                
-                <Flex gap="1rem">
-                  <Button 
-                    onClick={() => {
-                      setMessagingStudent(null);
-                      setMessageText('');
-                    }}
-                    variation="link"
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={async () => {
-                      if (!messageText.trim()) return;
-                      
-                      setIsSendingMessage(true);
-                      try {
-                        const userId = user.id || user.username;
-                        const studentId = messagingStudent.student?.id;
-                        const projectId = messagingStudent.application?.projectID;
-                        
-                        // Create message in database with threading
-                        const threadId = `${userId}-${studentId}-${projectId}`;
-                        const messageInput = {
-                          senderID: userId,
-                          receiverID: studentId,
-                          subject: `Research Project: ${messagingStudent.application?.project?.title}`,
-                          body: messageText,
-                          isRead: false,
-                          sentAt: new Date().toISOString(),
-                          threadID: threadId,
-                          projectID: projectId,
-                          messageType: 'PROJECT_RELATED'
-                        };
-                        
-                        console.log('Creating message with input:', messageInput);
-                        const messageResult = await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
-                        console.log('Message created successfully:', messageResult);
-                        console.log('Created message data:', messageResult.data.createMessage);
-                        
-                        // Also create notification
-                        const notificationInput = {
-                          userID: studentId,
-                          type: 'MESSAGE_RECEIVED',
-                          message: `New message from ${user.name} about ${messagingStudent.application?.project?.title}`,
-                          isRead: false
-                        };
-                        
-                        await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
-                        
-                        // Send email notification
-                        try {
-                          console.log('Attempting to send email to:', messagingStudent.student?.email);
-                          await sendEmailNotification(
-                            messagingStudent.student?.email,
-                            messagingStudent.student?.name,
-                            user.name,
-                            `Research Project: ${messagingStudent.application?.project?.title}`,
-                            messageText,
-                            messagingStudent.application?.project?.title
-                          );
-                          console.log('Email notification sent successfully');
-                        } catch (emailError) {
-                          console.error('Email notification failed:', emailError);
-                        }
-                        
-                        alert('Message sent successfully! Student will receive an email notification.');
-                        setMessagingStudent(null);
-                        setMessageText('');
-                      } catch (err) {
-                        console.error('Error sending message:', err);
-                        console.error('Full error details:', JSON.stringify(err, null, 2));
-                        setError('Failed to send message. Please try again.');
-                      } finally {
-                        setIsSendingMessage(false);
-                      }
-                    }}
-                    variation="primary"
-                    isLoading={isSendingMessage}
-                  >
-                    Send Message
-                  </Button>
-                </Flex>
-              </Flex>
-            </Card>
-          </Flex>
-        </View>
-      )}
-      
-      {/* Application Review Modal */}
+      {/* View Application Details Modal */}
       {reviewingApplication && (
         <View
           position="fixed"
@@ -897,10 +761,9 @@ const FacultyDashboard = ({ user }) => {
               <ApplicationReview 
                 application={reviewingApplication}
                 userRole="Faculty"
-                onUpdate={async () => {
+                onUpdate={() => {
+                  handleApplicationUpdate();
                   setReviewingApplication(null);
-                  // Force a complete data refresh
-                  await fetchData();
                 }}
               />
               <Button 
@@ -909,6 +772,107 @@ const FacultyDashboard = ({ user }) => {
               >
                 Close
               </Button>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* Message Student Modal */}
+      {messagingStudent && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setMessagingStudent(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="600px"
+              width="100%"
+              maxHeight="80vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Heading level={4}>Message Student</Heading>
+              <Divider margin="1rem 0" />
+              
+              <Flex direction="column" gap="1rem">
+                <Text><strong>To:</strong> {messagingStudent.student?.name} ({messagingStudent.student?.email})</Text>
+                <Text><strong>Project:</strong> {messagingStudent.application?.project?.title}</Text>
+                
+                <TextAreaField
+                  label="Message"
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  placeholder="Type your message here..."
+                  rows={6}
+                  required
+                />
+                
+                <Flex gap="1rem">
+                  <Button 
+                    onClick={() => {
+                      setMessagingStudent(null);
+                      setMessageText('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    variation="primary"
+                    isLoading={isSendingMessage}
+                    onClick={async () => {
+                      if (!messageText.trim()) return;
+                      
+                      setIsSendingMessage(true);
+                      try {
+                        const currentUser = await Auth.currentAuthenticatedUser();
+                        const userId = currentUser.username;
+                        
+                        const messageInput = {
+                          senderID: userId,
+                          recipientID: messagingStudent.student.id,
+                          projectID: messagingStudent.application.projectID,
+                          subject: `Message about ${messagingStudent.application.project?.title}`,
+                          content: messageText,
+                          isRead: false
+                        };
+                        
+                        await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
+                        
+                        await sendEmailNotification(
+                          messagingStudent.student.email,
+                          messagingStudent.student.name,
+                          user.name,
+                          `Message about ${messagingStudent.application.project?.title}`,
+                          messageText,
+                          messagingStudent.application.project?.title
+                        );
+                        
+                        setMessagingStudent(null);
+                        setMessageText('');
+                        setSuccessMessage('Message sent successfully!');
+                      } catch (err) {
+                        console.error('Error sending message:', err);
+                        setError('Failed to send message. Please try again.');
+                      } finally {
+                        setIsSendingMessage(false);
+                      }
+                    }}
+                  >
+                    Send Message
+                  </Button>
+                </Flex>
+              </Flex>
             </Card>
           </Flex>
         </View>
