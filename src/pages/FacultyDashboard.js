@@ -474,7 +474,7 @@ const FacultyDashboard = ({ user }) => {
                   <SelectField
                     name="requiresTranscript"
                     label="Requires Transcript Upload"
-                    value={projectForm.requiresTranscript.toString()}
+                    value={(projectForm.requiresTranscript || false).toString()}
                     onChange={(e) => setProjectForm(prev => ({ 
                       ...prev, 
                       requiresTranscript: e.target.value === 'true' 
@@ -487,7 +487,7 @@ const FacultyDashboard = ({ user }) => {
                   <SelectField
                     name="isActive"
                     label="Status"
-                    value={projectForm.isActive.toString()}
+                    value={(projectForm.isActive !== undefined ? projectForm.isActive : true).toString()}
                     onChange={(e) => setProjectForm(prev => ({ 
                       ...prev, 
                       isActive: e.target.value === 'true' 
