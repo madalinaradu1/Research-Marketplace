@@ -42,6 +42,9 @@
           "deploymentBucketName": "amplify-researchmarketplace-dev-0c85c-deployment",
           "s3Key": "amplify-builds/sendEmailNotification-4873757a746e34415146-build.zip"
         }
+      },
+      "storage": {
+        "applicationDocuments": {}
       }
     }
   }

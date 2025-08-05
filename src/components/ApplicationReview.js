@@ -245,7 +245,9 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
               <Text fontWeight="bold">Supporting Document</Text>
               <Button onClick={async () => {
                 try {
-                  const url = await Storage.get(application.documentKey, { expires: 60 });
+                  const url = await Storage.get(application.documentKey, { 
+                    expires: 60
+                  });
                   window.open(url, '_blank');
                 } catch (err) {
                   console.error('Error downloading document:', err);

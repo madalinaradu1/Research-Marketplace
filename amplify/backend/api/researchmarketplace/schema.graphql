@@ -60,6 +60,7 @@ type Application @model @auth(rules: [{allow: private}]) {
   statement: String!
   resumeKey: String
   transcriptLink: AWSURL
+  documentKey: String
   relevantCourses: [RelevantCourse]
   
   # Status tracking

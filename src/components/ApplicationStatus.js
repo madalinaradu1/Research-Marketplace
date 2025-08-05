@@ -18,7 +18,7 @@ import { updateApplication } from '../graphql/operations';
 import EnhancedApplicationForm from './EnhancedApplicationForm';
 import EditApplicationForm from './EditApplicationForm';
 
-const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
+const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturnedSection = true }) => {
   const [withdrawReason, setWithdrawReason] = useState('');
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -189,7 +189,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate }) => {
           </Button>
         )}
         
-        {isStudent && application.status === 'Returned' && (
+        {isStudent && application.status === 'Returned' && showReturnedSection && (
           <Card variation="outlined" backgroundColor="#fff3cd" padding="1rem">
             <Flex direction="column" gap="1rem">
               <Heading level={5} color="#856404">⚠️ Application Returned for Revision</Heading>

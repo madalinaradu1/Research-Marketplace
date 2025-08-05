@@ -320,22 +320,7 @@ const StudentDashboard = ({ user }) => {
           )}
         </TabItem>
         
-        <TabItem title={
-          <Flex alignItems="center" gap="0.5rem" position="relative">
-            <Text>My Applications</Text>
-            {hasUnseenChanges && (
-              <View
-                width="8px"
-                height="8px"
-                borderRadius="50%"
-                backgroundColor="#ffc107"
-                position="absolute"
-                top="-2px"
-                left="-8px"
-              />
-            )}
-          </Flex>
-        }>
+        <TabItem title="My Applications">
           {applications.length === 0 ? (
             <Card>
               <Text>You haven't submitted any applications yet.</Text>
@@ -361,6 +346,7 @@ const StudentDashboard = ({ user }) => {
                   application={application}
                   isStudent={true}
                   onUpdate={handleApplicationUpdate}
+                  showReturnedSection={false}
                 />
               )}
             </Collection>
@@ -386,6 +372,7 @@ const StudentDashboard = ({ user }) => {
                   application={application}
                   isStudent={true}
                   onUpdate={handleApplicationUpdate}
+                  showReturnedSection={true}
                 />
               )}
             </Collection>

@@ -1,0 +1,14 @@
+{
+  "resourceName": "applicationDocuments",
+  "policyUUID": "941d0fb0",
+  "bucketName": "research-marketplace-documents",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}
