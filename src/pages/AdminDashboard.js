@@ -4,13 +4,15 @@ import {
   Flex, 
   Heading, 
   Text, 
+  Button,
   Card, 
   Divider,
   Collection,
   Loader,
   Tabs,
   TabItem,
-  Badge
+  Badge,
+  View
 } from '@aws-amplify/ui-react';
 import { listApplications, listProjects, listUsers } from '../graphql/operations';
 import ApplicationReview from '../components/ApplicationReview';
@@ -20,6 +22,7 @@ const AdminDashboard = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [viewingApplication, setViewingApplication] = useState(null);
   
   useEffect(() => {
     fetchData();
@@ -237,14 +240,23 @@ const AdminDashboard = ({ user }) => {
                         <strong>Submitted:</strong> {new Date(application.createdAt).toLocaleDateString()}
                       </Text>
                       
-                      {application.status === 'Admin Review' && (
-                        <ApplicationReview 
-                          application={application}
-                          userRole="Admin"
-                          onUpdate={handleApplicationUpdate}
-                          compact={true}
-                        />
-                      )}
+                      <Flex gap="0.5rem" marginTop="0.5rem">
+                        <Button 
+                          size="small" 
+                          onClick={() => setViewingApplication(application)}
+                        >
+                          View Details
+                        </Button>
+                        {application.status === 'Admin Review' && (
+                          <Button 
+                            variation="primary" 
+                            size="small" 
+                            onClick={() => setViewingApplication(application)}
+                          >
+                            Review
+                          </Button>
+                        )}
+                      </Flex>
                     </Flex>
                   </Card>
                 )}
@@ -253,6 +265,50 @@ const AdminDashboard = ({ user }) => {
           )}
         </TabItem>
       </Tabs>
+      
+      {/* View Application Details Modal */}
+      {viewingApplication && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setViewingApplication(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="800px"
+              width="100%"
+              maxHeight="90vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ApplicationReview 
+                application={viewingApplication}
+                userRole="Admin"
+                onUpdate={() => {
+                  handleApplicationUpdate();
+                  setViewingApplication(null);
+                }}
+              />
+              <Button 
+                onClick={() => setViewingApplication(null)}
+                marginTop="1rem"
+              >
+                Close
+              </Button>
+            </Card>
+          </Flex>
+        </View>
+      )}
     </Flex>
   );
 };
