@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API, graphqlOperation } from 'aws-amplify';
+import { API, graphqlOperation, Auth } from 'aws-amplify';
 import { 
   Flex, 
   Heading, 
@@ -13,9 +13,11 @@ import {
   TabItem,
   Badge,
   TextAreaField,
+  TextField,
+  SelectField,
   View
 } from '@aws-amplify/ui-react';
-import { listUsers } from '../graphql/operations';
+import { listUsers, listApplications, listProjects } from '../graphql/operations';
 import { listMessages, updateMessage, createMessage, createNotification, getMessageThread } from '../graphql/message-operations';
 import { sendEmailNotification } from '../utils/emailNotifications';
 
@@ -30,6 +32,10 @@ const MessagesPage = ({ user }) => {
   const [isReplying, setIsReplying] = useState(false);
   const [threadMessages, setThreadMessages] = useState([]);
   const [showThread, setShowThread] = useState(false);
+  const [showNewMessage, setShowNewMessage] = useState(false);
+  const [availableRecipients, setAvailableRecipients] = useState([]);
+  const [newMessage, setNewMessage] = useState({ recipient: '', subject: '', body: '' });
+  const [isSendingNew, setIsSendingNew] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -115,11 +121,70 @@ const MessagesPage = ({ user }) => {
       
       setMessages(conversations);
       setUsers(allUsers);
+      
+      // Fetch available recipients based on user role
+      await fetchAvailableRecipients(userId, allUsers);
     } catch (err) {
       console.error('Error fetching messages:', err);
       setError('Failed to load messages. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const fetchAvailableRecipients = async (userId, allUsers) => {
+    try {
+      if (user.role === 'Faculty') {
+        // Faculty can message students with approved applications
+        const currentUser = await Auth.currentAuthenticatedUser();
+        const facultyId = currentUser.username;
+        
+        const projectResult = await API.graphql(graphqlOperation(listProjects, { 
+          filter: { facultyID: { eq: facultyId } },
+          limit: 100
+        }));
+        
+        const facultyProjects = projectResult.data.listProjects.items;
+        const projectIds = facultyProjects.map(p => p.id);
+        
+        if (projectIds.length > 0) {
+          const applicationResult = await API.graphql(graphqlOperation(listApplications, { 
+            limit: 100
+          }));
+          
+          const approvedStudentIds = applicationResult.data.listApplications.items
+            .filter(app => projectIds.includes(app.projectID) && app.status === 'Approved')
+            .map(app => app.studentID);
+          
+          const recipients = allUsers.filter(u => approvedStudentIds.includes(u.id));
+          setAvailableRecipients(recipients);
+        }
+      } else {
+        // Students can message faculty who approved their applications
+        const applicationResult = await API.graphql(graphqlOperation(listApplications, { 
+          limit: 100
+        }));
+        
+        const studentApplications = applicationResult.data.listApplications.items
+          .filter(app => app.studentID === userId && app.status === 'Approved');
+        
+        const projectIds = studentApplications.map(app => app.projectID);
+        
+        if (projectIds.length > 0) {
+          const projectResult = await API.graphql(graphqlOperation(listProjects, { 
+            limit: 100
+          }));
+          
+          const facultyIds = projectResult.data.listProjects.items
+            .filter(p => projectIds.includes(p.id))
+            .map(p => p.facultyID);
+          
+          const recipients = allUsers.filter(u => facultyIds.includes(u.id));
+          setAvailableRecipients(recipients);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching available recipients:', err);
     }
   };
 
@@ -241,9 +306,28 @@ const MessagesPage = ({ user }) => {
 
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
-      <Heading level={2}>Messages</Heading>
+      <Flex justifyContent="space-between" alignItems="center">
+        <Heading level={2}>Messages</Heading>
+        <Button 
+          variation="primary"
+          onClick={() => setShowNewMessage(true)}
+          isDisabled={availableRecipients.length === 0}
+        >
+          Send New Message
+        </Button>
+      </Flex>
       
       {error && <Text color="red">{error}</Text>}
+      
+      {availableRecipients.length === 0 && (
+        <Card backgroundColor="#fff3cd" padding="1rem">
+          <Text color="#856404">
+            {user.role === 'Faculty' 
+              ? 'You can send messages to students once their applications are approved.' 
+              : 'You can send messages to faculty once your applications are approved.'}
+          </Text>
+        </Card>
+      )}
       
 
       
@@ -410,12 +494,155 @@ const MessagesPage = ({ user }) => {
                   </Button>
                   <Button 
                     onClick={sendReply}
-                    backgroundColor="#552b9a"
+                    variation="primary"
                     color="white"
                     isLoading={isReplying}
                     isDisabled={!replyText.trim()}
                   >
                     Send Reply
+                  </Button>
+                </Flex>
+              </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* New Message Modal */}
+      {showNewMessage && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setShowNewMessage(false)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="600px"
+              width="100%"
+              maxHeight="80vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Flex direction="column" gap="1rem">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Heading level={4}>Send New Message</Heading>
+                  <Button size="small" onClick={() => setShowNewMessage(false)}>Close</Button>
+                </Flex>
+                
+                <Divider />
+                
+                <SelectField
+                  label={`Select ${user.role === 'Faculty' ? 'Student' : 'Faculty Member'}`}
+                  value={newMessage.recipient}
+                  onChange={(e) => setNewMessage(prev => ({ ...prev, recipient: e.target.value }))}
+                  required
+                >
+                  <option value="">Choose recipient...</option>
+                  {availableRecipients.map(recipient => (
+                    <option key={recipient.id} value={recipient.id}>
+                      {recipient.name} ({recipient.email})
+                    </option>
+                  ))}
+                </SelectField>
+                
+                <TextField
+                  label="Subject"
+                  value={newMessage.subject}
+                  onChange={(e) => setNewMessage(prev => ({ ...prev, subject: e.target.value }))}
+                  required
+                />
+                
+                <TextAreaField
+                  label="Message"
+                  value={newMessage.body}
+                  onChange={(e) => setNewMessage(prev => ({ ...prev, body: e.target.value }))}
+                  rows={6}
+                  required
+                  placeholder="Type your message here..."
+                />
+                
+                <Flex gap="1rem">
+                  <Button 
+                    onClick={() => {
+                      setShowNewMessage(false);
+                      setNewMessage({ recipient: '', subject: '', body: '' });
+                    }}
+                    variation="link"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={async () => {
+                      if (!newMessage.recipient || !newMessage.subject || !newMessage.body) return;
+                      
+                      setIsSendingNew(true);
+                      try {
+                        const userId = user.id || user.username;
+                        const recipient = availableRecipients.find(r => r.id === newMessage.recipient);
+                        
+                        const messageInput = {
+                          senderID: userId,
+                          receiverID: newMessage.recipient,
+                          subject: newMessage.subject,
+                          body: newMessage.body,
+                          isRead: false,
+                          sentAt: new Date().toISOString(),
+                          threadID: `${Math.min(userId, newMessage.recipient)}-${Math.max(userId, newMessage.recipient)}`,
+                          messageType: 'NEW'
+                        };
+                        
+                        await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
+                        
+                        // Create notification
+                        const notificationInput = {
+                          userID: newMessage.recipient,
+                          type: 'MESSAGE_RECEIVED',
+                          message: `You have a new message from ${user.name}`,
+                          isRead: false
+                        };
+                        
+                        await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
+                        
+                        // Send email notification
+                        try {
+                          await sendEmailNotification(
+                            recipient?.email,
+                            recipient?.name,
+                            user.name,
+                            newMessage.subject,
+                            newMessage.body,
+                            'Research Project'
+                          );
+                        } catch (emailError) {
+                          console.log('Email notification prepared (SES integration pending):', emailError);
+                        }
+                        
+                        setShowNewMessage(false);
+                        setNewMessage({ recipient: '', subject: '', body: '' });
+                        fetchData(); // Refresh messages
+                      } catch (err) {
+                        console.error('Error sending message:', err);
+                        setError('Failed to send message. Please try again.');
+                      } finally {
+                        setIsSendingNew(false);
+                      }
+                    }}
+                    variation="primary"
+                    color="white"
+                    isLoading={isSendingNew}
+                    isDisabled={!newMessage.recipient || !newMessage.subject || !newMessage.body}
+                  >
+                    Send Message
                   </Button>
                 </Flex>
               </Flex>
