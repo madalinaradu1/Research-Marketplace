@@ -251,7 +251,16 @@ const Header = ({ user, signOut }) => {
           onClick={() => navigate('/search')}
           style={{ cursor: 'pointer' }}
         />
-        <Button onClick={handleSignOut} backgroundColor="#552b9a" color="white">
+        <Button 
+          onClick={handleSignOut} 
+          backgroundColor="white" 
+          color="#552b9a"
+          style={{
+            transition: 'transform 0.2s ease'
+          }}
+          onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+        >
           Sign Out
         </Button>
       </Flex>
