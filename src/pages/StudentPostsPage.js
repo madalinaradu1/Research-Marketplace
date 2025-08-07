@@ -378,7 +378,7 @@ const StudentPostsPage = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="600px"
+              maxWidth="800px"
               width="100%"
               maxHeight="90vh"
               style={{ overflow: 'auto' }}
