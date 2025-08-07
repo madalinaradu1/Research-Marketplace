@@ -86,24 +86,6 @@
       "service": "Lambda"
     }
   },
-  "parameters": {
-    "AMPLIFY_function_sendEmailNotification_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "sendEmailNotification"
-        }
-      ]
-    },
-    "AMPLIFY_function_sendEmailNotification_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "sendEmailNotification"
-        }
-      ]
-    }
-  },
   "storage": {
     "applicationDocuments": {
       "dependsOn": [],

@@ -22,6 +22,7 @@ import CompleteProfilePage from './pages/CompleteProfilePage';
 import AdminPage from './pages/AdminPage';
 import MessagesPage from './pages/MessagesPage';
 import ApplicationPage from './pages/ApplicationPage';
+import StudentPostsPage from './pages/StudentPostsPage';
 
 // Import utilities
 import { createUserAfterSignUp, checkUserExists } from './utils/userManagement';
@@ -199,6 +200,9 @@ function App({ signOut, user }) {
             <Route path="/admin" element={isAdmin ? 
               <AdminPage /> : 
               <Navigate to="/dashboard" />} />
+            <Route path="/community" element={shouldCompleteProfile ? 
+              <Navigate to="/complete-profile" /> : 
+              <StudentPostsPage user={userProfile || user} />} />
           </Routes>
         </main>
         

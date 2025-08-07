@@ -11,7 +11,8 @@ import {
   MenuButton,
   MenuItem,
   useTheme,
-  View
+  View,
+  SearchField
 } from '@aws-amplify/ui-react';
 import { useNavigate } from 'react-router-dom';
 import { isUserAdmin } from '../utils/isUserAdmin';
@@ -40,6 +41,7 @@ const Header = ({ user, signOut }) => {
   }} = useTheme() || {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Check if the current path matches the given path
   const isActive = (path) => {
@@ -168,14 +170,7 @@ const Header = ({ user, signOut }) => {
             Dashboard
           </Text>
         </Link>
-        <Link to="/search">
-          <Text
-            color={isActive('/search') ? "white" : "rgba(255,255,255,0.8)"}
-            fontWeight={isActive('/search') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-          >
-            Search
-          </Text>
-        </Link>
+
         <Link to="/activity">
           <Text
             color={isActive('/activity') ? "white" : "rgba(255,255,255,0.8)"}
@@ -210,6 +205,14 @@ const Header = ({ user, signOut }) => {
             </View>
           )}
         </Link>
+        <Link to="/community">
+          <Text
+            color={isActive('/community') ? "white" : "rgba(255,255,255,0.8)"}
+            fontWeight={isActive('/community') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
+          >
+            Community
+          </Text>
+        </Link>
         {(user?.role === 'Student' || user?.role === 'Faculty') && (
           <Link to="/applications">
             <Text
@@ -240,6 +243,22 @@ const Header = ({ user, signOut }) => {
             </Text>
           </Link>
         )}
+        <SearchField
+          placeholder="Search projects..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onSubmit={() => {
+            if (searchTerm) {
+              navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+            } else {
+              navigate('/search');
+            }
+          }}
+          width="400px"
+          height="42px"
+          backgroundColor="white"
+          color="black"
+        />
         <Button onClick={handleSignOut} backgroundColor="#552b9a" color="white">
           Sign Out
         </Button>
@@ -267,6 +286,7 @@ const Header = ({ user, signOut }) => {
             <MenuItem onClick={() => navigate('/search')}>Search</MenuItem>
             <MenuItem onClick={() => navigate('/activity')}>My Activity</MenuItem>
             <MenuItem onClick={() => navigate('/messages')}>Messages</MenuItem>
+            <MenuItem onClick={() => navigate('/community')}>Community</MenuItem>
             {(user?.role === 'Student' || user?.role === 'Faculty') && (
               <MenuItem onClick={() => navigate('/applications')}>Applications</MenuItem>
             )}
