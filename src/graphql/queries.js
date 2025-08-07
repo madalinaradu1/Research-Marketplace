@@ -54,6 +54,10 @@ export const getUser = /* GraphQL */ `
         nextToken
         __typename
       }
+      studentPosts {
+        nextToken
+        __typename
+      }
       owner
       __typename
     }
@@ -266,6 +270,7 @@ export const getApplication = /* GraphQL */ `
       statement
       resumeKey
       transcriptLink
+      documentKey
       relevantCourses {
         courseName
         courseNumber
@@ -323,6 +328,7 @@ export const listApplications = /* GraphQL */ `
         statement
         resumeKey
         transcriptLink
+        documentKey
         status
         statusDetail
         facultyNotes
@@ -368,6 +374,7 @@ export const applicationsByStudentID = /* GraphQL */ `
         statement
         resumeKey
         transcriptLink
+        documentKey
         status
         statusDetail
         facultyNotes
@@ -413,6 +420,7 @@ export const applicationsByProjectID = /* GraphQL */ `
         statement
         resumeKey
         transcriptLink
+        documentKey
         status
         statusDetail
         facultyNotes
@@ -448,6 +456,7 @@ export const getLearningContract = /* GraphQL */ `
         statement
         resumeKey
         transcriptLink
+        documentKey
         status
         statusDetail
         facultyNotes
@@ -1152,6 +1161,119 @@ export const activityLogsByUserID = /* GraphQL */ `
         timestamp
         createdAt
         updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getStudentPost = /* GraphQL */ `
+  query GetStudentPost($id: ID!) {
+    getStudentPost(id: $id) {
+      id
+      studentID
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      type
+      title
+      description
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      isActive
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listStudentPosts = /* GraphQL */ `
+  query ListStudentPosts(
+    $filter: ModelStudentPostFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listStudentPosts(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        studentID
+        type
+        title
+        description
+        department
+        researchAreas
+        skillsOffered
+        skillsNeeded
+        timeCommitment
+        isActive
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const studentPostsByStudentID = /* GraphQL */ `
+  query StudentPostsByStudentID(
+    $studentID: ID!
+    $sortDirection: ModelSortDirection
+    $filter: ModelStudentPostFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    studentPostsByStudentID(
+      studentID: $studentID
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        studentID
+        type
+        title
+        description
+        department
+        researchAreas
+        skillsOffered
+        skillsNeeded
+        timeCommitment
+        isActive
+        createdAt
+        updatedAt
+        owner
         __typename
       }
       nextToken

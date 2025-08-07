@@ -309,7 +309,8 @@ const MessagesPage = ({ user }) => {
       <Flex justifyContent="space-between" alignItems="center">
         <Heading level={2}>Messages</Heading>
         <Button 
-          variation="primary"
+          backgroundColor="#552b9a"
+          color="white"
           onClick={() => setShowNewMessage(true)}
           isDisabled={availableRecipients.length === 0}
         >

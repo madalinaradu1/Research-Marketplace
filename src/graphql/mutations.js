@@ -57,6 +57,10 @@ export const createUser = /* GraphQL */ `
         nextToken
         __typename
       }
+      studentPosts {
+        nextToken
+        __typename
+      }
       owner
       __typename
     }
@@ -118,6 +122,10 @@ export const updateUser = /* GraphQL */ `
         nextToken
         __typename
       }
+      studentPosts {
+        nextToken
+        __typename
+      }
       owner
       __typename
     }
@@ -176,6 +184,10 @@ export const deleteUser = /* GraphQL */ `
         __typename
       }
       messageBoards {
+        nextToken
+        __typename
+      }
+      studentPosts {
         nextToken
         __typename
       }
@@ -409,6 +421,7 @@ export const createApplication = /* GraphQL */ `
       statement
       resumeKey
       transcriptLink
+      documentKey
       relevantCourses {
         courseName
         courseNumber
@@ -506,6 +519,7 @@ export const updateApplication = /* GraphQL */ `
       statement
       resumeKey
       transcriptLink
+      documentKey
       relevantCourses {
         courseName
         courseNumber
@@ -603,6 +617,7 @@ export const deleteApplication = /* GraphQL */ `
       statement
       resumeKey
       transcriptLink
+      documentKey
       relevantCourses {
         courseName
         courseNumber
@@ -661,6 +676,7 @@ export const createLearningContract = /* GraphQL */ `
         statement
         resumeKey
         transcriptLink
+        documentKey
         status
         statusDetail
         facultyNotes
@@ -708,6 +724,7 @@ export const updateLearningContract = /* GraphQL */ `
         statement
         resumeKey
         transcriptLink
+        documentKey
         status
         statusDetail
         facultyNotes
@@ -755,6 +772,7 @@ export const deleteLearningContract = /* GraphQL */ `
         statement
         resumeKey
         transcriptLink
+        documentKey
         status
         statusDetail
         facultyNotes
@@ -1527,6 +1545,156 @@ export const deleteActivityLog = /* GraphQL */ `
       timestamp
       createdAt
       updatedAt
+      __typename
+    }
+  }
+`;
+export const createStudentPost = /* GraphQL */ `
+  mutation CreateStudentPost(
+    $input: CreateStudentPostInput!
+    $condition: ModelStudentPostConditionInput
+  ) {
+    createStudentPost(input: $input, condition: $condition) {
+      id
+      studentID
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      type
+      title
+      description
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      isActive
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const updateStudentPost = /* GraphQL */ `
+  mutation UpdateStudentPost(
+    $input: UpdateStudentPostInput!
+    $condition: ModelStudentPostConditionInput
+  ) {
+    updateStudentPost(input: $input, condition: $condition) {
+      id
+      studentID
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      type
+      title
+      description
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      isActive
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const deleteStudentPost = /* GraphQL */ `
+  mutation DeleteStudentPost(
+    $input: DeleteStudentPostInput!
+    $condition: ModelStudentPostConditionInput
+  ) {
+    deleteStudentPost(input: $input, condition: $condition) {
+      id
+      studentID
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        applicationCount
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      type
+      title
+      description
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      isActive
+      createdAt
+      updatedAt
+      owner
       __typename
     }
   }

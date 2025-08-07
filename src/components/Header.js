@@ -41,7 +41,6 @@ const Header = ({ user, signOut }) => {
   }} = useTheme() || {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
 
   // Check if the current path matches the given path
   const isActive = (path) => {
@@ -162,7 +161,7 @@ const Header = ({ user, signOut }) => {
         gap={tokens.space.medium}
         display={{ base: 'none', medium: 'flex' }}
       >
-        <Link to="/dashboard">
+        <Link to="/dashboard" style={{ textDecoration: isActive('/dashboard') ? 'underline' : 'none', textDecorationColor: 'white' }}>
           <Text
             color={isActive('/dashboard') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/dashboard') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -171,7 +170,7 @@ const Header = ({ user, signOut }) => {
           </Text>
         </Link>
 
-        <Link to="/activity">
+        <Link to="/activity" style={{ textDecoration: isActive('/activity') ? 'underline' : 'none', textDecorationColor: 'white' }}>
           <Text
             color={isActive('/activity') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/activity') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -179,7 +178,7 @@ const Header = ({ user, signOut }) => {
             My Activity
           </Text>
         </Link>
-        <Link to="/messages" style={{ position: 'relative' }}>
+        <Link to="/messages" style={{ position: 'relative', textDecoration: isActive('/messages') ? 'underline' : 'none', textDecorationColor: 'white' }}>
           <Text
             color={isActive('/messages') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/messages') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -205,7 +204,7 @@ const Header = ({ user, signOut }) => {
             </View>
           )}
         </Link>
-        <Link to="/community">
+        <Link to="/community" style={{ textDecoration: isActive('/community') ? 'underline' : 'none', textDecorationColor: 'white' }}>
           <Text
             color={isActive('/community') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/community') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -214,7 +213,7 @@ const Header = ({ user, signOut }) => {
           </Text>
         </Link>
         {(user?.role === 'Student' || user?.role === 'Faculty') && (
-          <Link to="/applications">
+          <Link to="/applications" style={{ textDecoration: isActive('/applications') ? 'underline' : 'none', textDecorationColor: 'white' }}>
             <Text
               color={isActive('/applications') ? "white" : "rgba(255,255,255,0.8)"}
               fontWeight={isActive('/applications') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -224,7 +223,7 @@ const Header = ({ user, signOut }) => {
           </Link>
         )}
         {user?.role === 'Student' && (
-          <Link to="/profile">
+          <Link to="/profile" style={{ textDecoration: isActive('/profile') ? 'underline' : 'none', textDecorationColor: 'white' }}>
             <Text
               color={isActive('/profile') ? "white" : "rgba(255,255,255,0.8)"}
               fontWeight={isActive('/profile') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -234,7 +233,7 @@ const Header = ({ user, signOut }) => {
           </Link>
         )}
         {isUserAdmin(user, user) && (
-          <Link to="/admin">
+          <Link to="/admin" style={{ textDecoration: isActive('/admin') ? 'underline' : 'none', textDecorationColor: 'white' }}>
             <Text
               color={isActive('/admin') ? "white" : "rgba(255,255,255,0.8)"}
               fontWeight={isActive('/admin') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -243,21 +242,14 @@ const Header = ({ user, signOut }) => {
             </Text>
           </Link>
         )}
-        <SearchField
-          placeholder="Search projects..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onSubmit={() => {
-            if (searchTerm) {
-              navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
-            } else {
-              navigate('/search');
-            }
-          }}
-          width="400px"
-          height="42px"
-          backgroundColor="white"
-          color="black"
+        <Image
+          alt="Search Icon"
+          src="/Search Icon.png"
+          height="48px"
+          width="48px"
+          objectFit="contain"
+          onClick={() => navigate('/search')}
+          style={{ cursor: 'pointer' }}
         />
         <Button onClick={handleSignOut} backgroundColor="#552b9a" color="white">
           Sign Out
