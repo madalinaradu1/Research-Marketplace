@@ -369,7 +369,8 @@ const FacultyDashboard = ({ user }) => {
           <Heading level={4}>Quick Actions</Heading>
           <Flex direction="column" gap="0.5rem" marginTop="1rem">
             <Button 
-              variation="primary" 
+              backgroundColor="#552b9a"
+              color="white"
               onClick={() => {
                 setIsCreatingProject(true);
                 setSelectedProject(null);
@@ -506,7 +507,8 @@ const FacultyDashboard = ({ user }) => {
                     </Button>
                     <Button 
                       type="submit"
-                      variation="primary"
+                      backgroundColor="#552b9a"
+                      color="white"
                       isLoading={isSubmitting}
                     >
                       {selectedProject ? 'Update Project' : 'Create Project'}
@@ -582,7 +584,8 @@ const FacultyDashboard = ({ user }) => {
                             </Button>
                             <Button 
                               size="small"
-                              variation="primary"
+                              backgroundColor="#552b9a"
+                              color="white"
                               onClick={() => {
                                 setViewingApplicationsForProject(project);
                                 setActiveTabIndex(1);
@@ -655,7 +658,8 @@ const FacultyDashboard = ({ user }) => {
                               {application.status === 'Approved' && (
                                 <Button 
                                   size="small"
-                                  variation="primary"
+                                  backgroundColor="#552b9a"
+                                  color="white"
                                   onClick={() => setMessagingStudent({ application, student: application.student })}
                                 >
                                   Message
@@ -715,7 +719,8 @@ const FacultyDashboard = ({ user }) => {
                               
                               <Button 
                                 size="small"
-                                variation="primary"
+                                backgroundColor="#552b9a"
+                                color="white"
                                 onClick={() => setReviewingApplication(application)}
                               >
                                 Review Now
@@ -828,7 +833,8 @@ const FacultyDashboard = ({ user }) => {
                     Cancel
                   </Button>
                   <Button 
-                    variation="primary"
+                    backgroundColor="#552b9a"
+                    color="white"
                     isLoading={isSendingMessage}
                     onClick={async () => {
                       if (!messageText.trim()) return;

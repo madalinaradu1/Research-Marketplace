@@ -239,7 +239,7 @@ const StudentDashboard = ({ user }) => {
         <Card variation="elevated" flex="1">
           <Heading level={4}>Quick Links</Heading>
           <Flex direction="column" gap="0.5rem" marginTop="1rem">
-            <Button variation="primary" onClick={() => navigate('/search')}>
+            <Button backgroundColor="#552b9a" color="white" onClick={() => navigate('/search')}>
               Browse Research Opportunities
             </Button>
             <Button onClick={() => setActiveTabIndex(1)}>
@@ -304,7 +304,8 @@ const StudentDashboard = ({ user }) => {
                           View Details
                         </Button>
                         <Button 
-                          variation="primary" 
+                          backgroundColor="#552b9a"
+                          color="white"
                           size="small" 
                           onClick={() => handleApply(project)}
                           isDisabled={applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3}
@@ -325,7 +326,8 @@ const StudentDashboard = ({ user }) => {
             <Card>
               <Text>You haven't submitted any applications yet.</Text>
               <Button 
-                variation="primary" 
+                backgroundColor="#552b9a"
+                color="white"
                 onClick={() => setActiveTabIndex(0)}
                 marginTop="1rem"
               >
@@ -443,7 +445,8 @@ const StudentDashboard = ({ user }) => {
                 <Flex gap="1rem" marginTop="1rem">
                   <Button onClick={() => setSelectedProject(null)}>Close</Button>
                   <Button 
-                    variation="primary" 
+                    backgroundColor="#552b9a"
+                    color="white"
                     onClick={() => handleApply(selectedProject)}
                     isDisabled={applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3}
                   >

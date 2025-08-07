@@ -240,7 +240,7 @@ const Header = ({ user, signOut }) => {
             </Text>
           </Link>
         )}
-        <Button onClick={handleSignOut} variation="primary">
+        <Button onClick={handleSignOut} backgroundColor="#552b9a" color="white">
           Sign Out
         </Button>
       </Flex>
