@@ -17,7 +17,7 @@ import {
   View,
   Divider
 } from '@aws-amplify/ui-react';
-import { listStudentPosts, createStudentPost } from '../graphql/student-post-operations';
+import { listStudentPosts, createStudentPost, updateStudentPost, deleteStudentPost } from '../graphql/student-post-operations';
 
 const StudentPostsPage = ({ user }) => {
   const [posts, setPosts] = useState([]);
@@ -35,6 +35,8 @@ const StudentPostsPage = ({ user }) => {
     timeCommitment: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const departments = [
     'Computer Science',
@@ -47,7 +49,9 @@ const StudentPostsPage = ({ user }) => {
     'Mathematics',
     'Business',
     'Education',
-    'Nursing'
+    'Nursing',
+    'Technology',
+    'Other'
   ];
 
   const postTypes = [
@@ -88,7 +92,7 @@ const StudentPostsPage = ({ user }) => {
       const userId = user.id || user.username;
       
       const input = {
-        studentID: userId,
+        studentID: editingPost ? editingPost.studentID : userId,
         type: formData.type,
         title: formData.title,
         description: formData.description,
@@ -100,9 +104,15 @@ const StudentPostsPage = ({ user }) => {
         isActive: true
       };
 
-      await API.graphql(graphqlOperation(createStudentPost, { input }));
+      if (editingPost) {
+        input.id = editingPost.id;
+        await API.graphql(graphqlOperation(updateStudentPost, { input }));
+      } else {
+        await API.graphql(graphqlOperation(createStudentPost, { input }));
+      }
 
       setShowCreateForm(false);
+      setEditingPost(null);
       setFormData({
         type: 'RESEARCH_INTEREST',
         title: '',
@@ -116,8 +126,39 @@ const StudentPostsPage = ({ user }) => {
       fetchPosts();
     } catch (error) {
       console.error('Error creating post:', error);
+      if (error.errors) {
+        console.error('GraphQL errors:', error.errors);
+        error.errors.forEach(err => console.error('Error details:', err));
+      }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEdit = (post) => {
+    setEditingPost(post);
+    setFormData({
+      type: post.type,
+      title: post.title,
+      description: post.description,
+      department: post.department || '',
+      researchAreas: post.researchAreas ? post.researchAreas.join(', ') : '',
+      skillsOffered: post.skillsOffered ? post.skillsOffered.join(', ') : '',
+      skillsNeeded: post.skillsNeeded ? post.skillsNeeded.join(', ') : '',
+      timeCommitment: post.timeCommitment || ''
+    });
+    setShowCreateForm(true);
+  };
+
+  const handleDelete = async (postId) => {
+    setIsDeleting(true);
+    try {
+      await API.graphql(graphqlOperation(deleteStudentPost, { input: { id: postId } }));
+      fetchPosts();
+    } catch (error) {
+      console.error('Error deleting post:', error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -189,58 +230,57 @@ const StudentPostsPage = ({ user }) => {
                       <Flex direction="column" gap="0.5rem" flex="1">
                         <Flex alignItems="center" gap="1rem">
                           <Heading level={4}>{post.title}</Heading>
-                          <Badge backgroundColor={getPostTypeColor(post.type)} color="white">
+                          <Text fontSize="0.8rem" color="gray" fontWeight="bold">
                             {getPostTypeLabel(post.type)}
-                          </Badge>
+                          </Text>
                         </Flex>
                         <Text fontSize="0.9rem" color="gray">
-                          {post.student?.name} • {post.student?.major} • {post.department}
+                          {post.student?.name} • {post.department || 'No Department'}
                         </Text>
                       </Flex>
-                      <Text fontSize="0.8rem" color="gray">
-                        {new Date(post.createdAt).toLocaleDateString()}
-                      </Text>
+                      <Flex alignItems="center" gap="1rem">
+                        <Text fontSize="0.8rem" color="gray">
+                          {new Date(post.createdAt).toLocaleDateString()}
+                        </Text>
+                        {((user.id || user.username) === post.student?.id || user.role === 'Admin') && (
+                          <Flex gap="0.5rem">
+                            <Button size="small" onClick={() => handleEdit(post)}>
+                              Edit
+                            </Button>
+                            <Button 
+                              size="small"
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this post?')) {
+                                  handleDelete(post.id);
+                                }
+                              }}
+                              isLoading={isDeleting}
+                            >
+                              Delete
+                            </Button>
+                          </Flex>
+                        )}
+                      </Flex>
                     </Flex>
 
                     <Text>{post.description}</Text>
 
                     {post.researchAreas && post.researchAreas.length > 0 && (
-                      <Flex direction="column" gap="0.5rem">
-                        <Text fontWeight="bold" fontSize="0.9rem">Research Areas:</Text>
-                        <Flex wrap="wrap" gap="0.5rem">
-                          {post.researchAreas.map((area, index) => (
-                            <Badge key={index} backgroundColor="blue" color="white">
-                              {area}
-                            </Badge>
-                          ))}
-                        </Flex>
-                      </Flex>
+                      <Text fontSize="0.9rem">
+                        <strong>Research Areas:</strong> {post.researchAreas.join(', ')}
+                      </Text>
                     )}
 
                     {post.skillsOffered && post.skillsOffered.length > 0 && (
-                      <Flex direction="column" gap="0.5rem">
-                        <Text fontWeight="bold" fontSize="0.9rem">Skills Offered:</Text>
-                        <Flex wrap="wrap" gap="0.5rem">
-                          {post.skillsOffered.map((skill, index) => (
-                            <Badge key={index} backgroundColor="green" color="white">
-                              {skill}
-                            </Badge>
-                          ))}
-                        </Flex>
-                      </Flex>
+                      <Text fontSize="0.9rem">
+                        <strong>Skills Offered:</strong> {post.skillsOffered.join(', ')}
+                      </Text>
                     )}
 
                     {post.skillsNeeded && post.skillsNeeded.length > 0 && (
-                      <Flex direction="column" gap="0.5rem">
-                        <Text fontWeight="bold" fontSize="0.9rem">Skills Needed:</Text>
-                        <Flex wrap="wrap" gap="0.5rem">
-                          {post.skillsNeeded.map((skill, index) => (
-                            <Badge key={index} backgroundColor="orange" color="white">
-                              {skill}
-                            </Badge>
-                          ))}
-                        </Flex>
-                      </Flex>
+                      <Text fontSize="0.9rem">
+                        <strong>Skills Needed:</strong> {post.skillsNeeded.join(', ')}
+                      </Text>
                     )}
 
                     {post.timeCommitment && (
@@ -282,13 +322,33 @@ const StudentPostsPage = ({ user }) => {
                     <Flex justifyContent="space-between" alignItems="center">
                       <Flex alignItems="center" gap="1rem">
                         <Heading level={4}>{post.title}</Heading>
-                        <Badge backgroundColor={getPostTypeColor(post.type)} color="white">
+                        <Text fontSize="0.8rem" color="gray" fontWeight="bold">
                           {getPostTypeLabel(post.type)}
-                        </Badge>
+                        </Text>
                       </Flex>
-                      <Text fontSize="0.8rem" color="gray">
-                        {new Date(post.createdAt).toLocaleDateString()}
-                      </Text>
+                      <Flex alignItems="center" gap="1rem">
+                        <Text fontSize="0.8rem" color="gray">
+                          {new Date(post.createdAt).toLocaleDateString()}
+                        </Text>
+                        {((user.id || user.username) === post.student?.id || user.role === 'Admin') && (
+                          <Flex gap="0.5rem">
+                            <Button size="small" onClick={() => handleEdit(post)}>
+                              Edit
+                            </Button>
+                            <Button 
+                              size="small"
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this post?')) {
+                                  handleDelete(post.id);
+                                }
+                              }}
+                              isLoading={isDeleting}
+                            >
+                              Delete
+                            </Button>
+                          </Flex>
+                        )}
+                      </Flex>
                     </Flex>
                     <Text>{post.description}</Text>
                   </Flex>
@@ -324,7 +384,7 @@ const StudentPostsPage = ({ user }) => {
               style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Heading level={3}>Create New Post</Heading>
+              <Heading level={3}>{editingPost ? 'Edit Post' : 'Create New Post'}</Heading>
               <Divider margin="1rem 0" />
 
               <form onSubmit={handleSubmit}>
@@ -416,7 +476,7 @@ const StudentPostsPage = ({ user }) => {
                       color="white"
                       isLoading={isSubmitting}
                     >
-                      Create Post
+                      {editingPost ? 'Update Post' : 'Create Post'}
                     </Button>
                   </Flex>
                 </Flex>

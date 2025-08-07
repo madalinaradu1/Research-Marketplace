@@ -206,7 +206,7 @@ const SearchPage = ({ user }) => {
               label="Department"
               value={selectedDepartment}
               onChange={(e) => setSelectedDepartment(e.target.value)}
-              width="200px"
+              width="250px"
             >
               <option value="">All Departments</option>
               {departments.map(dept => (
@@ -218,7 +218,7 @@ const SearchPage = ({ user }) => {
               label="Duration"
               value={selectedDuration}
               onChange={(e) => setSelectedDuration(e.target.value)}
-              width="150px"
+              width="180px"
             >
               <option value="">Any Duration</option>
               {durations.map(duration => (
@@ -230,7 +230,7 @@ const SearchPage = ({ user }) => {
               label="Sort By"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              width="150px"
+              width="180px"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>

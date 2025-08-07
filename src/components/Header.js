@@ -161,7 +161,7 @@ const Header = ({ user, signOut }) => {
         gap={tokens.space.medium}
         display={{ base: 'none', medium: 'flex' }}
       >
-        <Link to="/dashboard" style={{ textDecoration: isActive('/dashboard') ? 'underline' : 'none', textDecorationColor: 'white' }}>
+        <Link to="/dashboard" style={{ textDecoration: isActive('/dashboard') ? 'underline white' : 'none' }}>
           <Text
             color={isActive('/dashboard') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/dashboard') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -170,7 +170,7 @@ const Header = ({ user, signOut }) => {
           </Text>
         </Link>
 
-        <Link to="/activity" style={{ textDecoration: isActive('/activity') ? 'underline' : 'none', textDecorationColor: 'white' }}>
+        <Link to="/activity" style={{ textDecoration: isActive('/activity') ? 'underline white' : 'none' }}>
           <Text
             color={isActive('/activity') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/activity') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -178,7 +178,7 @@ const Header = ({ user, signOut }) => {
             My Activity
           </Text>
         </Link>
-        <Link to="/messages" style={{ position: 'relative', textDecoration: isActive('/messages') ? 'underline' : 'none', textDecorationColor: 'white' }}>
+        <Link to="/messages" style={{ position: 'relative', textDecoration: isActive('/messages') ? 'underline white' : 'none' }}>
           <Text
             color={isActive('/messages') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/messages') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -204,7 +204,7 @@ const Header = ({ user, signOut }) => {
             </View>
           )}
         </Link>
-        <Link to="/community" style={{ textDecoration: isActive('/community') ? 'underline' : 'none', textDecorationColor: 'white' }}>
+        <Link to="/community" style={{ textDecoration: isActive('/community') ? 'underline white' : 'none' }}>
           <Text
             color={isActive('/community') ? "white" : "rgba(255,255,255,0.8)"}
             fontWeight={isActive('/community') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -213,7 +213,7 @@ const Header = ({ user, signOut }) => {
           </Text>
         </Link>
         {(user?.role === 'Student' || user?.role === 'Faculty') && (
-          <Link to="/applications" style={{ textDecoration: isActive('/applications') ? 'underline' : 'none', textDecorationColor: 'white' }}>
+          <Link to="/applications" style={{ textDecoration: isActive('/applications') ? 'underline white' : 'none' }}>
             <Text
               color={isActive('/applications') ? "white" : "rgba(255,255,255,0.8)"}
               fontWeight={isActive('/applications') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -223,7 +223,7 @@ const Header = ({ user, signOut }) => {
           </Link>
         )}
         {user?.role === 'Student' && (
-          <Link to="/profile" style={{ textDecoration: isActive('/profile') ? 'underline' : 'none', textDecorationColor: 'white' }}>
+          <Link to="/profile" style={{ textDecoration: isActive('/profile') ? 'underline white' : 'none' }}>
             <Text
               color={isActive('/profile') ? "white" : "rgba(255,255,255,0.8)"}
               fontWeight={isActive('/profile') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
@@ -233,7 +233,7 @@ const Header = ({ user, signOut }) => {
           </Link>
         )}
         {isUserAdmin(user, user) && (
-          <Link to="/admin" style={{ textDecoration: isActive('/admin') ? 'underline' : 'none', textDecorationColor: 'white' }}>
+          <Link to="/admin" style={{ textDecoration: isActive('/admin') ? 'underline white' : 'none' }}>
             <Text
               color={isActive('/admin') ? "white" : "rgba(255,255,255,0.8)"}
               fontWeight={isActive('/admin') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
