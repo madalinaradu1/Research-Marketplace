@@ -15,7 +15,8 @@ import {
   TextAreaField,
   SelectField,
   Badge,
-  View
+  View,
+  Image
 } from '@aws-amplify/ui-react';
 import { listProjects, listApplications, createProject, updateProject, getUser, listUsers } from '../graphql/operations';
 import { createMessage, createNotification } from '../graphql/message-operations';
@@ -329,7 +330,23 @@ const FacultyDashboard = ({ user }) => {
   }
   
   return (
-    <Flex direction="column" padding="2rem" gap="2rem">
+    <View width="100%">
+      <View
+        position="relative"
+        width="100vw"
+        height="450px"
+        style={{ left: '50%', marginLeft: '-50vw', marginTop: '-2rem' }}
+      >
+        <Image
+          alt="Faculty Meeting Banner"
+          src="/Faculty_Meeting.png"
+          width="100%"
+          height="100%"
+          objectFit="cover"
+          objectPosition="center 35%"
+        />
+      </View>
+      <Flex direction="column" padding="2rem" gap="2rem">
       <Heading level={2}>Faculty Dashboard</Heading>
       <Text>Welcome, {user.name}!</Text>
       
@@ -883,7 +900,8 @@ const FacultyDashboard = ({ user }) => {
           </Flex>
         </View>
       )}
-    </Flex>
+      </Flex>
+    </View>
   );
 };
 

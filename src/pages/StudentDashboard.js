@@ -14,7 +14,8 @@ import {
   Tabs,
   TabItem,
   TextField,
-  TextAreaField
+  TextAreaField,
+  Image
 } from '@aws-amplify/ui-react';
 import { listApplications, listProjects, createApplication } from '../graphql/simplified-operations';
 import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
@@ -215,9 +216,25 @@ const StudentDashboard = ({ user }) => {
   }
   
   return (
-    <Flex direction="column" padding="2rem" gap="2rem">
-      <Heading level={2}>Student Dashboard</Heading>
-      <Text>Welcome, {user.name && user.name.trim() ? user.name : user.email?.split('@')[0]?.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Student'}!</Text>
+    <View width="100%">
+      <View
+        position="relative"
+        width="100vw"
+        height="450px"
+        style={{ left: '50%', marginLeft: '-50vw', marginTop: '-2rem' }}
+      >
+        <Image
+          alt="Student Research Banner"
+          src="/Student_Presenting.jpg"
+          width="100%"
+          height="100%"
+          objectFit="cover"
+          objectPosition="center 25%"
+        />
+      </View>
+      <Flex direction="column" padding="2rem" gap="2rem">
+        <Heading level={2}>Student Dashboard</Heading>
+        <Text>Welcome, {user.name && user.name.trim() ? user.name : user.email?.split('@')[0]?.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Student'}!</Text>
       
       {error && <Text color="red">{error}</Text>}
       
@@ -385,6 +402,7 @@ const StudentDashboard = ({ user }) => {
           <ApplicationStatusGuide />
         </TabItem>
       </Tabs>
+      </Flex>
       
       {/* Project Details Overlay */}
       {selectedProject && !showApplicationForm && (
@@ -571,7 +589,7 @@ const StudentDashboard = ({ user }) => {
           </Flex>
         </View>
       )}
-    </Flex>
+    </View>
   );
 };
 
