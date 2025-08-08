@@ -149,9 +149,6 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
             <Text>Status Detail: {application.statusDetail}</Text>
           )}
           <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
-          <Button size="small" onClick={() => setShowDetails(true)} marginTop="0.5rem">
-            View Details
-          </Button>
         </Flex>
         
         <Divider />
@@ -245,12 +242,20 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                 </Flex>
               </Card>
             ) : (
-              <Button 
-                onClick={() => setIsWithdrawing(true)}
-                variation="destructive"
-              >
-                Withdraw Application
-              </Button>
+              <Flex gap="0.5rem">
+                <Button 
+                  size="small"
+                  onClick={() => setShowDetails(true)}
+                >
+                  View Details
+                </Button>
+                <Button 
+                  size="small"
+                  onClick={() => setIsWithdrawing(true)}
+                >
+                  Withdraw Application
+                </Button>
+              </Flex>
             )}
           </View>
         )}

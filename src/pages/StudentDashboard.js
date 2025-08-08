@@ -217,21 +217,29 @@ const StudentDashboard = ({ user }) => {
   
   return (
     <View width="100%">
-      <View
+      <Flex
         position="relative"
         width="100vw"
-        height="450px"
+        height="400px"
         style={{ left: '50%', marginLeft: '-50vw', marginTop: '-2rem' }}
       >
         <Image
           alt="Student Research Banner"
-          src="/Student_Presenting.jpg"
-          width="100%"
+          src="/Student_Research.png"
+          width="50%"
           height="100%"
           objectFit="cover"
           objectPosition="center 25%"
         />
-      </View>
+        <Image
+          alt="Student Presenting Banner"
+          src="/Student_Presenting.jpg"
+          width="50%"
+          height="100%"
+          objectFit="cover"
+          objectPosition="center 25%"
+        />
+      </Flex>
       <Flex direction="column" padding="2rem" gap="2rem">
         <Heading level={2}>Student Dashboard</Heading>
         <Text>Welcome, {user.name && user.name.trim() ? user.name : user.email?.split('@')[0]?.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Student'}!</Text>
