@@ -111,7 +111,6 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
         
         <Alert variation="warning">
           <Text>
-            <strong>Application Returned:</strong><br/>
             Your application was returned for revision. Please update your statement and/or upload additional documents as requested, then resubmit.
           </Text>
         </Alert>
@@ -119,17 +118,92 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
         {/* Show feedback from reviewers */}
         {(application.facultyNotes || application.coordinatorNotes || application.adminNotes) && (
           <Card variation="outlined">
-            <Text fontWeight="bold">Reviewer Feedback:</Text>
+            <Text fontWeight="bold">Coordinator Feedback:</Text>
             {application.facultyNotes && (
               <Text><strong>Faculty:</strong> {application.facultyNotes}</Text>
             )}
             {application.coordinatorNotes && (
-              <Text><strong>Coordinator:</strong> {application.coordinatorNotes}</Text>
+              <Text style={{ whiteSpace: 'pre-wrap' }}>{application.coordinatorNotes}</Text>
             )}
             {application.adminNotes && (
               <Text><strong>Admin:</strong> {application.adminNotes}</Text>
             )}
           </Card>
+        )}
+        
+        <Divider />
+        
+        {/* Student Information */}
+        <Flex direction="column" gap="0.5rem">
+          <Text fontWeight="bold">Student Information</Text>
+          <Text>Student ID: {application.studentID}</Text>
+          <Text>Name: {application.student?.name || 'Not specified'}</Text>
+          <Text>Email: {application.student?.email || 'Not specified'}</Text>
+          <Text>Program: {application.student?.major || 'Not specified'}</Text>
+          <Text>Academic Year: {application.student?.academicYear || 'Not specified'}</Text>
+          <Text>Expected Graduation: {application.student?.expectedGraduation || 'Not specified'}</Text>
+          <Text>GPA: {application.student?.gpa || 'Not specified'}</Text>
+        </Flex>
+        
+        {/* Relevant Coursework */}
+        {application.relevantCourses && application.relevantCourses.length > 0 && (
+          <>
+            <Divider />
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Relevant Coursework</Text>
+              {application.relevantCourses.map((course, index) => (
+                <Card key={index} variation="outlined" padding="0.5rem">
+                  <Flex justifyContent="space-between">
+                    <Text>{course.courseName} ({course.courseNumber})</Text>
+                    <Text>Grade: {course.grade} | {course.semester} {course.year}</Text>
+                  </Flex>
+                </Card>
+              ))}
+            </Flex>
+          </>
+        )}
+        
+        {/* Current Supporting Documents */}
+        {application.documentKey && (
+          <>
+            <Divider />
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Supporting Documents</Text>
+              <Flex gap="0.5rem">
+                <Button size="small" onClick={async () => {
+                  try {
+                    const url = await Storage.get(application.documentKey, { 
+                      expires: 300
+                    });
+                    window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`, '_blank');
+                  } catch (err) {
+                    console.error('Error loading document:', err);
+                    setError('Failed to load document. Please try again.');
+                  }
+                }}>View Document</Button>
+                <Button size="small" backgroundColor="white" color="black" border="1px solid black" onClick={async () => {
+                  try {
+                    const url = await Storage.get(application.documentKey, { 
+                      expires: 300
+                    });
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = downloadUrl;
+                    link.download = 'supporting-document';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(downloadUrl);
+                  } catch (err) {
+                    console.error('Error downloading document:', err);
+                    setError('Failed to download document. Please try again.');
+                  }
+                }}>Download</Button>
+              </Flex>
+            </Flex>
+          </>
         )}
 
         <Divider />
@@ -156,12 +230,6 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
                 Upload additional documents or replace existing document
               </Text>
               
-              {application.documentKey && (
-                <Text fontSize="0.9rem" color="blue">
-                  Current document available for download in application review
-                </Text>
-              )}
-              
               <input
                 type="file"
                 accept=".pdf,.doc,.docx,.txt"
@@ -179,13 +247,19 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
 
             <Divider />
 
-            <Flex gap="1rem">
-              <Button onClick={onClose} variation="link">
+            <Flex gap="0.5rem">
+              <Button 
+                onClick={onClose} 
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
+                size="small"
+              >
                 Cancel
               </Button>
               <Button 
                 type="submit" 
-                variation="primary"
+                size="small"
                 isLoading={isSubmitting || uploading}
               >
                 {uploading ? 'Uploading Document...' : 'Resubmit Application'}

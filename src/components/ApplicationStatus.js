@@ -175,25 +175,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
         
 
         
-        {isStudent && (application.status === 'Returned' || application.status === 'Rejected') && showReturnedSection && (
-          <Card variation="outlined" backgroundColor="#fff3cd" padding="1rem">
-            <Flex direction="column" gap="1rem">
-              <Heading level={5} color="#856404">⚠️ Application Returned for Revision</Heading>
-              
-              <Text fontSize="0.9rem" color="#856404" fontStyle="italic">
-                📝 Please review the feedback in the Review Notes section and make the necessary changes to your application before resubmitting.
-              </Text>
-              
-              <Button 
-                variation="primary"
-                onClick={() => setIsEditing(true)}
-                size="large"
-              >
-                Edit & Resubmit Application
-              </Button>
-            </Flex>
-          </Card>
-        )}
+
         
         {isStudent && application.status !== 'Cancelled' && application.status !== 'Expired' && application.status !== 'Draft' && (
           <View>
@@ -236,6 +218,14 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                 >
                   View Details
                 </Button>
+                {(application.status === 'Returned' || application.status === 'Rejected') && showReturnedSection && (
+                  <Button 
+                    size="small"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Edit & Resubmit
+                  </Button>
+                )}
                 <Button 
                   size="small"
                   onClick={() => setIsWithdrawing(true)}
