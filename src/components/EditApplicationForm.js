@@ -7,6 +7,9 @@ import {
   Button, 
   Card, 
   TextAreaField,
+  TextField,
+  SelectField,
+  Collection,
   Divider,
   Alert
 } from '@aws-amplify/ui-react';
@@ -14,6 +17,7 @@ import { updateApplication } from '../graphql/operations';
 
 const EditApplicationForm = ({ application, onClose, onSuccess }) => {
   const [statement, setStatement] = useState(application.statement || '');
+  const [courses, setCourses] = useState(application.relevantCourses || []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -91,6 +95,7 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
         id: application.id,
         statement,
         documentKey,
+        relevantCourses: courses.filter(course => course.courseName.trim()),
         status: newStatus
       };
 
@@ -146,22 +151,125 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
         </Flex>
         
         {/* Relevant Coursework */}
-        {application.relevantCourses && application.relevantCourses.length > 0 && (
-          <>
-            <Divider />
-            <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">Relevant Coursework</Text>
-              {application.relevantCourses.map((course, index) => (
-                <Card key={index} variation="outlined" padding="0.5rem">
-                  <Flex justifyContent="space-between">
-                    <Text>{course.courseName} ({course.courseNumber})</Text>
-                    <Text>Grade: {course.grade} | {course.semester} {course.year}</Text>
+        <Divider />
+        <Flex direction="column" gap="0.5rem">
+          <Text fontWeight="bold">Relevant Coursework</Text>
+          <Collection
+            items={courses}
+            type="list"
+            gap="1rem"
+            direction="column"
+          >
+            {(course, index) => (
+              <Card key={index} variation="outlined">
+                <Flex direction="column" gap="0.5rem">
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontWeight="bold">Course {index + 1}</Text>
+                    {courses.length > 1 && (
+                      <Button size="small" onClick={() => setCourses(courses.filter((_, i) => i !== index))}>
+                        Remove
+                      </Button>
+                    )}
                   </Flex>
-                </Card>
-              ))}
-            </Flex>
-          </>
-        )}
+                  
+                  <Flex direction={{ base: 'column', large: 'row' }} gap="0.5rem">
+                    <TextField
+                      label="Course Name"
+                      value={course.courseName}
+                      onChange={(e) => {
+                        const updatedCourses = courses.map((c, i) => 
+                          i === index ? { ...c, courseName: e.target.value } : c
+                        );
+                        setCourses(updatedCourses);
+                      }}
+                      placeholder="e.g. Introduction to Psychology"
+                      flex="2"
+                    />
+                    <TextField
+                      label="Course Number"
+                      value={course.courseNumber}
+                      onChange={(e) => {
+                        const updatedCourses = courses.map((c, i) => 
+                          i === index ? { ...c, courseNumber: e.target.value } : c
+                        );
+                        setCourses(updatedCourses);
+                      }}
+                      placeholder="e.g. PSYC 101"
+                      flex="1"
+                    />
+                  </Flex>
+                  
+                  <Flex direction={{ base: 'column', large: 'row' }} gap="0.5rem">
+                    <SelectField
+                      label="Grade"
+                      value={course.grade}
+                      onChange={(e) => {
+                        const updatedCourses = courses.map((c, i) => 
+                          i === index ? { ...c, grade: e.target.value } : c
+                        );
+                        setCourses(updatedCourses);
+                      }}
+                      flex="1"
+                    >
+                      <option value="">Select Grade</option>
+                      <option value="A+">A+</option>
+                      <option value="A">A</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B">B</option>
+                      <option value="B-">B-</option>
+                      <option value="C+">C+</option>
+                      <option value="C">C</option>
+                      <option value="C-">C-</option>
+                      <option value="D">D</option>
+                      <option value="P">P (Pass)</option>
+                      <option value="IP">IP (In Progress)</option>
+                    </SelectField>
+                    
+                    <SelectField
+                      label="Semester"
+                      value={course.semester}
+                      onChange={(e) => {
+                        const updatedCourses = courses.map((c, i) => 
+                          i === index ? { ...c, semester: e.target.value } : c
+                        );
+                        setCourses(updatedCourses);
+                      }}
+                      flex="1"
+                    >
+                      <option value="">Select Semester</option>
+                      <option value="Fall">Fall</option>
+                      <option value="Spring">Spring</option>
+                      <option value="Summer">Summer</option>
+                    </SelectField>
+                    
+                    <TextField
+                      label="Year"
+                      value={course.year}
+                      onChange={(e) => {
+                        const updatedCourses = courses.map((c, i) => 
+                          i === index ? { ...c, year: e.target.value } : c
+                        );
+                        setCourses(updatedCourses);
+                      }}
+                      placeholder="e.g. 2024"
+                      flex="1"
+                    />
+                  </Flex>
+                </Flex>
+              </Card>
+            )}
+          </Collection>
+          
+          {courses.length < 10 && (
+            <Button 
+              size="small" 
+              onClick={() => setCourses([...courses, { courseName: '', courseNumber: '', grade: '', semester: '', year: '' }])}
+            >
+              + Add Course
+            </Button>
+          )}
+        </Flex>
         
         {/* Current Supporting Documents */}
         {application.documentKey && (
