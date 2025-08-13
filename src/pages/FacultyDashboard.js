@@ -16,14 +16,17 @@ import {
   SelectField,
   Badge,
   View,
-  Image
+  Image,
+  useTheme
 } from '@aws-amplify/ui-react';
 import { listProjects, listApplications, createProject, updateProject, getUser, listUsers } from '../graphql/operations';
 import { createMessage, createNotification } from '../graphql/message-operations';
 import { sendEmailNotification } from '../utils/emailNotifications';
 import ApplicationReview from '../components/ApplicationReview';
+import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 
 const FacultyDashboard = ({ user }) => {
+  const { tokens } = useTheme();
   const [projects, setProjects] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +53,7 @@ const FacultyDashboard = ({ user }) => {
   const [messageText, setMessageText] = useState('');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [reviewingApplication, setReviewingApplication] = useState(null);
+  const [viewingReturnReason, setViewingReturnReason] = useState(null);
   
   useEffect(() => {
     fetchData();
@@ -193,7 +197,7 @@ const FacultyDashboard = ({ user }) => {
       console.log('Original date input:', projectForm.applicationDeadline);
       console.log('Formatted deadline for API:', deadline);
       
-      // Prepare input with proper types
+      // Prepare input with proper types and new workflow status
       const input = {
         title: projectForm.title,
         description: projectForm.description,
@@ -204,7 +208,8 @@ const FacultyDashboard = ({ user }) => {
         applicationDeadline: deadline,
         requiresTranscript: projectForm.requiresTranscript,
         facultyID: userId,
-        isActive: projectForm.isActive === true || projectForm.isActive === 'true'
+        isActive: projectForm.isActive === true || projectForm.isActive === 'true',
+        projectStatus: selectedProject && selectedProject.projectStatus === 'Returned' ? 'Coordinator Review' : (selectedProject ? selectedProject.projectStatus : 'Coordinator Review')
       };
       
       console.log('Project input:', input);
@@ -218,17 +223,22 @@ const FacultyDashboard = ({ user }) => {
         
         result = await API.graphql(graphqlOperation(updateProject, { input }));
         console.log('Project updated:', result);
-        setSuccessMessage('Project updated successfully!');
+        if (selectedProject.projectStatus === 'Returned') {
+          setSuccessMessage('Project resubmitted for coordinator review!');
+        } else {
+          setSuccessMessage('Project updated successfully!');
+        }
       } else {
         // Create new project
         console.log('Creating new project with input:', JSON.stringify(input, null, 2));
         result = await API.graphql(graphqlOperation(createProject, { input }));
         console.log('Project created:', result);
-        setSuccessMessage('Project created successfully!');
+        setSuccessMessage('Project submitted for coordinator review!');
       }
       
       setIsCreatingProject(false);
       setSelectedProject(null);
+      setViewingReturnReason(null);
       setProjectForm({
         title: '',
         description: '',
@@ -540,11 +550,12 @@ const FacultyDashboard = ({ user }) => {
                 <Card>
                   <Text>You haven't created any projects yet.</Text>
                   <Button 
-                    variation="primary" 
+                    backgroundColor="#552b9a"
+                    color="white"
                     onClick={() => setIsCreatingProject(true)}
                     marginTop="1rem"
                   >
-                    Create Your First Project
+                    Create New Project
                   </Button>
                 </Card>
               ) : (
@@ -560,16 +571,39 @@ const FacultyDashboard = ({ user }) => {
                       <Flex direction="column" gap="0.5rem">
                         <Flex justifyContent="space-between" alignItems="center">
                           <Heading level={5}>{project.title}</Heading>
-                          <Badge 
-                            backgroundColor={project.isActive ? 'green' : 'gray'}
-                            color="white"
-                          >
-                            {project.isActive ? 'Active' : 'Inactive'}
-                          </Badge>
+                          <Flex gap="0.5rem">
+                            <Badge 
+                              backgroundColor={
+                                project.projectStatus === 'Approved' ? tokens.colors.green[60] :
+                                project.projectStatus === 'Coordinator Review' ? tokens.colors.orange[60] :
+                                project.projectStatus === 'Returned' ? tokens.colors.yellow[60] :
+                                project.projectStatus === 'Filled' ? tokens.colors.blue[60] : tokens.colors.neutral[60]
+                              }
+                              color="white"
+                            >
+                              {project.projectStatus || 'Draft'}
+                            </Badge>
+                            <Badge 
+                              backgroundColor={project.isActive ? 'green' : 'gray'}
+                              color="white"
+                            >
+                              {project.isActive ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </Flex>
                         </Flex>
                         
                         <Text fontWeight="bold">Department: {project.department}</Text>
                         <Text>{project.description}</Text>
+                        
+                        {project.qualifications && (
+                          <Text><strong>Required Qualifications/Prerequisites:</strong> {project.qualifications}</Text>
+                        )}
+                        
+                        {project.duration && (
+                          <Text><strong>Project Duration:</strong> {project.duration}</Text>
+                        )}
+                        
+                        <Text><strong>Requires Transcript Upload:</strong> {project.requiresTranscript ? 'Yes' : 'No'}</Text>
                         
                         <Divider />
                         
@@ -593,16 +627,47 @@ const FacultyDashboard = ({ user }) => {
                             Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString('en-US', { timeZone: 'UTC' }) : 'Not specified'}
                           </Text>
                           <Flex gap="0.5rem">
+                            {project.projectStatus === 'Returned' ? (
+                              <Button 
+                                size="small"
+                                backgroundColor="white"
+                                color="black"
+                                border="1px solid black"
+                                fontSize="0.75rem"
+                                padding="0.25rem 0.5rem"
+                                onClick={() => {
+                                  setViewingReturnReason(project);
+                                  setSelectedProject(project);
+                                  setProjectForm({
+                                    title: project.title || '',
+                                    description: project.description || '',
+                                    department: project.department || '',
+                                    skillsRequired: project.skillsRequired?.join(', ') || '',
+                                    qualifications: project.qualifications || '',
+                                    duration: project.duration || '',
+                                    applicationDeadline: project.applicationDeadline ? new Date(project.applicationDeadline).toISOString().split('T')[0] : '',
+                                    requiresTranscript: project.requiresTranscript || false,
+                                    isActive: project.isActive !== undefined ? project.isActive : true
+                                  });
+                                }}
+                              >
+                                View Return Reason
+                              </Button>
+                            ) : (
+                              <Button 
+                                size="small"
+                                onClick={() => editProject(project)}
+                              >
+                                Edit
+                              </Button>
+                            )}
                             <Button 
                               size="small"
-                              onClick={() => editProject(project)}
-                            >
-                              Edit
-                            </Button>
-                            <Button 
-                              size="small"
-                              backgroundColor="#552b9a"
-                              color="white"
+                              backgroundColor="white"
+                              color="black"
+                              border="1px solid black"
+                              fontSize="0.75rem"
+                              padding="0.25rem 0.5rem"
                               onClick={() => {
                                 setViewingApplicationsForProject(project);
                                 setActiveTabIndex(1);
@@ -656,9 +721,11 @@ const FacultyDashboard = ({ user }) => {
                             <Flex gap="1rem" alignItems="center">
                               <Badge 
                                 backgroundColor={
-                                  application.status === 'Approved' ? 'green' :
-                                  application.status === 'Returned' ? 'yellow' :
-                                  application.status === 'Rejected' ? 'red' : 'gray'
+                                  application.status === 'Approved' ? tokens.colors.green[60] :
+                                  application.status === 'Returned' ? tokens.colors.yellow[60] :
+                                  application.status === 'Rejected' ? tokens.colors.red[60] :
+                                  application.status === 'Faculty Review' ? tokens.colors.blue[60] :
+                                  application.status === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.neutral[60]
                                 }
                                 color="white"
                               >
@@ -728,7 +795,10 @@ const FacultyDashboard = ({ user }) => {
                             
                             <Flex gap="1rem" alignItems="center">
                               <Badge 
-                                backgroundColor="orange"
+                                backgroundColor={
+                                  application.status === 'Faculty Review' ? tokens.colors.blue[60] :
+                                  application.status === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.orange[60]
+                                }
                                 color="white"
                               >
                                 {application.status}
@@ -752,6 +822,10 @@ const FacultyDashboard = ({ user }) => {
               })}
             </Flex>
           )}
+        </TabItem>
+        
+        <TabItem title="Status Guide">
+          <ApplicationStatusGuide />
         </TabItem>
       </Tabs>
       
@@ -896,6 +970,158 @@ const FacultyDashboard = ({ user }) => {
                   </Button>
                 </Flex>
               </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* View Return Reason and Edit Modal */}
+      {viewingReturnReason && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setViewingReturnReason(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="800px"
+              width="100%"
+              maxHeight="90vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Heading level={4}>Project Returned - Edit & Resubmit</Heading>
+              
+              {viewingReturnReason.coordinatorNotes && (
+                <Card backgroundColor="#fff3cd" padding="1rem" marginTop="1rem">
+                  <Text fontWeight="bold" color="#856404">Coordinator Notes:</Text>
+                  <Text color="#856404" marginTop="0.5rem">{viewingReturnReason.coordinatorNotes}</Text>
+                  <Text fontSize="0.9rem" color="#856404" marginTop="0.5rem" fontStyle="italic">
+                    Please address these concerns and resubmit your project.
+                  </Text>
+                </Card>
+              )}
+              
+              <Divider margin="1rem 0" />
+              
+              <form onSubmit={handleSubmitProject}>
+                <Flex direction="column" gap="1rem">
+                  <TextField
+                    name="title"
+                    label="Project Title *"
+                    value={projectForm.title}
+                    onChange={handleProjectFormChange}
+                    required
+                  />
+                  
+                  <TextAreaField
+                    name="description"
+                    label="Project Description *"
+                    value={projectForm.description}
+                    onChange={handleProjectFormChange}
+                    required
+                    rows={5}
+                  />
+                  
+                  <TextField
+                    name="department"
+                    label="Department *"
+                    value={projectForm.department}
+                    onChange={handleProjectFormChange}
+                    required
+                  />
+                  
+                  <TextField
+                    name="skillsRequired"
+                    label="Skills Required (comma-separated)"
+                    value={projectForm.skillsRequired}
+                    onChange={handleSkillsChange}
+                    placeholder="e.g. Python, Data Analysis, Machine Learning"
+                  />
+                  
+                  <TextAreaField
+                    name="qualifications"
+                    label="Required Qualifications/Prerequisites"
+                    value={projectForm.qualifications}
+                    onChange={handleProjectFormChange}
+                    placeholder="e.g. Completion of PSYC 101, minimum GPA of 3.0, upper-division standing"
+                    rows={3}
+                  />
+                  
+                  <TextField
+                    name="duration"
+                    label="Project Duration"
+                    value={projectForm.duration}
+                    onChange={handleProjectFormChange}
+                    placeholder="e.g. 3 months, Fall Semester"
+                  />
+                  
+                  <TextField
+                    name="applicationDeadline"
+                    label="Application Deadline *"
+                    type="date"
+                    value={projectForm.applicationDeadline}
+                    onChange={handleProjectFormChange}
+                    required
+                  />
+                  
+                  <SelectField
+                    name="requiresTranscript"
+                    label="Requires Transcript Upload"
+                    value={(projectForm.requiresTranscript || false).toString()}
+                    onChange={(e) => setProjectForm(prev => ({ 
+                      ...prev, 
+                      requiresTranscript: e.target.value === 'true' 
+                    }))}
+                  >
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                  </SelectField>
+                  
+                  <SelectField
+                    name="isActive"
+                    label="Status"
+                    value={(projectForm.isActive !== undefined ? projectForm.isActive : true).toString()}
+                    onChange={(e) => setProjectForm(prev => ({ 
+                      ...prev, 
+                      isActive: e.target.value === 'true' 
+                    }))}
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </SelectField>
+                  
+                  <Flex gap="1rem">
+                    <Button 
+                      onClick={() => setViewingReturnReason(null)}
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit"
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                      isLoading={isSubmitting}
+                    >
+                      Resubmit Project
+                    </Button>
+                  </Flex>
+                </Flex>
+              </form>
             </Card>
           </Flex>
         </View>

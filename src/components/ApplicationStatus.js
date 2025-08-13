@@ -34,14 +34,10 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
     if (!status) return tokens.colors.neutral[60];
     
     switch (status) {
-      case 'Draft':
-        return tokens.colors.neutral[60];
+      case 'Coordinator Review':
+        return tokens.colors.orange[60];
       case 'Faculty Review':
         return tokens.colors.blue[60];
-      case 'Department Review':
-        return tokens.colors.purple[60];
-      case 'Admin Review':
-        return tokens.colors.orange[60];
       case 'Approved':
         return tokens.colors.green[60];
       case 'Returned':
@@ -177,16 +173,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
           <Button onClick={downloadProposal}>Download Proposal</Button>
         )}
         
-        {isStudent && application.status === 'Draft' && (
-          <Button 
-            onClick={handleSubmitToFaculty}
-            variation="primary"
-            isLoading={isSubmitting}
-            width="auto"
-          >
-            Submit to Faculty
-          </Button>
-        )}
+
         
         {isStudent && (application.status === 'Returned' || application.status === 'Rejected') && showReturnedSection && (
           <Card variation="outlined" backgroundColor="#fff3cd" padding="1rem">
@@ -302,6 +289,22 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                     <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
                   </Flex>
                   
+                  <Divider />
+                  
+                  <Flex direction="column" gap="0.5rem">
+                    <Text fontWeight="bold">Student Information</Text>
+                    <Text>Student ID: {application.studentID}</Text>
+                    <Text>Name: {application.student?.name || 'Not specified'}</Text>
+                    <Text>Email: {application.student?.email || 'Not specified'}</Text>
+                    <Text>Program: {application.student?.major || 'Not specified'}</Text>
+                    <Text>Academic Year: {application.student?.academicYear || 'Not specified'}</Text>
+                    <Text>Expected Graduation: {application.student?.expectedGraduation || 'Not specified'}</Text>
+                    <Text>GPA: {application.student?.gpa || 'Not specified'}</Text>
+                    <Text>Research Interests: {application.student?.researchInterests?.join(', ') || 'Not specified'}</Text>
+                    <Text>Skills: {application.student?.skills?.join(', ') || 'Not specified'}</Text>
+                    <Text>Availability: {application.student?.availability || 'Not specified'}</Text>
+                  </Flex>
+                  
                   {application.statement && (
                     <>
                       <Divider />
@@ -349,7 +352,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                               setError('Failed to load document. Please try again.');
                             }
                           }}>View</Button>
-                          <Button size="small" variation="primary" onClick={async () => {
+                          <Button size="small" backgroundColor="white" color="black" border="1px solid black" onClick={async () => {
                             try {
                               const url = await Storage.get(application.documentKey, { 
                                 expires: 300
@@ -386,7 +389,8 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                         )}
                         {application.coordinatorNotes && (
                           <Card backgroundColor="#e7f3ff" padding="0.5rem">
-                            <Text><strong>Coordinator:</strong> {application.coordinatorNotes}</Text>
+                            <Text><strong>Coordinator:</strong></Text>
+                            <Text style={{ whiteSpace: 'pre-wrap' }}>{application.coordinatorNotes}</Text>
                           </Card>
                         )}
                         {application.adminNotes && (

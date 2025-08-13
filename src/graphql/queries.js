@@ -141,6 +141,10 @@ export const getProject = /* GraphQL */ `
       }
       isActive
       requiresTranscript
+      projectStatus
+      coordinatorNotes
+      selectedStudentID
+      filledAt
       createdAt
       updatedAt
       applications {
@@ -174,6 +178,10 @@ export const listProjects = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -210,6 +218,10 @@ export const projectsByFacultyID = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -263,6 +275,10 @@ export const getApplication = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -283,8 +299,9 @@ export const getApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      adminNotes
       withdrawReason
+      isSelected
+      selectedAt
       submittedToFacultyAt
       submittedToDepartmentAt
       submittedToAdminAt
@@ -333,8 +350,9 @@ export const listApplications = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        adminNotes
         withdrawReason
+        isSelected
+        selectedAt
         submittedToFacultyAt
         submittedToDepartmentAt
         submittedToAdminAt
@@ -379,8 +397,9 @@ export const applicationsByStudentID = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        adminNotes
         withdrawReason
+        isSelected
+        selectedAt
         submittedToFacultyAt
         submittedToDepartmentAt
         submittedToAdminAt
@@ -425,8 +444,9 @@ export const applicationsByProjectID = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        adminNotes
         withdrawReason
+        isSelected
+        selectedAt
         submittedToFacultyAt
         submittedToDepartmentAt
         submittedToAdminAt
@@ -461,8 +481,9 @@ export const getLearningContract = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        adminNotes
         withdrawReason
+        isSelected
+        selectedAt
         submittedToFacultyAt
         submittedToDepartmentAt
         submittedToAdminAt
@@ -599,6 +620,10 @@ export const getMessageBoard = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename

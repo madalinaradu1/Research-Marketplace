@@ -15,9 +15,10 @@ import {
   TabItem,
   TextField,
   TextAreaField,
-  Image
+  Image,
+  Badge
 } from '@aws-amplify/ui-react';
-import { listApplications, listProjects, createApplication } from '../graphql/simplified-operations';
+import { listApplications, listProjects, createApplication } from '../graphql/operations';
 import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 import ApplicationStatus from '../components/ApplicationStatus';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
@@ -89,8 +90,8 @@ const StudentDashboard = ({ user }) => {
         
         if (projectResult.data && projectResult.data.listProjects) {
           const allProjects = projectResult.data.listProjects.items || [];
-          // Set active projects for display
-          setProjects(allProjects.filter(p => p.isActive));
+          // Set approved projects for display (only coordinator-approved projects)
+          setProjects(allProjects.filter(p => p.isActive && p.projectStatus === 'Approved'));
           
           // Use all projects for enriching applications
           const enrichedApplications = userApplications.map(app => {
@@ -296,17 +297,43 @@ const StudentDashboard = ({ user }) => {
           ) : (
             <Collection
               items={projects}
-              type="grid"
-              templateColumns={{ base: '1fr', medium: '1fr 1fr' }}
+              type="list"
               gap="1rem"
+              wrap="nowrap"
+              direction="column"
             >
-              {(project) => (
+              {(project) => {
+                const hasApplied = applications.some(app => app.projectID === project.id && !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status));
+                const isExpired = project.applicationDeadline && new Date(project.applicationDeadline) < new Date();
+                
+                return (
                 <Card key={project.id}>
                   <Flex direction="column" gap="0.5rem">
-                    <Heading level={5}>{project.title}</Heading>
+                    <Flex justifyContent="space-between" alignItems="center">
+                      <Heading level={5}>{project.title}</Heading>
+                      <Badge 
+                        backgroundColor={isExpired ? "gray" : "green"}
+                        color="white"
+                      >
+                        {isExpired ? "Expired" : "Active"}
+                      </Badge>
+                    </Flex>
+                    
                     <Text fontWeight="bold">Department: {project.department}</Text>
-                    <Text>{project.description.length > 150 ? project.description.substring(0, 150) + '...' : project.description}</Text>
+                    <Text>{project.description}</Text>
+                    
+                    {project.qualifications && (
+                      <Text><strong>Required Qualifications/Prerequisites:</strong> {project.qualifications}</Text>
+                    )}
+                    
+                    {project.duration && (
+                      <Text><strong>Project Duration:</strong> {project.duration}</Text>
+                    )}
+                    
+                    <Text><strong>Requires Transcript Upload:</strong> {project.requiresTranscript ? 'Yes' : 'No'}</Text>
+                    
                     <Divider />
+                    
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.skillsRequired?.map((skill, index) => (
                         <Card 
@@ -319,7 +346,9 @@ const StudentDashboard = ({ user }) => {
                         </Card>
                       ))}
                     </Flex>
+                    
                     <Divider />
+                    
                     <Flex justifyContent="space-between" alignItems="center">
                       <Text fontSize="0.9rem">
                         Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}
@@ -333,15 +362,18 @@ const StudentDashboard = ({ user }) => {
                           color="white"
                           size="small" 
                           onClick={() => handleApply(project)}
-                          isDisabled={applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3}
+                          isDisabled={hasApplied || isExpired || applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3}
                         >
-                          {applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? 'Limit Reached' : 'Apply'}
+                          {hasApplied ? 'Already Applied' : 
+                           isExpired ? 'Expired' :
+                           applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? 'Limit Reached' : 'Apply'}
                         </Button>
                       </Flex>
                     </Flex>
                   </Flex>
                 </Card>
-              )}
+                );
+              }}
             </Collection>
           )}
         </TabItem>
@@ -370,7 +402,10 @@ const StudentDashboard = ({ user }) => {
               {(application) => (
                 <ApplicationStatus 
                   key={application.id}
-                  application={application}
+                  application={{
+                    ...application,
+                    student: user
+                  }}
                   isStudent={true}
                   onUpdate={handleApplicationUpdate}
                   showReturnedSection={false}
@@ -396,7 +431,10 @@ const StudentDashboard = ({ user }) => {
               {(application) => (
                 <ApplicationStatus 
                   key={application.id}
-                  application={application}
+                  application={{
+                    ...application,
+                    student: user
+                  }}
                   isStudent={true}
                   onUpdate={handleApplicationUpdate}
                   showReturnedSection={true}
@@ -444,6 +482,10 @@ const StudentDashboard = ({ user }) => {
                 <Text><strong>Department:</strong> {selectedProject.department}</Text>
                 <Text><strong>Description:</strong> {selectedProject.description}</Text>
                 
+                {selectedProject.qualifications && (
+                  <Text><strong>Required Qualifications/Prerequisites:</strong> {selectedProject.qualifications}</Text>
+                )}
+                
                 {selectedProject.skillsRequired && selectedProject.skillsRequired.length > 0 && (
                   <>
                     <Text><strong>Skills Required:</strong></Text>
@@ -468,15 +510,23 @@ const StudentDashboard = ({ user }) => {
                 
                 <Text><strong>Application Deadline:</strong> {selectedProject.applicationDeadline ? new Date(selectedProject.applicationDeadline).toLocaleDateString() : 'Not specified'}</Text>
                 
+                <Text><strong>Requires Transcript Upload:</strong> {selectedProject.requiresTranscript ? 'Yes' : 'No'}</Text>
+                
                 <Flex gap="1rem" marginTop="1rem">
                   <Button onClick={() => setSelectedProject(null)}>Close</Button>
                   <Button 
                     backgroundColor="#552b9a"
                     color="white"
                     onClick={() => handleApply(selectedProject)}
-                    isDisabled={applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3}
+                    isDisabled={
+                      applications.some(app => app.projectID === selectedProject.id && !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)) ||
+                      (selectedProject.applicationDeadline && new Date(selectedProject.applicationDeadline) < new Date()) ||
+                      applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3
+                    }
                   >
-                    {applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? 'Application Limit Reached' : 'Apply Now'}
+                    {applications.some(app => app.projectID === selectedProject.id && !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)) ? 'Already Applied' :
+                     (selectedProject.applicationDeadline && new Date(selectedProject.applicationDeadline) < new Date()) ? 'Expired' :
+                     applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? 'Application Limit Reached' : 'Apply Now'}
                   </Button>
                 </Flex>
               </Flex>

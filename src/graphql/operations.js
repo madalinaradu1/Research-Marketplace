@@ -100,6 +100,7 @@ export const listProjects = /* GraphQL */ `
         description
         department
         skillsRequired
+        qualifications
         duration
         applicationDeadline
         facultyID
@@ -109,6 +110,11 @@ export const listProjects = /* GraphQL */ `
           email
         }
         isActive
+        requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
       }
@@ -143,15 +149,9 @@ export const getApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      adminNotes
       withdrawReason
-      submittedToFacultyAt
-      submittedToDepartmentAt
-      submittedToAdminAt
-      approvedAt
-      returnedAt
-      rejectedAt
-      cancelledAt
+      isSelected
+      selectedAt
       createdAt
       updatedAt
     }
@@ -173,11 +173,20 @@ export const listApplications = /* GraphQL */ `
         resumeKey
         transcriptLink
         documentKey
+        relevantCourses {
+          courseName
+          courseNumber
+          grade
+          semester
+          year
+        }
         status
         statusDetail
         facultyNotes
         coordinatorNotes
-        adminNotes
+        withdrawReason
+        isSelected
+        selectedAt
         createdAt
         updatedAt
       }
@@ -281,10 +290,16 @@ export const updateProject = /* GraphQL */ `
       description
       department
       skillsRequired
+      qualifications
       duration
       applicationDeadline
       facultyID
       isActive
+      requiresTranscript
+      projectStatus
+      coordinatorNotes
+      selectedStudentID
+      filledAt
       createdAt
       updatedAt
     }
@@ -375,15 +390,9 @@ export const updateApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      adminNotes
       withdrawReason
-      submittedToFacultyAt
-      submittedToDepartmentAt
-      submittedToAdminAt
-      approvedAt
-      returnedAt
-      rejectedAt
-      cancelledAt
+      isSelected
+      selectedAt
       createdAt
       updatedAt
     }

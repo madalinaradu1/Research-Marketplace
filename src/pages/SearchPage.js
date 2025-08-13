@@ -119,9 +119,12 @@ const SearchPage = ({ user }) => {
       filtered = filtered.filter(project => project.duration === selectedDuration);
     }
 
-    // Active projects only
+    // Active and approved projects only
     if (showActiveOnly) {
-      filtered = filtered.filter(project => project.isActive);
+      filtered = filtered.filter(project => project.isActive && project.projectStatus === 'Approved');
+    } else {
+      // Even if not filtering by active, only show approved projects
+      filtered = filtered.filter(project => project.projectStatus === 'Approved');
     }
 
     // Available projects only (not past deadline)

@@ -236,6 +236,10 @@ export const onCreateProject = /* GraphQL */ `
       }
       isActive
       requiresTranscript
+      projectStatus
+      coordinatorNotes
+      selectedStudentID
+      filledAt
       createdAt
       updatedAt
       applications {
@@ -290,6 +294,10 @@ export const onUpdateProject = /* GraphQL */ `
       }
       isActive
       requiresTranscript
+      projectStatus
+      coordinatorNotes
+      selectedStudentID
+      filledAt
       createdAt
       updatedAt
       applications {
@@ -344,6 +352,10 @@ export const onDeleteProject = /* GraphQL */ `
       }
       isActive
       requiresTranscript
+      projectStatus
+      coordinatorNotes
+      selectedStudentID
+      filledAt
       createdAt
       updatedAt
       applications {
@@ -404,6 +416,10 @@ export const onCreateApplication = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -424,8 +440,9 @@ export const onCreateApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      adminNotes
       withdrawReason
+      isSelected
+      selectedAt
       submittedToFacultyAt
       submittedToDepartmentAt
       submittedToAdminAt
@@ -501,6 +518,10 @@ export const onUpdateApplication = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -521,8 +542,9 @@ export const onUpdateApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      adminNotes
       withdrawReason
+      isSelected
+      selectedAt
       submittedToFacultyAt
       submittedToDepartmentAt
       submittedToAdminAt
@@ -598,6 +620,10 @@ export const onDeleteApplication = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -618,8 +644,9 @@ export const onDeleteApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      adminNotes
       withdrawReason
+      isSelected
+      selectedAt
       submittedToFacultyAt
       submittedToDepartmentAt
       submittedToAdminAt
@@ -669,8 +696,9 @@ export const onCreateLearningContract = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        adminNotes
         withdrawReason
+        isSelected
+        selectedAt
         submittedToFacultyAt
         submittedToDepartmentAt
         submittedToAdminAt
@@ -717,8 +745,9 @@ export const onUpdateLearningContract = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        adminNotes
         withdrawReason
+        isSelected
+        selectedAt
         submittedToFacultyAt
         submittedToDepartmentAt
         submittedToAdminAt
@@ -765,8 +794,9 @@ export const onDeleteLearningContract = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        adminNotes
         withdrawReason
+        isSelected
+        selectedAt
         submittedToFacultyAt
         submittedToDepartmentAt
         submittedToAdminAt
@@ -839,6 +869,10 @@ export const onCreateMessageBoard = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -898,6 +932,10 @@ export const onUpdateMessageBoard = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -957,6 +995,10 @@ export const onDeleteMessageBoard = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename

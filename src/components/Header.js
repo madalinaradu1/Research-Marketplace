@@ -232,16 +232,8 @@ const Header = ({ user, signOut }) => {
             </Text>
           </Link>
         )}
-        {isUserAdmin(user, user) && (
-          <Link to="/admin" style={{ textDecoration: isActive('/admin') ? 'underline white' : 'none' }}>
-            <Text
-              color={isActive('/admin') ? "white" : "rgba(255,255,255,0.8)"}
-              fontWeight={isActive('/admin') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-            >
-              Admin
-            </Text>
-          </Link>
-        )}
+
+
         <Image
           alt="Search Icon"
           src="/Search Icon.png"
@@ -294,9 +286,7 @@ const Header = ({ user, signOut }) => {
             {user?.role === 'Student' && (
               <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
             )}
-            {isUserAdmin(user, user) && (
-              <MenuItem onClick={() => navigate('/admin')}>Admin</MenuItem>
-            )}
+
             <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
           </View>
         </Menu>

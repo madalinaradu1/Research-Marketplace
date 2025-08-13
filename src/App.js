@@ -165,7 +165,7 @@ function App({ signOut, user }) {
     <ThemeProvider theme={theme}>
       <Router>
         <div className="app">
-        <Header user={user} signOut={signOut} />
+        <Header user={userProfile || user} signOut={signOut} />
         
         <main>
           <Routes>
@@ -197,9 +197,7 @@ function App({ signOut, user }) {
             <Route path="/apply/:projectId" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <ApplicationPage user={userProfile || user} />} />
-            <Route path="/admin" element={isAdmin ? 
-              <AdminPage /> : 
-              <Navigate to="/dashboard" />} />
+
             <Route path="/community" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <StudentPostsPage user={userProfile || user} />} />

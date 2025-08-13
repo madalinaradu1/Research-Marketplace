@@ -239,6 +239,10 @@ export const createProject = /* GraphQL */ `
       }
       isActive
       requiresTranscript
+      projectStatus
+      coordinatorNotes
+      selectedStudentID
+      filledAt
       createdAt
       updatedAt
       applications {
@@ -296,6 +300,10 @@ export const updateProject = /* GraphQL */ `
       }
       isActive
       requiresTranscript
+      projectStatus
+      coordinatorNotes
+      selectedStudentID
+      filledAt
       createdAt
       updatedAt
       applications {
@@ -353,6 +361,10 @@ export const deleteProject = /* GraphQL */ `
       }
       isActive
       requiresTranscript
+      projectStatus
+      coordinatorNotes
+      selectedStudentID
+      filledAt
       createdAt
       updatedAt
       applications {
@@ -414,6 +426,10 @@ export const createApplication = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -434,8 +450,9 @@ export const createApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      adminNotes
       withdrawReason
+      isSelected
+      selectedAt
       submittedToFacultyAt
       submittedToDepartmentAt
       submittedToAdminAt
@@ -512,6 +529,10 @@ export const updateApplication = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -532,8 +553,9 @@ export const updateApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      adminNotes
       withdrawReason
+      isSelected
+      selectedAt
       submittedToFacultyAt
       submittedToDepartmentAt
       submittedToAdminAt
@@ -610,6 +632,10 @@ export const deleteApplication = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -630,8 +656,9 @@ export const deleteApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      adminNotes
       withdrawReason
+      isSelected
+      selectedAt
       submittedToFacultyAt
       submittedToDepartmentAt
       submittedToAdminAt
@@ -681,8 +708,9 @@ export const createLearningContract = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        adminNotes
         withdrawReason
+        isSelected
+        selectedAt
         submittedToFacultyAt
         submittedToDepartmentAt
         submittedToAdminAt
@@ -729,8 +757,9 @@ export const updateLearningContract = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        adminNotes
         withdrawReason
+        isSelected
+        selectedAt
         submittedToFacultyAt
         submittedToDepartmentAt
         submittedToAdminAt
@@ -777,8 +806,9 @@ export const deleteLearningContract = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        adminNotes
         withdrawReason
+        isSelected
+        selectedAt
         submittedToFacultyAt
         submittedToDepartmentAt
         submittedToAdminAt
@@ -852,6 +882,10 @@ export const createMessageBoard = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -912,6 +946,10 @@ export const updateMessageBoard = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename
@@ -972,6 +1010,10 @@ export const deleteMessageBoard = /* GraphQL */ `
         facultyID
         isActive
         requiresTranscript
+        projectStatus
+        coordinatorNotes
+        selectedStudentID
+        filledAt
         createdAt
         updatedAt
         __typename

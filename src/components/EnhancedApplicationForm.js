@@ -107,7 +107,7 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
         statement,
         relevantCourses: validCourses,
         documentKey,
-        status: 'Draft'
+        status: 'Coordinator Review'
       };
 
       await API.graphql(graphqlOperation(createApplication, { input: applicationInput }));

@@ -44,6 +44,13 @@ type Project @model @auth(rules: [{allow: groups, groups: ["Faculty", "Coordinat
   faculty: User @belongsTo(fields: ["facultyID"])
   isActive: Boolean
   requiresTranscript: Boolean
+  
+  # New approval workflow fields
+  projectStatus: String! # Draft, Coordinator Review, Returned, Approved, Published, Filled
+  coordinatorNotes: String
+  selectedStudentID: ID
+  filledAt: AWSDateTime
+  
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
   applications: [Application] @hasMany(indexName: "byProject", fields: ["id"])
@@ -64,15 +71,18 @@ type Application @model @auth(rules: [{allow: private}]) {
   documentKey: String
   relevantCourses: [RelevantCourse]
   
-  # Status tracking
-  status: String! # Draft, Faculty Review, Department Review, Admin Review, Approved, Returned, Rejected, Cancelled, Expired
+  # Status tracking - New simplified workflow
+  status: String! # Draft, Coordinator Review, Faculty Review, Approved, Returned, Rejected, Cancelled, Expired
   statusDetail: String
   
   # Notes
   facultyNotes: String
   coordinatorNotes: String
-  adminNotes: String
   withdrawReason: String
+  
+  # Selection tracking
+  isSelected: Boolean
+  selectedAt: AWSDateTime
   
   # Timestamps
   submittedToFacultyAt: AWSDateTime

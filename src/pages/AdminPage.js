@@ -11,16 +11,24 @@ import {
   Button,
   SelectField,
   Text,
-  Card
+  Card,
+  Tabs,
+  TabItem,
+  Badge,
+  useTheme
 } from '@aws-amplify/ui-react';
-import { listUsers } from '../graphql/queries';
+import { listUsers, listProjects, listApplications } from '../graphql/operations';
 import { updateUserRole } from '../utils/updateUserRole';
 import { updateProfileCompletion } from '../utils/updateUserProfile';
 import { syncUserGroupsToRole } from '../utils/syncUserGroups';
 import { updateUser } from '../graphql/operations';
 
 const AdminPage = () => {
+  const { tokens } = useTheme();
   const [users, setUsers] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [analytics, setAnalytics] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
@@ -28,29 +36,81 @@ const AdminPage = () => {
   const [selectedDepartments, setSelectedDepartments] = useState({});
 
   useEffect(() => {
-    fetchUsers();
+    fetchAllData();
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchAllData = async () => {
     try {
       setLoading(true);
-      const result = await API.graphql(graphqlOperation(listUsers));
-      const userList = result.data.listUsers.items;
+      let userList = [];
+      let projectList = [];
+      let applicationList = [];
       
-      // Initialize selected roles and departments with current values
+      // Fetch users
+      try {
+        console.log('Fetching users...');
+        const usersResult = await API.graphql(graphqlOperation(listUsers, { limit: 100 }));
+        userList = usersResult.data?.listUsers?.items || [];
+        console.log('Users fetched successfully:', userList.length);
+      } catch (userError) {
+        console.error('Error fetching users:', userError);
+        console.error('User error details:', userError.errors);
+      }
+      
+      // Fetch projects
+      try {
+        console.log('Fetching projects...');
+        const projectsResult = await API.graphql(graphqlOperation(listProjects, { limit: 100 }));
+        projectList = projectsResult.data?.listProjects?.items || [];
+        console.log('Projects fetched successfully:', projectList.length);
+      } catch (projectError) {
+        console.error('Error fetching projects:', projectError);
+        console.error('Project error details:', projectError.errors);
+      }
+      
+      // Fetch applications
+      try {
+        console.log('Fetching applications...');
+        const applicationsResult = await API.graphql(graphqlOperation(listApplications, { limit: 100 }));
+        applicationList = applicationsResult.data?.listApplications?.items || [];
+        console.log('Applications fetched successfully:', applicationList.length);
+      } catch (appError) {
+        console.error('Error fetching applications:', appError);
+        console.error('Application error details:', appError.errors);
+      }
+      
+      // Calculate analytics
+      const analyticsData = {
+        totalUsers: userList?.length || 0,
+        totalStudents: userList?.filter(u => u.role === 'Student')?.length || 0,
+        totalFaculty: userList?.filter(u => u.role === 'Faculty')?.length || 0,
+        totalCoordinators: userList?.filter(u => u.role === 'Coordinator')?.length || 0,
+        totalProjects: projectList?.length || 0,
+        activeProjects: projectList?.filter(p => p.isActive === true)?.length || 0,
+        pendingProjects: projectList?.filter(p => p.isActive === false)?.length || 0,
+        totalApplications: applicationList?.length || 0,
+        pendingApplications: applicationList?.filter(a => a.status === 'Coordinator Review')?.length || 0,
+        approvedApplications: applicationList?.filter(a => a.status === 'Approved')?.length || 0
+      };
+      
+      // Initialize selected roles and departments
       const roles = {};
       const departments = {};
-      userList.forEach(user => {
+      userList?.forEach(user => {
         roles[user.id] = user.role || 'Student';
         departments[user.id] = user.department || '';
       });
       
       setUsers(userList);
+      setProjects(projectList);
+      setApplications(applicationList);
+      setAnalytics(analyticsData);
       setSelectedRoles(roles);
       setSelectedDepartments(departments);
     } catch (err) {
-      console.error('Error fetching users:', err);
-      setError('Failed to load users. Please try again.');
+      console.error('Error in fetchAllData:', err);
+      console.error('Error details:', err.errors || err.message || err);
+      setError(`Failed to load data: ${err.errors?.[0]?.message || err.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -73,8 +133,8 @@ const AdminPage = () => {
   const handleUpdateRole = async (userId) => {
     try {
       await updateUserRole(userId, selectedRoles[userId]);
-      // Refresh the user list
-      fetchUsers();
+      // Refresh the data
+      fetchAllData();
     } catch (err) {
       console.error('Error updating role:', err);
       setError('Failed to update user role. Please try again.');
@@ -89,7 +149,7 @@ const AdminPage = () => {
       };
       await API.graphql(graphqlOperation(updateUser, { input }));
       setMessage('Department updated successfully!');
-      fetchUsers();
+      fetchAllData();
     } catch (err) {
       console.error('Error updating department:', err);
       setError('Failed to update department. Please try again.');
@@ -99,8 +159,8 @@ const AdminPage = () => {
   const handleCompleteProfile = async (userId) => {
     try {
       await updateProfileCompletion(userId, true);
-      // Refresh the user list
-      fetchUsers();
+      // Refresh the data
+      fetchAllData();
     } catch (err) {
       console.error('Error updating profile completion:', err);
       setError('Failed to update profile completion. Please try again.');
@@ -110,8 +170,8 @@ const AdminPage = () => {
   const handleSyncGroups = async (userId) => {
     try {
       await syncUserGroupsToRole(userId);
-      // Refresh the user list
-      fetchUsers();
+      // Refresh the data
+      fetchAllData();
       setMessage('User role synced with Cognito groups successfully!');
     } catch (err) {
       console.error('Error syncing user groups:', err);
@@ -124,91 +184,134 @@ const AdminPage = () => {
 
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
-      <Heading level={2}>User Management</Heading>
+      <Heading level={2}>Admin Dashboard</Heading>
       
       {message && <Text color="green">{message}</Text>}
       {error && <Text color="red">{error}</Text>}
       
-      <Card>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell as="th">Name</TableCell>
-              <TableCell as="th">Email</TableCell>
-              <TableCell as="th">Role</TableCell>
-              <TableCell as="th">Department</TableCell>
-              <TableCell as="th">New Role</TableCell>
-              <TableCell as="th">New Department</TableCell>
-              <TableCell as="th">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {users.map(user => (
-              <TableRow key={user.id}>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.role || 'Student'}</TableCell>
-                <TableCell>{user.department || 'None'}</TableCell>
-                <TableCell>
-                  <SelectField
-                    value={selectedRoles[user.id]}
-                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                  >
-                    <option value="Student">Student</option>
-                    <option value="Faculty">Faculty</option>
-                    <option value="Coordinator">Coordinator</option>
-                    <option value="Admin">Admin</option>
-                  </SelectField>
-                </TableCell>
-                <TableCell>
-                  <SelectField
-                    value={selectedDepartments[user.id]}
-                    onChange={(e) => handleDepartmentChange(user.id, e.target.value)}
-                  >
-                    <option value="">None</option>
-                    <option value="Social Sciences">Social Sciences</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Biology">Biology</option>
-                    <option value="Psychology">Psychology</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Business">Business</option>
-                  </SelectField>
-                </TableCell>
-                <TableCell>
-                  <Flex direction="column" gap="0.5rem">
-                    <Flex direction="row" gap="0.5rem">
-                      <Button
-                        onClick={() => handleUpdateRole(user.id)}
-                        isDisabled={user.role === selectedRoles[user.id]}
-                        size="small"
+      <Tabs>
+        <TabItem title="Analytics">
+          <Flex direction="column" gap="2rem">
+            <Heading level={3}>System Analytics</Heading>
+            
+            <Flex wrap="wrap" gap="1rem">
+              <Card flex="1" minWidth="200px">
+                <Heading level={4}>Users</Heading>
+                <Text fontSize="2rem" fontWeight="bold">{analytics.totalUsers}</Text>
+                <Flex gap="1rem" marginTop="0.5rem">
+                  <Badge backgroundColor={tokens.colors.blue[60]} color="white">Students: {analytics.totalStudents}</Badge>
+                  <Badge backgroundColor={tokens.colors.green[60]} color="white">Faculty: {analytics.totalFaculty}</Badge>
+                  <Badge backgroundColor={tokens.colors.orange[60]} color="white">Coordinators: {analytics.totalCoordinators}</Badge>
+                </Flex>
+              </Card>
+              
+              <Card flex="1" minWidth="200px">
+                <Heading level={4}>Projects</Heading>
+                <Text fontSize="2rem" fontWeight="bold">{analytics.totalProjects}</Text>
+                <Flex gap="1rem" marginTop="0.5rem">
+                  <Badge backgroundColor={tokens.colors.green[60]} color="white">Active: {analytics.activeProjects}</Badge>
+                  <Badge backgroundColor={tokens.colors.orange[60]} color="white">Pending: {analytics.pendingProjects}</Badge>
+                </Flex>
+              </Card>
+              
+              <Card flex="1" minWidth="200px">
+                <Heading level={4}>Applications</Heading>
+                <Text fontSize="2rem" fontWeight="bold">{analytics.totalApplications}</Text>
+                <Flex gap="1rem" marginTop="0.5rem">
+                  <Badge backgroundColor={tokens.colors.orange[60]} color="white">Pending: {analytics.pendingApplications}</Badge>
+                  <Badge backgroundColor={tokens.colors.green[60]} color="white">Approved: {analytics.approvedApplications}</Badge>
+                </Flex>
+              </Card>
+            </Flex>
+            
+            <Card>
+              <Heading level={4}>Recent Activity</Heading>
+              <Text>Activity tracking will be implemented with Lambda functions</Text>
+            </Card>
+          </Flex>
+        </TabItem>
+        
+        <TabItem title="User Management">
+          <Card>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell as="th">Name</TableCell>
+                  <TableCell as="th">Email</TableCell>
+                  <TableCell as="th">Role</TableCell>
+                  <TableCell as="th">Department</TableCell>
+                  <TableCell as="th">New Role</TableCell>
+                  <TableCell as="th">New Department</TableCell>
+                  <TableCell as="th">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {users.map(user => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.role || 'Student'}</TableCell>
+                    <TableCell>{user.department || 'None'}</TableCell>
+                    <TableCell>
+                      <SelectField
+                        value={selectedRoles[user.id]}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
                       >
-                        Update Role
-                      </Button>
-                      <Button
-                        onClick={() => handleUpdateDepartment(user.id)}
-                        isDisabled={user.department === selectedDepartments[user.id]}
-                        size="small"
-                        variation="primary"
+                        <option value="Student">Student</option>
+                        <option value="Faculty">Faculty</option>
+                        <option value="Coordinator">Coordinator</option>
+                        <option value="Admin">Admin</option>
+                      </SelectField>
+                    </TableCell>
+                    <TableCell>
+                      <SelectField
+                        value={selectedDepartments[user.id]}
+                        onChange={(e) => handleDepartmentChange(user.id, e.target.value)}
                       >
-                        Update Dept
-                      </Button>
-                    </Flex>
-                    <Flex direction="row" gap="0.5rem">
-                      <Button
-                        onClick={() => handleSyncGroups(user.id)}
-                        size="small"
-                        variation="link"
-                      >
-                        Sync Groups
-                      </Button>
-                    </Flex>
-                  </Flex>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
+                        <option value="">None</option>
+                        <option value="Social Sciences">Social Sciences</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Biology">Biology</option>
+                        <option value="Psychology">Psychology</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Business">Business</option>
+                      </SelectField>
+                    </TableCell>
+                    <TableCell>
+                      <Flex direction="column" gap="0.5rem">
+                        <Flex direction="row" gap="0.5rem">
+                          <Button
+                            onClick={() => handleUpdateRole(user.id)}
+                            isDisabled={user.role === selectedRoles[user.id]}
+                            size="small"
+                          >
+                            Update Role
+                          </Button>
+                          <Button
+                            onClick={() => handleUpdateDepartment(user.id)}
+                            isDisabled={user.department === selectedDepartments[user.id]}
+                            size="small"
+                            variation="primary"
+                          >
+                            Update Dept
+                          </Button>
+                        </Flex>
+                        <Button
+                          onClick={() => handleSyncGroups(user.id)}
+                          size="small"
+                          variation="link"
+                        >
+                          Sync Groups
+                        </Button>
+                      </Flex>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabItem>
+      </Tabs>
     </Flex>
   );
 };
