@@ -92,23 +92,15 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
     if (userRole === 'Faculty') {
       if (application.status === 'Faculty Review') {
         return [
-          { value: 'Department Review', label: 'Approve & Send to Department' },
+          { value: 'Approved', label: 'Approve Application' },
           { value: 'Returned', label: 'Return to Student' },
           { value: 'Rejected', label: 'Reject Application' }
         ];
       }
     } else if (userRole === 'Coordinator') {
-      if (application.status === 'Department Review') {
+      if (application.status === 'Coordinator Review') {
         return [
-          { value: 'Admin Review', label: 'Approve & Send to Admin' },
-          { value: 'Returned', label: 'Return to Student' },
-          { value: 'Rejected', label: 'Reject Application' }
-        ];
-      }
-    } else if (userRole === 'Admin') {
-      if (application.status === 'Admin Review') {
-        return [
-          { value: 'Approved', label: 'Approve Application' },
+          { value: 'Faculty Review', label: 'Approve & Send to Faculty' },
           { value: 'Returned', label: 'Return to Student' },
           { value: 'Rejected', label: 'Reject Application' }
         ];

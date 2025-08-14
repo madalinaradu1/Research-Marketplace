@@ -68,18 +68,15 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
       let newStatus = 'Faculty Review'; // Default to faculty
       
       // Check who provided feedback/notes - they are the ones who returned it
-      if (application.adminNotes && !application.coordinatorNotes && !application.facultyNotes) {
-        // Only admin has notes - admin returned it
-        newStatus = 'Admin Review';
-      } else if (application.coordinatorNotes && !application.adminNotes) {
-        // Coordinator has notes and no admin notes - coordinator returned it
-        newStatus = 'Department Review';
-      } else if (application.facultyNotes && !application.coordinatorNotes && !application.adminNotes) {
-        // Only faculty has notes - faculty returned it
+      if (application.coordinatorNotes) {
+        // Coordinator has notes - coordinator returned it, send back to coordinator
+        newStatus = 'Coordinator Review';
+      } else if (application.facultyNotes) {
+        // Faculty has notes - faculty returned it
         newStatus = 'Faculty Review';
       } else {
-        // Multiple notes or unclear - default to faculty
-        newStatus = 'Faculty Review';
+        // Default to coordinator review for new workflow
+        newStatus = 'Coordinator Review';
       }
       
       console.log('Resubmitting application:', {

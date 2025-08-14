@@ -17,13 +17,13 @@ import {
   Divider
 } from '@aws-amplify/ui-react';
 import { Storage } from 'aws-amplify';
-import { listProjects, listApplications, listUsers } from '../graphql/queries';
-import { updateProject, updateApplication } from '../graphql/operations';
+import { listProjects, listApplications, listUsers, updateProject, updateApplication } from '../graphql/operations';
 
 const CoordinatorDashboard = ({ user }) => {
   const { tokens } = useTheme();
   const [projects, setProjects] = useState({ pending: [], approved: [] });
   const [applications, setApplications] = useState([]);
+  const [approvedApplications, setApprovedApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedApplication, setSelectedApplication] = useState(null);
@@ -32,6 +32,7 @@ const CoordinatorDashboard = ({ user }) => {
   const [action, setAction] = useState('');
   const [documentUrl, setDocumentUrl] = useState(null);
   const [viewingDocument, setViewingDocument] = useState(false);
+  const [viewingProject, setViewingProject] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -84,8 +85,22 @@ const CoordinatorDashboard = ({ user }) => {
           };
         });
       
+      // Fetch approved applications (Faculty Review or Approved status)
+      const approvedApps = allApplications
+        .filter(a => a.status === 'Faculty Review' || a.status === 'Approved')
+        .map(application => {
+          const student = allUsers.find(user => user.id === application.studentID);
+          const project = allProjects.find(p => p.id === application.projectID);
+          return {
+            ...application,
+            student: student || { name: 'Unknown Student' },
+            project: project || { title: 'Unknown Project' }
+          };
+        });
+      
       setProjects({ pending: pendingProjects, approved: approvedProjects });
       setApplications(pendingApplications);
+      setApprovedApplications(approvedApps);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -164,187 +179,113 @@ const CoordinatorDashboard = ({ user }) => {
     <Flex direction="column" padding="2rem" gap="2rem">
       <Heading level={2}>Coordinator Dashboard</Heading>
       
+
       <Tabs>
-        <TabItem title={`Project Reviews (${projects.pending?.length || 0})`}>
-          <Collection
-            items={projects.pending || []}
-            type="list"
-            gap="1rem"
-          >
-            {(project) => (
-              <Card key={project.id}>
-                <Flex direction="column" gap="1rem">
-                  <Flex justifyContent="space-between" alignItems="center">
-                    <Heading level={4}>{project.title}</Heading>
-                    <Badge 
-                      backgroundColor={
-                        project.projectStatus === 'Coordinator Review' ? tokens.colors.orange[60] :
-                        project.projectStatus === 'Returned' ? tokens.colors.yellow[60] : tokens.colors.neutral[60]
-                      }
-                      color="white"
-                    >
-                      {project.projectStatus}
-                    </Badge>
-                  </Flex>
-                  
-                  <Text><strong>Faculty:</strong> {project.faculty?.name}</Text>
-                  <Text><strong>Department:</strong> {project.department}</Text>
-                  <Text>{project.description}</Text>
-                  
-                  {project.coordinatorNotes && (
-                    <Card backgroundColor="rgba(255, 193, 7, 0.1)">
-                      <Text><strong>Previous Notes:</strong> {project.coordinatorNotes}</Text>
+        <TabItem title="Pending Reviews">
+          <Flex direction="column" gap="2rem">
+            {/* Projects Needing Review */}
+            {projects.pending && projects.pending.length > 0 && (
+              <Card>
+                <Heading level={4} marginBottom="1rem">Projects ({projects.pending.length})</Heading>
+                <Collection items={projects.pending} type="list" gap="1rem">
+                  {(project) => (
+                    <Card key={project.id} variation="outlined">
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Flex direction="column" gap="0.5rem" flex="1">
+                          <Text fontWeight="bold">{project.title}</Text>
+                          <Text fontSize="0.9rem">{project.faculty?.name} • {project.department}</Text>
+                        </Flex>
+                        <Flex gap="0.5rem">
+                          <Button size="small" onClick={() => handleProjectAction(project, 'approve')}>Approve</Button>
+                          <Button size="small" onClick={() => setSelectedProject(project)}>Return</Button>
+                        </Flex>
+                      </Flex>
                     </Card>
                   )}
-                  
-                  <Flex gap="0.5rem">
-                    <Button 
-                      backgroundColor="white" 
-                      color="black"
-                      border="1px solid black"
-                      size="small"
-                      onClick={() => handleProjectAction(project, 'approve')}
-                    >
-                      Approve
-                    </Button>
-                    <Button 
-                      backgroundColor="white" 
-                      color="black"
-                      border="1px solid black"
-                      size="small"
-                      onClick={() => setSelectedProject(project)}
-                    >
-                      Return
-                    </Button>
-                    <Button 
-                      backgroundColor="white" 
-                      color="black"
-                      border="1px solid black"
-                      size="small"
-                      onClick={() => handleProjectAction(project, 'reject')}
-                    >
-                      Reject
-                    </Button>
-                  </Flex>
-                </Flex>
+                </Collection>
               </Card>
             )}
-          </Collection>
-        </TabItem>
-        
-        <TabItem title={`Approved Projects (${projects.approved?.length || 0})`}>
-          <Collection
-            items={projects.approved || []}
-            type="list"
-            gap="1rem"
-          >
-            {(project) => (
-              <Card key={project.id}>
-                <Flex direction="column" gap="1rem">
-                  <Flex justifyContent="space-between" alignItems="center">
-                    <Heading level={4}>{project.title}</Heading>
-                    <Badge backgroundColor={tokens.colors.green[60]} color="white">
-                      Approved
-                    </Badge>
-                  </Flex>
-                  
-                  <Text><strong>Faculty:</strong> {project.faculty?.name}</Text>
-                  <Text><strong>Department:</strong> {project.department}</Text>
-                  <Text>{project.description}</Text>
-                  
-                  {project.qualifications && (
-                    <Text><strong>Qualifications:</strong> {project.qualifications}</Text>
-                  )}
-                  
-                  {project.duration && (
-                    <Text><strong>Duration:</strong> {project.duration}</Text>
-                  )}
-                  
-                  {project.skillsRequired && project.skillsRequired.length > 0 && (
-                    <Text><strong>Skills Required:</strong> {project.skillsRequired.join(', ')}</Text>
-                  )}
-                  
-                  {project.applicationDeadline && (
-                    <Text><strong>Application Deadline:</strong> {new Date(project.applicationDeadline).toLocaleDateString()}</Text>
-                  )}
-                  
-                  <Text><strong>Requires Transcript:</strong> {project.requiresTranscript ? 'Yes' : 'No'}</Text>
-                  
-                  {project.coordinatorNotes && (
-                    <Card backgroundColor="rgba(255, 193, 7, 0.1)">
-                      <Text><strong>Coordinator Notes:</strong> {project.coordinatorNotes}</Text>
+            
+            {/* Applications Needing Review */}
+            {applications.length > 0 && (
+              <Card>
+                <Heading level={4} marginBottom="1rem">Applications ({applications.length})</Heading>
+                <Collection items={applications} type="list" gap="1rem">
+                  {(application) => (
+                    <Card key={application.id} variation="outlined">
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Flex direction="column" gap="0.5rem" flex="1">
+                          <Text fontWeight="bold">{application.project?.title}</Text>
+                          <Text fontSize="0.9rem">{application.student?.name}</Text>
+                        </Flex>
+                        <Flex gap="0.5rem">
+                          <Button size="small" onClick={() => setViewingApplication(application)}>View</Button>
+                          <Button size="small" onClick={() => handleApplicationAction(application, 'approve')}>Approve</Button>
+                          <Button size="small" onClick={() => setSelectedApplication(application)}>Return</Button>
+                        </Flex>
+                      </Flex>
                     </Card>
                   )}
-                  
-                  <Text fontSize="0.9rem" color="gray">
-                    Approved: {new Date(project.updatedAt).toLocaleDateString()}
-                  </Text>
-                </Flex>
+                </Collection>
               </Card>
             )}
-          </Collection>
+            
+            {projects.pending?.length === 0 && applications.length === 0 && (
+              <Card>
+                <Text>No items need your review at this time.</Text>
+              </Card>
+            )}
+          </Flex>
         </TabItem>
         
-        <TabItem title={`Application Reviews (${applications.length})`}>
-          <Collection
-            items={applications}
-            type="list"
-            gap="1rem"
-          >
-            {(application) => (
-              <Card key={application.id}>
-                <Flex direction="column" gap="1rem">
-                  <Flex justifyContent="space-between" alignItems="center">
-                    <Heading level={4}>{application.project?.title}</Heading>
-                    <Badge backgroundColor={tokens.colors.orange[60]} color="white">
-                      Coordinator Review
-                    </Badge>
-                  </Flex>
-                  
-                  <Text><strong>Student:</strong> {application.student?.name}</Text>
-                  
-                  <Flex gap="0.5rem">
-                    <Button 
-                      backgroundColor="white" 
-                      color="black"
-                      border="1px solid black"
-                      size="small"
-                      onClick={() => setViewingApplication(application)}
-                    >
-                      View Application
-                    </Button>
-                    <Button 
-                      backgroundColor="white" 
-                      color="black"
-                      border="1px solid black"
-                      size="small"
-                      onClick={() => handleApplicationAction(application, 'approve')}
-                    >
-                      Approve
-                    </Button>
-                    <Button 
-                      backgroundColor="white" 
-                      color="black"
-                      border="1px solid black"
-                      size="small"
-                      onClick={() => setSelectedApplication(application)}
-                    >
-                      Return
-                    </Button>
-                    <Button 
-                      backgroundColor="white" 
-                      color="black"
-                      border="1px solid black"
-                      size="small"
-                      onClick={() => handleApplicationAction(application, 'reject')}
-                    >
-                      Reject
-                    </Button>
-                  </Flex>
-                </Flex>
+        <TabItem title="Approved Items">
+          <Flex direction="column" gap="2rem">
+            {/* Approved Applications */}
+            {approvedApplications.length > 0 && (
+              <Card>
+                <Heading level={4} marginBottom="1rem">Applications ({approvedApplications.length})</Heading>
+                <Collection items={approvedApplications} type="list" gap="1rem">
+                  {(application) => (
+                    <Card key={application.id} variation="outlined">
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Flex direction="column" gap="0.5rem" flex="1">
+                          <Text fontWeight="bold">{application.project?.title}</Text>
+                          <Text fontSize="0.9rem">{application.student?.name} • {application.status}</Text>
+                        </Flex>
+                        <Button size="small" onClick={() => setViewingApplication(application)}>View Details</Button>
+                      </Flex>
+                    </Card>
+                  )}
+                </Collection>
               </Card>
             )}
-          </Collection>
+            
+            {/* Approved Projects */}
+            {projects.approved && projects.approved.length > 0 && (
+              <Card>
+                <Heading level={4} marginBottom="1rem">Projects ({projects.approved.length})</Heading>
+                <Collection items={projects.approved} type="list" gap="1rem">
+                  {(project) => (
+                    <Card key={project.id} variation="outlined">
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Flex direction="column" gap="0.5rem" flex="1">
+                          <Text fontWeight="bold">{project.title}</Text>
+                          <Text fontSize="0.9rem">{project.faculty?.name} • {project.department}</Text>
+                        </Flex>
+                        <Button size="small" onClick={() => setViewingProject(project)}>View Details</Button>
+                      </Flex>
+                    </Card>
+                  )}
+                </Collection>
+              </Card>
+            )}
+            
+            {approvedApplications.length === 0 && projects.approved?.length === 0 && (
+              <Card>
+                <Text>No approved items yet.</Text>
+              </Card>
+            )}
+          </Flex>
         </TabItem>
       </Tabs>
       
@@ -587,6 +528,119 @@ const CoordinatorDashboard = ({ user }) => {
                     title="Supporting Document"
                   />
                 </View>
+              </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* View Project Details Modal */}
+      {viewingProject && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setViewingProject(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="800px"
+              width="100%"
+              maxHeight="90vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Flex direction="column" gap="1rem">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Heading level={4}>Project Details</Heading>
+                  <Button size="small" onClick={() => setViewingProject(null)}>Close</Button>
+                </Flex>
+                
+                <Divider />
+                
+                <Flex direction="column" gap="0.5rem">
+                  <Text fontWeight="bold">Project Information</Text>
+                  <Text>Title: {viewingProject.title}</Text>
+                  <Text>Department: {viewingProject.department}</Text>
+                  <Text>Faculty: {viewingProject.faculty?.name}</Text>
+                  <Text>Status: {viewingProject.projectStatus}</Text>
+                  <Text>Created: {new Date(viewingProject.createdAt).toLocaleDateString()}</Text>
+                  <Text>Application Deadline: {viewingProject.applicationDeadline ? new Date(viewingProject.applicationDeadline).toLocaleDateString() : 'Not specified'}</Text>
+                </Flex>
+                
+                <Divider />
+                
+                <Flex direction="column" gap="0.5rem">
+                  <Text fontWeight="bold">Project Description</Text>
+                  <Card variation="outlined" padding="1rem">
+                    <Text style={{ whiteSpace: 'pre-wrap' }}>{viewingProject.description}</Text>
+                  </Card>
+                </Flex>
+                
+                {viewingProject.qualifications && (
+                  <>
+                    <Divider />
+                    <Flex direction="column" gap="0.5rem">
+                      <Text fontWeight="bold">Required Qualifications/Prerequisites</Text>
+                      <Card variation="outlined" padding="1rem">
+                        <Text style={{ whiteSpace: 'pre-wrap' }}>{viewingProject.qualifications}</Text>
+                      </Card>
+                    </Flex>
+                  </>
+                )}
+                
+                {viewingProject.skillsRequired && viewingProject.skillsRequired.length > 0 && (
+                  <>
+                    <Divider />
+                    <Flex direction="column" gap="0.5rem">
+                      <Text fontWeight="bold">Skills Required</Text>
+                      <Flex wrap="wrap" gap="0.5rem">
+                        {viewingProject.skillsRequired.map((skill, index) => (
+                          <Card 
+                            key={index}
+                            backgroundColor="rgba(0, 0, 0, 0.05)"
+                            padding="0.25rem 0.5rem"
+                            borderRadius="1rem"
+                          >
+                            <Text fontSize="0.8rem">{skill}</Text>
+                          </Card>
+                        ))}
+                      </Flex>
+                    </Flex>
+                  </>
+                )}
+                
+                <Divider />
+                
+                <Flex direction="column" gap="0.5rem">
+                  <Text fontWeight="bold">Project Details</Text>
+                  {viewingProject.duration && (
+                    <Text>Duration: {viewingProject.duration}</Text>
+                  )}
+                  <Text>Requires Transcript Upload: {viewingProject.requiresTranscript ? 'Yes' : 'No'}</Text>
+                  <Text>Active: {viewingProject.isActive ? 'Yes' : 'No'}</Text>
+                </Flex>
+                
+                {viewingProject.coordinatorNotes && (
+                  <>
+                    <Divider />
+                    <Flex direction="column" gap="0.5rem">
+                      <Text fontWeight="bold">Coordinator Notes</Text>
+                      <Card variation="outlined" padding="1rem">
+                        <Text style={{ whiteSpace: 'pre-wrap' }}>{viewingProject.coordinatorNotes}</Text>
+                      </Card>
+                    </Flex>
+                  </>
+                )}
               </Flex>
             </Card>
           </Flex>
