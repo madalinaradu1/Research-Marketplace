@@ -275,13 +275,18 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
               
               {error && <Text color="red">{error}</Text>}
               
-              <Button 
-                onClick={updateStatus}
-                variation="primary"
-                isLoading={isSubmitting}
-              >
-                Submit Decision
-              </Button>
+              <Flex justifyContent="flex-end">
+                <Button 
+                  onClick={updateStatus}
+                  backgroundColor="white"
+                  color="black"
+                  border="1px solid black"
+                  size="small"
+                  isLoading={isSubmitting}
+                >
+                  Submit Decision
+                </Button>
+              </Flex>
             </Flex>
           </Card>
         )}

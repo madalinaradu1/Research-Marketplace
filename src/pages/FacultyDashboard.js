@@ -358,67 +358,34 @@ const FacultyDashboard = ({ user }) => {
       </View>
       <Flex direction="column" padding="2rem" gap="2rem">
       <Heading level={2}>Faculty Dashboard</Heading>
-      <Text>Welcome, {user.name}!</Text>
       
       {error && <Text color="red">{error}</Text>}
       {successMessage && <Text color="green">{successMessage}</Text>}
       
-      <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
-        <Card variation="elevated" flex="1">
-          <Heading level={4}>My Projects</Heading>
-          <Flex wrap="wrap" gap="1rem" marginTop="1rem">
-            <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5}>{projects.length}</Heading>
-              <Text>Total Projects</Text>
-            </Card>
-            <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5}>{projects.filter(p => p.isActive).length}</Heading>
-              <Text>Active Projects</Text>
-            </Card>
-          </Flex>
-        </Card>
-        
-        <Card variation="elevated" flex="1">
-          <Heading level={4}>Applications</Heading>
-          <Flex wrap="wrap" gap="1rem" marginTop="1rem">
-            <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5} color="orange">{applicationCounts.reviewNeeded}</Heading>
-              <Text>Review Needed</Text>
-            </Card>
-            <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5} color="green">{applicationCounts.approved}</Heading>
-              <Text>Approved</Text>
-            </Card>
-          </Flex>
-        </Card>
-        
-        <Card variation="elevated" flex="1">
-          <Heading level={4}>Quick Actions</Heading>
-          <Flex direction="column" gap="0.5rem" marginTop="1rem">
-            <Button 
-              backgroundColor="#552b9a"
-              color="white"
-              onClick={() => {
-                setIsCreatingProject(true);
-                setSelectedProject(null);
-                setProjectForm({
-                  title: '',
-                  description: '',
-                  department: user.department || '',
-                  skillsRequired: '',
-                  duration: '',
-                  applicationDeadline: '',
-                  isActive: true
-                });
-              }}
-            >
-              Create New Project
-            </Button>
-            <Button onClick={() => setActiveTabIndex(2)}>
-              Review Applications
-            </Button>
-          </Flex>
-        </Card>
+      <Flex justifyContent="space-between" alignItems="center" marginBottom="2rem">
+        <Button 
+          backgroundColor="white"
+          color="black"
+          border="1px solid black"
+          size="small"
+          onClick={() => {
+            setIsCreatingProject(true);
+            setSelectedProject(null);
+            setProjectForm({
+              title: '',
+              description: '',
+              department: user.department || '',
+              skillsRequired: '',
+              qualifications: '',
+              duration: '',
+              applicationDeadline: '',
+              requiresTranscript: false,
+              isActive: true
+            });
+          }}
+        >
+          + Create Project
+        </Button>
       </Flex>
       
       <Tabs
@@ -433,248 +400,39 @@ const FacultyDashboard = ({ user }) => {
         }}
       >
         <TabItem title="My Projects">
-          {isCreatingProject ? (
+          <Flex direction="column" gap="2rem">
+            {/* Projects Section */}
             <Card>
-              <Heading level={4}>{selectedProject ? 'Edit Project' : 'Create New Project'}</Heading>
-              <Divider margin="1rem 0" />
+              <Heading level={4} marginBottom="1rem">My Projects ({projects.length})</Heading>
               
-              <form onSubmit={handleSubmitProject}>
-                <Flex direction="column" gap="1rem">
-                  <TextField
-                    name="title"
-                    label="Project Title *"
-                    value={projectForm.title}
-                    onChange={handleProjectFormChange}
-                    required
-                  />
-                  
-                  <TextAreaField
-                    name="description"
-                    label="Project Description *"
-                    value={projectForm.description}
-                    onChange={handleProjectFormChange}
-                    required
-                    rows={5}
-                  />
-                  
-                  <TextField
-                    name="department"
-                    label="Department *"
-                    value={projectForm.department}
-                    onChange={handleProjectFormChange}
-                    required
-                  />
-                  
-                  <TextField
-                    name="skillsRequired"
-                    label="Skills Required (comma-separated)"
-                    value={projectForm.skillsRequired}
-                    onChange={handleSkillsChange}
-                    placeholder="e.g. Python, Data Analysis, Machine Learning"
-                  />
-                  
-                  <TextAreaField
-                    name="qualifications"
-                    label="Required Qualifications/Prerequisites"
-                    value={projectForm.qualifications}
-                    onChange={handleProjectFormChange}
-                    placeholder="e.g. Completion of PSYC 101, minimum GPA of 3.0, upper-division standing"
-                    rows={3}
-                  />
-                  
-                  <TextField
-                    name="duration"
-                    label="Project Duration"
-                    value={projectForm.duration}
-                    onChange={handleProjectFormChange}
-                    placeholder="e.g. 3 months, Fall Semester"
-                  />
-                  
-                  <TextField
-                    name="applicationDeadline"
-                    label="Application Deadline *"
-                    type="date"
-                    value={projectForm.applicationDeadline}
-                    onChange={handleProjectFormChange}
-                    required
-                  />
-                  
-                  <SelectField
-                    name="requiresTranscript"
-                    label="Requires Transcript Upload"
-                    value={(projectForm.requiresTranscript || false).toString()}
-                    onChange={(e) => setProjectForm(prev => ({ 
-                      ...prev, 
-                      requiresTranscript: e.target.value === 'true' 
-                    }))}
-                  >
-                    <option value="false">No</option>
-                    <option value="true">Yes</option>
-                  </SelectField>
-                  
-                  <SelectField
-                    name="isActive"
-                    label="Status"
-                    value={(projectForm.isActive !== undefined ? projectForm.isActive : true).toString()}
-                    onChange={(e) => setProjectForm(prev => ({ 
-                      ...prev, 
-                      isActive: e.target.value === 'true' 
-                    }))}
-                  >
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
-                  </SelectField>
-                  
-                  <Flex gap="1rem">
-                    <Button 
-                      onClick={() => setIsCreatingProject(false)}
-                      variation="link"
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      type="submit"
-                      backgroundColor="#552b9a"
-                      color="white"
-                      isLoading={isSubmitting}
-                    >
-                      {selectedProject ? 'Update Project' : 'Create Project'}
-                    </Button>
-                  </Flex>
-                </Flex>
-              </form>
-            </Card>
-          ) : (
-            <>
               {projects.length === 0 ? (
-                <Card>
-                  <Text>You haven't created any projects yet.</Text>
-                  <Button 
-                    backgroundColor="#552b9a"
-                    color="white"
-                    onClick={() => setIsCreatingProject(true)}
-                    marginTop="1rem"
-                  >
-                    Create New Project
-                  </Button>
-                </Card>
+                <Text>No projects created yet.</Text>
               ) : (
-                <Collection
-                  items={projects}
-                  type="list"
-                  gap="1rem"
-                  wrap="nowrap"
-                  direction="column"
-                >
+                <Collection items={projects} type="list" gap="1rem">
                   {(project) => (
-                    <Card key={project.id}>
+                    <Card key={project.id} variation="outlined">
                       <Flex direction="column" gap="0.5rem">
                         <Flex justifyContent="space-between" alignItems="center">
-                          <Heading level={5}>{project.title}</Heading>
-                          <Flex gap="0.5rem">
-                            <Badge 
-                              backgroundColor={
-                                project.projectStatus === 'Approved' ? tokens.colors.green[60] :
-                                project.projectStatus === 'Coordinator Review' ? tokens.colors.orange[60] :
-                                project.projectStatus === 'Returned' ? tokens.colors.yellow[60] :
-                                project.projectStatus === 'Filled' ? tokens.colors.blue[60] : tokens.colors.neutral[60]
-                              }
-                              color="white"
-                            >
-                              {project.projectStatus || 'Draft'}
-                            </Badge>
-                            <Badge 
-                              backgroundColor={project.isActive ? 'green' : 'gray'}
-                              color="white"
-                            >
-                              {project.isActive ? 'Active' : 'Inactive'}
-                            </Badge>
-                          </Flex>
+                          <Text fontWeight="bold">{project.title}</Text>
+                          <Badge 
+                            backgroundColor={
+                              project.projectStatus === 'Approved' ? tokens.colors.green[60] :
+                              project.projectStatus === 'Returned' ? tokens.colors.yellow[60] :
+                              project.projectStatus === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.neutral[60]
+                            }
+                            color="white"
+                          >
+                            {project.projectStatus || 'Draft'}
+                          </Badge>
                         </Flex>
-                        
-                        <Text fontWeight="bold">Department: {project.department}</Text>
-                        <Text>{project.description}</Text>
-                        
-                        {project.qualifications && (
-                          <Text><strong>Required Qualifications/Prerequisites:</strong> {project.qualifications}</Text>
-                        )}
-                        
-                        {project.duration && (
-                          <Text><strong>Project Duration:</strong> {project.duration}</Text>
-                        )}
-                        
-                        <Text><strong>Requires Transcript Upload:</strong> {project.requiresTranscript ? 'Yes' : 'No'}</Text>
-                        
-                        <Divider />
-                        
-                        <Flex wrap="wrap" gap="0.5rem">
-                          {project.skillsRequired?.map((skill, index) => (
-                            <Card 
-                              key={index}
-                              backgroundColor="rgba(0, 0, 0, 0.05)"
-                              padding="0.25rem 0.5rem"
-                              borderRadius="1rem"
-                            >
-                              <Text fontSize="0.8rem">{skill}</Text>
-                            </Card>
-                          ))}
-                        </Flex>
-                        
-                        <Divider />
-                        
                         <Flex justifyContent="space-between" alignItems="center">
-                          <Text fontSize="0.9rem">
-                            Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString('en-US', { timeZone: 'UTC' }) : 'Not specified'}
-                          </Text>
+                          <Text fontSize="0.9rem">{project.department} • Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not set'}</Text>
                           <Flex gap="0.5rem">
-                            {project.projectStatus === 'Returned' ? (
-                              <Button 
-                                size="small"
-                                backgroundColor="white"
-                                color="black"
-                                border="1px solid black"
-                                fontSize="0.75rem"
-                                padding="0.25rem 0.5rem"
-                                onClick={() => {
-                                  setViewingReturnReason(project);
-                                  setSelectedProject(project);
-                                  setProjectForm({
-                                    title: project.title || '',
-                                    description: project.description || '',
-                                    department: project.department || '',
-                                    skillsRequired: project.skillsRequired?.join(', ') || '',
-                                    qualifications: project.qualifications || '',
-                                    duration: project.duration || '',
-                                    applicationDeadline: project.applicationDeadline ? new Date(project.applicationDeadline).toISOString().split('T')[0] : '',
-                                    requiresTranscript: project.requiresTranscript || false,
-                                    isActive: project.isActive !== undefined ? project.isActive : true
-                                  });
-                                }}
-                              >
-                                View Return Reason
-                              </Button>
-                            ) : (
-                              <Button 
-                                size="small"
-                                onClick={() => editProject(project)}
-                              >
-                                Edit
-                              </Button>
-                            )}
-                            <Button 
-                              size="small"
-                              backgroundColor="white"
-                              color="black"
-                              border="1px solid black"
-                              fontSize="0.75rem"
-                              padding="0.25rem 0.5rem"
-                              onClick={() => {
-                                setViewingApplicationsForProject(project);
-                                setActiveTabIndex(1);
-                              }}
-                            >
-                              View Applications
-                            </Button>
+                            <Button size="small" onClick={() => editProject(project)}>Edit</Button>
+                            <Button size="small" onClick={() => {
+                              setViewingApplicationsForProject(project);
+                              setActiveTabIndex(1);
+                            }}>Applications</Button>
                           </Flex>
                         </Flex>
                       </Flex>
@@ -682,9 +440,11 @@ const FacultyDashboard = ({ user }) => {
                   )}
                 </Collection>
               )}
-            </>
-          )}
+            </Card>
+          </Flex>
         </TabItem>
+        
+
         
         <TabItem title="All Applications">
           {getProcessedApplications().length === 0 ? (
@@ -716,9 +476,6 @@ const FacultyDashboard = ({ user }) => {
                               <Text fontWeight="bold" width="180px">{application.student?.name || 'Unknown Student'}</Text>
                               <Text fontSize="0.9rem" width="220px">{application.student?.email}</Text>
                               <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
-                            </Flex>
-                            
-                            <Flex gap="1rem" alignItems="center">
                               <Badge 
                                 backgroundColor={
                                   application.status === 'Approved' ? tokens.colors.green[60] :
@@ -731,7 +488,9 @@ const FacultyDashboard = ({ user }) => {
                               >
                                 {application.status}
                               </Badge>
-                              
+                            </Flex>
+                            
+                            <Flex gap="1rem" alignItems="center">
                               <Button 
                                 size="small"
                                 onClick={() => setReviewingApplication(application)}
@@ -742,8 +501,6 @@ const FacultyDashboard = ({ user }) => {
                               {application.status === 'Approved' && (
                                 <Button 
                                   size="small"
-                                  backgroundColor="#552b9a"
-                                  color="white"
                                   onClick={() => setMessagingStudent({ application, student: application.student })}
                                 >
                                   Message
@@ -791,9 +548,6 @@ const FacultyDashboard = ({ user }) => {
                               <Text fontWeight="bold" width="180px">{application.student?.name || 'Unknown Student'}</Text>
                               <Text fontSize="0.9rem" width="220px">{application.student?.email}</Text>
                               <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
-                            </Flex>
-                            
-                            <Flex gap="1rem" alignItems="center">
                               <Badge 
                                 backgroundColor={
                                   application.status === 'Faculty Review' ? tokens.colors.blue[60] :
@@ -803,16 +557,17 @@ const FacultyDashboard = ({ user }) => {
                               >
                                 {application.status}
                               </Badge>
-                              
-                              <Button 
-                                size="small"
-                                backgroundColor="#552b9a"
-                                color="white"
-                                onClick={() => setReviewingApplication(application)}
-                              >
-                                Review Now
-                              </Button>
                             </Flex>
+                            
+                            <Button 
+                              size="small"
+                              backgroundColor="white"
+                              color="black"
+                              border="1px solid black"
+                              onClick={() => setReviewingApplication(application)}
+                            >
+                              Review Now
+                            </Button>
                           </Flex>
                         </Card>
                       )}
@@ -970,6 +725,130 @@ const FacultyDashboard = ({ user }) => {
                   </Button>
                 </Flex>
               </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* Create/Edit Project Modal */}
+      {isCreatingProject && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setIsCreatingProject(false)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="800px"
+              width="100%"
+              maxHeight="90vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Heading level={4} marginBottom="1rem">{selectedProject ? 'Edit Project' : 'Create New Project'}</Heading>
+              <form onSubmit={handleSubmitProject}>
+                <Flex direction="column" gap="1.5rem">
+                  <TextField
+                    name="title"
+                    label="Project Title *"
+                    value={projectForm.title}
+                    onChange={handleProjectFormChange}
+                    required
+                  />
+                  <TextAreaField
+                    name="description"
+                    label="Project Description *"
+                    value={projectForm.description}
+                    onChange={handleProjectFormChange}
+                    required
+                    rows={6}
+                  />
+                  <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
+                    <TextField
+                      name="department"
+                      label="Department *"
+                      value={projectForm.department}
+                      onChange={handleProjectFormChange}
+                      required
+                      flex="1"
+                    />
+                    <TextField
+                      name="applicationDeadline"
+                      label="Application Deadline *"
+                      type="date"
+                      value={projectForm.applicationDeadline}
+                      onChange={handleProjectFormChange}
+                      required
+                      flex="1"
+                    />
+                  </Flex>
+                  <TextField
+                    name="skillsRequired"
+                    label="Skills Required (comma-separated)"
+                    value={projectForm.skillsRequired}
+                    onChange={handleSkillsChange}
+                    placeholder="e.g. Python, Data Analysis, Machine Learning"
+                  />
+                  <TextAreaField
+                    name="qualifications"
+                    label="Required Qualifications/Prerequisites"
+                    value={projectForm.qualifications}
+                    onChange={handleProjectFormChange}
+                    placeholder="e.g. Completion of PSYC 101, minimum GPA of 3.0, upper-division standing"
+                    rows={4}
+                  />
+                  <TextField
+                    name="duration"
+                    label="Project Duration"
+                    value={projectForm.duration}
+                    onChange={handleProjectFormChange}
+                    placeholder="e.g. 3 months, Fall Semester"
+                  />
+                  <SelectField
+                    name="requiresTranscript"
+                    label="Requires Transcript Upload"
+                    value={(projectForm.requiresTranscript || false).toString()}
+                    onChange={(e) => setProjectForm(prev => ({ 
+                      ...prev, 
+                      requiresTranscript: e.target.value === 'true' 
+                    }))}
+                  >
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                  </SelectField>
+                  <Flex gap="0.5rem">
+                    <Button 
+                      onClick={() => setIsCreatingProject(false)} 
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                      size="small"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                      size="small" 
+                      isLoading={isSubmitting}
+                    >
+                      {selectedProject ? 'Update Project' : 'Create Project'}
+                    </Button>
+                  </Flex>
+                </Flex>
+              </form>
             </Card>
           </Flex>
         </View>
