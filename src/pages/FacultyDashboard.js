@@ -692,10 +692,9 @@ const FacultyDashboard = ({ user }) => {
                         
                         const messageInput = {
                           senderID: userId,
-                          recipientID: messagingStudent.student.id,
-                          projectID: messagingStudent.application.projectID,
+                          receiverID: messagingStudent.student.id,
                           subject: `Message about ${messagingStudent.application.project?.title}`,
-                          content: messageText,
+                          body: messageText,
                           isRead: false
                         };
                         

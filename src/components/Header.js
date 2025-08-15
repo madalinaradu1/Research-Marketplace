@@ -212,7 +212,7 @@ const Header = ({ user, signOut }) => {
             Community
           </Text>
         </Link>
-        {(user?.role === 'Student' || user?.role === 'Faculty') && (
+        {user?.role === 'Student' && (
           <Link to="/applications" style={{ textDecoration: isActive('/applications') ? 'underline white' : 'none' }}>
             <Text
               color={isActive('/applications') ? "white" : "rgba(255,255,255,0.8)"}
@@ -280,7 +280,7 @@ const Header = ({ user, signOut }) => {
             <MenuItem onClick={() => navigate('/activity')}>My Activity</MenuItem>
             <MenuItem onClick={() => navigate('/messages')}>Messages</MenuItem>
             <MenuItem onClick={() => navigate('/community')}>Community</MenuItem>
-            {(user?.role === 'Student' || user?.role === 'Faculty') && (
+            {user?.role === 'Student' && (
               <MenuItem onClick={() => navigate('/applications')}>Applications</MenuItem>
             )}
             {user?.role === 'Student' && (

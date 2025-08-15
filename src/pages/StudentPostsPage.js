@@ -197,8 +197,10 @@ const StudentPostsPage = ({ user }) => {
       <Flex justifyContent="space-between" alignItems="center">
         <Heading level={2}>Student Research Community</Heading>
         <Button
-          backgroundColor="#552b9a"
-          color="white"
+          backgroundColor="white"
+          color="black"
+          border="1px solid black"
+          size="small"
           onClick={() => setShowCreateForm(true)}
         >
           Create Post
@@ -300,8 +302,10 @@ const StudentPostsPage = ({ user }) => {
             <Card>
               <Text>You haven't created any posts yet.</Text>
               <Button
-                backgroundColor="#552b9a"
-                color="white"
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
+                size="small"
                 onClick={() => setShowCreateForm(true)}
                 marginTop="1rem"
               >

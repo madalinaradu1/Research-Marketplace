@@ -281,19 +281,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                   
                   <Divider />
                   
-                  <Flex direction="column" gap="0.5rem">
-                    <Text fontWeight="bold">Student Information</Text>
-                    <Text>Student ID: {application.studentID}</Text>
-                    <Text>Name: {application.student?.name || 'Not specified'}</Text>
-                    <Text>Email: {application.student?.email || 'Not specified'}</Text>
-                    <Text>Program: {application.student?.major || 'Not specified'}</Text>
-                    <Text>Academic Year: {application.student?.academicYear || 'Not specified'}</Text>
-                    <Text>Expected Graduation: {application.student?.expectedGraduation || 'Not specified'}</Text>
-                    <Text>GPA: {application.student?.gpa || 'Not specified'}</Text>
-                    <Text>Research Interests: {application.student?.researchInterests?.join(', ') || 'Not specified'}</Text>
-                    <Text>Skills: {application.student?.skills?.join(', ') || 'Not specified'}</Text>
-                    <Text>Availability: {application.student?.availability || 'Not specified'}</Text>
-                  </Flex>
+
                   
                   {application.statement && (
                     <>

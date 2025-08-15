@@ -215,10 +215,7 @@ const MessagesPage = ({ user }) => {
         receiverID: recipientId,
         subject: selectedMessage.subject.startsWith('Re:') ? selectedMessage.subject : `Re: ${selectedMessage.subject}`,
         body: replyText,
-        isRead: false,
-        sentAt: new Date().toISOString(),
-        threadID: selectedMessage.threadID || `${Math.min(userId, recipientId)}-${Math.max(userId, recipientId)}`,
-        messageType: 'REPLY'
+        isRead: false
       };
       
       console.log('Sending message with input:', messageInput);
@@ -309,8 +306,10 @@ const MessagesPage = ({ user }) => {
       <Flex justifyContent="space-between" alignItems="center">
         <Heading level={2}>Messages</Heading>
         <Button 
-          backgroundColor="#552b9a"
-          color="white"
+          backgroundColor="white"
+          color="black"
+          border="1px solid black"
+          size="small"
           onClick={() => setShowNewMessage(true)}
           isDisabled={availableRecipients.length === 0}
         >
@@ -376,7 +375,7 @@ const MessagesPage = ({ user }) => {
                   <Flex direction="column" gap="0.5rem">
                     <Flex justifyContent="space-between" alignItems="center">
                       <Text fontWeight={message.hasUnread ? 'bold' : 'normal'}>
-                        {message.isIncoming ? `From: ${message.sender?.name || 'Unknown'}` : `To: ${message.receiver?.name || 'Unknown'}`}
+                        {message.senderID === (user.id || user.username) ? `To: ${message.receiver?.name || 'Unknown'}` : `From: ${message.sender?.name || 'Unknown'}`}
                       </Text>
                       <Flex alignItems="center" gap="0.5rem">
                         <Text fontSize="0.8rem">
@@ -444,7 +443,7 @@ const MessagesPage = ({ user }) => {
                 
                 <Flex direction="column" gap="0.5rem">
                   <Text><strong>Subject:</strong> {selectedMessage.subject}</Text>
-                  <Text><strong>Conversation with:</strong> {selectedMessage.isIncoming ? selectedMessage.sender?.name : selectedMessage.receiver?.name}</Text>
+                  <Text><strong>Conversation with:</strong> {selectedMessage.senderID === (user.id || user.username) ? selectedMessage.receiver?.name : selectedMessage.sender?.name}</Text>
                 </Flex>
                 
                 <Divider />
@@ -461,7 +460,7 @@ const MessagesPage = ({ user }) => {
                       <Flex direction="column" gap="0.5rem">
                         <Flex justifyContent="space-between" alignItems="center">
                           <Text fontSize="0.9rem" fontWeight="bold">
-                            {msg.senderID === (user.id || user.username) ? 'You' : (msg.sender?.name || 'Unknown')}
+                            {msg.senderID === (user.id || user.username) ? user.name : (msg.sender?.name || 'Unknown')}
                           </Text>
                           <Text fontSize="0.8rem" color="gray">
                             {new Date(msg.sentAt || msg.createdAt).toLocaleString()}
@@ -489,14 +488,19 @@ const MessagesPage = ({ user }) => {
                       setSelectedMessage(null);
                       setReplyText('');
                     }}
-                    variation="link"
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                    size="small"
                   >
                     Close
                   </Button>
                   <Button 
                     onClick={sendReply}
-                    backgroundColor="#552b9a"
-                    color="white"
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                    size="small"
                     isLoading={isReplying}
                     isDisabled={!replyText.trim()}
                   >
