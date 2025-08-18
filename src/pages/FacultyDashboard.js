@@ -342,9 +342,9 @@ const FacultyDashboard = ({ user }) => {
   const getReviewNeededApplications = () => {
     return applications.filter(app => {
       if (user.role === 'Faculty') {
-        return app.status === 'Faculty Review';
+        return app.status === 'Faculty Review' || app.status === 'Approved';
       } else if (user.role === 'Coordinator') {
-        return app.status === 'Department Review';
+        return app.status === 'Coordinator Review';
       } else if (user.role === 'Admin') {
         return app.status === 'Admin Review';
       }
@@ -362,6 +362,11 @@ const FacultyDashboard = ({ user }) => {
     return applications.filter(app => 
       ['Approved', 'Rejected', 'Returned'].includes(app.status)
     );
+  };
+  
+  // Get applications that are approved and ready for faculty selection
+  const getApprovedApplications = () => {
+    return applications.filter(app => app.status === 'Approved');
   };
   
   const applicationCounts = getApplicationCounts();
@@ -528,7 +533,7 @@ const FacultyDashboard = ({ user }) => {
                                 }
                                 color="white"
                               >
-                                {application.status}
+                                {application.status}{application.isSelected ? ' (Selected)' : ''}
                               </Badge>
                             </Flex>
                             

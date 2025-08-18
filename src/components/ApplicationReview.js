@@ -13,7 +13,7 @@ import {
   View,
   Collection
 } from '@aws-amplify/ui-react';
-import { updateApplication } from '../graphql/operations';
+import { updateApplication, updateProject } from '../graphql/operations';
 import { sendStatusChangeNotification } from '../utils/emailNotifications';
 
 const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourses = false }) => {
@@ -61,8 +61,13 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
         input.submittedToDepartmentAt = now;
       } else if (statusUpdate === 'Admin Review') {
         input.submittedToAdminAt = now;
+      } else if (statusUpdate === 'Faculty Review') {
+        input.submittedToFacultyAt = now;
       } else if (statusUpdate === 'Approved') {
         input.approvedAt = now;
+      } else if (statusUpdate === 'Approved' && userRole === 'Faculty' && application.status === 'Approved') {
+        input.selectedAt = now;
+        input.isSelected = true;
       } else if (statusUpdate === 'Returned') {
         input.returnedAt = now;
       } else if (statusUpdate === 'Rejected') {
@@ -110,15 +115,20 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
     if (userRole === 'Faculty') {
       if (application.status === 'Faculty Review') {
         return [
-          { value: 'Approved', label: 'Approve Application' },
+          { value: 'Coordinator Review', label: 'Send to Coordinator' },
           { value: 'Returned', label: 'Return to Student' },
           { value: 'Rejected', label: 'Reject Application' }
+        ];
+      } else if (application.status === 'Approved') {
+        return [
+          { value: 'Approved', label: 'Select Student' }
         ];
       }
     } else if (userRole === 'Coordinator') {
       if (application.status === 'Coordinator Review') {
         return [
-          { value: 'Faculty Review', label: 'Approve & Send to Faculty' },
+          { value: 'Faculty Review', label: 'Send to Faculty' },
+          { value: 'Approved', label: 'Approve Application' },
           { value: 'Returned', label: 'Return to Student' },
           { value: 'Rejected', label: 'Reject Application' }
         ];
