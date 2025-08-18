@@ -82,7 +82,8 @@ const FacultyDashboard = ({ user }) => {
         limit: 100
       }));
       
-      setProjects(projectResult.data.listProjects.items);
+      const allProjects = projectResult.data.listProjects.items;
+      setProjects(allProjects);
       
       // Fetch applications for faculty's projects
       if (projectResult.data.listProjects.items.length > 0) {
@@ -223,7 +224,21 @@ const FacultyDashboard = ({ user }) => {
         
         result = await API.graphql(graphqlOperation(updateProject, { input }));
         console.log('Project updated:', result);
+        
+        // Send notification if project was resubmitted from Returned status
         if (selectedProject.projectStatus === 'Returned') {
+          try {
+            await sendNewItemNotification(
+              'coordinator@gcu.edu', // Replace with actual coordinator email
+              'Coordinator',
+              'Project Resubmission',
+              input.title,
+              user.name,
+              user.email
+            );
+          } catch (emailError) {
+            console.log('Email notification prepared (SES integration pending):', emailError);
+          }
           setSuccessMessage('Project resubmitted for coordinator review!');
         } else {
           setSuccessMessage('Project updated successfully!');
@@ -337,6 +352,11 @@ const FacultyDashboard = ({ user }) => {
     });
   };
   
+  // Get projects that need faculty attention (returned projects)
+  const getProjectsNeedingAttention = () => {
+    return projects.filter(project => project.projectStatus === 'Returned');
+  };
+  
   // Filter applications that have been processed (approved, rejected, returned)
   const getProcessedApplications = () => {
     return applications.filter(app => 
@@ -443,7 +463,14 @@ const FacultyDashboard = ({ user }) => {
                         <Flex justifyContent="space-between" alignItems="center">
                           <Text fontSize="0.9rem">{project.department} • Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not set'}</Text>
                           <Flex gap="0.5rem">
-                            <Button size="small" onClick={() => editProject(project)}>Edit</Button>
+                            {project.projectStatus === 'Returned' ? (
+                              <Button size="small" onClick={() => {
+                                editProject(project);
+                                setViewingReturnReason(project);
+                              }}>Fix & Resubmit</Button>
+                            ) : (
+                              <Button size="small" onClick={() => editProject(project)}>Edit</Button>
+                            )}
                             <Button size="small" onClick={() => {
                               setViewingApplicationsForProject(project);
                               setActiveTabIndex(1);
@@ -534,12 +561,36 @@ const FacultyDashboard = ({ user }) => {
         </TabItem>
         
         <TabItem title="Pending Review">
-          {getReviewNeededApplications().length === 0 ? (
+          {getReviewNeededApplications().length === 0 && getProjectsNeedingAttention().length === 0 ? (
             <Card>
-              <Text>No applications need your review at this time.</Text>
+              <Text>No items need your review at this time.</Text>
             </Card>
           ) : (
             <Flex direction="column" gap="2rem">
+              {/* Returned Projects Section */}
+              {getProjectsNeedingAttention().length > 0 && (
+                <Card>
+                  <Heading level={4} marginBottom="1rem">Projects ({getProjectsNeedingAttention().length})</Heading>
+                  <Collection items={getProjectsNeedingAttention()} type="list" gap="1rem">
+                    {(project) => (
+                      <Card key={project.id} variation="outlined">
+                        <Flex justifyContent="space-between" alignItems="center">
+                          <Flex direction="column" gap="0.5rem" flex="1">
+                            <Text fontWeight="bold">{project.title}</Text>
+                            <Text fontSize="0.9rem">{project.department}</Text>
+                          </Flex>
+                          <Flex gap="0.5rem">
+                            <Button size="small" onClick={() => {
+                              editProject(project);
+                              setViewingReturnReason(project);
+                            }}>Edit & Resubmit</Button>
+                          </Flex>
+                        </Flex>
+                      </Card>
+                    )}
+                  </Collection>
+                </Card>
+              )}
               {projects.map(project => {
                 const projectApplications = getReviewNeededApplications().filter(app => app.projectID === project.id);
                 if (projectApplications.length === 0) return null;

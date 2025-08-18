@@ -18,7 +18,8 @@ import {
 } from '@aws-amplify/ui-react';
 import { Storage } from 'aws-amplify';
 import { listProjects, listApplications, listUsers, updateProject, updateApplication } from '../graphql/operations';
-import { sendStatusChangeNotification } from '../utils/emailNotifications';
+import { createMessage } from '../graphql/message-operations';
+import { sendStatusChangeNotification, sendEmailNotification } from '../utils/emailNotifications';
 
 const CoordinatorDashboard = ({ user }) => {
   const { tokens } = useTheme();
@@ -34,6 +35,7 @@ const CoordinatorDashboard = ({ user }) => {
   const [documentUrl, setDocumentUrl] = useState(null);
   const [viewingDocument, setViewingDocument] = useState(false);
   const [viewingProject, setViewingProject] = useState(null);
+
 
   useEffect(() => {
     fetchData();
@@ -51,7 +53,7 @@ const CoordinatorDashboard = ({ user }) => {
       const projectsResult = await API.graphql(graphqlOperation(listProjects, { limit: 100 }));
       const allProjects = projectsResult.data?.listProjects?.items || [];
       const pendingProjects = allProjects
-        .filter(p => p.projectStatus === 'Coordinator Review' || p.projectStatus === 'Returned')
+        .filter(p => p.projectStatus === 'Coordinator Review')
         .map(project => {
           const faculty = allUsers.find(user => user.id === project.facultyID);
           return {
@@ -102,6 +104,7 @@ const CoordinatorDashboard = ({ user }) => {
       setProjects({ pending: pendingProjects, approved: approvedProjects });
       setApplications(pendingApplications);
       setApprovedApplications(approvedApps);
+
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -214,6 +217,7 @@ const CoordinatorDashboard = ({ user }) => {
                           <Text fontSize="0.9rem">{project.faculty?.name} • {project.department}</Text>
                         </Flex>
                         <Flex gap="0.5rem">
+                          <Button size="small" onClick={() => setViewingProject(project)}>View</Button>
                           <Button size="small" onClick={() => handleProjectAction(project, 'approve')}>Approve</Button>
                           <Button size="small" onClick={() => setSelectedProject(project)}>Return</Button>
                         </Flex>
@@ -664,6 +668,8 @@ const CoordinatorDashboard = ({ user }) => {
           </Flex>
         </View>
       )}
+      
+
     </Flex>
   );
 };

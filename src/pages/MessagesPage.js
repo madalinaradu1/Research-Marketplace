@@ -134,7 +134,11 @@ const MessagesPage = ({ user }) => {
   
   const fetchAvailableRecipients = async (userId, allUsers) => {
     try {
-      if (user.role === 'Faculty') {
+      if (user.role === 'Coordinator') {
+        // Coordinators can message all faculty members
+        const facultyUsers = allUsers.filter(u => u.role === 'Faculty');
+        setAvailableRecipients(facultyUsers);
+      } else if (user.role === 'Faculty') {
         // Faculty can message students with approved applications
         const currentUser = await Auth.currentAuthenticatedUser();
         const facultyId = currentUser.username;
@@ -319,7 +323,7 @@ const MessagesPage = ({ user }) => {
       
       {error && <Text color="red">{error}</Text>}
       
-      {availableRecipients.length === 0 && (
+      {availableRecipients.length === 0 && user.role !== 'Coordinator' && (
         <Card backgroundColor="#fff3cd" padding="1rem">
           <Text color="#856404">
             {user.role === 'Faculty' 
@@ -401,11 +405,7 @@ const MessagesPage = ({ user }) => {
           )}
         </TabItem>
         
-        <TabItem title="All Messages">
-          <Card>
-            <Text>All conversations are shown in the Inbox tab above.</Text>
-          </Card>
-        </TabItem>
+
       </Tabs>
       
       {/* Message Detail Modal */}
