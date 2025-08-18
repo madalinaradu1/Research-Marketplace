@@ -14,15 +14,17 @@ import {
   Badge,
   View
 } from '@aws-amplify/ui-react';
-import { listApplications, listProjects, listUsers } from '../graphql/operations';
+import { listApplications, listProjects, listUsers, deleteUser } from '../graphql/operations';
 import ApplicationReview from '../components/ApplicationReview';
 
 const AdminDashboard = ({ user }) => {
   const [applications, setApplications] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [viewingApplication, setViewingApplication] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   useEffect(() => {
     fetchData();
@@ -105,6 +107,7 @@ const AdminDashboard = ({ user }) => {
         .filter(app => app.project && app.student);
       
       setApplications(adminApplications);
+      setUsers(allUsers);
     } catch (err) {
       console.error('Error fetching data:', err);
       setError('Failed to load dashboard data. Please try again.');
@@ -115,6 +118,23 @@ const AdminDashboard = ({ user }) => {
   
   const handleApplicationUpdate = () => {
     fetchData();
+  };
+  
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return;
+    }
+    
+    setIsDeleting(true);
+    try {
+      await API.graphql(graphqlOperation(deleteUser, { input: { id: userId } }));
+      fetchData();
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      setError('Failed to delete user. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
   
   // Count applications by status
@@ -263,6 +283,43 @@ const AdminDashboard = ({ user }) => {
               </Collection>
             </Flex>
           )}
+        </TabItem>
+        
+        <TabItem title="User Management">
+          <Card>
+            <Heading level={4} marginBottom="1rem">All Users ({users.length})</Heading>
+            {users.length === 0 ? (
+              <Text>No users found.</Text>
+            ) : (
+              <Collection
+                items={users}
+                type="list"
+                gap="1rem"
+              >
+                {(user) => (
+                  <Card key={user.id} variation="outlined">
+                    <Flex justifyContent="space-between" alignItems="center">
+                      <Flex direction="column" gap="0.5rem" flex="1">
+                        <Text fontWeight="bold">{user.name || 'No name'}</Text>
+                        <Text fontSize="0.9rem">{user.email} • {user.role} • {user.department || 'No department'}</Text>
+                        <Text fontSize="0.8rem">Created: {new Date(user.createdAt).toLocaleDateString()}</Text>
+                      </Flex>
+                      <Button 
+                        size="small"
+                        backgroundColor="white"
+                        color="red"
+                        border="1px solid red"
+                        onClick={() => handleDeleteUser(user.id)}
+                        isLoading={isDeleting}
+                      >
+                        Delete
+                      </Button>
+                    </Flex>
+                  </Card>
+                )}
+              </Collection>
+            )}
+          </Card>
         </TabItem>
       </Tabs>
       
