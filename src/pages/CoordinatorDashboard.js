@@ -18,6 +18,7 @@ import {
 } from '@aws-amplify/ui-react';
 import { Storage } from 'aws-amplify';
 import { listProjects, listApplications, listUsers, updateProject, updateApplication } from '../graphql/operations';
+import { sendStatusChangeNotification } from '../utils/emailNotifications';
 
 const CoordinatorDashboard = ({ user }) => {
   const { tokens } = useTheme();
@@ -133,6 +134,23 @@ const CoordinatorDashboard = ({ user }) => {
       };
 
       await API.graphql(graphqlOperation(updateProject, { input }));
+      
+      // Send email notification for project status change
+      try {
+        await sendStatusChangeNotification(
+          project.faculty?.email,
+          project.faculty?.name,
+          'Project',
+          project.title,
+          project.projectStatus,
+          newStatus,
+          'Coordinator',
+          notes
+        );
+      } catch (emailError) {
+        console.log('Email notification prepared (SES integration pending):', emailError);
+      }
+      
       setNotes('');
       setSelectedProject(null);
       fetchData();

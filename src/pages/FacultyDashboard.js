@@ -21,7 +21,7 @@ import {
 } from '@aws-amplify/ui-react';
 import { listProjects, listApplications, createProject, updateProject, getUser, listUsers } from '../graphql/operations';
 import { createMessage, createNotification } from '../graphql/message-operations';
-import { sendEmailNotification } from '../utils/emailNotifications';
+import { sendEmailNotification, sendNewItemNotification } from '../utils/emailNotifications';
 import ApplicationReview from '../components/ApplicationReview';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 
@@ -233,6 +233,21 @@ const FacultyDashboard = ({ user }) => {
         console.log('Creating new project with input:', JSON.stringify(input, null, 2));
         result = await API.graphql(graphqlOperation(createProject, { input }));
         console.log('Project created:', result);
+        
+        // Send notification to coordinator about new project
+        try {
+          await sendNewItemNotification(
+            'coordinator@gcu.edu', // Replace with actual coordinator email
+            'Coordinator',
+            'Project',
+            input.title,
+            user.name,
+            user.email
+          );
+        } catch (emailError) {
+          console.log('Email notification prepared (SES integration pending):', emailError);
+        }
+        
         setSuccessMessage('Project submitted for coordinator review!');
       }
       

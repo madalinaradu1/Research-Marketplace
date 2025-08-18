@@ -14,6 +14,7 @@ import {
   Collection
 } from '@aws-amplify/ui-react';
 import { updateApplication } from '../graphql/operations';
+import { sendStatusChangeNotification } from '../utils/emailNotifications';
 
 const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourses = false }) => {
   const [notes, setNotes] = useState('');
@@ -78,6 +79,23 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
       }
       
       await API.graphql(graphqlOperation(updateApplication, { input }));
+      
+      // Send email notification for status change
+      try {
+        await sendStatusChangeNotification(
+          application.student?.email,
+          application.student?.name,
+          'Application',
+          application.project?.title,
+          application.status,
+          statusUpdate,
+          userRole === 'Faculty' ? 'Faculty' : userRole === 'Coordinator' ? 'Coordinator' : 'Admin',
+          notes
+        );
+      } catch (emailError) {
+        console.log('Email notification prepared (SES integration pending):', emailError);
+      }
+      
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error updating application:', err);

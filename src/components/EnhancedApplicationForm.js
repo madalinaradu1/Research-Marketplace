@@ -14,6 +14,7 @@ import {
   Alert
 } from '@aws-amplify/ui-react';
 import { createApplication, updateUser, listApplications } from '../graphql/operations';
+import { sendNewItemNotification } from '../utils/emailNotifications';
 
 const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
   const [statement, setStatement] = useState('');
@@ -111,6 +112,20 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       };
 
       await API.graphql(graphqlOperation(createApplication, { input: applicationInput }));
+      
+      // Send notification to coordinator about new application
+      try {
+        await sendNewItemNotification(
+          'coordinator@gcu.edu', // Replace with actual coordinator email
+          'Coordinator',
+          'Application',
+          project.title,
+          user.name,
+          user.email
+        );
+      } catch (emailError) {
+        console.log('Email notification prepared (SES integration pending):', emailError);
+      }
 
       onSuccess();
     } catch (err) {
