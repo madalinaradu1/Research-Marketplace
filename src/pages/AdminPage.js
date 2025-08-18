@@ -133,7 +133,8 @@ const AdminPage = () => {
   const handleUpdateRole = async (userId) => {
     try {
       await updateUserRole(userId, selectedRoles[userId]);
-      // Refresh the data
+      await syncUserGroupsToRole(userId);
+      setMessage('User role and groups updated successfully!');
       fetchAllData();
     } catch (err) {
       console.error('Error updating role:', err);
@@ -239,9 +240,7 @@ const AdminPage = () => {
                   <TableCell as="th">Name</TableCell>
                   <TableCell as="th">Email</TableCell>
                   <TableCell as="th">Role</TableCell>
-                  <TableCell as="th">Department</TableCell>
                   <TableCell as="th">New Role</TableCell>
-                  <TableCell as="th">New Department</TableCell>
                   <TableCell as="th">Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -251,7 +250,6 @@ const AdminPage = () => {
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.role || 'Student'}</TableCell>
-                    <TableCell>{user.department || 'None'}</TableCell>
                     <TableCell>
                       <SelectField
                         value={selectedRoles[user.id]}
@@ -264,46 +262,13 @@ const AdminPage = () => {
                       </SelectField>
                     </TableCell>
                     <TableCell>
-                      <SelectField
-                        value={selectedDepartments[user.id]}
-                        onChange={(e) => handleDepartmentChange(user.id, e.target.value)}
+                      <Button
+                        onClick={() => handleUpdateRole(user.id)}
+                        isDisabled={user.role === selectedRoles[user.id]}
+                        size="small"
                       >
-                        <option value="">None</option>
-                        <option value="Social Sciences">Social Sciences</option>
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Biology">Biology</option>
-                        <option value="Psychology">Psychology</option>
-                        <option value="Engineering">Engineering</option>
-                        <option value="Business">Business</option>
-                      </SelectField>
-                    </TableCell>
-                    <TableCell>
-                      <Flex direction="column" gap="0.5rem">
-                        <Flex direction="row" gap="0.5rem">
-                          <Button
-                            onClick={() => handleUpdateRole(user.id)}
-                            isDisabled={user.role === selectedRoles[user.id]}
-                            size="small"
-                          >
-                            Update Role
-                          </Button>
-                          <Button
-                            onClick={() => handleUpdateDepartment(user.id)}
-                            isDisabled={user.department === selectedDepartments[user.id]}
-                            size="small"
-                            variation="primary"
-                          >
-                            Update Dept
-                          </Button>
-                        </Flex>
-                        <Button
-                          onClick={() => handleSyncGroups(user.id)}
-                          size="small"
-                          variation="link"
-                        >
-                          Sync Groups
-                        </Button>
-                      </Flex>
+                        Update Role
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}

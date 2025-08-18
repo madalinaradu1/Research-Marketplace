@@ -255,7 +255,6 @@ const AdminDashboard = ({ user }) => {
                       
                       <Text><strong>Student:</strong> {application.student?.name}</Text>
                       <Text><strong>Faculty:</strong> {application.faculty?.name}</Text>
-                      <Text><strong>Department:</strong> {application.project?.department}</Text>
                       <Text fontSize="0.9rem">
                         <strong>Submitted:</strong> {new Date(application.createdAt).toLocaleDateString()}
                       </Text>
@@ -301,7 +300,7 @@ const AdminDashboard = ({ user }) => {
                     <Flex justifyContent="space-between" alignItems="center">
                       <Flex direction="column" gap="0.5rem" flex="1">
                         <Text fontWeight="bold">{user.name || 'No name'}</Text>
-                        <Text fontSize="0.9rem">{user.email} • {user.role} • {user.department || 'No department'}</Text>
+                        <Text fontSize="0.9rem">{user.email} • {user.role}</Text>
                         <Text fontSize="0.8rem">Created: {new Date(user.createdAt).toLocaleDateString()}</Text>
                       </Flex>
                       <Button 
