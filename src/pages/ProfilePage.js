@@ -196,14 +196,19 @@ const ProfilePage = ({ user, refreshProfile }) => {
             {message && <Text color="green">{message}</Text>}
             {error && <Text color="red">{error}</Text>}
             
-            <Button 
-              type="submit" 
-              variation="primary"
-              isLoading={isSubmitting}
-              loadingText="Saving..."
-            >
-              Save Changes
-            </Button>
+            <Flex justifyContent="flex-end">
+              <Button 
+                type="submit" 
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
+                size="small"
+                isLoading={isSubmitting}
+                loadingText="Saving..."
+              >
+                Save Changes
+              </Button>
+            </Flex>
           </Flex>
         </form>
       </Card>

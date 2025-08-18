@@ -212,16 +212,7 @@ const Header = ({ user, signOut }) => {
             Community
           </Text>
         </Link>
-        {user?.role === 'Student' && (
-          <Link to="/applications" style={{ textDecoration: isActive('/applications') ? 'underline white' : 'none' }}>
-            <Text
-              color={isActive('/applications') ? "white" : "rgba(255,255,255,0.8)"}
-              fontWeight={isActive('/applications') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-            >
-              Applications
-            </Text>
-          </Link>
-        )}
+
         {user?.role === 'Student' && (
           <Link to="/profile" style={{ textDecoration: isActive('/profile') ? 'underline white' : 'none' }}>
             <Text
@@ -280,9 +271,7 @@ const Header = ({ user, signOut }) => {
             <MenuItem onClick={() => navigate('/activity')}>My Activity</MenuItem>
             <MenuItem onClick={() => navigate('/messages')}>Messages</MenuItem>
             <MenuItem onClick={() => navigate('/community')}>Community</MenuItem>
-            {user?.role === 'Student' && (
-              <MenuItem onClick={() => navigate('/applications')}>Applications</MenuItem>
-            )}
+
             {user?.role === 'Student' && (
               <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
             )}
