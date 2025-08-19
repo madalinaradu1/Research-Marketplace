@@ -134,6 +134,15 @@ const SearchPage = ({ user }) => {
         !project.applicationDeadline || new Date(project.applicationDeadline) > now
       );
     }
+    
+    // Remove expired projects after 7 days
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+    filtered = filtered.filter(project => {
+      if (!project.applicationDeadline) return true;
+      const deadline = new Date(project.applicationDeadline);
+      return deadline > sevenDaysAgo;
+    });
 
     // Sort results
     filtered.sort((a, b) => {
