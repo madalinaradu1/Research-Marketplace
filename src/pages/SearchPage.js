@@ -25,7 +25,7 @@ const SearchPage = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedDuration, setSelectedDuration] = useState('');
-  const [showActiveOnly, setShowActiveOnly] = useState(true);
+
   const [showAvailableOnly, setShowAvailableOnly] = useState(true);
   const [sortBy, setSortBy] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,7 +61,7 @@ const SearchPage = ({ user }) => {
 
   useEffect(() => {
     applyFilters();
-  }, [projects, searchTerm, selectedDepartment, selectedDuration, showActiveOnly, showAvailableOnly, sortBy]);
+  }, [projects, searchTerm, selectedDepartment, selectedDuration, showAvailableOnly, sortBy]);
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -119,13 +119,8 @@ const SearchPage = ({ user }) => {
       filtered = filtered.filter(project => project.duration === selectedDuration);
     }
 
-    // Active and approved projects only
-    if (showActiveOnly) {
-      filtered = filtered.filter(project => project.isActive && project.projectStatus === 'Approved');
-    } else {
-      // Even if not filtering by active, only show approved projects
-      filtered = filtered.filter(project => project.projectStatus === 'Approved');
-    }
+    // Only show approved projects
+    filtered = filtered.filter(project => project.projectStatus === 'Approved');
 
     // Available projects only (not past deadline)
     if (showAvailableOnly) {
@@ -134,15 +129,6 @@ const SearchPage = ({ user }) => {
         !project.applicationDeadline || new Date(project.applicationDeadline) > now
       );
     }
-    
-    // Remove expired projects after 7 days
-    const now = new Date();
-    const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-    filtered = filtered.filter(project => {
-      if (!project.applicationDeadline) return true;
-      const deadline = new Date(project.applicationDeadline);
-      return deadline > sevenDaysAgo;
-    });
 
     // Sort results
     filtered.sort((a, b) => {
@@ -184,7 +170,7 @@ const SearchPage = ({ user }) => {
     setSearchTerm('');
     setSelectedDepartment('');
     setSelectedDuration('');
-    setShowActiveOnly(true);
+
     setShowAvailableOnly(true);
     setSortBy('newest');
   };
@@ -259,11 +245,6 @@ const SearchPage = ({ user }) => {
           {/* Checkboxes */}
           <Flex direction="row" gap="2rem">
             <CheckboxField
-              label="Active projects only"
-              checked={showActiveOnly}
-              onChange={(e) => setShowActiveOnly(e.target.checked)}
-            />
-            <CheckboxField
               label="Available to apply"
               checked={showAvailableOnly}
               onChange={(e) => setShowAvailableOnly(e.target.checked)}
@@ -312,10 +293,13 @@ const SearchPage = ({ user }) => {
                   
                   <Flex direction="column" gap="0.5rem" alignItems="flex-end">
                     <Badge 
-                      backgroundColor={project.isActive ? 'green' : 'gray'}
+                      backgroundColor={
+                        (project.applicationDeadline && new Date(project.applicationDeadline) < new Date()) || !project.isActive ? 'gray' : 'green'
+                      }
                       color="white"
                     >
-                      {project.isActive ? 'Active' : 'Inactive'}
+                      {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' :
+                       project.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                     {project.applicationDeadline && (
                       <Text fontSize="0.8rem" color="gray">
@@ -332,7 +316,7 @@ const SearchPage = ({ user }) => {
                     <Text fontWeight="bold" fontSize="0.9rem">Skills Required:</Text>
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.skillsRequired.map((skill, index) => (
-                        <Badge key={index} backgroundColor="blue" color="white">
+                        <Badge key={index} backgroundColor="lightgray" color="white">
                           Skills: {skill}
                         </Badge>
                       ))}
@@ -345,7 +329,7 @@ const SearchPage = ({ user }) => {
                     <Text fontWeight="bold" fontSize="0.9rem">Research Tags:</Text>
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.tags.map((tag, index) => (
-                        <Badge key={index} backgroundColor="purple" color="white">
+                        <Badge key={index} backgroundColor="lightgray" color="white">
                           {tag}
                         </Badge>
                       ))}
@@ -365,16 +349,20 @@ const SearchPage = ({ user }) => {
                     )}
                   </Flex>
                   
-                  {user?.role === 'Student' && project.isActive && (
+                  {user?.role === 'Student' && (
                     <Button 
                       size="small" 
-                      variation="primary"
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
                       onClick={() => {
                         setSelectedProject(project);
                         setShowApplicationForm(true);
                       }}
+                      isDisabled={!project.isActive || (project.applicationDeadline && new Date(project.applicationDeadline) < new Date())}
                     >
-                      Apply Now
+                      {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' :
+                       !project.isActive ? 'Inactive' : 'Apply Now'}
                     </Button>
                   )}
                 </Flex>

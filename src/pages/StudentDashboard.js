@@ -334,18 +334,31 @@ const StudentDashboard = ({ user }) => {
                     
                     <Divider />
                     
-                    <Flex wrap="wrap" gap="0.5rem">
-                      {project.skillsRequired?.map((skill, index) => (
-                        <Card 
-                          key={index}
-                          backgroundColor="rgba(0, 0, 0, 0.05)"
-                          padding="0.25rem 0.5rem"
-                          borderRadius="1rem"
-                        >
-                          <Text fontSize="0.8rem">{skill}</Text>
-                        </Card>
-                      ))}
-                    </Flex>
+                    {project.skillsRequired && project.skillsRequired.length > 0 && (
+                      <Flex direction="column" gap="0.5rem">
+                        <Text fontWeight="bold" fontSize="0.9rem">Skills Required:</Text>
+                        <Flex wrap="wrap" gap="0.5rem">
+                          {project.skillsRequired.map((skill, index) => (
+                            <Badge key={index} backgroundColor="lightgray" color="white">
+                              Skills: {skill}
+                            </Badge>
+                          ))}
+                        </Flex>
+                      </Flex>
+                    )}
+                    
+                    {project.tags && project.tags.length > 0 && (
+                      <Flex direction="column" gap="0.5rem">
+                        <Text fontWeight="bold" fontSize="0.9rem">Research Tags:</Text>
+                        <Flex wrap="wrap" gap="0.5rem">
+                          {project.tags.map((tag, index) => (
+                            <Badge key={index} backgroundColor="lightgray" color="white">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </Flex>
+                      </Flex>
+                    )}
                     
                     <Divider />
                     
@@ -358,8 +371,9 @@ const StudentDashboard = ({ user }) => {
                           View Details
                         </Button>
                         <Button 
-                          backgroundColor="#552b9a"
-                          color="white"
+                          backgroundColor={hasApplied || isExpired || applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? "white" : "#552b9a"}
+                          color={hasApplied || isExpired || applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? "black" : "white"}
+                          border={hasApplied || isExpired || applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? "1px solid black" : "none"}
                           size="small" 
                           onClick={() => handleApply(project)}
                           isDisabled={hasApplied || isExpired || applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3}
@@ -491,14 +505,22 @@ const StudentDashboard = ({ user }) => {
                     <Text><strong>Skills Required:</strong></Text>
                     <Flex wrap="wrap" gap="0.5rem">
                       {selectedProject.skillsRequired.map((skill, index) => (
-                        <Card 
-                          key={index}
-                          backgroundColor="rgba(0, 0, 0, 0.05)"
-                          padding="0.25rem 0.5rem"
-                          borderRadius="1rem"
-                        >
-                          <Text fontSize="0.8rem">{skill}</Text>
-                        </Card>
+                        <Badge key={index} backgroundColor="lightgray" color="white">
+                          Skills: {skill}
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </>
+                )}
+                
+                {selectedProject.tags && selectedProject.tags.length > 0 && (
+                  <>
+                    <Text><strong>Research Tags:</strong></Text>
+                    <Flex wrap="wrap" gap="0.5rem">
+                      {selectedProject.tags.map((tag, index) => (
+                        <Badge key={index} backgroundColor="lightgray" color="white">
+                          {tag}
+                        </Badge>
                       ))}
                     </Flex>
                   </>
