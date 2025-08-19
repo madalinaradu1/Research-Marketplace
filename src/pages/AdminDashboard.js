@@ -245,7 +245,7 @@ const AdminDashboard = ({ user }) => {
                         <Badge 
                           backgroundColor={
                             application.status === 'Admin Review' ? 'orange' :
-                            application.status === 'Approved' ? 'green' : 'red'
+                            application.status === 'Approved' ? '#4caf50' : 'red'
                           }
                           color="white"
                         >

@@ -39,7 +39,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
       case 'Faculty Review':
         return tokens.colors.blue[60];
       case 'Approved':
-        return tokens.colors.green[60];
+        return '#4caf50';
       case 'Returned':
       case 'Rejected':
         return tokens.colors.red[60];

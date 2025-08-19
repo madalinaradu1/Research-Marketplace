@@ -25,7 +25,7 @@ const ApplicationStatusGuide = () => {
     {
       status: 'Approved',
       description: 'Congratulations! You have been selected by the faculty member for this research opportunity. The faculty member will contact you to begin the project.',
-      color: tokens.colors.green[60]
+      color: '#4caf50'
     },
     {
       status: 'Returned',

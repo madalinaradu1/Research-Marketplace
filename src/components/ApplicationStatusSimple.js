@@ -26,7 +26,7 @@ const ApplicationStatusSimple = ({ application, isStudent = true }) => {
       case 'Admin Review':
         return 'orange';
       case 'Approved':
-        return 'green';
+        return '#4caf50';
       case 'Returned':
       case 'Rejected':
         return 'red';

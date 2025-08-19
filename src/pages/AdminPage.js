@@ -220,7 +220,7 @@ const AdminPage = () => {
                 <Text fontSize="2rem" fontWeight="bold">{analytics.totalApplications}</Text>
                 <Flex gap="1rem" marginTop="0.5rem">
                   <Badge backgroundColor={tokens.colors.orange[60]} color="white">Pending: {analytics.pendingApplications}</Badge>
-                  <Badge backgroundColor={tokens.colors.green[60]} color="white">Approved: {analytics.approvedApplications}</Badge>
+                  <Badge backgroundColor="#4caf50" color="white">Approved: {analytics.approvedApplications}</Badge>
                 </Flex>
               </Card>
             </Flex>

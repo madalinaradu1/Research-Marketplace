@@ -466,7 +466,7 @@ const FacultyDashboard = ({ user }) => {
                           <Text fontWeight="bold">{project.title}</Text>
                           <Badge 
                             backgroundColor={
-                              project.projectStatus === 'Approved' ? tokens.colors.green[60] :
+                              project.projectStatus === 'Approved' ? '#4caf50' :
                               project.projectStatus === 'Returned' ? tokens.colors.yellow[60] :
                               project.projectStatus === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.neutral[60]
                             }
@@ -535,7 +535,7 @@ const FacultyDashboard = ({ user }) => {
                               <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
                               <Badge 
                                 backgroundColor={
-                                  application.status === 'Approved' ? tokens.colors.green[60] :
+                                  application.status === 'Approved' ? '#4caf50' :
                                   application.status === 'Returned' ? tokens.colors.yellow[60] :
                                   application.status === 'Rejected' ? tokens.colors.red[60] :
                                   application.status === 'Faculty Review' ? tokens.colors.blue[60] :
@@ -631,6 +631,7 @@ const FacultyDashboard = ({ user }) => {
                               <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
                               <Badge 
                                 backgroundColor={
+                                  application.status === 'Approved' ? '#4caf50' :
                                   application.status === 'Faculty Review' ? tokens.colors.blue[60] :
                                   application.status === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.orange[60]
                                 }

@@ -146,7 +146,7 @@ const ActivityPage = ({ user }) => {
                         <Badge 
                           backgroundColor={
                             application.status === 'Faculty Review' ? 'orange' :
-                            application.status === 'Approved' ? 'green' :
+                            application.status === 'Approved' ? '#4caf50' :
                             application.status === 'Rejected' ? 'red' : 'gray'
                           }
                           color="white"
