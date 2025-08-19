@@ -37,6 +37,7 @@ type Project @model @auth(rules: [{allow: groups, groups: ["Faculty", "Coordinat
   description: String!
   department: String
   skillsRequired: [String]
+  tags: [String] # Research tags like lab, field, geology, code, etc.
   qualifications: String # Required qualifications/courses
   duration: String
   applicationDeadline: AWSDateTime

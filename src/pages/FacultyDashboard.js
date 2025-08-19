@@ -41,6 +41,7 @@ const FacultyDashboard = ({ user }) => {
     description: '',
     department: user.department || '',
     skillsRequired: '',
+    tags: '',
     qualifications: '',
     duration: '',
     applicationDeadline: '',
@@ -181,12 +182,19 @@ const FacultyDashboard = ({ user }) => {
       const userId = currentUser.username;
       console.log('Current authenticated user ID:', userId);
       
-      // Convert skills string to array
+      // Convert skills and tags strings to arrays
       const skillsArray = projectForm.skillsRequired
         ? projectForm.skillsRequired
             .split(',')
             .map(skill => skill.trim())
             .filter(skill => skill)
+        : [];
+      
+      const tagsArray = projectForm.tags
+        ? projectForm.tags
+            .split(',')
+            .map(tag => tag.trim())
+            .filter(tag => tag)
         : [];
       
       // Format the date properly for GraphQL
@@ -204,6 +212,7 @@ const FacultyDashboard = ({ user }) => {
         description: projectForm.description,
         department: projectForm.department,
         skillsRequired: skillsArray,
+        tags: tagsArray,
         qualifications: projectForm.qualifications || null,
         duration: projectForm.duration || null,
         applicationDeadline: deadline,
@@ -302,6 +311,7 @@ const FacultyDashboard = ({ user }) => {
       description: project.description || '',
       department: project.department || '',
       skillsRequired: project.skillsRequired?.join(', ') || '',
+      tags: project.tags?.join(', ') || '',
       qualifications: project.qualifications || '',
       duration: project.duration || '',
       applicationDeadline: project.applicationDeadline ? new Date(project.applicationDeadline).toISOString().split('T')[0] : '',
@@ -868,6 +878,13 @@ const FacultyDashboard = ({ user }) => {
                     value={projectForm.skillsRequired}
                     onChange={handleSkillsChange}
                     placeholder="e.g. Python, Data Analysis, Machine Learning"
+                  />
+                  <TextField
+                    name="tags"
+                    label="Research Tags (comma-separated)"
+                    value={projectForm.tags}
+                    onChange={(e) => setProjectForm(prev => ({ ...prev, tags: e.target.value }))}
+                    placeholder="e.g. lab, field, geology, code, clinical"
                   />
                   <TextAreaField
                     name="qualifications"

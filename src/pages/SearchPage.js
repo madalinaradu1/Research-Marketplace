@@ -333,7 +333,20 @@ const SearchPage = ({ user }) => {
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.skillsRequired.map((skill, index) => (
                         <Badge key={index} backgroundColor="blue" color="white">
-                          {skill}
+                          Skills: {skill}
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </Flex>
+                )}
+                
+                {project.tags && project.tags.length > 0 && (
+                  <Flex direction="column" gap="0.5rem">
+                    <Text fontWeight="bold" fontSize="0.9rem">Research Tags:</Text>
+                    <Flex wrap="wrap" gap="0.5rem">
+                      {project.tags.map((tag, index) => (
+                        <Badge key={index} backgroundColor="purple" color="white">
+                          {tag}
                         </Badge>
                       ))}
                     </Flex>

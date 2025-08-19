@@ -109,6 +109,7 @@ type Project @model @auth(rules: [
   facultyId: ID! @index(name: "byFaculty")
   faculty: User @belongsTo(fields: ["facultyId"])
   status: ProjectStatus!
+  tags: [String]
   startDate: AWSDateTime!
   endDate: AWSDateTime
   files: [ProjectFile] @hasMany

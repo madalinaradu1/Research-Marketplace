@@ -100,6 +100,7 @@ export const listProjects = /* GraphQL */ `
         description
         department
         skillsRequired
+        tags
         qualifications
         duration
         applicationDeadline

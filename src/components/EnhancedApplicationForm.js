@@ -141,12 +141,22 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       <Flex direction="column" gap="1rem">
         <Heading level={3}>Apply to: {project.title}</Heading>
         
+        <Card variation="outlined" backgroundColor="#f8f9fa">
+          <Flex direction="column" gap="0.5rem">
+            <Text fontWeight="bold">Research Project Description:</Text>
+            <Text>{project.description}</Text>
+            {project.department && <Text><strong>Department:</strong> {project.department}</Text>}
+            {project.faculty?.name && <Text><strong>Faculty:</strong> {project.faculty.name}</Text>}
+            {project.duration && <Text><strong>Duration:</strong> {project.duration}</Text>}
+          </Flex>
+        </Card>
+        
         <Alert variation="info">
           <Text>
             <strong>Application Guidelines:</strong><br/>
             • You can apply for up to 3 projects total<br/>
             • Your statement should be around 450 words<br/>
-            • Address why you're interested and qualified<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;• Address why you're interested and qualified<br/>
             • Include relevant coursework (up to 10 courses)
           </Text>
         </Alert>
@@ -282,7 +292,7 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
               </Text>
               <input
                 type="file"
-                accept=".pdf,.doc,.docx,.txt"
+                accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
                 onChange={(e) => setUploadedFile(e.target.files[0])}
                 style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
               />
