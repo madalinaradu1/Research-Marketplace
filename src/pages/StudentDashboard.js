@@ -243,7 +243,6 @@ const StudentDashboard = ({ user }) => {
       </Flex>
       <Flex direction="column" padding="2rem" gap="2rem">
         <Heading level={2}>Student Dashboard</Heading>
-        <Text>Welcome, {user.name && user.name.trim() ? user.name : user.email?.split('@')[0]?.replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Student'}!</Text>
       
       {error && <Text color="red">{error}</Text>}
       
@@ -265,7 +264,7 @@ const StudentDashboard = ({ user }) => {
         <Card variation="elevated" flex="1">
           <Heading level={4}>Quick Links</Heading>
           <Flex direction="column" gap="0.5rem" marginTop="1rem">
-            <Button backgroundColor="#552b9a" color="white" onClick={() => navigate('/search')}>
+            <Button backgroundColor="white" color="black" border="1px solid black" onClick={() => navigate('/search')}>
               Browse Research Opportunities
             </Button>
             <Button onClick={() => setActiveTabIndex(1)}>
@@ -371,9 +370,9 @@ const StudentDashboard = ({ user }) => {
                           View Details
                         </Button>
                         <Button 
-                          backgroundColor={hasApplied || isExpired || applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? "white" : "#552b9a"}
-                          color={hasApplied || isExpired || applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? "black" : "white"}
-                          border={hasApplied || isExpired || applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? "1px solid black" : "none"}
+                          backgroundColor="white"
+                          color="black"
+                          border="1px solid black"
                           size="small" 
                           onClick={() => handleApply(project)}
                           isDisabled={hasApplied || isExpired || applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3}
@@ -397,8 +396,9 @@ const StudentDashboard = ({ user }) => {
             <Card>
               <Text>You haven't submitted any applications yet.</Text>
               <Button 
-                backgroundColor="#552b9a"
-                color="white"
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
                 onClick={() => setActiveTabIndex(0)}
                 marginTop="1rem"
               >
@@ -537,8 +537,9 @@ const StudentDashboard = ({ user }) => {
                 <Flex gap="1rem" marginTop="1rem">
                   <Button onClick={() => setSelectedProject(null)}>Close</Button>
                   <Button 
-                    backgroundColor="#552b9a"
-                    color="white"
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
                     onClick={() => handleApply(selectedProject)}
                     isDisabled={
                       applications.some(app => app.projectID === selectedProject.id && !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)) ||

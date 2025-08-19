@@ -760,7 +760,9 @@ const FacultyDashboard = ({ user }) => {
                     Cancel
                   </Button>
                   <Button 
-                    backgroundColor="#552b9a"
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
                     color="white"
                     isLoading={isSendingMessage}
                     onClick={async () => {

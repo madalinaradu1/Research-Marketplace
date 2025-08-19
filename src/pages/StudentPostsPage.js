@@ -476,7 +476,9 @@ const StudentPostsPage = ({ user }) => {
                     </Button>
                     <Button
                       type="submit"
-                      backgroundColor="#552b9a"
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
                       color="white"
                       isLoading={isSubmitting}
                     >

@@ -642,7 +642,9 @@ const MessagesPage = ({ user }) => {
                         setIsSendingNew(false);
                       }
                     }}
-                    backgroundColor="#552b9a"
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
                     color="white"
                     isLoading={isSendingNew}
                     isDisabled={!newMessage.recipient || !newMessage.subject || !newMessage.body}

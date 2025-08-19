@@ -65,3 +65,14 @@ button.amplify-button--primary {
 button.amplify-button--primary:hover {
   background-color: #7a3ab0;
 }
+
+/* Light purple hover effect for all buttons */
+button:hover:not(:disabled) {
+  background-color: #f3e5f5 !important;
+  transition: background-color 0.2s ease;
+}
+
+/* Preserve text color on hover */
+button:hover:not(:disabled) {
+  color: #7b1fa2 !important;
+}
