@@ -207,6 +207,7 @@ export const createProject = /* GraphQL */ `
       description
       department
       skillsRequired
+      tags
       qualifications
       duration
       applicationDeadline
@@ -268,6 +269,7 @@ export const updateProject = /* GraphQL */ `
       description
       department
       skillsRequired
+      tags
       qualifications
       duration
       applicationDeadline
@@ -329,6 +331,7 @@ export const deleteProject = /* GraphQL */ `
       description
       department
       skillsRequired
+      tags
       qualifications
       duration
       applicationDeadline
@@ -420,6 +423,7 @@ export const createApplication = /* GraphQL */ `
         description
         department
         skillsRequired
+        tags
         qualifications
         duration
         applicationDeadline
@@ -523,6 +527,7 @@ export const updateApplication = /* GraphQL */ `
         description
         department
         skillsRequired
+        tags
         qualifications
         duration
         applicationDeadline
@@ -626,6 +631,7 @@ export const deleteApplication = /* GraphQL */ `
         description
         department
         skillsRequired
+        tags
         qualifications
         duration
         applicationDeadline
@@ -876,6 +882,7 @@ export const createMessageBoard = /* GraphQL */ `
         description
         department
         skillsRequired
+        tags
         qualifications
         duration
         applicationDeadline
@@ -940,6 +947,7 @@ export const updateMessageBoard = /* GraphQL */ `
         description
         department
         skillsRequired
+        tags
         qualifications
         duration
         applicationDeadline
@@ -1004,6 +1012,7 @@ export const deleteMessageBoard = /* GraphQL */ `
         description
         department
         skillsRequired
+        tags
         qualifications
         duration
         applicationDeadline

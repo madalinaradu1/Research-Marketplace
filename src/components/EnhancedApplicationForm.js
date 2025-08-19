@@ -17,8 +17,31 @@ import { createApplication, updateUser, listApplications } from '../graphql/oper
 import { sendNewItemNotification } from '../utils/emailNotifications';
 
 const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
-  const [statement, setStatement] = useState('');
-  const [courses, setCourses] = useState([{ courseName: '', courseNumber: '', grade: '', semester: '', year: '' }]);
+  const cacheKey = `application_draft_${user.id || user.username}_${project.id}`;
+  
+  // Load cached data on component mount
+  const loadCachedData = () => {
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const data = JSON.parse(cached);
+        return {
+          statement: data.statement || '',
+          courses: data.courses || [{ courseName: '', courseNumber: '', grade: '', semester: '', year: '' }]
+        };
+      }
+    } catch (e) {
+      console.error('Error loading cached data:', e);
+    }
+    return {
+      statement: '',
+      courses: [{ courseName: '', courseNumber: '', grade: '', semester: '', year: '' }]
+    };
+  };
+  
+  const cachedData = loadCachedData();
+  const [statement, setStatement] = useState(cachedData.statement);
+  const [courses, setCourses] = useState(cachedData.courses);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -26,12 +49,16 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
 
   const addCourse = () => {
     if (courses.length < 10) {
-      setCourses([...courses, { courseName: '', courseNumber: '', grade: '', semester: '', year: '' }]);
+      const newCourses = [...courses, { courseName: '', courseNumber: '', grade: '', semester: '', year: '' }];
+      setCourses(newCourses);
+      saveToDraft(statement, newCourses);
     }
   };
 
   const removeCourse = (index) => {
-    setCourses(courses.filter((_, i) => i !== index));
+    const newCourses = courses.filter((_, i) => i !== index);
+    setCourses(newCourses);
+    saveToDraft(statement, newCourses);
   };
 
   const updateCourse = (index, field, value) => {
@@ -39,6 +66,30 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       i === index ? { ...course, [field]: value } : course
     );
     setCourses(updatedCourses);
+    saveToDraft(statement, updatedCourses);
+  };
+  
+  // Save form data to localStorage
+  const saveToDraft = (currentStatement, currentCourses) => {
+    try {
+      const draftData = {
+        statement: currentStatement,
+        courses: currentCourses,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(draftData));
+    } catch (e) {
+      console.error('Error saving draft:', e);
+    }
+  };
+  
+  // Clear draft after successful submission
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem(cacheKey);
+    } catch (e) {
+      console.error('Error clearing draft:', e);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -113,6 +164,9 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
 
       await API.graphql(graphqlOperation(createApplication, { input: applicationInput }));
       
+      // Clear draft after successful submission
+      clearDraft();
+      
       // Send notification to coordinator about new application
       try {
         await sendNewItemNotification(
@@ -157,7 +211,8 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
             • You can apply for up to 3 projects total<br/>
             • Your statement should be around 450 words<br/>
             &nbsp;&nbsp;&nbsp;&nbsp;• Address why you're interested and qualified<br/>
-            • Include relevant coursework (up to 10 courses)
+            • Include relevant coursework (up to 10 courses)<br/>
+            • Your progress is automatically saved as you type
           </Text>
         </Alert>
         
@@ -179,7 +234,10 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
             <TextAreaField
               label="Statement of Interest *"
               value={statement}
-              onChange={(e) => setStatement(e.target.value)}
+              onChange={(e) => {
+                setStatement(e.target.value);
+                saveToDraft(e.target.value, courses);
+              }}
               placeholder="Why are you interested in this project? Why are you qualified? What skills can you bring? What classes have you taken that relate? What do you hope to get out of this experience?"
               rows={10}
               required

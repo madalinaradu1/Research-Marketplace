@@ -109,6 +109,7 @@ export const getProject = /* GraphQL */ `
       description
       department
       skillsRequired
+      tags
       qualifications
       duration
       applicationDeadline
@@ -172,6 +173,7 @@ export const listProjects = /* GraphQL */ `
         description
         department
         skillsRequired
+        tags
         qualifications
         duration
         applicationDeadline
@@ -212,6 +214,7 @@ export const projectsByFacultyID = /* GraphQL */ `
         description
         department
         skillsRequired
+        tags
         qualifications
         duration
         applicationDeadline
@@ -269,6 +272,7 @@ export const getApplication = /* GraphQL */ `
         description
         department
         skillsRequired
+        tags
         qualifications
         duration
         applicationDeadline
@@ -614,6 +618,7 @@ export const getMessageBoard = /* GraphQL */ `
         description
         department
         skillsRequired
+        tags
         qualifications
         duration
         applicationDeadline
