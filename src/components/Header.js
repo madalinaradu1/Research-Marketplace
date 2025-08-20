@@ -41,6 +41,7 @@ const Header = ({ user, signOut }) => {
   }} = useTheme() || {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Check if the current path matches the given path
   const isActive = (path) => {
@@ -97,15 +98,51 @@ const Header = ({ user, signOut }) => {
   }, [location.pathname]);
 
   return (
-    <Flex
-      as="header"
-      direction="column"
-      backgroundColor="#552b9a"
-      boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
-      position="sticky"
-      top="0"
-      style={{ zIndex: 100 }}
-    >
+    <>
+      <style>
+        {`
+          .header-search-field input {
+            color: white !important;
+            border: 1px solid white !important;
+          }
+          .header-search-field input::placeholder {
+            color: white !important;
+            opacity: 0.8;
+          }
+          .header-search-field input:focus {
+            border: 1px solid white !important;
+            outline: none !important;
+            box-shadow: none !important;
+          }
+          .header-search-field button {
+            background-color: white !important;
+            color: gray !important;
+          }
+          .header-search-field button:hover {
+            background-color: white !important;
+            color: gray !important;
+            outline: none !important;
+            box-shadow: none !important;
+          }
+          .header-search-field button:focus {
+            outline: none !important;
+            box-shadow: none !important;
+          }
+          .header-search-field svg {
+            fill: gray !important;
+            stroke: gray !important;
+          }
+        `}
+      </style>
+      <Flex
+        as="header"
+        direction="column"
+        backgroundColor="#552b9a"
+        boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
+        position="sticky"
+        top="0"
+        style={{ zIndex: 100 }}
+      >
       {/* Top banner with logo and title */}
       <Flex
         direction="row"
@@ -115,7 +152,7 @@ const Header = ({ user, signOut }) => {
         gap={tokens.space.small}
         minHeight="20px"
       >
-        <Link to="/dashboard" style={{ textDecoration: 'none', position: 'relative', zIndex: 10 }}>
+        <Link to="/dashboard" style={{ textDecoration: 'none', position: 'relative', zIndex: 10, outline: 'none' }}>
           <Flex direction="row" alignItems="flex-end" gap={tokens.space.small}>
             <Image
               alt="GCU Logo"
@@ -233,24 +270,59 @@ const Header = ({ user, signOut }) => {
         )}
 
 
-        <Image
-          alt="Search Icon"
-          src="/Search Icon.png"
-          height="48px"
-          width="48px"
-          objectFit="contain"
-          onClick={() => navigate('/search')}
-          style={{ cursor: 'pointer' }}
+        <SearchField
+          placeholder="Search research opportunities..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+            }
+          }}
+          onSubmit={() => navigate(`/search?q=${encodeURIComponent(searchTerm)}`)}
+          width="300px"
+          size="small"
+          style={{
+            '--amplify-components-field-border-color': 'white',
+            '--amplify-components-field-color': 'white',
+            '--amplify-components-field-background-color': 'transparent',
+            '--amplify-components-field-focus-border-color': 'white',
+            '--amplify-components-field-focus-box-shadow': 'none',
+            '--amplify-components-searchfield-button-color': 'white',
+            '--amplify-components-button-color': 'white',
+            '--amplify-components-button-primary-color': 'white',
+            color: 'white',
+            border: '1px solid white',
+            outline: 'none'
+          }}
+          className="header-search-field"
         />
         <Button 
           onClick={handleSignOut} 
           backgroundColor="white" 
           color="#552b9a"
+          size="small"
           style={{
-            transition: 'transform 0.2s ease'
+            transition: 'transform 0.2s ease',
+            outline: 'none',
+            boxShadow: 'none'
           }}
-          onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+          onMouseEnter={(e) => {
+            e.target.style.transform = 'scale(1.05)';
+            e.target.style.backgroundColor = 'white';
+            e.target.style.outline = 'none';
+            e.target.style.boxShadow = 'none';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = 'scale(1)';
+            e.target.style.backgroundColor = 'white';
+            e.target.style.outline = 'none';
+            e.target.style.boxShadow = 'none';
+          }}
+          onFocus={(e) => {
+            e.target.style.outline = 'none';
+            e.target.style.boxShadow = 'none';
+          }}
         >
           Sign Out
         </Button>
@@ -288,7 +360,8 @@ const Header = ({ user, signOut }) => {
           </View>
         </Menu>
       </View>
-    </Flex>
+      </Flex>
+    </>
   );
 };
 

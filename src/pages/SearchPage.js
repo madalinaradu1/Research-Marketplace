@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation } from 'aws-amplify';
+import { useSearchParams } from 'react-router-dom';
 import {
   Flex,
   Heading,
@@ -19,13 +20,13 @@ import { listProjects, listUsers } from '../graphql/operations';
 import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 
 const SearchPage = ({ user }) => {
+  const [searchParams] = useSearchParams();
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedDuration, setSelectedDuration] = useState('');
-  const [selectedTag, setSelectedTag] = useState('');
 
   const [showAvailableOnly, setShowAvailableOnly] = useState(true);
   const [sortBy, setSortBy] = useState('newest');
@@ -59,10 +60,17 @@ const SearchPage = ({ user }) => {
   useEffect(() => {
     fetchProjects();
   }, []);
+  
+  useEffect(() => {
+    const queryTerm = searchParams.get('q');
+    if (queryTerm) {
+      setSearchTerm(queryTerm);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     applyFilters();
-  }, [projects, searchTerm, selectedDepartment, selectedDuration, selectedTag, showAvailableOnly, sortBy]);
+  }, [projects, searchTerm, selectedDepartment, selectedDuration, showAvailableOnly, sortBy]);
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -106,7 +114,8 @@ const SearchPage = ({ user }) => {
         project.description.toLowerCase().includes(term) ||
         project.department?.toLowerCase().includes(term) ||
         project.faculty?.name?.toLowerCase().includes(term) ||
-        project.skillsRequired?.some(skill => skill.toLowerCase().includes(term))
+        project.skillsRequired?.some(skill => skill.toLowerCase().includes(term)) ||
+        project.tags?.some(tag => tag.toLowerCase().includes(term))
       );
     }
 
@@ -118,13 +127,6 @@ const SearchPage = ({ user }) => {
     // Duration filter
     if (selectedDuration) {
       filtered = filtered.filter(project => project.duration === selectedDuration);
-    }
-
-    // Research tags filter
-    if (selectedTag) {
-      filtered = filtered.filter(project => 
-        project.tags && project.tags.some(tag => tag.toLowerCase().includes(selectedTag.toLowerCase()))
-      );
     }
 
     // Only show approved projects
@@ -178,7 +180,6 @@ const SearchPage = ({ user }) => {
     setSearchTerm('');
     setSelectedDepartment('');
     setSelectedDuration('');
-    setSelectedTag('');
 
     setShowAvailableOnly(true);
     setSortBy('newest');
@@ -202,7 +203,7 @@ const SearchPage = ({ user }) => {
           {/* Search Bar */}
           <SearchField
             label="Search"
-            placeholder="Search by title, description, department, faculty, or skills..."
+            placeholder="Search by title, description, department, faculty, skills, or research tags..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -232,14 +233,6 @@ const SearchPage = ({ user }) => {
                 <option key={duration} value={duration}>{duration}</option>
               ))}
             </SelectField>
-            
-            <SearchField
-              label="Research Tags"
-              placeholder="Filter by research tags..."
-              value={selectedTag}
-              onChange={(e) => setSelectedTag(e.target.value)}
-              width="200px"
-            />
             
             <SelectField
               label="Sort By"
