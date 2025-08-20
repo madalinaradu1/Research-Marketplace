@@ -36,18 +36,44 @@ const FacultyDashboard = ({ user }) => {
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [viewingApplicationsForProject, setViewingApplicationsForProject] = useState(null);
-  const [projectForm, setProjectForm] = useState({
-    title: '',
-    description: '',
-    department: user.department || '',
-    skillsRequired: '',
-    tags: '',
-    qualifications: '',
-    duration: '',
-    applicationDeadline: '',
-    requiresTranscript: false,
-    isActive: true
-  });
+  // Load cached project data on component mount
+  const loadCachedProjectData = () => {
+    try {
+      const cacheKey = `project_draft_${user.id || user.username}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const data = JSON.parse(cached);
+        return {
+          title: data.title || '',
+          description: data.description || '',
+          department: data.department || user.department || '',
+          skillsRequired: data.skillsRequired || '',
+          tags: data.tags || '',
+          qualifications: data.qualifications || '',
+          duration: data.duration || '',
+          applicationDeadline: data.applicationDeadline || '',
+          requiresTranscript: data.requiresTranscript || false,
+          isActive: data.isActive !== undefined ? data.isActive : true
+        };
+      }
+    } catch (e) {
+      console.error('Error loading cached project data:', e);
+    }
+    return {
+      title: '',
+      description: '',
+      department: user.department || '',
+      skillsRequired: '',
+      tags: '',
+      qualifications: '',
+      duration: '',
+      applicationDeadline: '',
+      requiresTranscript: false,
+      isActive: true
+    };
+  };
+  
+  const [projectForm, setProjectForm] = useState(loadCachedProjectData());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnseenApplications, setHasUnseenApplications] = useState(false);
   const [messagingStudent, setMessagingStudent] = useState(null);
@@ -158,16 +184,44 @@ const FacultyDashboard = ({ user }) => {
     await fetchData();
   };
   
+  // Save project form data to localStorage
+  const saveProjectToDraft = (formData) => {
+    try {
+      const cacheKey = `project_draft_${user.id || user.username}`;
+      const draftData = {
+        ...formData,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(draftData));
+    } catch (e) {
+      console.error('Error saving project draft:', e);
+    }
+  };
+  
+  // Clear project draft after successful submission
+  const clearProjectDraft = () => {
+    try {
+      const cacheKey = `project_draft_${user.id || user.username}`;
+      localStorage.removeItem(cacheKey);
+    } catch (e) {
+      console.error('Error clearing project draft:', e);
+    }
+  };
+  
   const handleProjectFormChange = (e) => {
     const { name, value } = e.target;
-    setProjectForm(prev => ({ ...prev, [name]: value }));
+    const newForm = { ...projectForm, [name]: value };
+    setProjectForm(newForm);
+    saveProjectToDraft(newForm);
   };
   
   const handleSkillsChange = (e) => {
-    setProjectForm(prev => ({ 
-      ...prev, 
+    const newForm = { 
+      ...projectForm, 
       skillsRequired: e.target.value 
-    }));
+    };
+    setProjectForm(newForm);
+    saveProjectToDraft(newForm);
   };
   
   const handleSubmitProject = async (e) => {
@@ -289,6 +343,9 @@ const FacultyDashboard = ({ user }) => {
         requiresTranscript: false,
         isActive: true
       });
+      
+      // Clear draft after successful submission
+      clearProjectDraft();
       
       fetchData();
     } catch (err) {
@@ -421,17 +478,20 @@ const FacultyDashboard = ({ user }) => {
           onClick={() => {
             setIsCreatingProject(true);
             setSelectedProject(null);
-            setProjectForm({
+            const newForm = {
               title: '',
               description: '',
               department: user.department || '',
               skillsRequired: '',
+              tags: '',
               qualifications: '',
               duration: '',
               applicationDeadline: '',
               requiresTranscript: false,
               isActive: true
-            });
+            };
+            setProjectForm(newForm);
+            saveProjectToDraft(newForm);
           }}
         >
           + Create Project
@@ -886,7 +946,11 @@ const FacultyDashboard = ({ user }) => {
                     name="tags"
                     label="Research Tags (comma-separated)"
                     value={projectForm.tags}
-                    onChange={(e) => setProjectForm(prev => ({ ...prev, tags: e.target.value }))}
+                    onChange={(e) => {
+                      const newForm = { ...projectForm, tags: e.target.value };
+                      setProjectForm(newForm);
+                      saveProjectToDraft(newForm);
+                    }}
                     placeholder="e.g. lab, field, geology, code, clinical"
                   />
                   <TextAreaField
