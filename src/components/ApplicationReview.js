@@ -16,7 +16,7 @@ import {
 import { updateApplication, updateProject } from '../graphql/operations';
 import { sendStatusChangeNotification } from '../utils/emailNotifications';
 
-const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourses = false }) => {
+const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourses = false, hideStatusUpdate = false }) => {
   const [notes, setNotes] = useState('');
   const [statusUpdate, setStatusUpdate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -119,7 +119,7 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
           { value: 'Returned', label: 'Return to Student' },
           { value: 'Rejected', label: 'Reject Application' }
         ];
-      } else if (application.status === 'Approved') {
+      } else if (application.status === 'Approved' && !application.isSelected) {
         return [
           { value: 'Approved', label: 'Select Student' }
         ];
@@ -276,7 +276,7 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
           </Flex>
         )}
         
-        {statusOptions.length > 0 && (
+        {statusOptions.length > 0 && !hideStatusUpdate && (
           <Card variation="outlined">
             <Flex direction="column" gap="1rem">
               <Text fontWeight="bold">Update Application Status</Text>

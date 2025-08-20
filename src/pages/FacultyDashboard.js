@@ -35,6 +35,7 @@ const FacultyDashboard = ({ user }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [isEditingProject, setIsEditingProject] = useState(false);
   const [viewingApplicationsForProject, setViewingApplicationsForProject] = useState(null);
   // Load cached project data on component mount
   const loadCachedProjectData = () => {
@@ -399,6 +400,8 @@ const FacultyDashboard = ({ user }) => {
       };
     };
     
+    setSelectedProject(project);
+    setIsEditingProject(true);
     setProjectForm(loadCachedEditData());
     setIsCreatingProject(true);
     setActiveTabIndex(0);
@@ -569,7 +572,10 @@ const FacultyDashboard = ({ user }) => {
                               backgroundColor="white"
                               color="black"
                               border="1px solid black"
-                              onClick={() => setSelectedProject(project)}
+                              onClick={() => {
+                                setSelectedProject(project);
+                                setIsEditingProject(false);
+                              }}
                             >
                               View Details
                             </Button>
@@ -875,6 +881,7 @@ const FacultyDashboard = ({ user }) => {
                   handleApplicationUpdate();
                   setReviewingApplication(null);
                 }}
+                hideStatusUpdate={true}
               />
               <Button 
                 onClick={() => setReviewingApplication(null)}
@@ -1101,6 +1108,7 @@ const FacultyDashboard = ({ user }) => {
                       onClick={() => {
                         setIsCreatingProject(false);
                         setSelectedProject(null);
+                        setIsEditingProject(false);
                         setViewingReturnReason(null);
                       }} 
                       backgroundColor="white"
@@ -1281,7 +1289,7 @@ const FacultyDashboard = ({ user }) => {
       )}
       
       {/* Project Details Modal */}
-      {selectedProject && !isCreatingProject && !viewingReturnReason && (
+      {selectedProject && !isCreatingProject && !isEditingProject && !viewingReturnReason && (
         <View
           position="fixed"
           top="0"
