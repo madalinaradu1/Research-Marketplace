@@ -97,6 +97,13 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
     setIsSubmitting(true);
     setError(null);
 
+    // Validate required fields
+    if (!statement || statement.trim() === '') {
+      setError('Please fill out the required Statement of Interest field.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       // Check application limit by counting current applications
       const currentApplications = await API.graphql(graphqlOperation(listApplications, { 

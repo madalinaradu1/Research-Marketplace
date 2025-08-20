@@ -231,6 +231,24 @@ const FacultyDashboard = ({ user }) => {
     setError(null);
     setSuccessMessage(null);
     
+    // Validate required fields
+    const requiredFields = {
+      'Project Title': projectForm.title,
+      'Project Description': projectForm.description,
+      'Department': projectForm.department,
+      'Application Deadline': projectForm.applicationDeadline
+    };
+    
+    const missingFields = Object.entries(requiredFields)
+      .filter(([field, value]) => !value || value.trim() === '')
+      .map(([field]) => field);
+    
+    if (missingFields.length > 0) {
+      setError(`Please fill out all required fields: ${missingFields.join(', ')}`);
+      setIsSubmitting(false);
+      return;
+    }
+    
     try {
       // Get current authenticated user to ensure we have the correct ID
       const currentUser = await Auth.currentAuthenticatedUser();
@@ -513,18 +531,46 @@ const FacultyDashboard = ({ user }) => {
           onClick={() => {
             setIsCreatingProject(true);
             setSelectedProject(null);
-            const newForm = {
-              title: '',
-              description: '',
-              department: user.department || '',
-              skillsRequired: '',
-              tags: '',
-              qualifications: '',
-              duration: '',
-              applicationDeadline: '',
-              requiresTranscript: false,
-              isActive: true
+            setIsEditingProject(false);
+            
+            // Load cached draft data if available
+            const loadCachedDraftData = () => {
+              try {
+                const cacheKey = `project_draft_${user.id || user.username}`;
+                const cached = localStorage.getItem(cacheKey);
+                if (cached) {
+                  const data = JSON.parse(cached);
+                  return {
+                    title: data.title || '',
+                    description: data.description || '',
+                    department: data.department || user.department || '',
+                    skillsRequired: data.skillsRequired || '',
+                    tags: data.tags || '',
+                    qualifications: data.qualifications || '',
+                    duration: data.duration || '',
+                    applicationDeadline: data.applicationDeadline || '',
+                    requiresTranscript: data.requiresTranscript || false,
+                    isActive: data.isActive !== undefined ? data.isActive : true
+                  };
+                }
+              } catch (e) {
+                console.error('Error loading cached draft data:', e);
+              }
+              return {
+                title: '',
+                description: '',
+                department: user.department || '',
+                skillsRequired: '',
+                tags: '',
+                qualifications: '',
+                duration: '',
+                applicationDeadline: '',
+                requiresTranscript: false,
+                isActive: true
+              };
             };
+            
+            const newForm = loadCachedDraftData();
             setProjectForm(newForm);
             saveProjectToDraft(newForm);
           }}
