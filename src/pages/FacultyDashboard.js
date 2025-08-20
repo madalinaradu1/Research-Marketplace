@@ -187,7 +187,7 @@ const FacultyDashboard = ({ user }) => {
   // Save project form data to localStorage
   const saveProjectToDraft = (formData) => {
     try {
-      const cacheKey = `project_draft_${user.id || user.username}`;
+      const cacheKey = selectedProject ? `project_edit_${selectedProject.id}` : `project_draft_${user.id || user.username}`;
       const draftData = {
         ...formData,
         timestamp: new Date().toISOString()
@@ -201,7 +201,7 @@ const FacultyDashboard = ({ user }) => {
   // Clear project draft after successful submission
   const clearProjectDraft = () => {
     try {
-      const cacheKey = `project_draft_${user.id || user.username}`;
+      const cacheKey = selectedProject ? `project_edit_${selectedProject.id}` : `project_draft_${user.id || user.username}`;
       localStorage.removeItem(cacheKey);
     } catch (e) {
       console.error('Error clearing project draft:', e);
@@ -362,19 +362,44 @@ const FacultyDashboard = ({ user }) => {
   };
   
   const editProject = (project) => {
-    setSelectedProject(project);
-    setProjectForm({
-      title: project.title || '',
-      description: project.description || '',
-      department: project.department || '',
-      skillsRequired: project.skillsRequired?.join(', ') || '',
-      tags: project.tags?.join(', ') || '',
-      qualifications: project.qualifications || '',
-      duration: project.duration || '',
-      applicationDeadline: project.applicationDeadline ? new Date(project.applicationDeadline).toISOString().split('T')[0] : '',
-      requiresTranscript: project.requiresTranscript || false,
-      isActive: project.isActive !== undefined ? project.isActive : true
-    });
+    // Load cached edit data if available
+    const loadCachedEditData = () => {
+      try {
+        const cacheKey = `project_edit_${project.id}`;
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const data = JSON.parse(cached);
+          return {
+            title: data.title || project.title || '',
+            description: data.description || project.description || '',
+            department: data.department || project.department || '',
+            skillsRequired: data.skillsRequired || (project.skillsRequired?.join(', ')) || '',
+            tags: data.tags || (project.tags?.join(', ')) || '',
+            qualifications: data.qualifications || project.qualifications || '',
+            duration: data.duration || project.duration || '',
+            applicationDeadline: data.applicationDeadline || (project.applicationDeadline ? new Date(project.applicationDeadline).toISOString().split('T')[0] : ''),
+            requiresTranscript: data.requiresTranscript !== undefined ? data.requiresTranscript : (project.requiresTranscript || false),
+            isActive: data.isActive !== undefined ? data.isActive : (project.isActive !== undefined ? project.isActive : true)
+          };
+        }
+      } catch (e) {
+        console.error('Error loading cached edit data:', e);
+      }
+      return {
+        title: project.title || '',
+        description: project.description || '',
+        department: project.department || '',
+        skillsRequired: project.skillsRequired?.join(', ') || '',
+        tags: project.tags?.join(', ') || '',
+        qualifications: project.qualifications || '',
+        duration: project.duration || '',
+        applicationDeadline: project.applicationDeadline ? new Date(project.applicationDeadline).toISOString().split('T')[0] : '',
+        requiresTranscript: project.requiresTranscript || false,
+        isActive: project.isActive !== undefined ? project.isActive : true
+      };
+    };
+    
+    setProjectForm(loadCachedEditData());
     setIsCreatingProject(true);
     setActiveTabIndex(0);
   };
@@ -539,17 +564,15 @@ const FacultyDashboard = ({ user }) => {
                         <Flex justifyContent="space-between" alignItems="center">
                           <Text fontSize="0.9rem">{project.department} • Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not set'}</Text>
                           <Flex gap="0.5rem">
-                            {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() && (
-                              <Button 
-                                size="small" 
-                                backgroundColor="white"
-                                color="black"
-                                border="1px solid black"
-                                onClick={() => setSelectedProject(project)}
-                              >
-                                View Details
-                              </Button>
-                            )}
+                            <Button 
+                              size="small" 
+                              backgroundColor="white"
+                              color="black"
+                              border="1px solid black"
+                              onClick={() => setSelectedProject(project)}
+                            >
+                              View Details
+                            </Button>
                             {project.projectStatus === 'Returned' ? (
                               <Button size="small" onClick={() => {
                                 editProject(project);
@@ -1076,7 +1099,11 @@ const FacultyDashboard = ({ user }) => {
                   </SelectField>
                   <Flex gap="0.5rem">
                     <Button 
-                      onClick={() => setIsCreatingProject(false)} 
+                      onClick={() => {
+                        setIsCreatingProject(false);
+                        setSelectedProject(null);
+                        setViewingReturnReason(null);
+                      }} 
                       backgroundColor="white"
                       color="black"
                       border="1px solid black"
@@ -1264,7 +1291,10 @@ const FacultyDashboard = ({ user }) => {
           height="100vh"
           backgroundColor="rgba(0, 0, 0, 0.5)"
           style={{ zIndex: 1000 }}
-          onClick={() => setSelectedProject(null)}
+          onClick={() => {
+            setSelectedProject(null);
+            setViewingReturnReason(null);
+          }}
         >
           <Flex
             justifyContent="center"
@@ -1273,9 +1303,9 @@ const FacultyDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="600px"
+              maxWidth="800px"
               width="100%"
-              maxHeight="80vh"
+              maxHeight="90vh"
               style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -1328,7 +1358,10 @@ const FacultyDashboard = ({ user }) => {
                 
                 <Flex gap="1rem" marginTop="1rem">
                   <Button 
-                    onClick={() => setSelectedProject(null)}
+                    onClick={() => {
+                      setSelectedProject(null);
+                      setViewingReturnReason(null);
+                    }}
                     backgroundColor="white"
                     color="black"
                     border="1px solid black"
