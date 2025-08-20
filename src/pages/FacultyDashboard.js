@@ -526,30 +526,61 @@ const FacultyDashboard = ({ user }) => {
                           <Text fontWeight="bold">{project.title}</Text>
                           <Badge 
                             backgroundColor={
+                              project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'gray' :
                               project.projectStatus === 'Approved' ? '#4caf50' :
                               project.projectStatus === 'Returned' ? tokens.colors.yellow[60] :
                               project.projectStatus === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.neutral[60]
                             }
                             color="white"
                           >
-                            {project.projectStatus || 'Draft'}
+                            {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : (project.projectStatus || 'Draft')}
                           </Badge>
                         </Flex>
                         <Flex justifyContent="space-between" alignItems="center">
                           <Text fontSize="0.9rem">{project.department} • Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not set'}</Text>
                           <Flex gap="0.5rem">
+                            {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() && (
+                              <Button 
+                                size="small" 
+                                backgroundColor="white"
+                                color="black"
+                                border="1px solid black"
+                                onClick={() => setSelectedProject(project)}
+                              >
+                                View Details
+                              </Button>
+                            )}
                             {project.projectStatus === 'Returned' ? (
                               <Button size="small" onClick={() => {
                                 editProject(project);
                                 setViewingReturnReason(project);
                               }}>Fix & Resubmit</Button>
                             ) : (
-                              <Button size="small" onClick={() => editProject(project)}>Edit</Button>
+                              <Button 
+                                size="small" 
+                                backgroundColor="white"
+                                color="black"
+                                border="1px solid black"
+                                onClick={() => editProject(project)}
+                                isDisabled={project.applicationDeadline && new Date(project.applicationDeadline) < new Date()}
+                              >
+                                {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : 'Edit'}
+                              </Button>
                             )}
-                            <Button size="small" onClick={() => {
-                              setViewingApplicationsForProject(project);
-                              setActiveTabIndex(1);
-                            }}>Applications</Button>
+                            {!(project.applicationDeadline && new Date(project.applicationDeadline) < new Date()) && (
+                              <Button 
+                                size="small" 
+                                backgroundColor="white"
+                                color="black"
+                                border="1px solid black"
+                                onClick={() => {
+                                  setViewingApplicationsForProject(project);
+                                  setActiveTabIndex(1);
+                                }}
+                              >
+                                Applications ({applications.filter(app => app.projectID === project.id).length})
+                              </Button>
+                            )}
                           </Flex>
                         </Flex>
                       </Flex>
@@ -564,28 +595,91 @@ const FacultyDashboard = ({ user }) => {
 
         
         <TabItem title="All Applications">
-          {getProcessedApplications().length === 0 ? (
+          {viewingApplicationsForProject ? (
+            // Show applications for specific project
             <Card>
-              <Text>No processed applications yet.</Text>
+              <Heading level={4} marginBottom="1rem">{viewingApplicationsForProject.title}</Heading>
+              {applications.filter(app => app.projectID === viewingApplicationsForProject.id).length === 0 ? (
+                <Text>No applications submitted for this project yet.</Text>
+              ) : (
+                <>
+                  <Divider margin="1rem 0" />
+                  <Collection
+                    items={applications.filter(app => app.projectID === viewingApplicationsForProject.id).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
+                    type="list"
+                    gap="1rem"
+                    wrap="nowrap"
+                    direction="column"
+                  >
+                    {(application) => (
+                      <Card key={application.id}>
+                        <Flex justifyContent="space-between" alignItems="center">
+                          <Flex direction="row" gap="2rem" alignItems="center" flex="1">
+                            <Text fontWeight="bold" width="180px">{application.student?.name || 'Unknown Student'}</Text>
+                            <Text fontSize="0.9rem" width="220px">{application.student?.email}</Text>
+                            <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
+                            <Badge 
+                              backgroundColor={
+                                application.status === 'Approved' ? '#4caf50' :
+                                application.status === 'Returned' ? tokens.colors.yellow[60] :
+                                application.status === 'Rejected' ? tokens.colors.red[60] :
+                                application.status === 'Faculty Review' ? tokens.colors.blue[60] :
+                                application.status === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.neutral[60]
+                              }
+                              color="white"
+                            >
+                              {application.status}{application.isSelected ? ' (Selected)' : ''}
+                            </Badge>
+                          </Flex>
+                          
+                          <Flex gap="1rem" alignItems="center">
+                            <Button 
+                              size="small"
+                              onClick={() => setReviewingApplication(application)}
+                            >
+                              View Details
+                            </Button>
+                            
+                            {application.status === 'Approved' && (
+                              <Button 
+                                size="small"
+                                onClick={() => setMessagingStudent({ application, student: application.student })}
+                              >
+                                Message
+                              </Button>
+                            )}
+                          </Flex>
+                        </Flex>
+                      </Card>
+                    )}
+                  </Collection>
+                </>
+              )}
             </Card>
           ) : (
-            <Flex direction="column" gap="2rem">
-              {projects.map(project => {
-                const projectApplications = getProcessedApplications().filter(app => app.projectID === project.id);
-                if (projectApplications.length === 0) return null;
-                
-                return (
-                  <Card key={project.id}>
-                    <Heading level={4}>{project.title}</Heading>
-                    <Text>Department: {project.department}</Text>
-                    <Divider margin="1rem 0" />
-                    <Collection
-                      items={projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
-                      type="list"
-                      gap="1rem"
-                      wrap="nowrap"
-                      direction="column"
-                    >
+            // Show all applications grouped by project
+            getProcessedApplications().length === 0 ? (
+              <Card>
+                <Text>No processed applications yet.</Text>
+              </Card>
+            ) : (
+              <Flex direction="column" gap="2rem">
+                {projects.map(project => {
+                  const projectApplications = getProcessedApplications().filter(app => app.projectID === project.id);
+                  if (projectApplications.length === 0) return null;
+                  
+                  return (
+                    <Card key={project.id}>
+                      <Heading level={4}>{project.title}</Heading>
+                      <Text>Department: {project.department}</Text>
+                      <Divider margin="1rem 0" />
+                      <Collection
+                        items={projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
+                        type="list"
+                        gap="1rem"
+                        wrap="nowrap"
+                        direction="column"
+                      >
                       {(application) => (
                         <Card key={application.id}>
                           <Flex justifyContent="space-between" alignItems="center">
@@ -629,9 +723,10 @@ const FacultyDashboard = ({ user }) => {
                       )}
                     </Collection>
                   </Card>
-                );
-              })}
-            </Flex>
+                  );
+                })}
+              </Flex>
+            )
           )}
         </TabItem>
         
@@ -673,7 +768,6 @@ const FacultyDashboard = ({ user }) => {
                 return (
                   <Card key={project.id}>
                     <Heading level={4}>{project.title}</Heading>
-                    <Text>Department: {project.department}</Text>
                     <Divider margin="1rem 0" />
                     <Collection
                       items={projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
@@ -1155,6 +1249,104 @@ const FacultyDashboard = ({ user }) => {
                   </Flex>
                 </Flex>
               </form>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* Project Details Modal */}
+      {selectedProject && !isCreatingProject && !viewingReturnReason && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setSelectedProject(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="600px"
+              width="100%"
+              maxHeight="80vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Heading level={3}>{selectedProject.title}</Heading>
+              <Divider margin="1rem 0" />
+              
+              <Flex direction="column" gap="1rem">
+                <Text><strong>Department:</strong> {selectedProject.department}</Text>
+                <Text><strong>Description:</strong> {selectedProject.description}</Text>
+                
+                {selectedProject.qualifications && (
+                  <Text><strong>Required Qualifications/Prerequisites:</strong> {selectedProject.qualifications}</Text>
+                )}
+                
+                {selectedProject.skillsRequired && selectedProject.skillsRequired.length > 0 && (
+                  <>
+                    <Text><strong>Skills Required:</strong></Text>
+                    <Flex wrap="wrap" gap="0.5rem">
+                      {selectedProject.skillsRequired.map((skill, index) => (
+                        <Badge key={index} backgroundColor="lightgray" color="white">
+                          Skills: {skill}
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </>
+                )}
+                
+                {selectedProject.tags && selectedProject.tags.length > 0 && (
+                  <>
+                    <Text><strong>Research Tags:</strong></Text>
+                    <Flex wrap="wrap" gap="0.5rem">
+                      {selectedProject.tags.map((tag, index) => (
+                        <Badge key={index} backgroundColor="lightgray" color="white">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </>
+                )}
+                
+                {selectedProject.duration && (
+                  <Text><strong>Duration:</strong> {selectedProject.duration}</Text>
+                )}
+                
+                <Text><strong>Application Deadline:</strong> {selectedProject.applicationDeadline ? new Date(selectedProject.applicationDeadline).toLocaleDateString() : 'Not specified'}</Text>
+                
+                <Text><strong>Requires Transcript Upload:</strong> {selectedProject.requiresTranscript ? 'Yes' : 'No'}</Text>
+                
+                <Text><strong>Status:</strong> {selectedProject.projectStatus || 'Draft'}</Text>
+                
+                <Flex gap="1rem" marginTop="1rem">
+                  <Button 
+                    onClick={() => setSelectedProject(null)}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Close
+                  </Button>
+                  {selectedProject.applicationDeadline && new Date(selectedProject.applicationDeadline) < new Date() && (
+                    <Button 
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                      isDisabled={true}
+                    >
+                      Expired
+                    </Button>
+                  )}
+                </Flex>
+              </Flex>
             </Card>
           </Flex>
         </View>

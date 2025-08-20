@@ -195,16 +195,6 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       <Flex direction="column" gap="1rem">
         <Heading level={3}>Apply to: {project.title}</Heading>
         
-        <Card variation="outlined" backgroundColor="#f8f9fa">
-          <Flex direction="column" gap="0.5rem">
-            <Text fontWeight="bold">Research Project Description:</Text>
-            <Text>{project.description}</Text>
-            {project.department && <Text><strong>Department:</strong> {project.department}</Text>}
-            {project.faculty?.name && <Text><strong>Faculty:</strong> {project.faculty.name}</Text>}
-            {project.duration && <Text><strong>Duration:</strong> {project.duration}</Text>}
-          </Flex>
-        </Card>
-        
         <Alert variation="info">
           <Text>
             <strong>Application Guidelines:</strong><br/>
@@ -215,6 +205,16 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
             • Your progress is automatically saved as you type
           </Text>
         </Alert>
+        
+        <Card variation="outlined" backgroundColor="#f8f9fa">
+          <Flex direction="column" gap="0.5rem">
+            <Text fontWeight="bold">Research Project Description:</Text>
+            <Text>{project.description}</Text>
+            {project.department && <Text><strong>Department:</strong> {project.department}</Text>}
+            {project.faculty?.name && <Text><strong>Faculty:</strong> {project.faculty.name}</Text>}
+            {project.duration && <Text><strong>Duration:</strong> {project.duration}</Text>}
+          </Flex>
+        </Card>
         
         <Card variation="outlined">
           <Text fontWeight="bold">Student Profile Information:</Text>
@@ -366,12 +366,19 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
             <Divider />
 
             <Flex gap="1rem">
-              <Button onClick={onClose} variation="link">
+              <Button 
+                onClick={onClose} 
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
+              >
                 Cancel
               </Button>
               <Button 
                 type="submit" 
-                variation="primary"
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
                 isLoading={isSubmitting || uploading}
               >
                 {uploading ? 'Uploading Document...' : 'Submit Application'}
