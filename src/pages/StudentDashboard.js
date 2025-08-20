@@ -32,6 +32,8 @@ const StudentDashboard = ({ user }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const projectsPerPage = 10;
   const [applicationForm, setApplicationForm] = useState({
     hoursPerWeek: '',
     statement: ''
@@ -294,11 +296,12 @@ const StudentDashboard = ({ user }) => {
               <Text>No active research opportunities available at this time.</Text>
             </Card>
           ) : (
-            <Collection
-              items={projects}
-              type="list"
-              gap="1rem"
-              wrap="nowrap"
+            <>
+              <Collection
+                items={projects.slice((currentPage - 1) * projectsPerPage, currentPage * projectsPerPage)}
+                type="list"
+                gap="1rem"
+                wrap="nowrap"
               direction="column"
             >
               {(project) => {
@@ -388,6 +391,46 @@ const StudentDashboard = ({ user }) => {
                 );
               }}
             </Collection>
+            
+            {projects.length > projectsPerPage && (
+              <Flex justifyContent="flex-end" alignItems="center" gap="1rem" marginTop="2rem">
+                <Button 
+                  size="small"
+                  backgroundColor="white"
+                  color="black"
+                  border="1px solid black"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  isDisabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                
+                {Array.from({ length: Math.ceil(projects.length / projectsPerPage) }, (_, i) => i + 1).map(page => (
+                  <Button
+                    key={page}
+                    size="small"
+                    backgroundColor={currentPage === page ? "black" : "white"}
+                    color={currentPage === page ? "white" : "black"}
+                    border="1px solid black"
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </Button>
+                ))}
+                
+                <Button 
+                  size="small"
+                  backgroundColor="white"
+                  color="black"
+                  border="1px solid black"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(projects.length / projectsPerPage)))}
+                  isDisabled={currentPage === Math.ceil(projects.length / projectsPerPage)}
+                >
+                  Next
+                </Button>
+              </Flex>
+            )}
+            </>
           )}
         </TabItem>
         

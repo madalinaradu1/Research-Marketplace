@@ -1199,7 +1199,12 @@ const FacultyDashboard = ({ user }) => {
           height="100vh"
           backgroundColor="rgba(0, 0, 0, 0.5)"
           style={{ zIndex: 1000 }}
-          onClick={() => setViewingReturnReason(null)}
+          onClick={() => {
+            setViewingReturnReason(null);
+            setSelectedProject(null);
+            setIsCreatingProject(false);
+            setIsEditingProject(false);
+          }}
         >
           <Flex
             justifyContent="center"
@@ -1317,7 +1322,12 @@ const FacultyDashboard = ({ user }) => {
                   
                   <Flex gap="1rem">
                     <Button 
-                      onClick={() => setViewingReturnReason(null)}
+                      onClick={() => {
+                        setViewingReturnReason(null);
+                        setSelectedProject(null);
+                        setIsCreatingProject(false);
+                        setIsEditingProject(false);
+                      }}
                       backgroundColor="white"
                       color="black"
                       border="1px solid black"
