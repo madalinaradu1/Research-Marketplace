@@ -351,11 +351,18 @@ const FacultyDashboard = ({ user }) => {
       fetchData();
     } catch (err) {
       console.error('Error saving project:', err);
+      console.error('Full error object:', JSON.stringify(err, null, 2));
+      
       if (err.errors && err.errors.length > 0) {
         console.error('GraphQL error details:', err.errors);
-        setError(`Failed to save project: ${err.errors[0].message}`);
+        console.error('First error object:', err.errors[0]);
+        const errorMessage = err.errors[0].message || err.errors[0].errorType || 'GraphQL error';
+        console.error('Specific error message:', errorMessage);
+        setError(`Failed to save project: ${errorMessage}`);
       } else {
-        setError('Failed to save project. Please try again.');
+        const errorMessage = err.message || 'Unknown error';
+        console.error('Non-GraphQL error:', errorMessage);
+        setError(`Failed to save project: ${errorMessage}`);
       }
     } finally {
       setIsSubmitting(false);
