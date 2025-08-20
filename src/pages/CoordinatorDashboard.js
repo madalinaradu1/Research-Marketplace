@@ -627,14 +627,25 @@ const CoordinatorDashboard = ({ user }) => {
                       <Text fontWeight="bold">Skills Required</Text>
                       <Flex wrap="wrap" gap="0.5rem">
                         {viewingProject.skillsRequired.map((skill, index) => (
-                          <Card 
-                            key={index}
-                            backgroundColor="rgba(0, 0, 0, 0.05)"
-                            padding="0.25rem 0.5rem"
-                            borderRadius="1rem"
-                          >
-                            <Text fontSize="0.8rem">{skill}</Text>
-                          </Card>
+                          <Badge key={index} backgroundColor="lightgray" color="white">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </Flex>
+                    </Flex>
+                  </>
+                )}
+                
+                {viewingProject.tags && viewingProject.tags.length > 0 && (
+                  <>
+                    <Divider />
+                    <Flex direction="column" gap="0.5rem">
+                      <Text fontWeight="bold">Research Tags</Text>
+                      <Flex wrap="wrap" gap="0.5rem">
+                        {viewingProject.tags.map((tag, index) => (
+                          <Badge key={index} backgroundColor="lightgray" color="white">
+                            {tag}
+                          </Badge>
                         ))}
                       </Flex>
                     </Flex>
