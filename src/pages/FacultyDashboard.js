@@ -434,7 +434,7 @@ const FacultyDashboard = ({ user }) => {
   const getReviewNeededApplications = () => {
     return applications.filter(app => {
       if (user.role === 'Faculty') {
-        return app.status === 'Faculty Review' || app.status === 'Approved';
+        return app.status === 'Faculty Review';
       } else if (user.role === 'Coordinator') {
         return app.status === 'Coordinator Review';
       } else if (user.role === 'Admin') {
@@ -941,7 +941,6 @@ const FacultyDashboard = ({ user }) => {
                     backgroundColor="white"
                     color="black"
                     border="1px solid black"
-                    color="white"
                     isLoading={isSendingMessage}
                     onClick={async () => {
                       if (!messageText.trim()) return;
