@@ -25,6 +25,7 @@ const SearchPage = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedDuration, setSelectedDuration] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
 
   const [showAvailableOnly, setShowAvailableOnly] = useState(true);
   const [sortBy, setSortBy] = useState('newest');
@@ -61,7 +62,7 @@ const SearchPage = ({ user }) => {
 
   useEffect(() => {
     applyFilters();
-  }, [projects, searchTerm, selectedDepartment, selectedDuration, showAvailableOnly, sortBy]);
+  }, [projects, searchTerm, selectedDepartment, selectedDuration, selectedTag, showAvailableOnly, sortBy]);
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -119,6 +120,13 @@ const SearchPage = ({ user }) => {
       filtered = filtered.filter(project => project.duration === selectedDuration);
     }
 
+    // Research tags filter
+    if (selectedTag) {
+      filtered = filtered.filter(project => 
+        project.tags && project.tags.some(tag => tag.toLowerCase().includes(selectedTag.toLowerCase()))
+      );
+    }
+
     // Only show approved projects
     filtered = filtered.filter(project => project.projectStatus === 'Approved');
 
@@ -170,6 +178,7 @@ const SearchPage = ({ user }) => {
     setSearchTerm('');
     setSelectedDepartment('');
     setSelectedDuration('');
+    setSelectedTag('');
 
     setShowAvailableOnly(true);
     setSortBy('newest');
@@ -223,6 +232,14 @@ const SearchPage = ({ user }) => {
                 <option key={duration} value={duration}>{duration}</option>
               ))}
             </SelectField>
+            
+            <SearchField
+              label="Research Tags"
+              placeholder="Filter by research tags..."
+              value={selectedTag}
+              onChange={(e) => setSelectedTag(e.target.value)}
+              width="200px"
+            />
             
             <SelectField
               label="Sort By"
