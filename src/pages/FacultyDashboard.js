@@ -617,7 +617,7 @@ const FacultyDashboard = ({ user }) => {
         
 
         
-        <TabItem title="All Applications">
+        <TabItem title="Applications">
           {viewingApplicationsForProject ? (
             // Show applications for specific project
             <Card>
@@ -681,14 +681,14 @@ const FacultyDashboard = ({ user }) => {
             </Card>
           ) : (
             // Show all applications grouped by project
-            getProcessedApplications().length === 0 ? (
+            applications.length === 0 ? (
               <Card>
-                <Text>No processed applications yet.</Text>
+                <Text>No applications yet.</Text>
               </Card>
             ) : (
               <Flex direction="column" gap="2rem">
                 {projects.map(project => {
-                  const projectApplications = getProcessedApplications().filter(app => app.projectID === project.id);
+                  const projectApplications = applications.filter(app => app.projectID === project.id);
                   if (projectApplications.length === 0) return null;
                   
                   return (
