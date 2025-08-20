@@ -54,10 +54,12 @@ const Header = ({ user, signOut }) => {
   };
   
   const fetchUnreadCount = async () => {
-    if (!user) return;
+    if (!user || !user.id) return;
     
     try {
       const userId = user.id || user.username;
+      if (!userId) return;
+      
       const messageResult = await API.graphql(graphqlOperation(listMessages, { 
         limit: 100
       }));
@@ -69,16 +71,22 @@ const Header = ({ user, signOut }) => {
       
       setUnreadCount(unreadMessages.length);
     } catch (error) {
-      console.error('Error fetching unread count:', error);
+      // Only log error if it's not a "No current user" error
+      if (!error.message?.includes('No current user')) {
+        console.error('Error fetching unread count:', error);
+      }
+      setUnreadCount(0);
     }
   };
   
   useEffect(() => {
-    fetchUnreadCount();
-    
-    // Poll for new messages every 30 seconds
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
+    if (user && user.id) {
+      fetchUnreadCount();
+      
+      // Poll for new messages every 30 seconds
+      const interval = setInterval(fetchUnreadCount, 30000);
+      return () => clearInterval(interval);
+    }
   }, [user]);
   
   useEffect(() => {

@@ -186,6 +186,23 @@ const CoordinatorDashboard = ({ user }) => {
       };
 
       await API.graphql(graphqlOperation(updateApplication, { input }));
+      
+      // Send email notification for application status change to student
+      try {
+        await sendStatusChangeNotification(
+          application.student?.email,
+          application.student?.name,
+          'Application',
+          application.project?.title,
+          application.status,
+          newStatus,
+          'Coordinator',
+          notes
+        );
+      } catch (emailError) {
+        console.log('Email notification prepared (SES integration pending):', emailError);
+      }
+      
       setNotes('');
       setSelectedApplication(null);
       fetchData();
@@ -313,33 +330,60 @@ const CoordinatorDashboard = ({ user }) => {
       
       {/* Project Notes Modal */}
       {selectedProject && (
-        <Card position="fixed" top="50%" left="50%" transform="translate(-50%, -50%)" 
-              backgroundColor="white" padding="2rem" boxShadow="large" style={{ zIndex: 1000 }}>
-          <Heading level={4}>Return Project for Edits</Heading>
-          <Text marginBottom="1rem">Project: {selectedProject.title}</Text>
-          
-          <TextAreaField
-            label="Notes for Faculty"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={4}
-            placeholder="Explain what needs to be changed..."
-          />
-          
-          <Flex gap="1rem" marginTop="1rem">
-            <Button onClick={() => setSelectedProject(null)}>Cancel</Button>
-            <Button 
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setSelectedProject(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
               backgroundColor="white" 
-              color="black"
-              border="1px solid black"
-              size="small"
-              onClick={() => handleProjectAction(selectedProject, 'return')}
-              isDisabled={!notes.trim()}
+              padding="2rem" 
+              boxShadow="large" 
+              width="800px" 
+              maxWidth="90vw" 
+              height="620px" 
+              maxHeight="80vh"
+              style={{ overflow: 'auto' }}
+              onClick={(e) => e.stopPropagation()}
             >
-              Return with Notes
-            </Button>
+              <Heading level={4}>Return Project for Edits</Heading>
+              <Text marginBottom="1rem">Project: {selectedProject.title}</Text>
+              
+              <TextAreaField
+                label="Notes for Faculty"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={15}
+                placeholder="Explain what needs to be changed..."
+              />
+              
+              <Flex gap="1rem" marginTop="1rem">
+                <Button onClick={() => setSelectedProject(null)}>Cancel</Button>
+                <Button 
+                  backgroundColor="white" 
+                  color="black"
+                  border="1px solid black"
+                  size="small"
+                  onClick={() => handleProjectAction(selectedProject, 'return')}
+                  isDisabled={!notes.trim()}
+                >
+                  Return with Notes
+                </Button>
+              </Flex>
+            </Card>
           </Flex>
-        </Card>
+        </View>
       )}
       
       {/* Application Notes Modal */}
