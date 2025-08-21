@@ -257,7 +257,7 @@ const StudentDashboard = ({ user }) => {
               <Text>Applications Used</Text>
             </Card>
             <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5} color="green">{statusCounts.approved}</Heading>
+              <Heading level={5} color={statusCounts.approved > 0 ? "green" : "black"}>{statusCounts.approved}</Heading>
               <Text>Approved</Text>
             </Card>
           </Flex>
