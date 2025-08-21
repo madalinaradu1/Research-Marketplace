@@ -455,21 +455,14 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                   <Flex justifyContent="space-between" alignItems="center" padding="1rem">
                     <Heading level={4}>Supporting Document</Heading>
                     <Flex gap="0.5rem">
-                      <Button size="small" onClick={async () => {
-                        try {
-                          const response = await fetch(documentUrl);
-                          const blob = await response.blob();
-                          const url = window.URL.createObjectURL(blob);
-                          const link = document.createElement('a');
-                          link.href = url;
-                          link.download = 'supporting-document';
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                          window.URL.revokeObjectURL(url);
-                        } catch (err) {
-                          console.error('Error downloading document:', err);
-                        }
+                      <Button size="small" onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = documentUrl;
+                        link.download = 'supporting-document';
+                        link.target = '_blank';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
                       }}>Download</Button>
                       <Button size="small" onClick={() => {
                         setViewingDocument(false);
@@ -478,14 +471,41 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                     </Flex>
                   </Flex>
                   <Divider />
-                  <View flex="1" style={{ overflow: 'hidden' }}>
-                    <iframe
-                      src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 'none' }}
-                      title="Supporting Document"
-                    />
+                  <View flex="1" style={{ overflow: 'auto', padding: '1rem' }}>
+                    {application.documentKey && application.documentKey.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i) ? (
+                      <img
+                        src={documentUrl}
+                        alt="Supporting Document"
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                          objectFit: 'contain',
+                          display: 'block',
+                          margin: '0 auto'
+                        }}
+                      />
+                    ) : application.documentKey && application.documentKey.toLowerCase().match(/\.(pdf|doc|docx|txt)$/i) ? (
+                      <iframe
+                        src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 'none', minHeight: '500px' }}
+                        title="Supporting Document"
+                      />
+                    ) : (
+                      <Flex direction="column" alignItems="center" justifyContent="center" height="100%" gap="1rem">
+                        <Text>Document preview not available for this file type.</Text>
+                        <Button onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = documentUrl;
+                          link.download = 'supporting-document';
+                          link.target = '_blank';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}>Download Document</Button>
+                      </Flex>
+                    )}
                   </View>
                 </Flex>
               </Card>

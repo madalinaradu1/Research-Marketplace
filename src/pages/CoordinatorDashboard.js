@@ -585,14 +585,41 @@ const CoordinatorDashboard = ({ user }) => {
                   }}>Close</Button>
                 </Flex>
                 <Divider />
-                <View flex="1" style={{ overflow: 'hidden' }}>
-                  <iframe
-                    src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 'none' }}
-                    title="Supporting Document"
-                  />
+                <View flex="1" style={{ overflow: 'auto', padding: '1rem' }}>
+                  {viewingApplication?.documentKey && viewingApplication.documentKey.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i) ? (
+                    <img
+                      src={documentUrl}
+                      alt="Supporting Document"
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        objectFit: 'contain',
+                        display: 'block',
+                        margin: '0 auto'
+                      }}
+                    />
+                  ) : viewingApplication?.documentKey && viewingApplication.documentKey.toLowerCase().match(/\.(pdf|doc|docx|txt)$/i) ? (
+                    <iframe
+                      src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 'none', minHeight: '500px' }}
+                      title="Supporting Document"
+                    />
+                  ) : (
+                    <Flex direction="column" alignItems="center" justifyContent="center" height="100%" gap="1rem">
+                      <Text>Document preview not available for this file type.</Text>
+                      <Button onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = documentUrl;
+                        link.download = 'supporting-document';
+                        link.target = '_blank';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}>Download Document</Button>
+                    </Flex>
+                  )}
                 </View>
               </Flex>
             </Card>
