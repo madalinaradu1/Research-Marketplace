@@ -319,15 +319,36 @@ const Header = ({ user, signOut }) => {
                 position: 'absolute', 
                 top: '100%', 
                 right: '0', 
-                minWidth: '150px', 
+                minWidth: '250px', 
                 zIndex: 1001, 
                 boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                 border: '1px solid #ccc'
               }}
               onMouseLeave={() => setIsMenuOpen(false)}
             >
-              <Button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small">Edit Profile</Button>
-              <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small">Sign Out</Button>
+              <Flex direction="row" alignItems="center" gap="1rem">
+                <View
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    backgroundColor: 'white',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '30px'
+                  }}
+                >
+                  👤
+                </View>
+                <Flex direction="column" gap="0.5rem" flex="1">
+                  <Text fontSize="0.9rem" fontWeight="bold" color="black">
+                    Hello, {user?.email ? user.email.split('@')[0] : user?.username || 'User'}
+                  </Text>
+                  <Button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Edit Profile</Button>
+                  <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Sign Out</Button>
+                </Flex>
+              </Flex>
             </Flex>
           )}
         </View>
