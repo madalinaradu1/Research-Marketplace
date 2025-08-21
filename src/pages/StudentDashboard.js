@@ -605,27 +605,47 @@ const StudentDashboard = ({ user }) => {
                   >
                     Close
                   </Button>
-                  {selectedProject.applicationDeadline && new Date(selectedProject.applicationDeadline) < new Date() ? (
-                    <Button 
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
-                      isDisabled={true}
-                    >
-                      Expired
-                    </Button>
-                  ) : (
-                    <Button 
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
-                      onClick={() => {
-                        setShowApplicationForm(true);
-                      }}
-                    >
-                      Apply
-                    </Button>
-                  )}
+                  {(() => {
+                    const hasApplied = applications.some(app => app.projectID === selectedProject.id && !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status));
+                    const isExpired = selectedProject.applicationDeadline && new Date(selectedProject.applicationDeadline) < new Date();
+                    
+                    if (isExpired) {
+                      return (
+                        <Button 
+                          backgroundColor="white"
+                          color="black"
+                          border="1px solid black"
+                          isDisabled={true}
+                        >
+                          Expired
+                        </Button>
+                      );
+                    } else if (hasApplied) {
+                      return (
+                        <Button 
+                          backgroundColor="white"
+                          color="black"
+                          border="1px solid black"
+                          isDisabled={true}
+                        >
+                          Already Applied
+                        </Button>
+                      );
+                    } else {
+                      return (
+                        <Button 
+                          backgroundColor="white"
+                          color="black"
+                          border="1px solid black"
+                          onClick={() => {
+                            setShowApplicationForm(true);
+                          }}
+                        >
+                          Apply
+                        </Button>
+                      );
+                    }
+                  })()}
                 </Flex>
               </Flex>
             </Card>

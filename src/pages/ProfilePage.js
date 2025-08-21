@@ -31,7 +31,8 @@ const ProfilePage = ({ user, refreshProfile }) => {
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [scheduledEvents, setScheduledEvents] = useState(() => {
-    const saved = localStorage.getItem('scheduledEvents');
+    const userId = user?.id || user?.username || user?.email;
+    const saved = localStorage.getItem(`scheduledEvents_${userId}`);
     return saved ? JSON.parse(saved) : [];
   });
   const [editingEvent, setEditingEvent] = useState(null);
@@ -544,7 +545,8 @@ const ProfilePage = ({ user, refreshProfile }) => {
                               setDeleteAction(() => () => {
                                 const updatedEvents = scheduledEvents.filter(e => e.id !== event.id);
                                 setScheduledEvents(updatedEvents);
-                                localStorage.setItem('scheduledEvents', JSON.stringify(updatedEvents));
+                                const userId = user?.id || user?.username || user?.email;
+                                localStorage.setItem(`scheduledEvents_${userId}`, JSON.stringify(updatedEvents));
                               });
                               setShowDeleteConfirm(true);
                             }}
@@ -1002,14 +1004,15 @@ const ProfilePage = ({ user, refreshProfile }) => {
                           description: eventForm.description
                         };
                         
+                        const userId = user?.id || user?.username || user?.email;
                         if (editingEvent) {
                           const updatedEvents = scheduledEvents.map(e => e.id === editingEvent.id ? newEvent : e);
                           setScheduledEvents(updatedEvents);
-                          localStorage.setItem('scheduledEvents', JSON.stringify(updatedEvents));
+                          localStorage.setItem(`scheduledEvents_${userId}`, JSON.stringify(updatedEvents));
                         } else {
                           const updatedEvents = [...scheduledEvents, newEvent];
                           setScheduledEvents(updatedEvents);
-                          localStorage.setItem('scheduledEvents', JSON.stringify(updatedEvents));
+                          localStorage.setItem(`scheduledEvents_${userId}`, JSON.stringify(updatedEvents));
                         }
                         
                         setEventForm({ title: '', description: '', startDate: '', endDate: '', allDay: true });
