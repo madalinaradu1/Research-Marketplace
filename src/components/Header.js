@@ -153,13 +153,14 @@ const Header = ({ user, signOut }) => {
         minHeight="20px"
       >
         <Link to="/dashboard" style={{ textDecoration: 'none', position: 'relative', zIndex: 10, outline: 'none' }}>
-          <Flex direction="row" alignItems="flex-end" gap={tokens.space.small}>
+          <Flex direction="row" alignItems="flex-end" gap={tokens.space.small} marginTop="25px" marginBottom="-10px">
             <Image
               alt="GCU Logo"
               src="/GCU_WHITE.png"
               height="50px"
               objectFit="contain"
-              marginBottom="10px"
+              marginBottom="0px"
+              marginTop="15px"
               paddingLeft="20px"
             />
             <Flex direction="column" gap="0">
@@ -204,7 +205,8 @@ const Header = ({ user, signOut }) => {
         direction="row"
         alignItems="center"
         gap={tokens.space.medium}
-        display={{ base: 'none', medium: 'flex' }}
+        display={{ base: 'none', xl: 'flex' }}
+        padding="1.5rem 2rem"
       >
         <Link to="/dashboard" style={{ textDecoration: isActive('/dashboard') ? 'underline white' : 'none' }}>
           <Text
@@ -258,16 +260,7 @@ const Header = ({ user, signOut }) => {
           </Text>
         </Link>
 
-        {user?.role === 'Student' && (
-          <Link to="/profile" style={{ textDecoration: isActive('/profile') ? 'underline white' : 'none' }}>
-            <Text
-              color={isActive('/profile') ? "white" : "rgba(255,255,255,0.8)"}
-              fontWeight={isActive('/profile') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-            >
-              Profile
-            </Text>
-          </Link>
-        )}
+
 
 
         <SearchField
@@ -297,69 +290,99 @@ const Header = ({ user, signOut }) => {
           }}
           className="header-search-field"
         />
-        <Button 
-          onClick={handleSignOut} 
-          backgroundColor="white" 
-          color="#552b9a"
-          size="small"
-          style={{
-            transition: 'transform 0.2s ease',
-            outline: 'none',
-            boxShadow: 'none'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = 'scale(1.05)';
-            e.target.style.backgroundColor = 'white';
-            e.target.style.outline = 'none';
-            e.target.style.boxShadow = 'none';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = 'scale(1)';
-            e.target.style.backgroundColor = 'white';
-            e.target.style.outline = 'none';
-            e.target.style.boxShadow = 'none';
-          }}
-          onFocus={(e) => {
-            e.target.style.outline = 'none';
-            e.target.style.boxShadow = 'none';
-          }}
-        >
-          Sign Out
-        </Button>
+        <View style={{ position: 'relative' }}>
+          <Button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onMouseEnter={() => setIsMenuOpen(true)}
+            backgroundColor="white" 
+            color="#552b9a"
+            size="small"
+            style={{
+              borderRadius: '8px',
+              width: '40px',
+              height: '40px',
+              padding: '0',
+              outline: 'none',
+              boxShadow: 'none'
+            }}
+          >
+            👤
+          </Button>
+          
+          {isMenuOpen && (
+            <Flex 
+              direction="column" 
+              gap="0.5rem" 
+              backgroundColor="white" 
+              padding="0.5rem" 
+              style={{ 
+                position: 'absolute', 
+                top: '100%', 
+                right: '0', 
+                minWidth: '150px', 
+                zIndex: 1001, 
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                border: '1px solid #ccc'
+              }}
+              onMouseLeave={() => setIsMenuOpen(false)}
+            >
+              <Button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small">Edit Profile</Button>
+              <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small">Sign Out</Button>
+            </Flex>
+          )}
+        </View>
       </Flex>
       </Flex>
 
       {/* Mobile Navigation */}
-      <View display={{ base: 'block', medium: 'none' }}>
-        <Menu
-          isOpen={isMenuOpen}
-          onOpenChange={(open) => setIsMenuOpen(open)}
-        >
-          <MenuButton
+      <Flex justifyContent="flex-end" display={{ base: 'flex', xl: 'none' }} padding="1rem 2rem">
+        <View style={{ position: 'relative' }}>
+          <Button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Navigation Menu"
+            backgroundColor="white"
+            color="black"
+            border="1px solid white"
+            style={{ alignSelf: 'flex-start', marginTop: '-0.5rem' }}
           >
             <Flex direction="column" gap="4px">
-              <View height="2px" width="24px" backgroundColor={tokens.colors.primary[80]} />
-              <View height="2px" width="24px" backgroundColor={tokens.colors.primary[80]} />
-              <View height="2px" width="24px" backgroundColor={tokens.colors.primary[80]} />
+              <View height="2px" width="24px" backgroundColor="black" />
+              <View height="2px" width="24px" backgroundColor="black" />
+              <View height="2px" width="24px" backgroundColor="black" />
             </Flex>
-          </MenuButton>
-          <View>
-            <MenuItem onClick={() => navigate('/dashboard')}>Dashboard</MenuItem>
-            <MenuItem onClick={() => navigate('/search')}>Search</MenuItem>
-            <MenuItem onClick={() => navigate('/activity')}>My Activity</MenuItem>
-            <MenuItem onClick={() => navigate('/messages')}>Messages</MenuItem>
-            <MenuItem onClick={() => navigate('/community')}>Community</MenuItem>
+          </Button>
+          
+          {isMenuOpen && (
+            <Flex 
+              direction="column" 
+              gap="0.5rem" 
+              backgroundColor="white" 
+              padding="1rem" 
+              style={{ 
+                position: 'absolute', 
+                top: '100%', 
+                right: '0', 
+                minWidth: '200px', 
+                zIndex: 1001, 
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                border: '1px solid #ccc'
+              }}
+            >
+              <Button onClick={() => { navigate('/dashboard'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Dashboard</Button>
+              <Button onClick={() => { navigate('/search'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Search</Button>
+              <Button onClick={() => { navigate('/activity'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">My Activity</Button>
+              <Button onClick={() => { navigate('/messages'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Messages</Button>
+              <Button onClick={() => { navigate('/community'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Community</Button>
 
-            {user?.role === 'Student' && (
-              <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
-            )}
+              {user?.role === 'Student' && (
+                <Button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Profile</Button>
+              )}
 
-            <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
-          </View>
-        </Menu>
-      </View>
+              <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Sign Out</Button>
+            </Flex>
+          )}
+        </View>
+      </Flex>
       </Flex>
     </>
   );

@@ -510,6 +510,129 @@ const StudentDashboard = ({ user }) => {
 
       
       {/* Enhanced Application Form Overlay */}
+      {/* Project Details Modal */}
+      {selectedProject && !showApplicationForm && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setSelectedProject(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="800px"
+              width="100%"
+              maxHeight="90vh"
+              style={{ overflow: 'auto', border: '1px solid black' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Flex direction="column" gap="1rem" padding="1rem">
+                <Heading level={4}>Project Details</Heading>
+                
+                <Divider />
+                
+                <Flex direction="column" gap="0.5rem">
+                  <Text fontWeight="bold">Title:</Text>
+                  <Text>{selectedProject.title}</Text>
+                  
+                  <Text fontWeight="bold">Department:</Text>
+                  <Text>{selectedProject.department}</Text>
+                  
+                  <Text fontWeight="bold">Description:</Text>
+                  <Text style={{ whiteSpace: 'pre-wrap' }}>{selectedProject.description}</Text>
+                  
+                  {selectedProject.qualifications && (
+                    <>
+                      <Text fontWeight="bold">Required Qualifications:</Text>
+                      <Text style={{ whiteSpace: 'pre-wrap' }}>{selectedProject.qualifications}</Text>
+                    </>
+                  )}
+                  
+                  {selectedProject.skillsRequired && selectedProject.skillsRequired.length > 0 && (
+                    <>
+                      <Text fontWeight="bold">Skills Required:</Text>
+                      <Flex wrap="wrap" gap="0.5rem">
+                        {selectedProject.skillsRequired.map((skill, index) => (
+                          <Badge key={index} backgroundColor="lightgray" color="white">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </Flex>
+                    </>
+                  )}
+                  
+                  {selectedProject.tags && selectedProject.tags.length > 0 && (
+                    <>
+                      <Text fontWeight="bold">Research Tags:</Text>
+                      <Flex wrap="wrap" gap="0.5rem">
+                        {selectedProject.tags.map((tag, index) => (
+                          <Badge key={index} backgroundColor="lightgray" color="white">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </Flex>
+                    </>
+                  )}
+                  
+                  {selectedProject.duration && (
+                    <>
+                      <Text fontWeight="bold">Duration:</Text>
+                      <Text>{selectedProject.duration}</Text>
+                    </>
+                  )}
+                  
+                  <Text fontWeight="bold">Application Deadline:</Text>
+                  <Text>{selectedProject.applicationDeadline ? new Date(selectedProject.applicationDeadline).toLocaleDateString() : 'Not specified'}</Text>
+                  
+                  <Text fontWeight="bold">Requires Transcript:</Text>
+                  <Text>{selectedProject.requiresTranscript ? 'Yes' : 'No'}</Text>
+                </Flex>
+                
+                <Divider />
+                
+                <Flex gap="0.5rem" justifyContent="flex-start">
+                  <Button 
+                    onClick={() => setSelectedProject(null)}
+                  >
+                    Close
+                  </Button>
+                  {selectedProject.applicationDeadline && new Date(selectedProject.applicationDeadline) < new Date() ? (
+                    <Button 
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                      isDisabled={true}
+                    >
+                      Expired
+                    </Button>
+                  ) : (
+                    <Button 
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                      onClick={() => {
+                        setShowApplicationForm(true);
+                      }}
+                    >
+                      Apply
+                    </Button>
+                  )}
+                </Flex>
+              </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
       {showApplicationForm && selectedProject && (
         <View
           position="fixed"
@@ -519,7 +642,10 @@ const StudentDashboard = ({ user }) => {
           height="100vh"
           backgroundColor="rgba(0, 0, 0, 0.5)"
           style={{ zIndex: 1000 }}
-          onClick={() => setShowApplicationForm(false)}
+          onClick={() => {
+            setShowApplicationForm(false);
+            setSelectedProject(null);
+          }}
         >
           <Flex
             justifyContent="center"
