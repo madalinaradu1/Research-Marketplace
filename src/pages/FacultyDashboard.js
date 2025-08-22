@@ -710,7 +710,7 @@ const FacultyDashboard = ({ user }) => {
                               }
                               color="white"
                             >
-                              {application.status}{application.isSelected ? ' (Selected)' : ''}
+                              {application.status}
                             </Badge>
                           </Flex>
                           
@@ -780,7 +780,7 @@ const FacultyDashboard = ({ user }) => {
                                 }
                                 color="white"
                               >
-                                {application.status}{application.isSelected ? ' (Selected)' : ''}
+                                {application.status}
                               </Badge>
                             </Flex>
                             
@@ -1016,7 +1016,8 @@ const FacultyDashboard = ({ user }) => {
                           receiverID: messagingStudent.student.id,
                           subject: `Message about ${messagingStudent.application.project?.title}`,
                           body: messageText,
-                          isRead: false
+                          isRead: false,
+                          sentAt: new Date().toISOString()
                         };
                         
                         await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
