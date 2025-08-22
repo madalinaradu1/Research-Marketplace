@@ -48,11 +48,13 @@ function App({ signOut, user }) {
   };
   
   useEffect(() => {
-    // Check for email link access and force logout
+    // Check for email link access and force logout - do this first
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('from') === 'email') {
-      // Clear the URL parameter and redirect to clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // Clear the URL parameter immediately
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+      // Force sign out
       signOut();
       return;
     }
@@ -208,7 +210,10 @@ function App({ signOut, user }) {
               <Navigate to="/complete-profile" /> : 
               <Navigate to="/dashboard" />} />
             <Route path="/complete-profile" element={<CompleteProfilePage user={userProfile || user} />} />
-            <Route path="/dashboard" element={shouldCompleteProfile ? 
+            <Route path="/dashboard" element={
+              new URLSearchParams(window.location.search).get('from') === 'email' ? 
+              <Navigate to="/dashboard" replace /> :
+              shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <Dashboard user={userProfile || user} />} />
             <Route path="/search" element={shouldCompleteProfile ? 
