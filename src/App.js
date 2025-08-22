@@ -40,6 +40,7 @@ function App({ signOut, user }) {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
+  const [lastActivity, setLastActivity] = useState(Date.now());
   
   // Function to refresh user profile
   const refreshUserProfile = () => {
@@ -47,6 +48,33 @@ function App({ signOut, user }) {
   };
   
   useEffect(() => {
+    // Check for email link access and force logout
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('from') === 'email') {
+      signOut();
+      return;
+    }
+    
+    // Check session timeout (2 hours = 7200000 ms)
+    const checkSessionTimeout = () => {
+      const now = Date.now();
+      const sessionTimeout = 2 * 60 * 60 * 1000; // 2 hours
+      if (now - lastActivity > sessionTimeout) {
+        signOut();
+        return;
+      }
+    };
+    
+    // Set up activity tracking
+    const updateActivity = () => setLastActivity(Date.now());
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    events.forEach(event => {
+      document.addEventListener(event, updateActivity, true);
+    });
+    
+    // Check session timeout every minute
+    const timeoutInterval = setInterval(checkSessionTimeout, 60000);
+    
     // Test API access
     testApiAccess();
     
@@ -134,9 +162,14 @@ function App({ signOut, user }) {
     
     fetchUserProfile();
     
-    // Clean up listener
+    // Clean up listeners
     return () => {
       Hub.remove('auth', listener);
+      clearInterval(timeoutInterval);
+      const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+      events.forEach(event => {
+        document.removeEventListener(event, updateActivity, true);
+      });
     };
   }, [profileRefreshTrigger]); // Re-run when profileRefreshTrigger changes
   

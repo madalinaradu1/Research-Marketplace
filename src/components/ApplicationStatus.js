@@ -258,9 +258,9 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
               <Card
                 maxWidth="900px"
                 width="100%"
-                maxHeight="80vh"
+                maxHeight="90vh"
                 padding="2rem"
-                style={{ overflow: 'auto' }}
+                style={{ overflow: 'auto', border: '1px solid black' }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <Flex direction="column" gap="1rem">

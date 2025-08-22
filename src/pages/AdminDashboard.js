@@ -344,7 +344,7 @@ const AdminDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="90vh"
-              style={{ overflow: 'auto' }}
+              style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
               <ApplicationReview 

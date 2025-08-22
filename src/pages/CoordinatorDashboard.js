@@ -354,7 +354,7 @@ const CoordinatorDashboard = ({ user }) => {
               maxWidth="90vw" 
               height="620px" 
               maxHeight="80vh"
-              style={{ overflow: 'auto' }}
+              style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
               <Heading level={4}>Return Project for Edits</Heading>
@@ -441,7 +441,7 @@ const CoordinatorDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="90vh"
-              style={{ overflow: 'auto' }}
+              style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
               <Flex direction="column" gap="1rem">
@@ -649,7 +649,7 @@ const CoordinatorDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="90vh"
-              style={{ overflow: 'auto' }}
+              style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
               <Flex direction="column" gap="1rem">

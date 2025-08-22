@@ -28,7 +28,7 @@ export const sendEmailNotification = async (recipientEmail, recipientName, sende
           </div>
           <div style="margin-top: 20px; padding: 15px; background-color: #e7f3ff; border-radius: 8px;">
             <p style="margin: 0; font-size: 14px;">
-              <a href="https://master.d33ubw0r59z0k8.amplifyapp.com/messages" style="color: #552b9a; text-decoration: none;">
+              <a href="https://master.d33ubw0r59z0k8.amplifyapp.com/messages?from=email" style="color: #552b9a; text-decoration: none;">
                 Click here to view and reply to this message in the Research Marketplace
               </a>
             </p>
@@ -47,7 +47,7 @@ Subject: ${messageSubject}
 Message:
 ${messageBody}
 
-View and reply at: https://master.d33ubw0r59z0k8.amplifyapp.com/messages
+View and reply at: https://master.d33ubw0r59z0k8.amplifyapp.com/messages?from=email
       `
     };
 
@@ -121,7 +121,7 @@ export const sendStatusChangeNotification = async (recipientEmail, recipientName
           ` : ''}
           <div style="margin-top: 20px; padding: 15px; background-color: #e7f3ff; border-radius: 8px;">
             <p style="margin: 0; font-size: 14px;">
-              <a href="https://master.d33ubw0r59z0k8.amplifyapp.com/dashboard" style="color: #552b9a; text-decoration: none;">
+              <a href="https://master.d33ubw0r59z0k8.amplifyapp.com/dashboard?from=email" style="color: #552b9a; text-decoration: none;">
                 Click here to view your ${itemType.toLowerCase()} in the Research Marketplace
               </a>
             </p>
@@ -138,7 +138,7 @@ ${itemType}: ${itemTitle}
 Status Changed: ${oldStatus} → ${newStatus}
 Reviewed by: ${reviewerName}
 
-${notes ? `Review Notes:\n${notes}\n\n` : ''}View your ${itemType.toLowerCase()} at: https://master.d33ubw0r59z0k8.amplifyapp.com/dashboard
+${notes ? `Review Notes:\n${notes}\n\n` : ''}View your ${itemType.toLowerCase()} at: https://master.d33ubw0r59z0k8.amplifyapp.com/dashboard?from=email
       `
     };
 
@@ -173,7 +173,7 @@ export const sendNewItemNotification = async (recipientEmail, recipientName, ite
           </div>
           <div style="margin-top: 20px; padding: 15px; background-color: #e7f3ff; border-radius: 8px;">
             <p style="margin: 0; font-size: 14px;">
-              <a href="https://master.d33ubw0r59z0k8.amplifyapp.com/dashboard" style="color: #552b9a; text-decoration: none;">
+              <a href="https://master.d33ubw0r59z0k8.amplifyapp.com/dashboard?from=email" style="color: #552b9a; text-decoration: none;">
                 Click here to review this ${itemType.toLowerCase()} in the Research Marketplace
               </a>
             </p>
@@ -190,7 +190,7 @@ ${itemType}: ${itemTitle}
 Submitted by: ${submitterName} (${submitterEmail})
 Status: Pending Review
 
-Review this ${itemType.toLowerCase()} at: https://master.d33ubw0r59z0k8.amplifyapp.com/dashboard
+Review this ${itemType.toLowerCase()} at: https://master.d33ubw0r59z0k8.amplifyapp.com/dashboard?from=email
       `
     };
 

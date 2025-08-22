@@ -924,7 +924,7 @@ const FacultyDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="90vh"
-              style={{ overflow: 'auto' }}
+              style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
               <ApplicationReview 
@@ -969,7 +969,7 @@ const FacultyDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="80vh"
-              style={{ overflow: 'auto' }}
+              style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
               <Heading level={4}>Message Student</Heading>
@@ -1071,7 +1071,7 @@ const FacultyDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="90vh"
-              style={{ overflow: 'auto' }}
+              style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
               <Heading level={4} marginBottom="1rem">{selectedProject ? 'Edit Project' : 'Create New Project'}</Heading>
@@ -1216,7 +1216,7 @@ const FacultyDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="90vh"
-              style={{ overflow: 'auto' }}
+              style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
               <Heading level={4}>Project Returned - Edit & Resubmit</Heading>
@@ -1376,7 +1376,7 @@ const FacultyDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="90vh"
-              style={{ overflow: 'auto' }}
+              style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
               <Heading level={3}>{selectedProject.title}</Heading>
