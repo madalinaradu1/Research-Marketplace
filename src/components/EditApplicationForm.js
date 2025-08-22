@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation, Storage } from 'aws-amplify';
 import { 
   Flex, 
@@ -11,17 +11,71 @@ import {
   SelectField,
   Collection,
   Divider,
-  Alert
+  Alert,
+  View
 } from '@aws-amplify/ui-react';
 import { updateApplication } from '../graphql/operations';
 
 const EditApplicationForm = ({ application, onClose, onSuccess }) => {
-  const [statement, setStatement] = useState(application.statement || '');
-  const [courses, setCourses] = useState(application.relevantCourses || []);
+  const cacheKey = `edit_application_${application.id}`;
+  
+  // Load cached data
+  const loadCachedData = () => {
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const data = JSON.parse(cached);
+        return {
+          statement: data.statement || application.statement || '',
+          courses: data.courses || application.relevantCourses || []
+        };
+      }
+    } catch (e) {
+      console.error('Error loading cached data:', e);
+    }
+    return {
+      statement: application.statement || '',
+      courses: application.relevantCourses || []
+    };
+  };
+  
+  const cachedData = loadCachedData();
+  const [statement, setStatement] = useState(cachedData.statement);
+  const [courses, setCourses] = useState(cachedData.courses);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [viewingDocument, setViewingDocument] = useState(false);
+  const [documentUrl, setDocumentUrl] = useState(null);
+  
+  // Auto-save function
+  const saveToDraft = (currentStatement, currentCourses) => {
+    try {
+      const draftData = {
+        statement: currentStatement,
+        courses: currentCourses,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(draftData));
+    } catch (e) {
+      console.error('Error saving draft:', e);
+    }
+  };
+  
+  // Clear draft after successful submission
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem(cacheKey);
+    } catch (e) {
+      console.error('Error clearing draft:', e);
+    }
+  };
+  
+  // Auto-save when data changes
+  useEffect(() => {
+    saveToDraft(statement, courses);
+  }, [statement, courses]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,6 +151,7 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
       };
 
       await API.graphql(graphqlOperation(updateApplication, { input: updateInput }));
+      clearDraft();
       onSuccess();
     } catch (err) {
       console.error('Error updating application:', err);
@@ -163,7 +218,11 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
                   <Flex justifyContent="space-between" alignItems="center">
                     <Text fontWeight="bold">Course {index + 1}</Text>
                     {courses.length > 1 && (
-                      <Button size="small" onClick={() => setCourses(courses.filter((_, i) => i !== index))}>
+                      <Button size="small" onClick={() => {
+                        const newCourses = courses.filter((_, i) => i !== index);
+                        setCourses(newCourses);
+                        saveToDraft(statement, newCourses);
+                      }}>
                         Remove
                       </Button>
                     )}
@@ -178,6 +237,7 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
                           i === index ? { ...c, courseName: e.target.value } : c
                         );
                         setCourses(updatedCourses);
+                        saveToDraft(statement, updatedCourses);
                       }}
                       placeholder="e.g. Introduction to Psychology"
                       flex="2"
@@ -190,6 +250,7 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
                           i === index ? { ...c, courseNumber: e.target.value } : c
                         );
                         setCourses(updatedCourses);
+                        saveToDraft(statement, updatedCourses);
                       }}
                       placeholder="e.g. PSYC 101"
                       flex="1"
@@ -205,6 +266,7 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
                           i === index ? { ...c, grade: e.target.value } : c
                         );
                         setCourses(updatedCourses);
+                        saveToDraft(statement, updatedCourses);
                       }}
                       flex="1"
                     >
@@ -231,6 +293,7 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
                           i === index ? { ...c, semester: e.target.value } : c
                         );
                         setCourses(updatedCourses);
+                        saveToDraft(statement, updatedCourses);
                       }}
                       flex="1"
                     >
@@ -248,6 +311,7 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
                           i === index ? { ...c, year: e.target.value } : c
                         );
                         setCourses(updatedCourses);
+                        saveToDraft(statement, updatedCourses);
                       }}
                       placeholder="e.g. 2024"
                       flex="1"
@@ -261,7 +325,11 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
           {courses.length < 10 && (
             <Button 
               size="small" 
-              onClick={() => setCourses([...courses, { courseName: '', courseNumber: '', grade: '', semester: '', year: '' }])}
+              onClick={() => {
+                const newCourses = [...courses, { courseName: '', courseNumber: '', grade: '', semester: '', year: '' }];
+                setCourses(newCourses);
+                saveToDraft(statement, newCourses);
+              }}
             >
               + Add Course
             </Button>
@@ -280,27 +348,25 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
                     const url = await Storage.get(application.documentKey, { 
                       expires: 300
                     });
-                    window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`, '_blank');
+                    setDocumentUrl(url);
+                    setViewingDocument(true);
                   } catch (err) {
                     console.error('Error loading document:', err);
                     setError('Failed to load document. Please try again.');
                   }
-                }}>View Document</Button>
+                }}>View</Button>
                 <Button size="small" backgroundColor="white" color="black" border="1px solid black" onClick={async () => {
                   try {
                     const url = await Storage.get(application.documentKey, { 
                       expires: 300
                     });
-                    const response = await fetch(url);
-                    const blob = await response.blob();
-                    const downloadUrl = window.URL.createObjectURL(blob);
                     const link = document.createElement('a');
-                    link.href = downloadUrl;
+                    link.href = url;
                     link.download = 'supporting-document';
+                    link.target = '_blank';
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
-                    window.URL.revokeObjectURL(downloadUrl);
                   } catch (err) {
                     console.error('Error downloading document:', err);
                     setError('Failed to download document. Please try again.');
@@ -318,7 +384,10 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
             <TextAreaField
               label="Statement of Interest *"
               value={statement}
-              onChange={(e) => setStatement(e.target.value)}
+              onChange={(e) => {
+                setStatement(e.target.value);
+                saveToDraft(e.target.value, courses);
+              }}
               placeholder="Update your statement based on the feedback provided..."
               rows={10}
               required
@@ -337,7 +406,7 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
               
               <input
                 type="file"
-                accept=".pdf,.doc,.docx,.txt"
+accept="*"
                 onChange={(e) => setUploadedFile(e.target.files[0])}
                 style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
               />
@@ -372,6 +441,86 @@ const EditApplicationForm = ({ application, onClose, onSuccess }) => {
             </Flex>
           </Flex>
         </form>
+        
+        {/* Document Viewer Modal */}
+        {viewingDocument && documentUrl && (
+          <View
+            position="fixed"
+            top="0"
+            left="0"
+            width="100vw"
+            height="100vh"
+            backgroundColor="rgba(0, 0, 0, 0.8)"
+            style={{ zIndex: 2000 }}
+            onClick={() => {
+              setViewingDocument(false);
+              setDocumentUrl(null);
+            }}
+          >
+            <Flex
+              justifyContent="center"
+              alignItems="center"
+              height="100%"
+              padding="2rem"
+            >
+              <Card
+                maxWidth="90vw"
+                width="100%"
+                maxHeight="90vh"
+                height="100%"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Flex direction="column" height="100%">
+                  <Flex justifyContent="space-between" alignItems="center" padding="1rem">
+                    <Heading level={4}>Supporting Document</Heading>
+                    <Button size="small" onClick={() => {
+                      setViewingDocument(false);
+                      setDocumentUrl(null);
+                    }}>Close</Button>
+                  </Flex>
+                  <Divider />
+                  <View flex="1" style={{ overflow: 'auto', padding: '1rem' }}>
+                    {application.documentKey && application.documentKey.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i) ? (
+                      <img
+                        src={documentUrl}
+                        alt="Supporting Document"
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                          objectFit: 'contain',
+                          display: 'block',
+                          margin: '0 auto'
+                        }}
+                      />
+                    ) : application.documentKey && application.documentKey.toLowerCase().match(/\.(pdf|doc|docx|txt)$/i) ? (
+                      <iframe
+                        src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 'none', minHeight: '500px' }}
+                        title="Supporting Document"
+                      />
+                    ) : (
+                      <Flex direction="column" alignItems="center" justifyContent="center" height="100%" gap="1rem">
+                        <Text>Document preview not available for this file type.</Text>
+                        <Button onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = documentUrl;
+                          link.download = 'supporting-document';
+                          link.target = '_blank';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}>Download Document</Button>
+                      </Flex>
+                    )}
+                  </View>
+                </Flex>
+              </Card>
+            </Flex>
+          </View>
+        )}
+
       </Flex>
     </Card>
   );

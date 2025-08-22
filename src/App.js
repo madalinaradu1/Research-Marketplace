@@ -51,6 +51,8 @@ function App({ signOut, user }) {
     // Check for email link access and force logout
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('from') === 'email') {
+      // Clear the URL parameter and redirect to clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
       signOut();
       return;
     }
