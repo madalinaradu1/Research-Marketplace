@@ -722,6 +722,7 @@ const FacultyDashboard = ({ user }) => {
                               View Details
                             </Button>
                             
+
                             {application.status === 'Approved' && (
                               <Button 
                                 size="small"
@@ -791,6 +792,7 @@ const FacultyDashboard = ({ user }) => {
                                 View Details
                               </Button>
                               
+
                               {application.status === 'Approved' && (
                                 <Button 
                                   size="small"
@@ -934,7 +936,6 @@ const FacultyDashboard = ({ user }) => {
                   handleApplicationUpdate();
                   setReviewingApplication(null);
                 }}
-                hideStatusUpdate={true}
               />
               <Button 
                 onClick={() => setReviewingApplication(null)}

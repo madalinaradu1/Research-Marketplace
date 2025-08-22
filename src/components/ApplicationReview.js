@@ -65,6 +65,11 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
         input.submittedToFacultyAt = now;
       } else if (statusUpdate === 'Approved') {
         input.approvedAt = now;
+      } else if (statusUpdate === 'Selected' && userRole === 'Faculty') {
+        input.status = 'Approved';
+        input.approvedAt = now;
+        input.selectedAt = now;
+        input.isSelected = true;
       } else if (statusUpdate === 'Approved' && userRole === 'Faculty' && application.status === 'Approved') {
         input.selectedAt = now;
         input.isSelected = true;
@@ -115,6 +120,7 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
     if (userRole === 'Faculty') {
       if (application.status === 'Faculty Review') {
         return [
+          { value: 'Selected', label: 'Select Student for Project' },
           { value: 'Coordinator Review', label: 'Send to Coordinator' },
           { value: 'Returned', label: 'Return to Student' },
           { value: 'Rejected', label: 'Reject Application' }
