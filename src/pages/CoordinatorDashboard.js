@@ -438,7 +438,7 @@ const CoordinatorDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="800px"
+              maxWidth="900px"
               width="100%"
               maxHeight="90vh"
               style={{ overflow: 'auto' }}
@@ -646,7 +646,7 @@ const CoordinatorDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="800px"
+              maxWidth="900px"
               width="100%"
               maxHeight="90vh"
               style={{ overflow: 'auto' }}

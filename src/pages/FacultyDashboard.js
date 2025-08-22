@@ -921,7 +921,7 @@ const FacultyDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="800px"
+              maxWidth="900px"
               width="100%"
               maxHeight="90vh"
               style={{ overflow: 'auto' }}
@@ -966,7 +966,7 @@ const FacultyDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="600px"
+              maxWidth="900px"
               width="100%"
               maxHeight="80vh"
               style={{ overflow: 'auto' }}
@@ -1068,7 +1068,7 @@ const FacultyDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="800px"
+              maxWidth="900px"
               width="100%"
               maxHeight="90vh"
               style={{ overflow: 'auto' }}
@@ -1213,7 +1213,7 @@ const FacultyDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="800px"
+              maxWidth="900px"
               width="100%"
               maxHeight="90vh"
               style={{ overflow: 'auto' }}
@@ -1373,7 +1373,7 @@ const FacultyDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="800px"
+              maxWidth="900px"
               width="100%"
               maxHeight="90vh"
               style={{ overflow: 'auto' }}

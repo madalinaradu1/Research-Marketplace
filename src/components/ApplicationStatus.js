@@ -256,7 +256,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
               padding="2rem"
             >
               <Card
-                maxWidth="600px"
+                maxWidth="900px"
                 width="100%"
                 maxHeight="80vh"
                 padding="2rem"
