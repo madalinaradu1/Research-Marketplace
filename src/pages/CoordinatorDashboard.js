@@ -26,6 +26,7 @@ const CoordinatorDashboard = ({ user }) => {
   const [projects, setProjects] = useState({ pending: [], approved: [] });
   const [applications, setApplications] = useState([]);
   const [approvedApplications, setApprovedApplications] = useState([]);
+  const [rejectedApplications, setRejectedApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedApplication, setSelectedApplication] = useState(null);
@@ -101,9 +102,23 @@ const CoordinatorDashboard = ({ user }) => {
           };
         });
       
+      // Fetch rejected applications
+      const rejectedApps = allApplications
+        .filter(a => a.status === 'Rejected')
+        .map(application => {
+          const student = allUsers.find(user => user.id === application.studentID);
+          const project = allProjects.find(p => p.id === application.projectID);
+          return {
+            ...application,
+            student: student || { name: 'Unknown Student' },
+            project: project || { title: 'Unknown Project' }
+          };
+        });
+      
       setProjects({ pending: pendingProjects, approved: approvedProjects });
       setApplications(pendingApplications);
       setApprovedApplications(approvedApps);
+      setRejectedApplications(rejectedApps);
 
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -291,7 +306,15 @@ const CoordinatorDashboard = ({ user }) => {
                           <Text fontWeight="bold">{application.project?.title}</Text>
                           <Text fontSize="0.9rem">{application.student?.name} • {application.status}</Text>
                         </Flex>
-                        <Button size="small" onClick={() => setViewingApplication(application)}>View Details</Button>
+                        <Button
+                          size="small"
+                          backgroundColor="white"
+                          color="black"
+                          border="1px solid black"
+                          onClick={() => setViewingApplication(application)}
+                        >
+                          View Details
+                        </Button>
                       </Flex>
                     </Card>
                   )}
@@ -322,6 +345,47 @@ const CoordinatorDashboard = ({ user }) => {
             {approvedApplications.length === 0 && projects.approved?.length === 0 && (
               <Card>
                 <Text>No approved items yet.</Text>
+              </Card>
+            )}
+          </Flex>
+        </TabItem>
+        
+        <TabItem title="Rejected Items">
+          <Flex direction="column" gap="2rem">
+            {/* Rejected Applications */}
+            {rejectedApplications.length > 0 && (
+              <Card>
+                <Heading level={4} marginBottom="1rem">Applications ({rejectedApplications.length})</Heading>
+                <Collection items={rejectedApplications} type="list" gap="1rem">
+                  {(application) => (
+                    <Card key={application.id} variation="outlined">
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Flex direction="column" gap="0.5rem" flex="1">
+                          <Text fontWeight="bold">{application.project?.title}</Text>
+                          <Text fontSize="0.9rem">Student: {application.student?.name}</Text>
+                          <Text fontSize="0.8rem" color="gray">
+                            Rejected: {new Date(application.updatedAt).toLocaleDateString()}
+                          </Text>
+                        </Flex>
+                        <Button
+                          size="small"
+                          backgroundColor="white"
+                          color="black"
+                          border="1px solid black"
+                          onClick={() => setViewingApplication(application)}
+                        >
+                          View Details
+                        </Button>
+                      </Flex>
+                    </Card>
+                  )}
+                </Collection>
+              </Card>
+            )}
+            
+            {rejectedApplications.length === 0 && (
+              <Card>
+                <Text>No rejected items yet.</Text>
               </Card>
             )}
           </Flex>
@@ -479,7 +543,7 @@ const CoordinatorDashboard = ({ user }) => {
                     <Flex direction="column" gap="0.5rem">
                       <Text fontWeight="bold">Statement of Interest</Text>
                       <Card variation="outlined" padding="1rem">
-                        <Text style={{ whiteSpace: 'pre-wrap' }}>{viewingApplication.statement}</Text>
+                        <div dangerouslySetInnerHTML={{ __html: viewingApplication.statement }} />
                       </Card>
                     </Flex>
                   </>
@@ -675,7 +739,7 @@ const CoordinatorDashboard = ({ user }) => {
                 <Flex direction="column" gap="0.5rem">
                   <Text fontWeight="bold">Project Description</Text>
                   <Card variation="outlined" padding="1rem">
-                    <Text style={{ whiteSpace: 'pre-wrap' }}>{viewingProject.description}</Text>
+                    <div dangerouslySetInnerHTML={{ __html: viewingProject.description }} />
                   </Card>
                 </Flex>
                 

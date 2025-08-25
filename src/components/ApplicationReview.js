@@ -181,7 +181,7 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
             <Flex direction="column" gap="0.5rem">
               <Text fontWeight="bold">Statement of Interest</Text>
               <Card variation="outlined" padding="0.5rem">
-                <Text style={{ whiteSpace: 'pre-wrap' }}>{application.statement}</Text>
+                <div dangerouslySetInnerHTML={{ __html: application.statement }} />
               </Card>
             </Flex>
           </>

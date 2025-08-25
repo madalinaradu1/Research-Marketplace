@@ -240,8 +240,8 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
 
         <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="1rem">
-            <div>
-              <Text fontWeight="bold">Statement of Interest *</Text>
+            <Text fontWeight="bold">Statement of Interest *</Text>
+            <div style={{ marginBottom: '1rem' }}>
               <ReactQuill
                 value={statement}
                 onChange={(value) => {
@@ -259,10 +259,11 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
                 style={{ minHeight: '380px', height: '380px' }}
               />
             </div>
-            
-            <Text fontSize="0.9rem" color="gray">
-              Word count: {statement.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(word => word).length} (aim for ~450 words)
-            </Text>
+            <div style={{ marginTop: '1rem', clear: 'both' }}>
+              <Text fontSize="0.9rem" color="gray">
+                Word count: {statement.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(word => word).length} (aim for ~450 words)
+              </Text>
+            </div>
 
             <Divider />
 

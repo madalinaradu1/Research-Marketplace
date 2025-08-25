@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation, Auth } from 'aws-amplify';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { 
   Flex, 
   Heading, 
@@ -538,7 +540,7 @@ const MessagesPage = ({ user }) => {
                             {new Date(msg.sentAt || msg.createdAt).toLocaleString()}
                           </Text>
                         </Flex>
-                        <Text whiteSpace="pre-wrap">{msg.body || msg.content || 'No content'}</Text>
+                        <div dangerouslySetInnerHTML={{ __html: msg.body || msg.content || 'No content' }} />
                       </Flex>
                     </Card>
                   ))}
@@ -546,13 +548,22 @@ const MessagesPage = ({ user }) => {
                 
                 <Divider />
                 
-                <TextAreaField
-                  label="Reply"
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  rows={4}
-                  placeholder="Type your reply here..."
-                />
+                <div>
+                  <Text fontWeight="bold">Reply</Text>
+                  <ReactQuill
+                    value={replyText}
+                    onChange={setReplyText}
+                    placeholder="Type your reply here..."
+                    modules={{
+                      toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                      ]
+                    }}
+                    style={{ minHeight: '150px' }}
+                  />
+                </div>
                 
                 <Flex gap="1rem">
                   <Button 
@@ -639,14 +650,22 @@ const MessagesPage = ({ user }) => {
                   required
                 />
                 
-                <TextAreaField
-                  label="Message"
-                  value={newMessage.body}
-                  onChange={(e) => setNewMessage(prev => ({ ...prev, body: e.target.value }))}
-                  rows={6}
-                  required
-                  placeholder="Type your message here..."
-                />
+                <div>
+                  <Text fontWeight="bold">Message *</Text>
+                  <ReactQuill
+                    value={newMessage.body}
+                    onChange={(value) => setNewMessage(prev => ({ ...prev, body: value }))}
+                    placeholder="Type your message here..."
+                    modules={{
+                      toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                      ]
+                    }}
+                    style={{ minHeight: '200px' }}
+                  />
+                </div>
                 
                 <Flex gap="1rem">
                   <Button 

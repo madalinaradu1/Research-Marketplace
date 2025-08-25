@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation, Auth } from 'aws-amplify';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { 
   Flex, 
   Heading, 
@@ -980,11 +982,23 @@ const FacultyDashboard = ({ user }) => {
                 <Text><strong>To:</strong> {messagingStudent.student?.name} ({messagingStudent.student?.email})</Text>
                 <Text><strong>Project:</strong> {messagingStudent.application?.project?.title}</Text>
                 
-                <TextAreaField
-                  label="Message"
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  placeholder="Type your message here..."
+                <div>
+                  <Text fontWeight="bold">Message</Text>
+                  <ReactQuill
+                    value={messageText}
+                    onChange={setMessageText}
+                    placeholder="Type your message here..."
+                    modules={{
+                      toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                      ]
+                    }}
+                    style={{ minHeight: '150px' }}
+                  />
+                </div>
+                <div style={{ display: 'none' }}
                   rows={6}
                   required
                 />
@@ -1086,14 +1100,22 @@ const FacultyDashboard = ({ user }) => {
                     onChange={handleProjectFormChange}
                     required
                   />
-                  <TextAreaField
-                    name="description"
-                    label="Project Description *"
-                    value={projectForm.description}
-                    onChange={handleProjectFormChange}
-                    required
-                    rows={6}
-                  />
+                  <div>
+                    <Text fontWeight="bold">Project Description *</Text>
+                    <ReactQuill
+                      value={projectForm.description}
+                      onChange={(value) => setProjectForm(prev => ({ ...prev, description: value }))}
+                      placeholder="Describe the research project, objectives, and what students will learn..."
+                      modules={{
+                        toolbar: [
+                          ['bold', 'italic', 'underline'],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['clean']
+                        ]
+                      }}
+                      style={{ minHeight: '200px' }}
+                    />
+                  </div>
                   <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
                     <TextField
                       name="department"
@@ -1245,14 +1267,22 @@ const FacultyDashboard = ({ user }) => {
                     required
                   />
                   
-                  <TextAreaField
-                    name="description"
-                    label="Project Description *"
-                    value={projectForm.description}
-                    onChange={handleProjectFormChange}
-                    required
-                    rows={5}
-                  />
+                  <div>
+                    <Text fontWeight="bold">Project Description *</Text>
+                    <ReactQuill
+                      value={projectForm.description}
+                      onChange={(value) => setProjectForm(prev => ({ ...prev, description: value }))}
+                      placeholder="Describe the research project, objectives, and what students will learn..."
+                      modules={{
+                        toolbar: [
+                          ['bold', 'italic', 'underline'],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['clean']
+                        ]
+                      }}
+                      style={{ minHeight: '200px' }}
+                    />
+                  </div>
                   
                   <TextField
                     name="department"
