@@ -28,6 +28,10 @@ const CoordinatorDashboard = ({ user }) => {
   const [approvedApplications, setApprovedApplications] = useState([]);
   const [rejectedApplications, setRejectedApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showRejectConfirm, setShowRejectConfirm] = useState(false);
+  const [applicationToReject, setApplicationToReject] = useState(null);
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [applicationToApprove, setApplicationToApprove] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [viewingApplication, setViewingApplication] = useState(null);
@@ -274,8 +278,15 @@ const CoordinatorDashboard = ({ user }) => {
                         </Flex>
                         <Flex gap="0.5rem">
                           <Button size="small" onClick={() => setViewingApplication(application)}>View</Button>
-                          <Button size="small" onClick={() => handleApplicationAction(application, 'approve')}>Approve</Button>
+                          <Button size="small" onClick={() => {
+                            setApplicationToApprove(application);
+                            setShowApproveConfirm(true);
+                          }}>Approve</Button>
                           <Button size="small" onClick={() => setSelectedApplication(application)}>Return</Button>
+                          <Button size="small" onClick={() => {
+                            setApplicationToReject(application);
+                            setShowRejectConfirm(true);
+                          }}>Reject</Button>
                         </Flex>
                       </Flex>
                     </Card>
@@ -815,6 +826,119 @@ const CoordinatorDashboard = ({ user }) => {
         </View>
       )}
       
+      {/* Reject Confirmation Modal */}
+      {showRejectConfirm && applicationToReject && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 2000 }}
+          onClick={() => setShowRejectConfirm(false)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="400px"
+              width="100%"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Flex direction="column" gap="1rem">
+                <Heading level={4}>Reject Application</Heading>
+                <Text>Are you sure you want to reject this application from {applicationToReject.student?.name} for {applicationToReject.project?.title}?</Text>
+                <Flex gap="1rem" justifyContent="flex-end">
+                  <Button
+                    onClick={() => {
+                      setShowRejectConfirm(false);
+                      setApplicationToReject(null);
+                    }}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      await handleApplicationAction(applicationToReject, 'reject');
+                      setShowRejectConfirm(false);
+                      setApplicationToReject(null);
+                    }}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Reject
+                  </Button>
+                </Flex>
+              </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* Approve Confirmation Modal */}
+      {showApproveConfirm && applicationToApprove && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 2000 }}
+          onClick={() => setShowApproveConfirm(false)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="400px"
+              width="100%"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Flex direction="column" gap="1rem">
+                <Heading level={4}>Approve Application</Heading>
+                <Text>Are you sure you want to approve this application from {applicationToApprove.student?.name} for {applicationToApprove.project?.title}?</Text>
+                <Flex gap="1rem" justifyContent="flex-end">
+                  <Button
+                    onClick={() => {
+                      setShowApproveConfirm(false);
+                      setApplicationToApprove(null);
+                    }}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      await handleApplicationAction(applicationToApprove, 'approve');
+                      setShowApproveConfirm(false);
+                      setApplicationToApprove(null);
+                    }}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Approve
+                  </Button>
+                </Flex>
+              </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
 
     </Flex>
   );
