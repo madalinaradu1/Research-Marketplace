@@ -587,7 +587,7 @@ const ProfilePage = ({ user, refreshProfile }) => {
             <Card
               maxWidth="900px"
               width="100%"
-              maxHeight="80vh"
+              maxHeight="100vh"
               style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >

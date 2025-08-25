@@ -501,7 +501,7 @@ const MessagesPage = ({ user }) => {
             <Card
               maxWidth="700px"
               width="100%"
-              maxHeight="80vh"
+              maxHeight="100vh"
               style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -606,7 +606,7 @@ const MessagesPage = ({ user }) => {
             <Card
               maxWidth="600px"
               width="100%"
-              maxHeight="80vh"
+              maxHeight="100vh"
               style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >

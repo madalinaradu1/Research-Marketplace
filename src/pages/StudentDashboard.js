@@ -531,7 +531,7 @@ const StudentDashboard = ({ user }) => {
             <Card
               maxWidth="900px"
               width="100%"
-              maxHeight="90vh"
+              maxHeight="100vh"
               style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -676,7 +676,7 @@ const StudentDashboard = ({ user }) => {
             <Card
               maxWidth="800px"
               width="100%"
-              maxHeight="90vh"
+              maxHeight="100vh"
               style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -716,7 +716,7 @@ const StudentDashboard = ({ user }) => {
             <Card
               maxWidth="600px"
               width="100%"
-              maxHeight="80vh"
+              maxHeight="100vh"
               style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >

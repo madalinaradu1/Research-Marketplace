@@ -350,7 +350,7 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
               <Card
                 maxWidth="90vw"
                 width="100%"
-                maxHeight="90vh"
+                maxHeight="100vh"
                 height="100%"
                 onClick={(e) => e.stopPropagation()}
               >

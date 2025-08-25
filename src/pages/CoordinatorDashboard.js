@@ -353,7 +353,7 @@ const CoordinatorDashboard = ({ user }) => {
               width="800px" 
               maxWidth="90vw" 
               height="620px" 
-              maxHeight="80vh"
+              maxHeight="100vh"
               style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -390,7 +390,7 @@ const CoordinatorDashboard = ({ user }) => {
       {selectedApplication && (
         <Card position="fixed" top="50%" left="50%" transform="translate(-50%, -50%)" 
               backgroundColor="white" padding="2rem" boxShadow="large" 
-              width="800px" maxWidth="90vw" height="550px" maxHeight="80vh"
+              width="800px" maxWidth="90vw" height="550px" maxHeight="100vh"
               style={{ zIndex: 1000, overflow: 'auto' }}>
           <Heading level={4}>Return Application</Heading>
           <Text marginBottom="1rem">Student: {selectedApplication.student?.name}</Text>
@@ -440,7 +440,7 @@ const CoordinatorDashboard = ({ user }) => {
             <Card
               maxWidth="900px"
               width="100%"
-              maxHeight="90vh"
+              maxHeight="100vh"
               style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -572,7 +572,7 @@ const CoordinatorDashboard = ({ user }) => {
             <Card
               maxWidth="90vw"
               width="100%"
-              maxHeight="90vh"
+              maxHeight="100vh"
               height="100%"
               onClick={(e) => e.stopPropagation()}
             >
@@ -648,7 +648,7 @@ const CoordinatorDashboard = ({ user }) => {
             <Card
               maxWidth="900px"
               width="100%"
-              maxHeight="90vh"
+              maxHeight="100vh"
               style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >

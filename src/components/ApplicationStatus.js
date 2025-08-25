@@ -258,7 +258,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
               <Card
                 maxWidth="900px"
                 width="100%"
-                maxHeight="90vh"
+                maxHeight="100vh"
                 padding="2rem"
                 style={{ overflow: 'auto', border: '1px solid black' }}
                 onClick={(e) => e.stopPropagation()}
@@ -406,7 +406,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
               <Card
                 maxWidth="800px"
                 width="100%"
-                maxHeight="90vh"
+                maxHeight="100vh"
                 style={{ overflow: 'auto' }}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -447,7 +447,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
               <Card
                 maxWidth="90vw"
                 width="100%"
-                maxHeight="90vh"
+                maxHeight="100vh"
                 height="100%"
                 onClick={(e) => e.stopPropagation()}
               >

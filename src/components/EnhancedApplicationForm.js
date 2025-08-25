@@ -207,7 +207,7 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
             <strong>Application Guidelines:</strong><br/>
             • You can apply for up to 3 projects total<br/>
             • Your statement should be around 450 words<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;• Address why you're interested and qualified<br/>
+            • Address why you're interested and qualified<br/>
             • Include relevant coursework (up to 10 courses)<br/>
             • Your progress is automatically saved as you type
           </Text>

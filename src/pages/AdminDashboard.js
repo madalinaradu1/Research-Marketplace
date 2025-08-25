@@ -343,7 +343,7 @@ const AdminDashboard = ({ user }) => {
             <Card
               maxWidth="900px"
               width="100%"
-              maxHeight="90vh"
+              maxHeight="100vh"
               style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
