@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { API, graphqlOperation, Auth, Storage } from 'aws-amplify';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { 
   Flex, 
   Heading, 
@@ -120,7 +122,7 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       }
 
       // Validate statement length (around 450 words)
-      const wordCount = statement.trim().split(/\s+/).length;
+      const wordCount = statement.replace(/<[^>]*>/g, '').trim().split(/\s+/).length;
       if (wordCount < 300) {
         setError('Your statement should be at least 300 words. Current count: ' + wordCount);
         return;
@@ -238,19 +240,28 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
 
         <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="1rem">
-            <TextAreaField
-              label="Statement of Interest *"
-              value={statement}
-              onChange={(e) => {
-                setStatement(e.target.value);
-                saveToDraft(e.target.value, courses);
-              }}
-              placeholder="Why are you interested in this project? Why are you qualified? What skills can you bring? What classes have you taken that relate? What do you hope to get out of this experience?"
-              rows={10}
-              required
-            />
+            <div>
+              <Text fontWeight="bold">Statement of Interest *</Text>
+              <ReactQuill
+                value={statement}
+                onChange={(value) => {
+                  setStatement(value);
+                  saveToDraft(value, courses);
+                }}
+                placeholder="Why are you interested in this project? Why are you qualified? What skills can you bring? What classes have you taken that relate? What do you hope to get out of this experience?"
+                modules={{
+                  toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['clean']
+                  ]
+                }}
+                style={{ minHeight: '380px', height: '380px' }}
+              />
+            </div>
+            
             <Text fontSize="0.9rem" color="gray">
-              Word count: {statement.trim().split(/\s+/).filter(word => word).length} (aim for ~450 words)
+              Word count: {statement.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(word => word).length} (aim for ~450 words)
             </Text>
 
             <Divider />

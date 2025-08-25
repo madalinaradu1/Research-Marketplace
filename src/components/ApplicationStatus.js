@@ -27,6 +27,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
   const [error, setError] = useState(null);
   const [viewingDocument, setViewingDocument] = useState(false);
   const [documentUrl, setDocumentUrl] = useState(null);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const { tokens } = useTheme();
   
   // Get status color
@@ -88,7 +89,6 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
       const input = {
         id: application.id,
         status: 'Cancelled',
-        statusDetail: `Cancelled (${application.status})`,
         withdrawReason,
         cancelledAt: new Date().toISOString()
       };
@@ -178,63 +178,28 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
 
         
         {isStudent && application.status !== 'Cancelled' && application.status !== 'Expired' && application.status !== 'Draft' && (
-          <View>
-            {isWithdrawing ? (
-              <Card variation="outlined">
-                <Flex direction="column" gap="1rem">
-                  <Text fontWeight="bold">Withdraw Application</Text>
-                  <TextAreaField
-                    label="Reason for withdrawing"
-                    value={withdrawReason}
-                    onChange={(e) => setWithdrawReason(e.target.value)}
-                    placeholder="Please provide a reason for withdrawing your application"
-                    required
-                  />
-                  
-                  {error && <Text color="red">{error}</Text>}
-                  
-                  <Flex gap="1rem">
-                    <Button 
-                      onClick={() => setIsWithdrawing(false)}
-                      variation="link"
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      onClick={handleWithdraw}
-                      variation="destructive"
-                      isLoading={isSubmitting}
-                    >
-                      Confirm Withdrawal
-                    </Button>
-                  </Flex>
-                </Flex>
-              </Card>
-            ) : (
-              <Flex gap="0.5rem">
-                <Button 
-                  size="small"
-                  onClick={() => setShowDetails(true)}
-                >
-                  View Details
-                </Button>
-                {(application.status === 'Returned' || application.status === 'Rejected') && showReturnedSection && (
-                  <Button 
-                    size="small"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Edit & Resubmit
-                  </Button>
-                )}
-                <Button 
-                  size="small"
-                  onClick={() => setIsWithdrawing(true)}
-                >
-                  Withdraw Application
-                </Button>
-              </Flex>
+          <Flex gap="0.5rem">
+            <Button 
+              size="small"
+              onClick={() => setShowDetails(true)}
+            >
+              View Details
+            </Button>
+            {(application.status === 'Returned' || application.status === 'Rejected') && showReturnedSection && (
+              <Button 
+                size="small"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit & Resubmit
+              </Button>
             )}
-          </View>
+            <Button 
+              size="small"
+              onClick={() => setShowWithdrawModal(true)}
+            >
+              Withdraw Application
+            </Button>
+          </Flex>
         )}
         
         {/* View Details Modal */}
@@ -289,7 +254,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                       <Flex direction="column" gap="0.5rem">
                         <Text fontWeight="bold">Statement of Interest</Text>
                         <Card variation="outlined" padding="0.5rem">
-                          <Text>{application.statement}</Text>
+                          <div dangerouslySetInnerHTML={{ __html: application.statement }} />
                         </Card>
                       </Flex>
                     </>
@@ -507,6 +472,77 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                       </Flex>
                     )}
                   </View>
+                </Flex>
+              </Card>
+            </Flex>
+          </View>
+        )}
+        
+        {/* Withdraw Application Modal */}
+        {showWithdrawModal && (
+          <View
+            position="fixed"
+            top="0"
+            left="0"
+            width="100vw"
+            height="100vh"
+            backgroundColor="rgba(0, 0, 0, 0.5)"
+            style={{ zIndex: 1000 }}
+            onClick={() => setShowWithdrawModal(false)}
+          >
+            <Flex
+              justifyContent="center"
+              alignItems="center"
+              height="100%"
+              padding="2rem"
+            >
+              <Card
+                maxWidth="700px"
+                width="100%"
+                minHeight="400px"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Flex direction="column" gap="2rem">
+                  <Heading level={4}>Withdraw Application</Heading>
+                  <TextAreaField
+                    label="Reason for withdrawing"
+                    value={withdrawReason}
+                    onChange={(e) => setWithdrawReason(e.target.value)}
+                    placeholder="Please provide a reason for withdrawing your application"
+                    required
+                    rows={8}
+                  />
+                  
+                  {error && <Text color="red">{error}</Text>}
+                  
+                  <Flex gap="1rem" justifyContent="flex-end">
+                    <Button 
+                      onClick={() => {
+                        setShowWithdrawModal(false);
+                        setWithdrawReason('');
+                        setError(null);
+                      }}
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={async () => {
+                        await handleWithdraw();
+                        if (!error) {
+                          setShowWithdrawModal(false);
+                        }
+                      }}
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                      isLoading={isSubmitting}
+                    >
+                      Confirm Withdrawal
+                    </Button>
+                  </Flex>
                 </Flex>
               </Card>
             </Flex>
