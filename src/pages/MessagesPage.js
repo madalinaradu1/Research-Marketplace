@@ -36,6 +36,9 @@ const MessagesPage = ({ user }) => {
   const [availableRecipients, setAvailableRecipients] = useState([]);
   const [newMessage, setNewMessage] = useState({ recipient: '', subject: '', body: '' });
   const [isSendingNew, setIsSendingNew] = useState(false);
+  const [archivedMessages, setArchivedMessages] = useState([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -121,6 +124,10 @@ const MessagesPage = ({ user }) => {
       
       setMessages(conversations);
       setUsers(allUsers);
+      
+      // Load archived messages from localStorage
+      const archived = JSON.parse(localStorage.getItem(`archived_messages_${userId}`) || '[]');
+      setArchivedMessages(archived);
       
       // Fetch available recipients based on user role
       await fetchAvailableRecipients(userId, allUsers);
@@ -270,9 +277,24 @@ const MessagesPage = ({ user }) => {
     }
   };
 
-  const getInboxMessages = () => messages;
+  const getInboxMessages = () => messages.filter(msg => !archivedMessages.includes(msg.id));
   const getSentMessages = () => [];
-  const getUnreadCount = () => messages.filter(msg => msg.hasUnread).length;
+  const getArchivedMessages = () => messages.filter(msg => archivedMessages.includes(msg.id));
+  const getUnreadCount = () => getInboxMessages().filter(msg => msg.hasUnread).length;
+  
+  const archiveMessage = (messageId) => {
+    const userId = user.id || user.username;
+    const newArchived = [...archivedMessages, messageId];
+    setArchivedMessages(newArchived);
+    localStorage.setItem(`archived_messages_${userId}`, JSON.stringify(newArchived));
+    setShowDeleteConfirm(false);
+    setMessageToDelete(null);
+  };
+  
+  const confirmDelete = (message) => {
+    setMessageToDelete(message);
+    setShowDeleteConfirm(true);
+  };
   
   const viewThread = async (message) => {
     if (!message.threadID) {
@@ -390,6 +412,17 @@ const MessagesPage = ({ user }) => {
                             {message.thread.length}
                           </Badge>
                         )}
+                        <Text
+                          fontSize="1.2rem"
+                          color="gray"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            confirmDelete(message);
+                          }}
+                          style={{ cursor: 'pointer', alignSelf: 'flex-end', userSelect: 'none' }}
+                        >
+                          ×
+                        </Text>
                       </Flex>
                     </Flex>
                     <Text fontWeight={message.hasUnread ? 'bold' : 'normal'}>
@@ -405,6 +438,45 @@ const MessagesPage = ({ user }) => {
           )}
         </TabItem>
         
+        <TabItem title="Archive">
+          {getArchivedMessages().length === 0 ? (
+            <Card>
+              <Text>No archived messages.</Text>
+            </Card>
+          ) : (
+            <Collection
+              items={getArchivedMessages()}
+              type="list"
+              gap="1rem"
+              wrap="nowrap"
+              direction="column"
+            >
+              {(message) => (
+                <Card 
+                  key={message.id}
+                  backgroundColor="#f5f5f5"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setSelectedMessage(message)}
+                >
+                  <Flex direction="column" gap="0.5rem">
+                    <Flex justifyContent="space-between" alignItems="center">
+                      <Text>
+                        {message.senderID === (user.id || user.username) ? `To: ${message.receiver?.name || 'Unknown'}` : `From: ${message.sender?.name || 'Unknown'}`}
+                      </Text>
+                      <Text fontSize="0.8rem">
+                        {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
+                      </Text>
+                    </Flex>
+                    <Text>{message.subject}</Text>
+                    <Text fontSize="0.9rem" color="gray">
+                      {(message.body || message.content || '').substring(0, 100)}...
+                    </Text>
+                  </Flex>
+                </Card>
+              )}
+            </Collection>
+          )}
+        </TabItem>
 
       </Tabs>
       
@@ -582,7 +654,9 @@ const MessagesPage = ({ user }) => {
                       setShowNewMessage(false);
                       setNewMessage({ recipient: '', subject: '', body: '' });
                     }}
-                    variation="link"
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
                   >
                     Cancel
                   </Button>
@@ -645,11 +719,60 @@ const MessagesPage = ({ user }) => {
                     backgroundColor="white"
                     color="black"
                     border="1px solid black"
-                    color="white"
                     isLoading={isSendingNew}
                     isDisabled={!newMessage.recipient || !newMessage.subject || !newMessage.body}
                   >
                     Send Message
+                  </Button>
+                </Flex>
+              </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && messageToDelete && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 2000 }}
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="400px"
+              width="100%"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Flex direction="column" gap="1rem">
+                <Heading level={4}>Archive Message</Heading>
+                <Text>Are you sure you want to archive this message? It will be moved to your Archive folder.</Text>
+                <Flex gap="1rem" justifyContent="flex-end">
+                  <Button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => archiveMessage(messageToDelete.id)}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Yes
                   </Button>
                 </Flex>
               </Flex>
