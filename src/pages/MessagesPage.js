@@ -101,7 +101,7 @@ const MessagesPage = ({ user }) => {
       // Group messages by thread
       const threadGroups = {};
       userMessages.forEach(msg => {
-        const threadId = msg.threadID || `${Math.min(msg.senderID, msg.receiverID)}-${Math.max(msg.senderID, msg.receiverID)}`;
+        const threadId = msg.threadID || `${Math.min(msg.senderID, msg.receiverID)}-${Math.max(msg.senderID, msg.receiverID)}-${msg.subject.replace(/^Re:\s*/, '')}`;
         if (!threadGroups[threadId]) {
           threadGroups[threadId] = [];
         }
@@ -116,7 +116,7 @@ const MessagesPage = ({ user }) => {
           return {
             ...latestMessage,
             thread: sortedThread,
-            threadId: sortedThread[0].threadID || `${Math.min(latestMessage.senderID, latestMessage.receiverID)}-${Math.max(latestMessage.senderID, latestMessage.receiverID)}`,
+            threadId: sortedThread[0].threadID || `${Math.min(latestMessage.senderID, latestMessage.receiverID)}-${Math.max(latestMessage.senderID, latestMessage.receiverID)}-${latestMessage.subject.replace(/^Re:\s*/, '')}`,
             hasUnread: sortedThread.some(msg => msg.isIncoming && !msg.isRead),
             // Keep all conversations in inbox
             isIncoming: true
@@ -550,22 +550,24 @@ const MessagesPage = ({ user }) => {
                 
                 <div>
                   <Text fontWeight="bold">Reply</Text>
-                  <ReactQuill
-                    value={replyText}
-                    onChange={setReplyText}
-                    placeholder="Type your reply here..."
-                    modules={{
-                      toolbar: [
-                        ['bold', 'italic', 'underline'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['clean']
-                      ]
-                    }}
-                    style={{ minHeight: '150px' }}
-                  />
+                  <div style={{ maxHeight: '200px' }}>
+                    <ReactQuill
+                      value={replyText}
+                      onChange={setReplyText}
+                      placeholder="Type your reply here..."
+                      modules={{
+                        toolbar: [
+                          ['bold', 'italic', 'underline'],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['clean']
+                        ]
+                      }}
+                      style={{ height: '150px' }}
+                    />
+                  </div>
                 </div>
                 
-                <Flex gap="1rem">
+                <Flex gap="1rem" marginTop="2rem">
                   <Button 
                     onClick={() => {
                       setSelectedMessage(null);
@@ -585,9 +587,8 @@ const MessagesPage = ({ user }) => {
                     border="1px solid black"
                     size="small"
                     isLoading={isReplying}
-                    isDisabled={!replyText.trim()}
                   >
-                    Send Reply
+                    Send
                   </Button>
                 </Flex>
               </Flex>

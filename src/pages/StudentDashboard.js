@@ -473,13 +473,13 @@ const StudentDashboard = ({ user }) => {
         </TabItem>
         
         <TabItem title="Returned Applications">
-          {applications.filter(app => ['Returned', 'Rejected'].includes(app.status)).length === 0 ? (
+          {applications.filter(app => app.status === 'Returned').length === 0 ? (
             <Card>
-              <Text>No returned or rejected applications.</Text>
+              <Text>No returned applications.</Text>
             </Card>
           ) : (
             <Collection
-              items={applications.filter(app => ['Returned', 'Rejected'].includes(app.status)).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
+              items={applications.filter(app => app.status === 'Returned').sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
               type="list"
               gap="1rem"
               wrap="nowrap"

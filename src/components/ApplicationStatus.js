@@ -244,10 +244,6 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                     <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
                   </Flex>
                   
-                  <Divider />
-                  
-
-                  
                   {application.statement && (
                     <>
                       <Divider />
