@@ -115,22 +115,33 @@ const Header = ({ user, signOut }) => {
             box-shadow: none !important;
           }
           .header-search-field button {
-            background-color: white !important;
-            color: gray !important;
+            background-color: transparent !important;
+            color: white !important;
+            border: none !important;
+          }
+          .header-search-field button[type="submit"] {
+            border: 1px solid white !important;
           }
           .header-search-field button:hover {
-            background-color: white !important;
-            color: gray !important;
+            background-color: transparent !important;
+            color: white !important;
             outline: none !important;
             box-shadow: none !important;
+            border: none !important;
+          }
+          .header-search-field button[type="submit"]:hover {
+            border: 1px solid white !important;
           }
           .header-search-field button:focus {
             outline: none !important;
             box-shadow: none !important;
           }
+          .header-search-field button:focus-visible {
+            outline: none !important;
+            box-shadow: none !important;
+          }
           .header-search-field svg {
-            fill: gray !important;
-            stroke: gray !important;
+            fill: white !important;
           }
         `}
       </style>
@@ -267,6 +278,7 @@ const Header = ({ user, signOut }) => {
           placeholder="Search research opportunities..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onClear={() => setSearchTerm('')}
           onKeyPress={(e) => {
             if (e.key === 'Enter') {
               navigate(`/search?q=${encodeURIComponent(searchTerm)}`);

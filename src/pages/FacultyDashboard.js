@@ -984,19 +984,21 @@ const FacultyDashboard = ({ user }) => {
                 
                 <div>
                   <Text fontWeight="bold">Message</Text>
-                  <ReactQuill
-                    value={messageText}
-                    onChange={setMessageText}
-                    placeholder="Type your message here..."
-                    modules={{
-                      toolbar: [
-                        ['bold', 'italic', 'underline'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['clean']
-                      ]
-                    }}
-                    style={{ minHeight: '150px' }}
-                  />
+                  <div style={{ height: '400px' }}>
+                    <ReactQuill
+                      value={messageText}
+                      onChange={setMessageText}
+                      placeholder="Type your message here..."
+                      modules={{
+                        toolbar: [
+                          ['bold', 'italic', 'underline'],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['clean']
+                        ]
+                      }}
+                      style={{ height: '350px' }}
+                    />
+                  </div>
                 </div>
                 <div style={{ display: 'none' }}
                   rows={6}
@@ -1056,7 +1058,7 @@ const FacultyDashboard = ({ user }) => {
                       }
                     }}
                   >
-                    Send Message
+                    Send
                   </Button>
                 </Flex>
               </Flex>
@@ -1102,19 +1104,21 @@ const FacultyDashboard = ({ user }) => {
                   />
                   <div>
                     <Text fontWeight="bold">Project Description *</Text>
-                    <ReactQuill
-                      value={projectForm.description}
-                      onChange={(value) => setProjectForm(prev => ({ ...prev, description: value }))}
-                      placeholder="Describe the research project, objectives, and what students will learn..."
-                      modules={{
-                        toolbar: [
-                          ['bold', 'italic', 'underline'],
-                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                          ['clean']
-                        ]
-                      }}
-                      style={{ minHeight: '200px' }}
-                    />
+                    <div style={{ height: '300px' }}>
+                      <ReactQuill
+                        value={projectForm.description}
+                        onChange={(value) => setProjectForm(prev => ({ ...prev, description: value }))}
+                        placeholder="Describe the research project, objectives, and what students will learn..."
+                        modules={{
+                          toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['clean']
+                          ]
+                        }}
+                        style={{ height: '250px' }}
+                      />
+                    </div>
                   </div>
                   <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
                     <TextField

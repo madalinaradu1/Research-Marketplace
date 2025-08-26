@@ -185,7 +185,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
             >
               View Details
             </Button>
-            {(application.status === 'Returned' || application.status === 'Rejected') && showReturnedSection && (
+            {application.status === 'Returned' && showReturnedSection && (
               <Button 
                 size="small"
                 onClick={() => setIsEditing(true)}

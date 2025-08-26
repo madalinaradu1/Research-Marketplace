@@ -194,19 +194,55 @@ const SearchPage = ({ user }) => {
   }
 
   return (
-    <Flex direction="column" padding="2rem" gap="2rem">
-      <Heading level={2}>Search Research Opportunities</Heading>
-      
-      {/* Search and Filters */}
-      <Card>
-        <Flex direction="column" gap="1.5rem">
-          {/* Search Bar */}
-          <SearchField
-            label="Search"
-            placeholder="Search by title, description, department, faculty, skills, or research tags..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+    <>
+      <style>
+        {`
+          .search-page-search-field button {
+            background-color: transparent !important;
+            color: gray !important;
+            border: none !important;
+          }
+          .search-page-search-field button[type="submit"] {
+            border: 1px solid black !important;
+          }
+          .search-page-search-field button:hover {
+            background-color: transparent !important;
+            color: gray !important;
+            outline: none !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
+          .search-page-search-field button[type="submit"]:hover {
+            border: 1px solid black !important;
+          }
+          .search-page-search-field button:focus {
+            outline: none !important;
+            box-shadow: none !important;
+          }
+          .search-page-search-field button:focus-visible {
+            outline: none !important;
+            box-shadow: none !important;
+          }
+          .search-page-search-field svg {
+            fill: gray !important;
+          }
+        `}
+      </style>
+      <Flex direction="column" padding="2rem" gap="2rem">
+        <Heading level={2}>Search Research Opportunities</Heading>
+        
+        {/* Search and Filters */}
+        <Card>
+          <Flex direction="column" gap="1.5rem">
+            {/* Search Bar */}
+            <SearchField
+              label="Search"
+              placeholder="Search by title, description, department, faculty, skills, or research tags..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onClear={() => setSearchTerm('')}
+              className="search-page-search-field"
+            />
           
           {/* Filter Row */}
           <Flex direction="row" gap="1rem" wrap="wrap" alignItems="flex-end">
@@ -477,7 +513,8 @@ const SearchPage = ({ user }) => {
           </Flex>
         </View>
       )}
-    </Flex>
+      </Flex>
+    </>
   );
 };
 
