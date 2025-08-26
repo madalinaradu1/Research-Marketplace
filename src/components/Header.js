@@ -294,8 +294,8 @@ const Header = ({ user, signOut }) => {
           <Button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             onMouseEnter={() => setIsMenuOpen(true)}
-            backgroundColor="white" 
-            color="#552b9a"
+            backgroundColor="#552b9a" 
+            color="white"
             size="small"
             style={{
               borderRadius: '8px',
@@ -303,7 +303,8 @@ const Header = ({ user, signOut }) => {
               height: '40px',
               padding: '0',
               outline: 'none',
-              boxShadow: 'none'
+              boxShadow: 'none',
+              border: '1px solid white'
             }}
           >
             👤
@@ -361,8 +362,8 @@ const Header = ({ user, signOut }) => {
           <Button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Navigation Menu"
-            backgroundColor="white"
-            color="black"
+            backgroundColor="#552b9a"
+            color="white"
             border="1px solid white"
             style={{ alignSelf: 'flex-start', marginTop: '-0.5rem' }}
           >

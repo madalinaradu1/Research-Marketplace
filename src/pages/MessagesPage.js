@@ -223,12 +223,22 @@ const MessagesPage = ({ user }) => {
       const userId = user.id || user.username;
       const recipientId = selectedMessage.isIncoming ? selectedMessage.senderID : selectedMessage.receiverID;
       
+      // Check if this message is archived - if so, create a new thread
+      const isMessageArchived = archivedMessages.includes(selectedMessage.id);
+      let threadID = selectedMessage.threadID;
+      
+      if (isMessageArchived) {
+        const baseThreadId = `${Math.min(userId, recipientId)}-${Math.max(userId, recipientId)}`;
+        threadID = `${baseThreadId}-${Date.now()}`; // Create new thread
+      }
+      
       const messageInput = {
         senderID: userId,
         receiverID: recipientId,
         subject: selectedMessage.subject.startsWith('Re:') ? selectedMessage.subject : `Re: ${selectedMessage.subject}`,
         body: replyText,
-        isRead: false
+        isRead: false,
+        threadID: threadID
       };
       
       console.log('Sending message with input:', messageInput);
@@ -550,7 +560,7 @@ const MessagesPage = ({ user }) => {
                 
                 <div>
                   <Text fontWeight="bold">Reply</Text>
-                  <div style={{ maxHeight: '200px' }}>
+                  <div style={{ height: '200px' }}>
                     <ReactQuill
                       value={replyText}
                       onChange={setReplyText}
@@ -618,8 +628,6 @@ const MessagesPage = ({ user }) => {
             <Card
               maxWidth="600px"
               width="100%"
-              maxHeight="100vh"
-              style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
               <Flex direction="column" gap="1rem">
@@ -653,98 +661,114 @@ const MessagesPage = ({ user }) => {
                 
                 <div>
                   <Text fontWeight="bold">Message *</Text>
-                  <ReactQuill
-                    value={newMessage.body}
-                    onChange={(value) => setNewMessage(prev => ({ ...prev, body: value }))}
-                    placeholder="Type your message here..."
-                    modules={{
-                      toolbar: [
-                        ['bold', 'italic', 'underline'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['clean']
-                      ]
-                    }}
-                    style={{ minHeight: '200px' }}
-                  />
-                </div>
-                
-                <Flex gap="1rem">
-                  <Button 
-                    onClick={() => {
-                      setShowNewMessage(false);
-                      setNewMessage({ recipient: '', subject: '', body: '' });
-                    }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={async () => {
-                      if (!newMessage.recipient || !newMessage.subject || !newMessage.body) return;
-                      
-                      setIsSendingNew(true);
-                      try {
-                        const userId = user.id || user.username;
-                        const recipient = availableRecipients.find(r => r.id === newMessage.recipient);
-                        
-                        const messageInput = {
-                          senderID: userId,
-                          receiverID: newMessage.recipient,
-                          subject: newMessage.subject,
-                          body: newMessage.body,
-                          isRead: false,
-                          sentAt: new Date().toISOString(),
-                          threadID: `${Math.min(userId, newMessage.recipient)}-${Math.max(userId, newMessage.recipient)}`,
-                          messageType: 'NEW'
-                        };
-                        
-                        await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
-                        
-                        // Create notification
-                        const notificationInput = {
-                          userID: newMessage.recipient,
-                          type: 'MESSAGE_RECEIVED',
-                          message: `You have a new message from ${user.name}`,
-                          isRead: false
-                        };
-                        
-                        await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
-                        
-                        // Send email notification
-                        try {
-                          await sendEmailNotification(
-                            recipient?.email,
-                            recipient?.name,
-                            user.name,
-                            newMessage.subject,
-                            newMessage.body,
-                            'Research Project'
-                          );
-                        } catch (emailError) {
-                          console.log('Email notification prepared (SES integration pending):', emailError);
-                        }
-                        
+                  <div style={{ height: '300px' }}>
+                    <ReactQuill
+                      value={newMessage.body}
+                      onChange={(value) => setNewMessage(prev => ({ ...prev, body: value }))}
+                      placeholder="Type your message here..."
+                      modules={{
+                        toolbar: [
+                          ['bold', 'italic', 'underline'],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['clean']
+                        ]
+                      }}
+                      style={{ height: '250px' }}
+                    />
+                  </div>
+                  
+                  <Flex gap="1rem" marginTop="1rem">
+                    <Button 
+                      onClick={() => {
                         setShowNewMessage(false);
                         setNewMessage({ recipient: '', subject: '', body: '' });
-                        fetchData(); // Refresh messages
-                      } catch (err) {
-                        console.error('Error sending message:', err);
-                        setError('Failed to send message. Please try again.');
-                      } finally {
-                        setIsSendingNew(false);
-                      }
-                    }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
-                    isLoading={isSendingNew}
-                    isDisabled={!newMessage.recipient || !newMessage.subject || !newMessage.body}
-                  >
-                    Send Message
-                  </Button>
-                </Flex>
+                      }}
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={async () => {
+                        if (!newMessage.recipient || !newMessage.subject || !newMessage.body) return;
+                        
+                        setIsSendingNew(true);
+                        try {
+                          const userId = user.id || user.username;
+                          const recipient = availableRecipients.find(r => r.id === newMessage.recipient);
+                          
+                          // Check if there are archived conversations with this recipient
+                          const baseThreadId = `${Math.min(userId, newMessage.recipient)}-${Math.max(userId, newMessage.recipient)}`;
+                          const existingConversations = messages.filter(msg => 
+                            msg.threadId && msg.threadId.startsWith(baseThreadId)
+                          );
+                          
+                          // If any conversation with this recipient is archived, create a new thread
+                          const hasArchivedConversation = existingConversations.some(conv => 
+                            archivedMessages.includes(conv.id)
+                          );
+                          
+                          const threadID = hasArchivedConversation 
+                            ? `${baseThreadId}-${Date.now()}` // Create new thread with timestamp
+                            : baseThreadId; // Use existing thread
+                          
+                          const messageInput = {
+                            senderID: userId,
+                            receiverID: newMessage.recipient,
+                            subject: newMessage.subject,
+                            body: newMessage.body,
+                            isRead: false,
+                            sentAt: new Date().toISOString(),
+                            threadID: threadID,
+                            messageType: 'NEW'
+                          };
+                          
+                          await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
+                          
+                          // Create notification
+                          const notificationInput = {
+                            userID: newMessage.recipient,
+                            type: 'MESSAGE_RECEIVED',
+                            message: `You have a new message from ${user.name}`,
+                            isRead: false
+                          };
+                          
+                          await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
+                          
+                          // Send email notification
+                          try {
+                            await sendEmailNotification(
+                              recipient?.email,
+                              recipient?.name,
+                              user.name,
+                              newMessage.subject,
+                              newMessage.body,
+                              'Research Project'
+                            );
+                          } catch (emailError) {
+                            console.log('Email notification prepared (SES integration pending):', emailError);
+                          }
+                          
+                          setShowNewMessage(false);
+                          setNewMessage({ recipient: '', subject: '', body: '' });
+                          fetchData(); // Refresh messages
+                        } catch (err) {
+                          console.error('Error sending message:', err);
+                          setError('Failed to send message. Please try again.');
+                        } finally {
+                          setIsSendingNew(false);
+                        }
+                      }}
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                      isLoading={isSendingNew}
+                    >
+                      Send
+                    </Button>
+                  </Flex>
+                </div>
               </Flex>
             </Card>
           </Flex>
