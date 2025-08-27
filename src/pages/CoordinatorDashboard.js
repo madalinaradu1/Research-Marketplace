@@ -40,6 +40,10 @@ const CoordinatorDashboard = ({ user }) => {
   const [documentUrl, setDocumentUrl] = useState(null);
   const [viewingDocument, setViewingDocument] = useState(false);
   const [viewingProject, setViewingProject] = useState(null);
+  const [pendingPage, setPendingPage] = useState(1);
+  const [approvedPage, setApprovedPage] = useState(1);
+  const [rejectedPage, setRejectedPage] = useState(1);
+  const itemsPerPage = 10;
 
 
   useEffect(() => {
@@ -230,6 +234,35 @@ const CoordinatorDashboard = ({ user }) => {
     }
   };
 
+  // Pagination helper function
+  const renderPagination = (items, currentPage, setPage) => {
+    const totalPages = Math.ceil(items.length / itemsPerPage);
+    if (totalPages <= 1) return null;
+    
+    return (
+      <Flex justifyContent="flex-end" alignItems="center" gap="0.5rem" marginTop="1rem">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+          <Button
+            key={page}
+            size="small"
+            backgroundColor={page === currentPage ? "#552b9a" : "white"}
+            color={page === currentPage ? "white" : "black"}
+            border="1px solid #552b9a"
+            onClick={() => setPage(page)}
+          >
+            {page}
+          </Button>
+        ))}
+      </Flex>
+    );
+  };
+  
+  // Get paginated items
+  const getPaginatedItems = (items, page) => {
+    const startIndex = (page - 1) * itemsPerPage;
+    return items.slice(startIndex, startIndex + itemsPerPage);
+  };
+  
   if (loading) return <Text>Loading...</Text>;
 
   return (
@@ -237,14 +270,20 @@ const CoordinatorDashboard = ({ user }) => {
       <Heading level={2}>Coordinator Dashboard</Heading>
       
 
-      <Tabs>
+      <Tabs
+        onChange={() => {
+          setPendingPage(1);
+          setApprovedPage(1);
+          setRejectedPage(1);
+        }}
+      >
         <TabItem title="Pending Reviews">
           <Flex direction="column" gap="2rem">
             {/* Projects Needing Review */}
             {projects.pending && projects.pending.length > 0 && (
               <Card>
                 <Heading level={4} marginBottom="1rem">Projects ({projects.pending.length})</Heading>
-                <Collection items={projects.pending} type="list" gap="1rem">
+                <Collection items={getPaginatedItems(projects.pending, pendingPage)} type="list" gap="1rem">
                   {(project) => (
                     <Card key={project.id} variation="outlined">
                       <Flex justifyContent="space-between" alignItems="center">
@@ -261,6 +300,7 @@ const CoordinatorDashboard = ({ user }) => {
                     </Card>
                   )}
                 </Collection>
+                {renderPagination(projects.pending, pendingPage, setPendingPage)}
               </Card>
             )}
             
@@ -268,7 +308,7 @@ const CoordinatorDashboard = ({ user }) => {
             {applications.length > 0 && (
               <Card>
                 <Heading level={4} marginBottom="1rem">Applications ({applications.length})</Heading>
-                <Collection items={applications} type="list" gap="1rem">
+                <Collection items={getPaginatedItems(applications, pendingPage)} type="list" gap="1rem">
                   {(application) => (
                     <Card key={application.id} variation="outlined">
                       <Flex justifyContent="space-between" alignItems="center">
@@ -292,6 +332,7 @@ const CoordinatorDashboard = ({ user }) => {
                     </Card>
                   )}
                 </Collection>
+                {renderPagination(applications, pendingPage, setPendingPage)}
               </Card>
             )}
             
@@ -309,7 +350,7 @@ const CoordinatorDashboard = ({ user }) => {
             {approvedApplications.length > 0 && (
               <Card>
                 <Heading level={4} marginBottom="1rem">Applications ({approvedApplications.length})</Heading>
-                <Collection items={approvedApplications} type="list" gap="1rem">
+                <Collection items={getPaginatedItems(approvedApplications, approvedPage)} type="list" gap="1rem">
                   {(application) => (
                     <Card key={application.id} variation="outlined">
                       <Flex justifyContent="space-between" alignItems="center">
@@ -330,6 +371,7 @@ const CoordinatorDashboard = ({ user }) => {
                     </Card>
                   )}
                 </Collection>
+                {renderPagination(approvedApplications, approvedPage, setApprovedPage)}
               </Card>
             )}
             
@@ -337,7 +379,7 @@ const CoordinatorDashboard = ({ user }) => {
             {projects.approved && projects.approved.length > 0 && (
               <Card>
                 <Heading level={4} marginBottom="1rem">Projects ({projects.approved.length})</Heading>
-                <Collection items={projects.approved} type="list" gap="1rem">
+                <Collection items={getPaginatedItems(projects.approved, approvedPage)} type="list" gap="1rem">
                   {(project) => (
                     <Card key={project.id} variation="outlined">
                       <Flex justifyContent="space-between" alignItems="center">
@@ -350,6 +392,7 @@ const CoordinatorDashboard = ({ user }) => {
                     </Card>
                   )}
                 </Collection>
+                {renderPagination(projects.approved, approvedPage, setApprovedPage)}
               </Card>
             )}
             
@@ -367,7 +410,7 @@ const CoordinatorDashboard = ({ user }) => {
             {rejectedApplications.length > 0 && (
               <Card>
                 <Heading level={4} marginBottom="1rem">Applications ({rejectedApplications.length})</Heading>
-                <Collection items={rejectedApplications} type="list" gap="1rem">
+                <Collection items={getPaginatedItems(rejectedApplications, rejectedPage)} type="list" gap="1rem">
                   {(application) => (
                     <Card key={application.id} variation="outlined">
                       <Flex justifyContent="space-between" alignItems="center">
@@ -391,6 +434,7 @@ const CoordinatorDashboard = ({ user }) => {
                     </Card>
                   )}
                 </Collection>
+                {renderPagination(rejectedApplications, rejectedPage, setRejectedPage)}
               </Card>
             )}
             

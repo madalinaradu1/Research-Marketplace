@@ -41,6 +41,9 @@ const StudentDashboard = ({ user }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnseenChanges, setHasUnseenChanges] = useState(false);
   const [lastViewedTime, setLastViewedTime] = useState(null);
+  const [applicationsPage, setApplicationsPage] = useState(1);
+  const [returnedPage, setReturnedPage] = useState(1);
+  const itemsPerPage = 10;
   
   useEffect(() => {
     fetchData();
@@ -210,6 +213,35 @@ const StudentDashboard = ({ user }) => {
   
   const statusCounts = getStatusCounts();
   
+  // Pagination helper function
+  const renderPagination = (items, currentPage, setPage) => {
+    const totalPages = Math.ceil(items.length / itemsPerPage);
+    if (totalPages <= 1) return null;
+    
+    return (
+      <Flex justifyContent="flex-end" alignItems="center" gap="0.5rem" marginTop="1rem">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+          <Button
+            key={page}
+            size="small"
+            backgroundColor={page === currentPage ? "#552b9a" : "white"}
+            color={page === currentPage ? "white" : "black"}
+            border="1px solid #552b9a"
+            onClick={() => setPage(page)}
+          >
+            {page}
+          </Button>
+        ))}
+      </Flex>
+    );
+  };
+  
+  // Get paginated items
+  const getPaginatedItems = (items, page) => {
+    const startIndex = (page - 1) * itemsPerPage;
+    return items.slice(startIndex, startIndex + itemsPerPage);
+  };
+  
   if (loading) {
     return (
       <Flex justifyContent="center" padding="2rem">
@@ -283,6 +315,9 @@ const StudentDashboard = ({ user }) => {
         currentIndex={activeTabIndex}
         onChange={(index) => {
           setActiveTabIndex(index);
+          // Reset pagination when switching tabs
+          setApplicationsPage(1);
+          setReturnedPage(1);
           if (index === 1) { // My Applications tab
             setHasUnseenChanges(false);
             const userId = user.id || user.username;
@@ -449,8 +484,9 @@ const StudentDashboard = ({ user }) => {
               </Button>
             </Card>
           ) : (
+            <>
             <Collection
-              items={applications}
+              items={getPaginatedItems(applications, applicationsPage)}
               type="list"
               gap="1rem"
               wrap="nowrap"
@@ -469,6 +505,8 @@ const StudentDashboard = ({ user }) => {
                 />
               )}
             </Collection>
+            {renderPagination(applications, applicationsPage, setApplicationsPage)}
+            </>
           )}
         </TabItem>
         
@@ -478,8 +516,9 @@ const StudentDashboard = ({ user }) => {
               <Text>No returned applications.</Text>
             </Card>
           ) : (
+            <>
             <Collection
-              items={applications.filter(app => app.status === 'Returned').sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
+              items={getPaginatedItems(applications.filter(app => app.status === 'Returned').sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), returnedPage)}
               type="list"
               gap="1rem"
               wrap="nowrap"
@@ -498,6 +537,8 @@ const StudentDashboard = ({ user }) => {
                 />
               )}
             </Collection>
+            {renderPagination(applications.filter(app => app.status === 'Returned'), returnedPage, setReturnedPage)}
+            </>
           )}
         </TabItem>
         

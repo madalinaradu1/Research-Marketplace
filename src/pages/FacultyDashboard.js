@@ -84,6 +84,10 @@ const FacultyDashboard = ({ user }) => {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [reviewingApplication, setReviewingApplication] = useState(null);
   const [viewingReturnReason, setViewingReturnReason] = useState(null);
+  const [projectsPage, setProjectsPage] = useState(1);
+  const [applicationsPage, setApplicationsPage] = useState(1);
+  const [pendingPage, setPendingPage] = useState(1);
+  const itemsPerPage = 10;
   
   useEffect(() => {
     fetchData();
@@ -493,6 +497,35 @@ const FacultyDashboard = ({ user }) => {
   
   const applicationCounts = getApplicationCounts();
   
+  // Pagination helper function
+  const renderPagination = (items, currentPage, setPage) => {
+    const totalPages = Math.ceil(items.length / itemsPerPage);
+    if (totalPages <= 1) return null;
+    
+    return (
+      <Flex justifyContent="flex-end" alignItems="center" gap="0.5rem" marginTop="1rem">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+          <Button
+            key={page}
+            size="small"
+            backgroundColor={page === currentPage ? "#552b9a" : "white"}
+            color={page === currentPage ? "white" : "black"}
+            border="1px solid #552b9a"
+            onClick={() => setPage(page)}
+          >
+            {page}
+          </Button>
+        ))}
+      </Flex>
+    );
+  };
+  
+  // Get paginated items
+  const getPaginatedItems = (items, page) => {
+    const startIndex = (page - 1) * itemsPerPage;
+    return items.slice(startIndex, startIndex + itemsPerPage);
+  };
+  
   if (loading) {
     return (
       <Flex justifyContent="center" padding="2rem">
@@ -585,6 +618,10 @@ const FacultyDashboard = ({ user }) => {
         currentIndex={activeTabIndex}
         onChange={(index) => {
           setActiveTabIndex(index);
+          // Reset pagination when switching tabs
+          setProjectsPage(1);
+          setApplicationsPage(1);
+          setPendingPage(1);
           if (index === 1 || index === 2) { // All Applications or Pending Review tab
             setHasUnseenApplications(false);
             const userId = user.id || user.username;
@@ -601,7 +638,8 @@ const FacultyDashboard = ({ user }) => {
               {projects.length === 0 ? (
                 <Text>No projects created yet.</Text>
               ) : (
-                <Collection items={projects.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))} type="list" gap="1rem">
+                <>
+                <Collection items={getPaginatedItems(projects.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), projectsPage)} type="list" gap="1rem">
                   {(project) => (
                     <Card key={project.id} variation="outlined">
                       <Flex direction="column" gap="0.5rem">
@@ -671,6 +709,8 @@ const FacultyDashboard = ({ user }) => {
                     </Card>
                   )}
                 </Collection>
+                {renderPagination(projects, projectsPage, setProjectsPage)}
+                </>
               )}
             </Card>
           </Flex>
@@ -689,7 +729,7 @@ const FacultyDashboard = ({ user }) => {
                 <>
                   <Divider margin="1rem 0" />
                   <Collection
-                    items={applications.filter(app => app.projectID === viewingApplicationsForProject.id).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
+                    items={getPaginatedItems(applications.filter(app => app.projectID === viewingApplicationsForProject.id).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage)}
                     type="list"
                     gap="1rem"
                     wrap="nowrap"
@@ -738,6 +778,7 @@ const FacultyDashboard = ({ user }) => {
                       </Card>
                     )}
                   </Collection>
+                  {renderPagination(applications.filter(app => app.projectID === viewingApplicationsForProject.id), applicationsPage, setApplicationsPage)}
                 </>
               )}
             </Card>
@@ -759,7 +800,7 @@ const FacultyDashboard = ({ user }) => {
                       <Text>Department: {project.department}</Text>
                       <Divider margin="1rem 0" />
                       <Collection
-                        items={projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
+                        items={getPaginatedItems(projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage)}
                         type="list"
                         gap="1rem"
                         wrap="nowrap"
@@ -808,6 +849,7 @@ const FacultyDashboard = ({ user }) => {
                         </Card>
                       )}
                     </Collection>
+                    {renderPagination(projectApplications, applicationsPage, setApplicationsPage)}
                   </Card>
                   );
                 })}
@@ -827,7 +869,7 @@ const FacultyDashboard = ({ user }) => {
               {getProjectsNeedingAttention().length > 0 && (
                 <Card>
                   <Heading level={4} marginBottom="1rem">Projects ({getProjectsNeedingAttention().length})</Heading>
-                  <Collection items={getProjectsNeedingAttention()} type="list" gap="1rem">
+                  <Collection items={getPaginatedItems(getProjectsNeedingAttention(), pendingPage)} type="list" gap="1rem">
                     {(project) => (
                       <Card key={project.id} variation="outlined">
                         <Flex justifyContent="space-between" alignItems="center">
@@ -845,6 +887,7 @@ const FacultyDashboard = ({ user }) => {
                       </Card>
                     )}
                   </Collection>
+                  {renderPagination(getProjectsNeedingAttention(), pendingPage, setPendingPage)}
                 </Card>
               )}
               {projects.map(project => {
@@ -856,7 +899,7 @@ const FacultyDashboard = ({ user }) => {
                     <Heading level={4}>{project.title}</Heading>
                     <Divider margin="1rem 0" />
                     <Collection
-                      items={projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))}
+                      items={getPaginatedItems(projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), pendingPage)}
                       type="list"
                       gap="1rem"
                       wrap="nowrap"
@@ -894,6 +937,7 @@ const FacultyDashboard = ({ user }) => {
                         </Card>
                       )}
                     </Collection>
+                    {renderPagination(projectApplications, pendingPage, setPendingPage)}
                   </Card>
                 );
               })}
