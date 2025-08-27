@@ -1333,7 +1333,9 @@ const FacultyDashboard = ({ user }) => {
                     <div style={{ height: '300px' }}>
                       <ReactQuill
                         value={projectForm.description}
-                        onChange={(value) => setProjectForm(prev => ({ ...prev, description: value }))}
+                        onChange={(value) => {
+                          setProjectForm(prev => ({ ...prev, description: value }));
+                        }}
                         placeholder="Describe the research project, objectives, and what students will learn..."
                         modules={{
                           toolbar: [
