@@ -106,6 +106,13 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       return;
     }
 
+    // Validate transcript upload if required
+    if (project.requiresTranscript && !uploadedFile) {
+      setError('This project requires transcript upload. Please upload your transcript.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       // Check application limit by counting current applications
       const currentApplications = await API.graphql(graphqlOperation(listApplications, { 
@@ -363,15 +370,20 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
             <Divider />
             
             <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">Supporting Documents (Optional)</Text>
+              <Text fontWeight="bold">
+                Supporting Documents {project.requiresTranscript ? '(Required - Transcript)' : '(Optional)'}
+              </Text>
               <Text fontSize="0.9rem" color="gray">
-                Upload additional documents that support your application (resume, portfolio, etc.)
+                {project.requiresTranscript 
+                  ? 'This project requires transcript upload. Please upload your official or unofficial transcript.'
+                  : 'Upload additional documents that support your application (resume, portfolio, etc.)'}
               </Text>
               <input
                 type="file"
                 accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
                 onChange={(e) => setUploadedFile(e.target.files[0])}
                 style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
+                required={project.requiresTranscript}
               />
               {uploadedFile && (
                 <Text fontSize="0.9rem" color="green">

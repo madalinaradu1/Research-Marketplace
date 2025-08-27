@@ -563,7 +563,16 @@ const MessagesPage = ({ user }) => {
                   <div style={{ height: '200px' }}>
                     <ReactQuill
                       value={replyText}
-                      onChange={setReplyText}
+                      onChange={(value) => {
+                        setReplyText(value);
+                        // Auto-save reply draft
+                        try {
+                          const draftKey = `reply_draft_${user.id || user.username}_${selectedMessage.id}`;
+                          localStorage.setItem(draftKey, value);
+                        } catch (e) {
+                          console.error('Error saving reply draft:', e);
+                        }
+                      }}
                       placeholder="Type your reply here..."
                       modules={{
                         toolbar: [
@@ -664,7 +673,17 @@ const MessagesPage = ({ user }) => {
                   <div style={{ height: '300px' }}>
                     <ReactQuill
                       value={newMessage.body}
-                      onChange={(value) => setNewMessage(prev => ({ ...prev, body: value }))}
+                      onChange={(value) => {
+                        setNewMessage(prev => ({ ...prev, body: value }));
+                        // Auto-save new message draft
+                        try {
+                          const draftKey = `new_message_draft_${user.id || user.username}`;
+                          const draftData = { ...newMessage, body: value };
+                          localStorage.setItem(draftKey, JSON.stringify(draftData));
+                        } catch (e) {
+                          console.error('Error saving new message draft:', e);
+                        }
+                      }}
                       placeholder="Type your message here..."
                       modules={{
                         toolbar: [

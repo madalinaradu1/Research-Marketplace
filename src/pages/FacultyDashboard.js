@@ -601,7 +601,7 @@ const FacultyDashboard = ({ user }) => {
               {projects.length === 0 ? (
                 <Text>No projects created yet.</Text>
               ) : (
-                <Collection items={projects} type="list" gap="1rem">
+                <Collection items={projects.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))} type="list" gap="1rem">
                   {(project) => (
                     <Card key={project.id} variation="outlined">
                       <Flex direction="column" gap="0.5rem">
@@ -987,7 +987,16 @@ const FacultyDashboard = ({ user }) => {
                   <div style={{ height: '400px' }}>
                     <ReactQuill
                       value={messageText}
-                      onChange={setMessageText}
+                      onChange={(value) => {
+                        setMessageText(value);
+                        // Auto-save message draft
+                        try {
+                          const draftKey = `faculty_message_draft_${user.id || user.username}_${messagingStudent?.student?.id}`;
+                          localStorage.setItem(draftKey, value);
+                        } catch (e) {
+                          console.error('Error saving message draft:', e);
+                        }
+                      }}
                       placeholder="Type your message here..."
                       modules={{
                         toolbar: [
@@ -1107,7 +1116,11 @@ const FacultyDashboard = ({ user }) => {
                     <div style={{ height: '300px' }}>
                       <ReactQuill
                         value={projectForm.description}
-                        onChange={(value) => setProjectForm(prev => ({ ...prev, description: value }))}
+                        onChange={(value) => {
+                          const newForm = { ...projectForm, description: value };
+                          setProjectForm(newForm);
+                          saveProjectToDraft(newForm);
+                        }}
                         placeholder="Describe the research project, objectives, and what students will learn..."
                         modules={{
                           toolbar: [
