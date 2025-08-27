@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { API, graphqlOperation, Auth } from 'aws-amplify';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -88,6 +88,17 @@ const FacultyDashboard = ({ user }) => {
   const [applicationsPage, setApplicationsPage] = useState(1);
   const [pendingPage, setPendingPage] = useState(1);
   const itemsPerPage = 10;
+  
+  const handleDescriptionChange = useCallback((value) => {
+    setProjectForm(prev => {
+      if (value !== prev.description) {
+        const newForm = { ...prev, description: value };
+        saveProjectToDraft(newForm);
+        return newForm;
+      }
+      return prev;
+    });
+  }, []);
   
   useEffect(() => {
     fetchData();
@@ -1032,13 +1043,15 @@ const FacultyDashboard = ({ user }) => {
                     <ReactQuill
                       value={messageText}
                       onChange={(value) => {
-                        setMessageText(value);
-                        // Auto-save message draft
-                        try {
-                          const draftKey = `faculty_message_draft_${user.id || user.username}_${messagingStudent?.student?.id}`;
-                          localStorage.setItem(draftKey, value);
-                        } catch (e) {
-                          console.error('Error saving message draft:', e);
+                        if (value !== messageText) {
+                          setMessageText(value);
+                          // Auto-save message draft
+                          try {
+                            const draftKey = `faculty_message_draft_${user.id || user.username}_${messagingStudent?.student?.id}`;
+                            localStorage.setItem(draftKey, value);
+                          } catch (e) {
+                            console.error('Error saving message draft:', e);
+                          }
                         }
                       }}
                       placeholder="Type your message here..."
@@ -1161,9 +1174,11 @@ const FacultyDashboard = ({ user }) => {
                       <ReactQuill
                         value={projectForm.description}
                         onChange={(value) => {
-                          const newForm = { ...projectForm, description: value };
-                          setProjectForm(newForm);
-                          saveProjectToDraft(newForm);
+                          if (value !== projectForm.description) {
+                            const newForm = { ...projectForm, description: value };
+                            setProjectForm(newForm);
+                            saveProjectToDraft(newForm);
+                          }
                         }}
                         placeholder="Describe the research project, objectives, and what students will learn..."
                         modules={{
@@ -1333,9 +1348,7 @@ const FacultyDashboard = ({ user }) => {
                     <div style={{ height: '300px' }}>
                       <ReactQuill
                         value={projectForm.description}
-                        onChange={(value) => {
-                          setProjectForm(prev => ({ ...prev, description: value }));
-                        }}
+                        onChange={handleDescriptionChange}
                         placeholder="Describe the research project, objectives, and what students will learn..."
                         modules={{
                           toolbar: [
