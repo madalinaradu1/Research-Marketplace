@@ -676,7 +676,7 @@ const FacultyDashboard = ({ user }) => {
                               <Button size="small" onClick={() => {
                                 editProject(project);
                                 setViewingReturnReason(project);
-                              }}>Fix & Resubmit</Button>
+                              }}>Edit and Resubmit</Button>
                             ) : (
                               <Button 
                                 size="small" 
@@ -881,7 +881,7 @@ const FacultyDashboard = ({ user }) => {
                             <Button size="small" onClick={() => {
                               editProject(project);
                               setViewingReturnReason(project);
-                            }}>Edit & Resubmit</Button>
+                            }}>Edit and Resubmit</Button>
                           </Flex>
                         </Flex>
                       </Card>
@@ -1330,19 +1330,21 @@ const FacultyDashboard = ({ user }) => {
                   
                   <div>
                     <Text fontWeight="bold">Project Description *</Text>
-                    <ReactQuill
-                      value={projectForm.description}
-                      onChange={(value) => setProjectForm(prev => ({ ...prev, description: value }))}
-                      placeholder="Describe the research project, objectives, and what students will learn..."
-                      modules={{
-                        toolbar: [
-                          ['bold', 'italic', 'underline'],
-                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                          ['clean']
-                        ]
-                      }}
-                      style={{ minHeight: '200px' }}
-                    />
+                    <div style={{ height: '300px' }}>
+                      <ReactQuill
+                        value={projectForm.description}
+                        onChange={(value) => setProjectForm(prev => ({ ...prev, description: value }))}
+                        placeholder="Describe the research project, objectives, and what students will learn..."
+                        modules={{
+                          toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['clean']
+                          ]
+                        }}
+                        style={{ height: '250px' }}
+                      />
+                    </div>
                   </div>
                   
                   <TextField
