@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { API, graphqlOperation, Auth } from 'aws-amplify';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -99,6 +99,27 @@ const FacultyDashboard = ({ user }) => {
       return prev;
     });
   }, []);
+  
+  // Refs for ReactQuill components to suppress findDOMNode warnings
+  const messageQuillRef = useRef(null);
+  const createProjectQuillRef = useRef(null);
+  const editProjectQuillRef = useRef(null);
+  
+  // Clean HTML content to remove excessive spacing
+  const cleanHtmlContent = (html) => {
+    if (!html || html === '<p><br></p>') return '';
+    return html
+      .replace(/<p><br><\/p>/g, '') // Remove empty paragraphs with breaks
+      .replace(/<p>\s*<\/p>/g, '') // Remove empty paragraphs
+      .replace(/(<br\s*\/??>\s*){2,}/g, '<br>') // Replace multiple breaks with single
+      .replace(/(<p>\s*){2,}/g, '<p>') // Remove multiple paragraph starts
+      .replace(/(<\/p>\s*){2,}/g, '</p>') // Remove multiple paragraph ends
+      .replace(/<\/p>\s*<br>\s*<ol>/g, '</p><ol>') // Remove breaks between paragraph and ordered list
+      .replace(/<\/p>\s*<br>\s*<ul>/g, '</p><ul>') // Remove breaks between paragraph and unordered list
+      .replace(/<\/p>(\s*<br>\s*){2,}<ol>/g, '</p><ol>') // Remove multiple breaks before ordered list
+      .replace(/<\/p>(\s*<br>\s*){2,}<ul>/g, '</p><ul>') // Remove multiple breaks before unordered list
+      .trim();
+  };
   
   useEffect(() => {
     fetchData();
@@ -299,7 +320,7 @@ const FacultyDashboard = ({ user }) => {
       // Prepare input with proper types and new workflow status
       const input = {
         title: projectForm.title,
-        description: projectForm.description,
+        description: cleanHtmlContent(projectForm.description),
         department: projectForm.department,
         skillsRequired: skillsArray,
         tags: tagsArray,
@@ -1041,6 +1062,7 @@ const FacultyDashboard = ({ user }) => {
                   <Text fontWeight="bold">Message</Text>
                   <div style={{ height: '400px' }}>
                     <ReactQuill
+                      ref={messageQuillRef}
                       value={messageText}
                       onChange={(value) => {
                         if (value !== messageText) {
@@ -1172,6 +1194,7 @@ const FacultyDashboard = ({ user }) => {
                     <Text fontWeight="bold">Project Description *</Text>
                     <div style={{ height: '300px' }}>
                       <ReactQuill
+                        ref={createProjectQuillRef}
                         value={projectForm.description}
                         onChange={(value) => {
                           if (value !== projectForm.description) {
@@ -1347,6 +1370,7 @@ const FacultyDashboard = ({ user }) => {
                     <Text fontWeight="bold">Project Description *</Text>
                     <div style={{ height: '300px' }}>
                       <ReactQuill
+                        ref={editProjectQuillRef}
                         value={projectForm.description}
                         onChange={handleDescriptionChange}
                         placeholder="Describe the research project, objectives, and what students will learn..."
@@ -1355,8 +1379,12 @@ const FacultyDashboard = ({ user }) => {
                             ['bold', 'italic', 'underline'],
                             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                             ['clean']
-                          ]
+                          ],
+                          clipboard: {
+                            matchVisual: false
+                          }
                         }}
+                        formats={['bold', 'italic', 'underline', 'list', 'bullet']}
                         style={{ height: '250px' }}
                       />
                     </div>
@@ -1494,7 +1522,10 @@ const FacultyDashboard = ({ user }) => {
               
               <Flex direction="column" gap="1rem">
                 <Text><strong>Department:</strong> {selectedProject.department}</Text>
-                <Text><strong>Description:</strong> {selectedProject.description}</Text>
+                <div>
+                  <Text fontWeight="bold">Description:</Text>
+                  <div dangerouslySetInnerHTML={{ __html: selectedProject.description }} />
+                </div>
                 
                 {selectedProject.qualifications && (
                   <Text><strong>Required Qualifications/Prerequisites:</strong> {selectedProject.qualifications}</Text>
