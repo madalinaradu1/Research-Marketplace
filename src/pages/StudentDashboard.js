@@ -357,7 +357,7 @@ const StudentDashboard = ({ user }) => {
                     </Flex>
                     
                     <Text fontWeight="bold">Department: {project.department}</Text>
-                    <Text>{project.description}</Text>
+                    <div dangerouslySetInnerHTML={{ __html: project.description }} />
                     
                     {project.qualifications && (
                       <Text><strong>Required Qualifications/Prerequisites:</strong> {project.qualifications}</Text>
@@ -589,7 +589,7 @@ const StudentDashboard = ({ user }) => {
                   <Text>{selectedProject.department}</Text>
                   
                   <Text fontWeight="bold">Description:</Text>
-                  <Text style={{ whiteSpace: 'pre-wrap' }}>{selectedProject.description}</Text>
+                  <div dangerouslySetInnerHTML={{ __html: selectedProject.description }} />
                   
                   {selectedProject.qualifications && (
                     <>
