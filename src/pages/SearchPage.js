@@ -283,7 +283,11 @@ const SearchPage = ({ user }) => {
               <option value="department">Department</option>
             </SelectField>
             
-            <Button onClick={clearFilters} variation="link">
+            <Button 
+              onClick={clearFilters} 
+              variation="link"
+              color="black"
+            >
               Clear Filters
             </Button>
           </Flex>
@@ -292,8 +296,15 @@ const SearchPage = ({ user }) => {
           <Flex direction="row" gap="2rem">
             <CheckboxField
               label="Available to apply"
+              name="availableToApply"
+              value="available"
               checked={showAvailableOnly}
               onChange={(e) => setShowAvailableOnly(e.target.checked)}
+              style={{
+                '--amplify-components-checkbox-button-background-color-checked': 'white',
+                '--amplify-components-checkbox-button-border-color-checked': 'black',
+                '--amplify-components-checkbox-button-color-checked': 'black'
+              }}
             />
           </Flex>
         </Flex>
@@ -355,7 +366,7 @@ const SearchPage = ({ user }) => {
                   </Flex>
                 </Flex>
                 
-                <Text>{project.description}</Text>
+                <div dangerouslySetInnerHTML={{ __html: project.description }} />
                 
                 {project.skillsRequired && project.skillsRequired.length > 0 && (
                   <Flex direction="column" gap="0.5rem">
@@ -386,14 +397,7 @@ const SearchPage = ({ user }) => {
                 <Divider />
                 
                 <Flex justifyContent="space-between" alignItems="center">
-                  <Flex gap="1rem">
-                    <Text fontSize="0.8rem">Duration: {project.duration}</Text>
-                    {project.requiresTranscript && (
-                      <Badge backgroundColor="orange" color="white">
-                        Transcript Required
-                      </Badge>
-                    )}
-                  </Flex>
+                  <Text fontSize="0.8rem">Duration: {project.duration}</Text>
                   
                   {user?.role === 'Student' && (
                     <Button 
@@ -408,7 +412,7 @@ const SearchPage = ({ user }) => {
                       isDisabled={!project.isActive || (project.applicationDeadline && new Date(project.applicationDeadline) < new Date())}
                     >
                       {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' :
-                       !project.isActive ? 'Inactive' : 'Apply Now'}
+                       !project.isActive ? 'Inactive' : 'Apply'}
                     </Button>
                   )}
                 </Flex>
