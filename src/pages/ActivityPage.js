@@ -198,7 +198,7 @@ const ActivityPage = ({ user }) => {
                       </Badge>
                     </Flex>
                     <Text fontWeight="bold">Department: {project.department}</Text>
-                    <Text>{project.description}</Text>
+                    <div dangerouslySetInnerHTML={{ __html: project.description }} />
                     {user.role === 'Faculty' && (
                       <Text fontSize="0.9rem">
                         <strong>Deadline:</strong> {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}

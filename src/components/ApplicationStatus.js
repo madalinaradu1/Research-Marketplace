@@ -140,6 +140,11 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
           <Text fontWeight="bold">Application Details</Text>
           <Text>Project: {application.project?.title || 'Unknown Project'}</Text>
           <Text>Department: {application.project?.department || 'Unknown Department'}</Text>
+          
+          {application.project?.description && (
+            <div dangerouslySetInnerHTML={{ __html: application.project.description }} />
+          )}
+          
           <Text>Status: {application.status}</Text>
           {application.statusDetail && (
             <Text>Status Detail: {application.statusDetail}</Text>
