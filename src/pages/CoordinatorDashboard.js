@@ -23,7 +23,7 @@ import { sendStatusChangeNotification, sendEmailNotification } from '../utils/em
 
 const CoordinatorDashboard = ({ user }) => {
   const { tokens } = useTheme();
-  const [projects, setProjects] = useState({ pending: [], approved: [] });
+  const [projects, setProjects] = useState({ pending: [], approved: [], rejected: [] });
   const [applications, setApplications] = useState([]);
   const [approvedApplications, setApprovedApplications] = useState([]);
   const [rejectedApplications, setRejectedApplications] = useState([]);
@@ -32,6 +32,10 @@ const CoordinatorDashboard = ({ user }) => {
   const [applicationToReject, setApplicationToReject] = useState(null);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
   const [applicationToApprove, setApplicationToApprove] = useState(null);
+  const [showProjectRejectConfirm, setShowProjectRejectConfirm] = useState(false);
+  const [projectToReject, setProjectToReject] = useState(null);
+  const [showProjectApproveConfirm, setShowProjectApproveConfirm] = useState(false);
+  const [projectToApprove, setProjectToApprove] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [viewingApplication, setViewingApplication] = useState(null);
@@ -82,6 +86,17 @@ const CoordinatorDashboard = ({ user }) => {
           };
         });
       
+      // Fetch rejected projects
+      const rejectedProjects = allProjects
+        .filter(p => p.projectStatus === 'Rejected')
+        .map(project => {
+          const faculty = allUsers.find(user => user.id === project.facultyID);
+          return {
+            ...project,
+            faculty: faculty || { name: 'Unknown Faculty' }
+          };
+        });
+      
       // Fetch applications needing coordinator review
       const applicationsResult = await API.graphql(graphqlOperation(listApplications, { limit: 100 }));
       const allApplications = applicationsResult.data?.listApplications?.items || [];
@@ -123,7 +138,7 @@ const CoordinatorDashboard = ({ user }) => {
           };
         });
       
-      setProjects({ pending: pendingProjects, approved: approvedProjects });
+      setProjects({ pending: pendingProjects, approved: approvedProjects, rejected: rejectedProjects });
       setApplications(pendingApplications);
       setApprovedApplications(approvedApps);
       setRejectedApplications(rejectedApps);
@@ -293,8 +308,15 @@ const CoordinatorDashboard = ({ user }) => {
                         </Flex>
                         <Flex gap="0.5rem">
                           <Button size="small" onClick={() => setViewingProject(project)}>View</Button>
-                          <Button size="small" onClick={() => handleProjectAction(project, 'approve')}>Approve</Button>
+                          <Button size="small" onClick={() => {
+                            setProjectToApprove(project);
+                            setShowProjectApproveConfirm(true);
+                          }}>Approve</Button>
                           <Button size="small" onClick={() => setSelectedProject(project)}>Return</Button>
+                          <Button size="small" onClick={() => {
+                            setProjectToReject(project);
+                            setShowProjectRejectConfirm(true);
+                          }}>Reject</Button>
                         </Flex>
                       </Flex>
                     </Card>
@@ -406,6 +428,38 @@ const CoordinatorDashboard = ({ user }) => {
         
         <TabItem title="Rejected Items">
           <Flex direction="column" gap="2rem">
+            {/* Rejected Projects */}
+            {projects.rejected && projects.rejected.length > 0 && (
+              <Card>
+                <Heading level={4} marginBottom="1rem">Projects ({projects.rejected.length})</Heading>
+                <Collection items={getPaginatedItems(projects.rejected, rejectedPage)} type="list" gap="1rem">
+                  {(project) => (
+                    <Card key={project.id} variation="outlined">
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Flex direction="column" gap="0.5rem" flex="1">
+                          <Text fontWeight="bold">{project.title}</Text>
+                          <Text fontSize="0.9rem">Faculty: {project.faculty?.name} • {project.department}</Text>
+                          <Text fontSize="0.8rem" color="gray">
+                            Rejected: {new Date(project.updatedAt).toLocaleDateString()}
+                          </Text>
+                        </Flex>
+                        <Button
+                          size="small"
+                          backgroundColor="white"
+                          color="black"
+                          border="1px solid black"
+                          onClick={() => setViewingProject(project)}
+                        >
+                          View Details
+                        </Button>
+                      </Flex>
+                    </Card>
+                  )}
+                </Collection>
+                {renderPagination(projects.rejected, rejectedPage, setRejectedPage)}
+              </Card>
+            )}
+            
             {/* Rejected Applications */}
             {rejectedApplications.length > 0 && (
               <Card>
@@ -438,7 +492,7 @@ const CoordinatorDashboard = ({ user }) => {
               </Card>
             )}
             
-            {rejectedApplications.length === 0 && (
+            {projects.rejected?.length === 0 && rejectedApplications.length === 0 && (
               <Card>
                 <Text>No rejected items yet.</Text>
               </Card>
@@ -976,6 +1030,120 @@ const CoordinatorDashboard = ({ user }) => {
                     border="1px solid black"
                   >
                     Approve
+                  </Button>
+                </Flex>
+              </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* Project Approve Confirmation Modal */}
+      {showProjectApproveConfirm && projectToApprove && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 2000 }}
+          onClick={() => setShowProjectApproveConfirm(false)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="400px"
+              width="100%"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Flex direction="column" gap="1rem">
+                <Heading level={4}>Approve Project</Heading>
+                <Text>Are you sure you want to approve the project "{projectToApprove.title}" by {projectToApprove.faculty?.name}?</Text>
+                <Flex gap="1rem" justifyContent="flex-end">
+                  <Button
+                    onClick={() => {
+                      setShowProjectApproveConfirm(false);
+                      setProjectToApprove(null);
+                    }}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      await handleProjectAction(projectToApprove, 'approve');
+                      setShowProjectApproveConfirm(false);
+                      setProjectToApprove(null);
+                    }}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Approve
+                  </Button>
+                </Flex>
+              </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+      
+      {/* Project Reject Confirmation Modal */}
+      {showProjectRejectConfirm && projectToReject && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 2000 }}
+          onClick={() => setShowProjectRejectConfirm(false)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="400px"
+              width="100%"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Flex direction="column" gap="1rem">
+                <Heading level={4}>Reject Project</Heading>
+                <Text>Are you sure you want to reject the project "{projectToReject.title}" by {projectToReject.faculty?.name}?</Text>
+                <Flex gap="1rem" justifyContent="flex-end">
+                  <Button
+                    onClick={() => {
+                      setShowProjectRejectConfirm(false);
+                      setProjectToReject(null);
+                    }}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      await handleProjectAction(projectToReject, 'reject');
+                      setShowProjectRejectConfirm(false);
+                      setProjectToReject(null);
+                    }}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Reject
                   </Button>
                 </Flex>
               </Flex>

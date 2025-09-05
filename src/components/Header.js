@@ -228,14 +228,16 @@ const Header = ({ user, signOut }) => {
           </Text>
         </Link>
 
-        <Link to="/activity" style={{ textDecoration: isActive('/activity') ? 'underline white' : 'none' }}>
-          <Text
-            color={isActive('/activity') ? "white" : "rgba(255,255,255,0.8)"}
-            fontWeight={isActive('/activity') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-          >
-            My Activity
-          </Text>
-        </Link>
+        {user?.role !== 'Coordinator' && (
+          <Link to="/activity" style={{ textDecoration: isActive('/activity') ? 'underline white' : 'none' }}>
+            <Text
+              color={isActive('/activity') ? "white" : "rgba(255,255,255,0.8)"}
+              fontWeight={isActive('/activity') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
+            >
+              My Activity
+            </Text>
+          </Link>
+        )}
         <Link to="/messages" style={{ position: 'relative', textDecoration: isActive('/messages') ? 'underline white' : 'none' }}>
           <Text
             color={isActive('/messages') ? "white" : "rgba(255,255,255,0.8)"}
@@ -404,7 +406,9 @@ const Header = ({ user, signOut }) => {
             >
               <Button onClick={() => { navigate('/dashboard'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Dashboard</Button>
               <Button onClick={() => { navigate('/search'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Search</Button>
-              <Button onClick={() => { navigate('/activity'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">My Activity</Button>
+              {user?.role !== 'Coordinator' && (
+                <Button onClick={() => { navigate('/activity'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">My Activity</Button>
+              )}
               <Button onClick={() => { navigate('/messages'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Messages</Button>
               <Button onClick={() => { navigate('/community'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Community</Button>
 
