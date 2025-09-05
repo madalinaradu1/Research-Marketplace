@@ -23,6 +23,18 @@ import { listUsers, listApplications, listProjects } from '../graphql/operations
 import { listMessages, updateMessage, createMessage, createNotification, getMessageThread } from '../graphql/message-operations';
 import { sendEmailNotification } from '../utils/emailNotifications';
 
+// Clean HTML content to remove excessive spacing
+const cleanHtmlContent = (html) => {
+  if (!html) return '';
+  return html
+    .replace(/<p><br><\/p>/g, '') // Remove empty paragraphs with breaks
+    .replace(/<p>\s*<\/p>/g, '') // Remove empty paragraphs
+    .replace(/<br\s*\/?>/g, ' ') // Replace breaks with spaces
+    .replace(/<\/p>\s*<p>/g, '</p><p>') // Remove extra spacing between paragraphs
+    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    .trim();
+};
+
 const MessagesPage = ({ user }) => {
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
@@ -441,7 +453,7 @@ const MessagesPage = ({ user }) => {
                       {message.subject}
                     </Text>
                     <Text fontSize="0.9rem" color="gray">
-                      {(message.body || message.content || '').substring(0, 100)}...
+                      {(message.body || message.content || '').replace(/<[^>]*>/g, '').substring(0, 100)}...
                     </Text>
                   </Flex>
                 </Card>
@@ -481,7 +493,7 @@ const MessagesPage = ({ user }) => {
                     </Flex>
                     <Text>{message.subject}</Text>
                     <Text fontSize="0.9rem" color="gray">
-                      {(message.body || message.content || '').substring(0, 100)}...
+                      {(message.body || message.content || '').replace(/<[^>]*>/g, '').substring(0, 100)}...
                     </Text>
                   </Flex>
                 </Card>
@@ -550,7 +562,7 @@ const MessagesPage = ({ user }) => {
                             {new Date(msg.sentAt || msg.createdAt).toLocaleString()}
                           </Text>
                         </Flex>
-                        <div dangerouslySetInnerHTML={{ __html: msg.body || msg.content || 'No content' }} />
+                        <div dangerouslySetInnerHTML={{ __html: cleanHtmlContent(msg.body || msg.content) || 'No content' }} />
                       </Flex>
                     </Card>
                   ))}
