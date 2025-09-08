@@ -37,6 +37,7 @@ const StudentPostsPage = ({ user }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [openKebabMenu, setOpenKebabMenu] = useState(null);
 
   const departments = [
     'Computer Science',
@@ -63,6 +64,18 @@ const StudentPostsPage = ({ user }) => {
   useEffect(() => {
     fetchPosts();
   }, [user]);
+  
+  // Close kebab menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenKebabMenu(null);
+    };
+    
+    if (openKebabMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [openKebabMenu]);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -245,22 +258,64 @@ const StudentPostsPage = ({ user }) => {
                           {new Date(post.createdAt).toLocaleDateString()}
                         </Text>
                         {((user.id || user.username) === post.student?.id || user.role === 'Admin') && (
-                          <Flex gap="0.5rem">
-                            <Button size="small" onClick={() => handleEdit(post)}>
-                              Edit
-                            </Button>
+                          <View position="relative">
                             <Button 
-                              size="small"
-                              onClick={() => {
-                                if (window.confirm('Are you sure you want to delete this post?')) {
-                                  handleDelete(post.id);
-                                }
+                              size="medium"
+                              backgroundColor="transparent"
+                              color="black"
+                              border="none"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenKebabMenu(openKebabMenu === post.id ? null : post.id);
                               }}
-                              isLoading={isDeleting}
+                              style={{ padding: '0.75rem' }}
                             >
-                              Delete
+                              ⋯
                             </Button>
-                          </Flex>
+                            {openKebabMenu === post.id && (
+                              <Card
+                                position="absolute"
+                                top="100%"
+                                left="0"
+                                style={{ zIndex: 100, minWidth: '120px' }}
+                                backgroundColor="white"
+                                border="1px solid black"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Flex direction="column" gap="0">
+                                  <Button
+                                    size="small"
+                                    backgroundColor="white"
+                                    color="black"
+                                    border="none"
+                                    style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                    onClick={() => {
+                                      handleEdit(post);
+                                      setOpenKebabMenu(null);
+                                    }}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    backgroundColor="white"
+                                    color="black"
+                                    border="none"
+                                    style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                    onClick={() => {
+                                      if (window.confirm('Are you sure you want to delete this post?')) {
+                                        handleDelete(post.id);
+                                      }
+                                      setOpenKebabMenu(null);
+                                    }}
+                                    isLoading={isDeleting}
+                                  >
+                                    Delete
+                                  </Button>
+                                </Flex>
+                              </Card>
+                            )}
+                          </View>
                         )}
                       </Flex>
                     </Flex>
@@ -335,22 +390,64 @@ const StudentPostsPage = ({ user }) => {
                           {new Date(post.createdAt).toLocaleDateString()}
                         </Text>
                         {((user.id || user.username) === post.student?.id || user.role === 'Admin') && (
-                          <Flex gap="0.5rem">
-                            <Button size="small" onClick={() => handleEdit(post)}>
-                              Edit
-                            </Button>
+                          <View position="relative">
                             <Button 
-                              size="small"
-                              onClick={() => {
-                                if (window.confirm('Are you sure you want to delete this post?')) {
-                                  handleDelete(post.id);
-                                }
+                              size="medium"
+                              backgroundColor="transparent"
+                              color="black"
+                              border="none"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenKebabMenu(openKebabMenu === post.id ? null : post.id);
                               }}
-                              isLoading={isDeleting}
+                              style={{ padding: '0.75rem' }}
                             >
-                              Delete
+                              ⋯
                             </Button>
-                          </Flex>
+                            {openKebabMenu === post.id && (
+                              <Card
+                                position="absolute"
+                                top="100%"
+                                left="0"
+                                style={{ zIndex: 100, minWidth: '120px' }}
+                                backgroundColor="white"
+                                border="1px solid black"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Flex direction="column" gap="0">
+                                  <Button
+                                    size="small"
+                                    backgroundColor="white"
+                                    color="black"
+                                    border="none"
+                                    style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                    onClick={() => {
+                                      handleEdit(post);
+                                      setOpenKebabMenu(null);
+                                    }}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    backgroundColor="white"
+                                    color="black"
+                                    border="none"
+                                    style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                    onClick={() => {
+                                      if (window.confirm('Are you sure you want to delete this post?')) {
+                                        handleDelete(post.id);
+                                      }
+                                      setOpenKebabMenu(null);
+                                    }}
+                                    isLoading={isDeleting}
+                                  >
+                                    Delete
+                                  </Button>
+                                </Flex>
+                              </Card>
+                            )}
+                          </View>
                         )}
                       </Flex>
                     </Flex>
@@ -479,7 +576,6 @@ const StudentPostsPage = ({ user }) => {
                       backgroundColor="white"
                       color="black"
                       border="1px solid black"
-                      color="white"
                       isLoading={isSubmitting}
                     >
                       {editingPost ? 'Update Post' : 'Create Post'}
