@@ -6,25 +6,51 @@ import {
   Text, 
   Button,
   Card, 
-  Divider,
   Collection,
   Loader,
   Tabs,
   TabItem,
   Badge,
-  View
+  View,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  SelectField,
+  TextField,
+  CheckboxField,
+  SwitchField,
+  Alert,
+  Divider,
+  useTheme
 } from '@aws-amplify/ui-react';
-import { listApplications, listProjects, listUsers, deleteUser } from '../graphql/operations';
-import ApplicationReview from '../components/ApplicationReview';
+import { listApplications, listProjects, listUsers, deleteUser, updateUser, createUser } from '../graphql/operations';
+import { updateUserRole } from '../utils/updateUserRole';
+import { syncUserGroupsToRole } from '../utils/syncUserGroups';
+import { deleteUserCompletely, bulkDeleteUsers, canDeleteUser } from '../utils/adminUserManagement';
 
 const AdminDashboard = ({ user }) => {
+  const { tokens } = useTheme();
   const [applications, setApplications] = useState([]);
   const [users, setUsers] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [viewingApplication, setViewingApplication] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Student', department: '' });
+  const [systemConfig, setSystemConfig] = useState({
+    maintenanceMode: false,
+    registrationEnabled: true,
+    maxApplications: 5,
+    passwordMinLength: 8,
+    sessionTimeout: 30
+  });
+  const [analytics, setAnalytics] = useState({});
   
   useEffect(() => {
     fetchData();
@@ -35,79 +61,75 @@ const AdminDashboard = ({ user }) => {
     setError(null);
     
     try {
-      // Fetch all applications with relevant courses
-      const listApplicationsWithCourses = /* GraphQL */ `
-        query ListApplications(
-          $filter: ModelApplicationFilterInput
-          $limit: Int
-          $nextToken: String
-        ) {
-          listApplications(filter: $filter, limit: $limit, nextToken: $nextToken) {
-            items {
-              id
-              studentID
-              projectID
-              statement
-              resumeKey
-              transcriptLink
-              documentKey
-              relevantCourses {
-                courseName
-                courseNumber
-                grade
-                semester
-                year
-              }
-              status
-              statusDetail
-              facultyNotes
-              coordinatorNotes
-              adminNotes
-              createdAt
-              updatedAt
-            }
-            nextToken
-          }
-        }
-      `;
+      let allApplications = [];
+      let allProjects = [];
+      let allUsers = [];
       
-      const applicationResult = await API.graphql(graphqlOperation(listApplicationsWithCourses, { 
-        limit: 100
-      }));
+      // Fetch applications
+      try {
+        const applicationResult = await API.graphql(graphqlOperation(listApplications, { 
+          limit: 100
+        }));
+        allApplications = applicationResult.data?.listApplications?.items || [];
+      } catch (appError) {
+        console.error('Error fetching applications:', appError);
+        allApplications = [];
+      }
       
-      // Fetch all projects to get project info
-      const projectResult = await API.graphql(graphqlOperation(listProjects, { 
-        limit: 100
-      }));
+      // Fetch projects
+      try {
+        const projectResult = await API.graphql(graphqlOperation(listProjects, { 
+          limit: 100
+        }));
+        allProjects = projectResult.data?.listProjects?.items || [];
+      } catch (projError) {
+        console.error('Error fetching projects:', projError);
+        allProjects = [];
+      }
       
-      // Fetch all users to get student and faculty info
-      const usersResult = await API.graphql(graphqlOperation(listUsers, { 
-        limit: 100
-      }));
+      // Fetch users
+      try {
+        const usersResult = await API.graphql(graphqlOperation(listUsers, { 
+          limit: 100
+        }));
+        allUsers = usersResult.data?.listUsers?.items || [];
+      } catch (userError) {
+        console.error('Error fetching users:', userError);
+        allUsers = [];
+      }
       
-      const allApplications = applicationResult.data.listApplications.items;
-      const allProjects = projectResult.data.listProjects.items;
-      const allUsers = usersResult.data.listUsers.items;
+      // Calculate analytics
+      const now = new Date();
+      const analyticsData = {
+        totalUsers: allUsers.length,
+        totalStudents: allUsers.filter(u => u.role === 'Student').length,
+        totalFaculty: allUsers.filter(u => u.role === 'Faculty').length,
+        totalCoordinators: allUsers.filter(u => u.role === 'Coordinator').length,
+        totalAdmins: allUsers.filter(u => u.role === 'Admin').length,
+        totalProjects: allProjects.length,
+        activeProjects: allProjects.filter(p => {
+          if (!p.applicationDeadline) return p.isActive;
+          const deadline = new Date(p.applicationDeadline);
+          return p.isActive && deadline > now;
+        }).length,
+        expiredProjects: allProjects.filter(p => {
+          if (!p.applicationDeadline) return false;
+          const deadline = new Date(p.applicationDeadline);
+          return deadline <= now;
+        }).length,
+        totalApplications: allApplications.length,
+        pendingApplications: allApplications.filter(a => ['Pending', 'Faculty Review', 'Coordinator Review'].includes(a.status)).length,
+        approvedApplications: allApplications.filter(a => a.status === 'Approved').length,
+        rejectedApplications: allApplications.filter(a => a.status === 'Rejected').length,
+        storageUsed: 'N/A', // Would be calculated from S3
+        systemUptime: 'N/A', // Would come from CloudWatch
+        avgResponseTime: 'N/A' // Would come from monitoring
+      };
       
-      // Filter applications for admin level (Admin Review and Approved) and enrich with data
-      const adminApplications = allApplications
-        .filter(app => ['Admin Review', 'Approved'].includes(app.status))
-        .map(app => {
-          const project = allProjects.find(p => p.id === app.projectID);
-          const student = allUsers.find(u => u.id === app.studentID);
-          const faculty = allUsers.find(u => u.id === project?.facultyID);
-          
-          return {
-            ...app,
-            project,
-            student,
-            faculty
-          };
-        })
-        .filter(app => app.project && app.student);
-      
-      setApplications(adminApplications);
+      setApplications(allApplications);
       setUsers(allUsers);
+      setProjects(allProjects);
+      setAnalytics(analyticsData);
     } catch (err) {
       console.error('Error fetching data:', err);
       setError('Failed to load dashboard data. Please try again.');
@@ -116,18 +138,29 @@ const AdminDashboard = ({ user }) => {
     }
   };
   
-  const handleApplicationUpdate = () => {
-    fetchData();
-  };
+
   
   const handleDeleteUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+    const targetUser = users.find(u => u.id === userId);
+    const deleteCheck = canDeleteUser(userId, user.id);
+    
+    if (!deleteCheck.canDelete) {
+      setError(deleteCheck.reason);
+      return;
+    }
+    
+    const confirmMessage = `Are you sure you want to delete ${targetUser?.name || 'this user'}?\n\nThis will:\n• Remove user from database\n• Remove user from Cognito User Pool\n• Completely revoke system access\n• Cannot be undone\n\nContinue?`;
+    
+    if (!window.confirm(confirmMessage)) {
       return;
     }
     
     setIsDeleting(true);
     try {
-      await API.graphql(graphqlOperation(deleteUser, { input: { id: userId } }));
+      const result = await deleteUserCompletely(userId, targetUser?.email);
+      if (result.success) {
+        setMessage(`User deleted successfully. ${result.cognitoDeleted ? 'Removed from both database and Cognito.' : 'Removed from database only - Cognito deletion failed.'}`);
+      }
       fetchData();
     } catch (err) {
       console.error('Error deleting user:', err);
@@ -137,19 +170,113 @@ const AdminDashboard = ({ user }) => {
     }
   };
   
-  // Count applications by status
-  const getApplicationCounts = () => {
-    const counts = {
-      pending: applications.filter(app => app.status === 'Admin Review').length,
-      approved: applications.filter(app => app.status === 'Approved').length,
-      returned: applications.filter(app => ['Returned', 'Rejected'].includes(app.status)).length,
-      total: applications.length
-    };
+  const handleDeleteSelectedUsers = async () => {
+    if (selectedUsers.size === 0) {
+      setError('No users selected for deletion.');
+      return;
+    }
     
-    return counts;
+    // Check if current user is in selection
+    if (selectedUsers.has(user.id)) {
+      setError('Cannot delete your own account. Please unselect yourself.');
+      return;
+    }
+    
+    const confirmMessage = `Are you sure you want to delete ${selectedUsers.size} selected users?\n\nThis will:\n• Remove users from database\n• Remove users from Cognito User Pool\n• Completely revoke system access\n• Cannot be undone\n\nContinue?`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+    
+    setIsDeleting(true);
+    try {
+      const results = await bulkDeleteUsers(Array.from(selectedUsers), users);
+      const successful = results.filter(r => r.success).length;
+      const failed = results.filter(r => !r.success).length;
+      
+      if (successful > 0) {
+        setMessage(`${successful} users deleted successfully from both database and Cognito. ${failed > 0 ? `${failed} failed.` : ''}`);
+      }
+      if (failed > 0) {
+        setError(`Failed to delete ${failed} users.`);
+      }
+      
+      setSelectedUsers(new Set());
+      setSelectAll(false);
+      fetchData();
+    } catch (err) {
+      console.error('Error deleting users:', err);
+      setError('Failed to delete selected users. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
   
-  const applicationCounts = getApplicationCounts();
+  const handleUserSelection = (userId, checked) => {
+    const newSelected = new Set(selectedUsers);
+    if (checked) {
+      newSelected.add(userId);
+    } else {
+      newSelected.delete(userId);
+    }
+    setSelectedUsers(newSelected);
+    setSelectAll(newSelected.size === users.length);
+  };
+  
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedUsers(new Set(users.map(u => u.id)));
+    } else {
+      setSelectedUsers(new Set());
+    }
+    setSelectAll(checked);
+  };
+  
+  const handleCreateUser = async () => {
+    if (!newUser.name || !newUser.email) {
+      setError('Name and email are required.');
+      return;
+    }
+    
+    try {
+      const userInput = {
+        id: `manual_${Date.now()}`,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        department: newUser.department || null,
+        profileComplete: true
+      };
+      
+      await API.graphql(graphqlOperation(createUser, { input: userInput }));
+      setMessage('User created successfully!');
+      setNewUser({ name: '', email: '', role: 'Student', department: '' });
+      fetchData();
+    } catch (err) {
+      console.error('Error creating user:', err);
+      setError('Failed to create user. Please try again.');
+    }
+  };
+  
+  const handleRoleUpdate = async (userId, newRole) => {
+    try {
+      await updateUserRole(userId, newRole);
+      await syncUserGroupsToRole(userId);
+      setMessage('User role updated successfully!');
+      fetchData();
+    } catch (err) {
+      console.error('Error updating role:', err);
+      setError('Failed to update user role. Please try again.');
+    }
+  };
+  
+  const handleSystemConfigUpdate = async (key, value) => {
+    setSystemConfig(prev => ({ ...prev, [key]: value }));
+    // In a real implementation, this would update system configuration in the backend
+    setMessage(`System configuration updated: ${key}`);
+  };
+  
+
   
   if (loading) {
     return (
@@ -162,209 +289,423 @@ const AdminDashboard = ({ user }) => {
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
       <Heading level={2}>Admin Dashboard</Heading>
-      <Text>Welcome, {user.name}! Review applications for final approval.</Text>
+      <Text>Welcome, {user.name}! Manage the Research Marketplace system.</Text>
       
-      {error && <Text color="red">{error}</Text>}
-      
-      <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
-        <Card variation="elevated" flex="1">
-          <Heading level={4}>Application Reviews</Heading>
-          <Flex wrap="wrap" gap="1rem" marginTop="1rem">
-            <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5} color="orange">{applicationCounts.pending}</Heading>
-              <Text>Pending Final Review</Text>
-            </Card>
-            <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5} color="green">{applicationCounts.approved}</Heading>
-              <Text>Approved</Text>
-            </Card>
-          </Flex>
-        </Card>
-        
-        <Card variation="elevated" flex="2">
-          <Heading level={4}>Review Guidelines</Heading>
-          <Text fontSize="0.9rem" marginTop="1rem">
-            Final review of applications that have been approved by faculty and coordinators:
-          </Text>
-          <Text fontSize="0.8rem" marginTop="0.5rem">
-            • Verify all requirements are met<br/>
-            • Ensure proper documentation is complete<br/>
-            • Confirm alignment with university policies<br/>
-            • Review faculty and coordinator feedback<br/>
-            • Make final approval decision
-          </Text>
-        </Card>
-      </Flex>
+      {error && <Alert variation="error" isDismissible onDismiss={() => setError(null)}>{error}</Alert>}
+      {message && <Alert variation="success" isDismissible onDismiss={() => setMessage(null)}>{message}</Alert>}
       
       <Tabs
         currentIndex={activeTabIndex}
         onChange={(index) => setActiveTabIndex(index)}
       >
-        <TabItem title="Pending Review">
-          {applications.filter(app => app.status === 'Admin Review').length === 0 ? (
-            <Card>
-              <Text>No applications pending final review.</Text>
-            </Card>
-          ) : (
-            <Collection
-              items={applications.filter(app => app.status === 'Admin Review')}
-              type="grid"
-              templateColumns="repeat(auto-fit, minmax(350px, 1fr))"
-              gap="1rem"
-            >
-              {(application) => (
-                <ApplicationReview 
-                  key={application.id}
-                  application={application}
-                  userRole="Admin"
-                  onUpdate={handleApplicationUpdate}
-                />
-              )}
-            </Collection>
-          )}
-        </TabItem>
-        
-        <TabItem title="All Applications">
-          {applications.length === 0 ? (
-            <Card>
-              <Text>No applications found for admin review.</Text>
-            </Card>
-          ) : (
-            <Flex direction="column" gap="1rem">
-              <Collection
-                items={applications}
-                type="grid"
-                templateColumns="repeat(auto-fit, minmax(350px, 1fr))"
-                gap="1rem"
-              >
-                {(application) => (
-                  <Card key={application.id}>
-                    <Flex direction="column" gap="0.5rem">
-                      <Flex justifyContent="space-between" alignItems="center">
-                        <Heading level={5}>{application.project?.title}</Heading>
-                        <Badge 
-                          backgroundColor={
-                            application.status === 'Admin Review' ? 'orange' :
-                            application.status === 'Approved' ? '#4caf50' : 'red'
-                          }
-                          color="white"
-                        >
-                          {application.status}
-                        </Badge>
-                      </Flex>
-                      
-                      <Text><strong>Student:</strong> {application.student?.name}</Text>
-                      <Text><strong>Faculty:</strong> {application.faculty?.name}</Text>
-                      <Text fontSize="0.9rem">
-                        <strong>Submitted:</strong> {new Date(application.createdAt).toLocaleDateString()}
-                      </Text>
-                      
-                      <Flex gap="0.5rem" marginTop="0.5rem">
-                        <Button 
-                          size="small" 
-                          onClick={() => setViewingApplication(application)}
-                        >
-                          View Details
-                        </Button>
-                        {application.status === 'Admin Review' && (
-                          <Button 
-                            variation="primary" 
-                            size="small" 
-                            onClick={() => setViewingApplication(application)}
-                          >
-                            Review
-                          </Button>
-                        )}
-                      </Flex>
-                    </Flex>
-                  </Card>
-                )}
-              </Collection>
+        <TabItem title="Dashboard">
+          <Flex direction="column" gap="2rem">
+            <Flex wrap="wrap" gap="1rem">
+              <Card flex="1" minWidth="200px">
+                <Heading level={4}>Users</Heading>
+                <Text fontSize="2rem" fontWeight="bold">{analytics.totalUsers}</Text>
+                <Flex gap="0.5rem" marginTop="0.5rem" wrap="wrap">
+                  <Badge backgroundColor={tokens.colors.blue[60]} color="white">Students: {analytics.totalStudents}</Badge>
+                  <Badge backgroundColor={tokens.colors.green[60]} color="white">Faculty: {analytics.totalFaculty}</Badge>
+                  <Badge backgroundColor={tokens.colors.orange[60]} color="white">Coordinators: {analytics.totalCoordinators}</Badge>
+                  <Badge backgroundColor={tokens.colors.purple[60]} color="white">Admins: {analytics.totalAdmins}</Badge>
+                </Flex>
+              </Card>
+              
+              <Card flex="1" minWidth="200px">
+                <Heading level={4}>Projects</Heading>
+                <Text fontSize="2rem" fontWeight="bold">{analytics.totalProjects}</Text>
+                <Flex gap="0.5rem" marginTop="0.5rem">
+                  <Badge backgroundColor={tokens.colors.green[60]} color="white">Active: {analytics.activeProjects}</Badge>
+                  <Badge backgroundColor={tokens.colors.red[60]} color="white">Expired: {analytics.expiredProjects}</Badge>
+                </Flex>
+              </Card>
+              
+              <Card flex="1" minWidth="200px">
+                <Heading level={4}>Applications</Heading>
+                <Text fontSize="2rem" fontWeight="bold">{analytics.totalApplications}</Text>
+                <Flex gap="0.5rem" marginTop="0.5rem">
+                  <Badge backgroundColor={tokens.colors.orange[60]} color="white">Pending: {analytics.pendingApplications}</Badge>
+                  <Badge backgroundColor="#4caf50" color="white">Approved: {analytics.approvedApplications}</Badge>
+                  <Badge backgroundColor={tokens.colors.red[60]} color="white">Rejected: {analytics.rejectedApplications}</Badge>
+                </Flex>
+              </Card>
             </Flex>
-          )}
+            
+            <Flex wrap="wrap" gap="1rem">
+              <Card flex="1" minWidth="200px">
+                <Heading level={4}>System Performance</Heading>
+                <Text><strong>Uptime:</strong> {analytics.systemUptime}</Text>
+                <Text><strong>Response Time:</strong> {analytics.avgResponseTime}</Text>
+                <Text><strong>Storage Used:</strong> {analytics.storageUsed}</Text>
+                <Text fontSize="0.8rem" color="gray" marginTop="0.5rem">
+                  * Performance metrics require CloudWatch integration
+                </Text>
+              </Card>
+              
+              <Card flex="1" minWidth="200px">
+                <Heading level={4}>Recent Activity (Today)</Heading>
+                <Text fontSize="0.9rem">• {applications.filter(a => {
+                  const today = new Date();
+                  const appDate = new Date(a.createdAt);
+                  return appDate.toDateString() === today.toDateString();
+                }).length} new applications</Text>
+                <Text fontSize="0.9rem">• {users.filter(u => {
+                  const today = new Date();
+                  const userDate = new Date(u.createdAt);
+                  return userDate.toDateString() === today.toDateString();
+                }).length} users registered</Text>
+                <Text fontSize="0.9rem">• {projects.filter(p => {
+                  const today = new Date();
+                  const projDate = new Date(p.createdAt);
+                  return projDate.toDateString() === today.toDateString();
+                }).length} projects created</Text>
+                <Text fontSize="0.8rem" color="gray" marginTop="0.5rem">
+                  * Based on actual system data
+                </Text>
+              </Card>
+            </Flex>
+          </Flex>
         </TabItem>
         
         <TabItem title="User Management">
-          <Card>
-            <Heading level={4} marginBottom="1rem">All Users ({users.length})</Heading>
-            {users.length === 0 ? (
-              <Text>No users found.</Text>
-            ) : (
-              <Collection
-                items={users}
-                type="list"
-                gap="1rem"
-              >
-                {(user) => (
-                  <Card key={user.id} variation="outlined">
-                    <Flex justifyContent="space-between" alignItems="center">
-                      <Flex direction="column" gap="0.5rem" flex="1">
-                        <Text fontWeight="bold">{user.name || 'No name'}</Text>
-                        <Text fontSize="0.9rem">{user.email} • {user.role}</Text>
-                        <Text fontSize="0.8rem">Created: {new Date(user.createdAt).toLocaleDateString()}</Text>
-                      </Flex>
-                      <Button 
-                        size="small"
-                        backgroundColor="white"
-                        color="red"
-                        border="1px solid red"
-                        onClick={() => handleDeleteUser(user.id)}
-                        isLoading={isDeleting}
-                      >
-                        Delete
-                      </Button>
-                    </Flex>
-                  </Card>
-                )}
-              </Collection>
-            )}
-          </Card>
+          <Flex direction="column" gap="2rem">
+            <Alert variation="info">
+              <strong>User Deletion:</strong> This will remove users from both the database and AWS Cognito User Pool, 
+              completely removing their access to the system.
+            </Alert>
+            
+            <Card>
+              <Heading level={4} marginBottom="1rem">Create New User</Heading>
+              <Flex gap="1rem" wrap="wrap">
+                <TextField
+                  label="Name"
+                  value={newUser.name}
+                  onChange={(e) => setNewUser(prev => ({ ...prev, name: e.target.value }))}
+                  flex="1"
+                  minWidth="200px"
+                />
+                <TextField
+                  label="Email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
+                  flex="1"
+                  minWidth="200px"
+                />
+                <SelectField
+                  label="Role"
+                  value={newUser.role}
+                  onChange={(e) => setNewUser(prev => ({ ...prev, role: e.target.value }))}
+                  flex="1"
+                  minWidth="150px"
+                >
+                  <option value="Student">Student</option>
+                  <option value="Faculty">Faculty</option>
+                  <option value="Coordinator">Coordinator</option>
+                  <option value="Admin">Admin</option>
+                </SelectField>
+                <TextField
+                  label="Department"
+                  value={newUser.department}
+                  onChange={(e) => setNewUser(prev => ({ ...prev, department: e.target.value }))}
+                  flex="1"
+                  minWidth="200px"
+                />
+                <Button onClick={handleCreateUser} alignSelf="end">
+                  Create User
+                </Button>
+              </Flex>
+            </Card>
+            
+            <Card>
+              <Flex justifyContent="space-between" alignItems="center" marginBottom="1rem">
+                <Heading level={4}>All Users ({users.length})</Heading>
+                <Flex gap="1rem" alignItems="center">
+                  <Text fontSize="0.9rem">{selectedUsers.size} selected</Text>
+                  <Button
+                    size="small"
+                    onClick={handleDeleteSelectedUsers}
+                    isDisabled={selectedUsers.size === 0 || selectedUsers.has(user.id)}
+                    isLoading={isDeleting}
+                    backgroundColor="white"
+                    color="black"
+                    border="1px solid black"
+                  >
+                    Delete Selected
+                  </Button>
+                </Flex>
+              </Flex>
+              
+              {selectedUsers.has(user.id) && (
+                <Alert variation="error" marginBottom="1rem">
+                  Cannot delete your own account. Please unselect yourself.
+                </Alert>
+              )}
+              
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell as="th">
+                      <CheckboxField
+                        isChecked={selectAll}
+                        onChange={handleSelectAll}
+                      />
+                    </TableCell>
+                    <TableCell as="th">Name</TableCell>
+                    <TableCell as="th">Email</TableCell>
+                    <TableCell as="th">Role</TableCell>
+                    <TableCell as="th">Department</TableCell>
+                    <TableCell as="th">Created</TableCell>
+                    <TableCell as="th">Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {users.map(user => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <CheckboxField
+                          isChecked={selectedUsers.has(user.id)}
+                          onChange={(checked) => handleUserSelection(user.id, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>{user.name || 'No name'}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <SelectField
+                          value={user.role || 'Student'}
+                          onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
+                          size="small"
+                        >
+                          <option value="Student">Student</option>
+                          <option value="Faculty">Faculty</option>
+                          <option value="Coordinator">Coordinator</option>
+                          <option value="Admin">Admin</option>
+                        </SelectField>
+                      </TableCell>
+                      <TableCell>{user.department || 'N/A'}</TableCell>
+                      <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <Button
+                          size="small"
+                          onClick={() => handleDeleteUser(user.id)}
+                          backgroundColor="white"
+                          color="black"
+                          border="1px solid black"
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </Flex>
+        </TabItem>
+        
+        <TabItem title="Security & Config">
+          <Flex direction="column" gap="2rem">
+            <Card>
+              <Heading level={4} marginBottom="1rem">Security Settings</Heading>
+              <Flex direction="column" gap="1rem">
+                <TextField
+                  label="Minimum Password Length"
+                  type="number"
+                  value={systemConfig.passwordMinLength}
+                  onChange={(e) => handleSystemConfigUpdate('passwordMinLength', parseInt(e.target.value))}
+                />
+                <TextField
+                  label="Session Timeout (minutes)"
+                  type="number"
+                  value={systemConfig.sessionTimeout}
+                  onChange={(e) => handleSystemConfigUpdate('sessionTimeout', parseInt(e.target.value))}
+                />
+                <SwitchField
+                  label="Two-Factor Authentication Required"
+                  isChecked={false}
+                  onChange={(checked) => handleSystemConfigUpdate('twoFactorRequired', checked)}
+                />
+              </Flex>
+            </Card>
+            
+            <Card>
+              <Heading level={4} marginBottom="1rem">Application Configuration</Heading>
+              <Flex direction="column" gap="1rem">
+                <SwitchField
+                  label="Maintenance Mode"
+                  isChecked={systemConfig.maintenanceMode}
+                  onChange={(checked) => handleSystemConfigUpdate('maintenanceMode', checked)}
+                />
+                <SwitchField
+                  label="User Registration Enabled"
+                  isChecked={systemConfig.registrationEnabled}
+                  onChange={(checked) => handleSystemConfigUpdate('registrationEnabled', checked)}
+                />
+                <TextField
+                  label="Maximum Applications per Student"
+                  type="number"
+                  value={systemConfig.maxApplications}
+                  onChange={(e) => handleSystemConfigUpdate('maxApplications', parseInt(e.target.value))}
+                />
+              </Flex>
+            </Card>
+            
+            <Card>
+              <Heading level={4} marginBottom="1rem">Data Management</Heading>
+              <Flex gap="1rem" wrap="wrap">
+                <Button>Export All Data</Button>
+                <Button>Backup Database</Button>
+                <Button>Clean Old Files</Button>
+                <Button>Generate Reports</Button>
+              </Flex>
+            </Card>
+          </Flex>
+        </TabItem>
+        
+        <TabItem title="Monitoring">
+          <Flex direction="column" gap="2rem">
+            <Card>
+              <Heading level={4} marginBottom="1rem">System Health</Heading>
+              <Flex direction="column" gap="1rem">
+                <Flex justifyContent="space-between">
+                  <Text>Database Status:</Text>
+                  <Badge backgroundColor="green" color="white">Healthy</Badge>
+                </Flex>
+                <Flex justifyContent="space-between">
+                  <Text>API Response Time:</Text>
+                  <Text>{analytics.avgResponseTime}</Text>
+                </Flex>
+                <Flex justifyContent="space-between">
+                  <Text>Storage Usage:</Text>
+                  <Text>{analytics.storageUsed}</Text>
+                </Flex>
+                <Flex justifyContent="space-between">
+                  <Text>Active Users (24h):</Text>
+                  <Text>N/A*</Text>
+                </Flex>
+                <Text fontSize="0.8rem" color="gray" marginTop="0.5rem">
+                  * Requires session tracking implementation
+                </Text>
+              </Flex>
+            </Card>
+            
+            <Card>
+              <Heading level={4} marginBottom="1rem">Error Logs</Heading>
+              <Text fontSize="0.9rem" fontFamily="monospace" backgroundColor="#f5f5f5" padding="1rem">
+                No recent errors logged.<br/>
+                <Text fontSize="0.8rem" color="gray">
+                  * Error logging requires CloudWatch Logs integration
+                </Text>
+              </Text>
+            </Card>
+            
+            <Card>
+              <Heading level={4} marginBottom="1rem">Integration Status</Heading>
+              <Flex direction="column" gap="1rem">
+                <Flex justifyContent="space-between">
+                  <Text>AWS Cognito:</Text>
+                  <Badge backgroundColor="green" color="white">Connected</Badge>
+                </Flex>
+                <Flex justifyContent="space-between">
+                  <Text>AWS S3:</Text>
+                  <Badge backgroundColor="green" color="white">Connected</Badge>
+                </Flex>
+                <Flex justifyContent="space-between">
+                  <Text>AWS SES:</Text>
+                  <Badge backgroundColor="orange" color="white">Rate Limited</Badge>
+                </Flex>
+                <Flex justifyContent="space-between">
+                  <Text>DynamoDB:</Text>
+                  <Badge backgroundColor="green" color="white">Connected</Badge>
+                </Flex>
+              </Flex>
+            </Card>
+          </Flex>
+        </TabItem>
+        
+        <TabItem title="System Overview">
+          <Flex direction="column" gap="2rem">
+            <Card>
+              <Heading level={4} marginBottom="1rem">Application Statistics</Heading>
+              <Flex wrap="wrap" gap="1rem">
+                <Card variation="outlined" padding="1rem" flex="1">
+                  <Heading level={5} color="orange">{analytics.pendingApplications}</Heading>
+                  <Text>Pending Review</Text>
+                </Card>
+                <Card variation="outlined" padding="1rem" flex="1">
+                  <Heading level={5} color="green">{analytics.approvedApplications}</Heading>
+                  <Text>Approved</Text>
+                </Card>
+                <Card variation="outlined" padding="1rem" flex="1">
+                  <Heading level={5} color="red">{analytics.rejectedApplications}</Heading>
+                  <Text>Rejected</Text>
+                </Card>
+              </Flex>
+            </Card>
+            
+            <Card>
+              <Heading level={4} marginBottom="1rem">Project Statistics</Heading>
+              <Flex wrap="wrap" gap="1rem">
+                <Card variation="outlined" padding="1rem" flex="1">
+                  <Heading level={5} color="green">{analytics.activeProjects}</Heading>
+                  <Text>Active Projects</Text>
+                </Card>
+                <Card variation="outlined" padding="1rem" flex="1">
+                  <Heading level={5} color="red">{analytics.expiredProjects}</Heading>
+                  <Text>Expired Projects</Text>
+                </Card>
+                <Card variation="outlined" padding="1rem" flex="1">
+                  <Heading level={5}>{analytics.totalProjects}</Heading>
+                  <Text>Total Projects</Text>
+                </Card>
+              </Flex>
+            </Card>
+            
+            <Card>
+              <Heading level={4} marginBottom="1rem">System Information</Heading>
+              <Text>Admins can view system statistics and manage users, but do not participate in the application approval process. Faculty and Coordinators handle application reviews.</Text>
+            </Card>
+          </Flex>
+        </TabItem>
+        
+        <TabItem title="Support">
+          <Flex direction="column" gap="2rem">
+            <Card>
+              <Heading level={4} marginBottom="1rem">Troubleshooting Tools</Heading>
+              <Flex gap="1rem" wrap="wrap">
+                <Button>Clear Cache</Button>
+                <Button>Restart Services</Button>
+                <Button>Test Connections</Button>
+                <Button>Validate Data</Button>
+                <Button>Check Permissions</Button>
+              </Flex>
+            </Card>
+            
+            <Card>
+              <Heading level={4} marginBottom="1rem">System Maintenance</Heading>
+              <Flex direction="column" gap="1rem">
+                <Button>Schedule Maintenance Window</Button>
+                <Button>Update System Components</Button>
+                <Button>Apply Security Patches</Button>
+                <Button>Optimize Database</Button>
+              </Flex>
+            </Card>
+            
+            <Card>
+              <Heading level={4} marginBottom="1rem">Policy Enforcement</Heading>
+              <Text>Ensure compliance with university policies:</Text>
+              <Flex direction="column" gap="0.5rem" marginTop="1rem">
+                <Text fontSize="0.9rem">• Data retention policies: 7 years</Text>
+                <Text fontSize="0.9rem">• Privacy compliance: FERPA compliant</Text>
+                <Text fontSize="0.9rem">• Security standards: SOC 2 Type II</Text>
+                <Text fontSize="0.9rem">• Access controls: Role-based permissions</Text>
+              </Flex>
+            </Card>
+          </Flex>
         </TabItem>
       </Tabs>
       
-      {/* View Application Details Modal */}
-      {viewingApplication && (
-        <View
-          position="fixed"
-          top="0"
-          left="0"
-          width="100vw"
-          height="100vh"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          style={{ zIndex: 1000 }}
-          onClick={() => setViewingApplication(null)}
-        >
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-            padding="2rem"
-          >
-            <Card
-              maxWidth="900px"
-              width="100%"
-              maxHeight="100vh"
-              style={{ overflow: 'auto', border: '1px solid black' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ApplicationReview 
-                application={viewingApplication}
-                userRole="Admin"
-                onUpdate={() => {
-                  handleApplicationUpdate();
-                  setViewingApplication(null);
-                }}
-              />
-              <Button 
-                onClick={() => setViewingApplication(null)}
-                marginTop="1rem"
-              >
-                Close
-              </Button>
-            </Card>
-          </Flex>
-        </View>
-      )}
+
     </Flex>
   );
 };

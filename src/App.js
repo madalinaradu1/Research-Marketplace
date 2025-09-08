@@ -19,7 +19,7 @@ import ProfilePage from './pages/ProfilePage';
 import ActivityPage from './pages/ActivityPage';
 import OpportunityDetails from './pages/OpportunityDetails';
 import CompleteProfilePage from './pages/CompleteProfilePage';
-import AdminPage from './pages/AdminPage';
+import AdminDashboard from './pages/AdminDashboard';
 import MessagesPage from './pages/MessagesPage';
 import ApplicationPage from './pages/ApplicationPage';
 import StudentPostsPage from './pages/StudentPostsPage';
@@ -241,6 +241,9 @@ function App({ signOut, user }) {
             <Route path="/community" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <StudentPostsPage user={userProfile || user} />} />
+            <Route path="/admin" element={isAdmin ? 
+              <AdminDashboard user={userProfile || user} /> : 
+              <Navigate to="/dashboard" />} />
           </Routes>
         </main>
         

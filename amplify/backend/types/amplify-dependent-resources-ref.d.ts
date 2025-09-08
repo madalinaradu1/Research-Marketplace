@@ -22,6 +22,13 @@ export type AmplifyDependentResourcesAttributes = {
     }
   },
   "function": {
+    "adminDeleteUser": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "sendEmailNotification": {
       "Arn": "string",
       "LambdaExecutionRole": "string",

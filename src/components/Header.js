@@ -272,6 +272,17 @@ const Header = ({ user, signOut }) => {
             Community
           </Text>
         </Link>
+        
+        {isUserAdmin(user, user) && (
+          <Link to="/admin" style={{ textDecoration: isActive('/admin') ? 'underline white' : 'none' }}>
+            <Text
+              color={isActive('/admin') ? "white" : "rgba(255,255,255,0.8)"}
+              fontWeight={isActive('/admin') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
+            >
+              Admin
+            </Text>
+          </Link>
+        )}
 
 
 
@@ -411,6 +422,10 @@ const Header = ({ user, signOut }) => {
               )}
               <Button onClick={() => { navigate('/messages'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Messages</Button>
               <Button onClick={() => { navigate('/community'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Community</Button>
+              
+              {isUserAdmin(user, user) && (
+                <Button onClick={() => { navigate('/admin'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Admin</Button>
+              )}
 
               {user?.role === 'Student' && (
                 <Button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" justifyContent="flex-start">Profile</Button>

@@ -9,6 +9,14 @@
           ],
           "category": "function",
           "resourceName": "sendEmailNotification"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "adminDeleteUser"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -80,6 +88,11 @@
     }
   },
   "function": {
+    "adminDeleteUser": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "sendEmailNotification": {
       "build": true,
       "providerPlugin": "awscloudformation",
@@ -87,6 +100,22 @@
     }
   },
   "parameters": {
+    "AMPLIFY_function_adminDeleteUser_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "adminDeleteUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_adminDeleteUser_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "adminDeleteUser"
+        }
+      ]
+    },
     "AMPLIFY_function_sendEmailNotification_deploymentBucketName": {
       "usedBy": [
         {
