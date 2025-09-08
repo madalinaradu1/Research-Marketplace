@@ -88,6 +88,7 @@ const FacultyDashboard = ({ user }) => {
   const [applicationsPage, setApplicationsPage] = useState(1);
   const [pendingPage, setPendingPage] = useState(1);
   const itemsPerPage = 10;
+  const [openKebabMenu, setOpenKebabMenu] = useState(null);
   
   const handleDescriptionChange = useCallback((value) => {
     setProjectForm(prev => {
@@ -124,6 +125,18 @@ const FacultyDashboard = ({ user }) => {
   useEffect(() => {
     fetchData();
   }, [user]);
+  
+  // Close kebab menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenKebabMenu(null);
+    };
+    
+    if (openKebabMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [openKebabMenu]);
   
 
   
@@ -675,67 +688,114 @@ const FacultyDashboard = ({ user }) => {
                   {(project) => (
                     <Card key={project.id} variation="outlined">
                       <Flex direction="column" gap="0.5rem">
-                        <Flex justifyContent="space-between" alignItems="center">
+                        <Flex justifyContent="space-between" alignItems="flex-start">
                           <Text fontWeight="bold">{project.title}</Text>
-                          <Badge 
-                            backgroundColor={
-                              project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'gray' :
-                              project.projectStatus === 'Approved' ? '#4caf50' :
-                              project.projectStatus === 'Returned' ? tokens.colors.yellow[60] :
-                              project.projectStatus === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.neutral[60]
-                            }
-                            color="white"
-                          >
-                            {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : (project.projectStatus || 'Draft')}
-                          </Badge>
+                          <Flex direction="column" alignItems="center" gap="0.5rem">
+                            <Badge 
+                              backgroundColor={
+                                project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'gray' :
+                                project.projectStatus === 'Approved' ? '#4caf50' :
+                                project.projectStatus === 'Returned' ? tokens.colors.yellow[60] :
+                                project.projectStatus === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.neutral[60]
+                              }
+                              color="white"
+                            >
+                              {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : (project.projectStatus || 'Draft')}
+                            </Badge>
+                            <View position="relative" style={{ marginLeft: '0.5rem' }}>
+                              <Button 
+                                size="medium"
+                                backgroundColor="transparent"
+                                color="black"
+                                border="none"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
+                                }}
+                                style={{ padding: '0.75rem' }}
+                              >
+                                ⋯
+                              </Button>
+                              {openKebabMenu === project.id && (
+                                <Card
+                                  position="absolute"
+                                  top="100%"
+                                  right="0"
+                                  style={{ zIndex: 100, minWidth: '200px' }}
+                                  backgroundColor="white"
+                                  border="1px solid black"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Flex direction="column" gap="0">
+                                    <Button
+                                      size="small"
+                                      backgroundColor="white"
+                                      color="black"
+                                      border="none"
+                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                      onClick={() => {
+                                        setSelectedProject(project);
+                                        setIsEditingProject(false);
+                                        setOpenKebabMenu(null);
+                                      }}
+                                    >
+                                      View Details
+                                    </Button>
+                                    {project.projectStatus === 'Returned' ? (
+                                      <Button
+                                        size="small"
+                                        backgroundColor="white"
+                                        color="black"
+                                        border="none"
+                                        style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                        onClick={() => {
+                                          editProject(project);
+                                          setViewingReturnReason(project);
+                                          setOpenKebabMenu(null);
+                                        }}
+                                      >
+                                        Edit and Resubmit
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        size="small"
+                                        backgroundColor="white"
+                                        color="black"
+                                        border="none"
+                                        style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                        onClick={() => {
+                                          editProject(project);
+                                          setOpenKebabMenu(null);
+                                        }}
+                                        isDisabled={project.applicationDeadline && new Date(project.applicationDeadline) < new Date()}
+                                      >
+                                        {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : 'Edit'}
+                                      </Button>
+                                    )}
+                                    {!(project.applicationDeadline && new Date(project.applicationDeadline) < new Date()) && (
+                                      <Button
+                                        size="small"
+                                        backgroundColor="white"
+                                        color="black"
+                                        border="none"
+                                        style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                        onClick={() => {
+                                          setViewingApplicationsForProject(project);
+                                          setActiveTabIndex(1);
+                                          setOpenKebabMenu(null);
+                                        }}
+                                      >
+                                        Applications ({applications.filter(app => app.projectID === project.id).length})
+                                      </Button>
+                                    )}
+                                  </Flex>
+                                </Card>
+                              )}
+                            </View>
+                          </Flex>
                         </Flex>
                         <Flex justifyContent="space-between" alignItems="center">
                           <Text fontSize="0.9rem">{project.department} • Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not set'}</Text>
-                          <Flex gap="0.5rem">
-                            <Button 
-                              size="small" 
-                              backgroundColor="white"
-                              color="black"
-                              border="1px solid black"
-                              onClick={() => {
-                                setSelectedProject(project);
-                                setIsEditingProject(false);
-                              }}
-                            >
-                              View Details
-                            </Button>
-                            {project.projectStatus === 'Returned' ? (
-                              <Button size="small" onClick={() => {
-                                editProject(project);
-                                setViewingReturnReason(project);
-                              }}>Edit and Resubmit</Button>
-                            ) : (
-                              <Button 
-                                size="small" 
-                                backgroundColor="white"
-                                color="black"
-                                border="1px solid black"
-                                onClick={() => editProject(project)}
-                                isDisabled={project.applicationDeadline && new Date(project.applicationDeadline) < new Date()}
-                              >
-                                {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : 'Edit'}
-                              </Button>
-                            )}
-                            {!(project.applicationDeadline && new Date(project.applicationDeadline) < new Date()) && (
-                              <Button 
-                                size="small" 
-                                backgroundColor="white"
-                                color="black"
-                                border="1px solid black"
-                                onClick={() => {
-                                  setViewingApplicationsForProject(project);
-                                  setActiveTabIndex(1);
-                                }}
-                              >
-                                Applications ({applications.filter(app => app.projectID === project.id).length})
-                              </Button>
-                            )}
-                          </Flex>
                         </Flex>
                       </Flex>
                     </Card>
@@ -788,24 +848,63 @@ const FacultyDashboard = ({ user }) => {
                             </Badge>
                           </Flex>
                           
-                          <Flex gap="1rem" alignItems="center">
+                          <View position="relative">
                             <Button 
-                              size="small"
-                              onClick={() => setReviewingApplication(application)}
+                              size="medium"
+                              backgroundColor="transparent"
+                              color="black"
+                              border="none"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
+                              }}
+                              style={{ padding: '0.75rem' }}
                             >
-                              View Details
+                              ⋯
                             </Button>
-                            
-
-                            {application.status === 'Approved' && (
-                              <Button 
-                                size="small"
-                                onClick={() => setMessagingStudent({ application, student: application.student })}
+                            {openKebabMenu === application.id && (
+                              <Card
+                                position="absolute"
+                                top="100%"
+                                right="0"
+                                style={{ zIndex: 100, minWidth: '200px' }}
+                                backgroundColor="white"
+                                border="1px solid black"
+                                onClick={(e) => e.stopPropagation()}
                               >
-                                Message
-                              </Button>
+                                <Flex direction="column" gap="0">
+                                  <Button
+                                    size="small"
+                                    backgroundColor="white"
+                                    color="black"
+                                    border="none"
+                                    style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                    onClick={() => {
+                                      setReviewingApplication(application);
+                                      setOpenKebabMenu(null);
+                                    }}
+                                  >
+                                    View Details
+                                  </Button>
+                                  {application.status === 'Approved' && (
+                                    <Button
+                                      size="small"
+                                      backgroundColor="white"
+                                      color="black"
+                                      border="none"
+                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                      onClick={() => {
+                                        setMessagingStudent({ application, student: application.student });
+                                        setOpenKebabMenu(null);
+                                      }}
+                                    >
+                                      Message
+                                    </Button>
+                                  )}
+                                </Flex>
+                              </Card>
                             )}
-                          </Flex>
+                          </View>
                         </Flex>
                       </Card>
                     )}
@@ -859,24 +958,63 @@ const FacultyDashboard = ({ user }) => {
                               </Badge>
                             </Flex>
                             
-                            <Flex gap="1rem" alignItems="center">
+                            <View position="relative">
                               <Button 
-                                size="small"
-                                onClick={() => setReviewingApplication(application)}
+                                size="medium"
+                                backgroundColor="transparent"
+                                color="black"
+                                border="none"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
+                                }}
+                                style={{ padding: '0.75rem' }}
                               >
-                                View Details
+                                ⋯
                               </Button>
-                              
-
-                              {application.status === 'Approved' && (
-                                <Button 
-                                  size="small"
-                                  onClick={() => setMessagingStudent({ application, student: application.student })}
+                              {openKebabMenu === application.id && (
+                                <Card
+                                  position="absolute"
+                                  top="100%"
+                                  right="0"
+                                  style={{ zIndex: 100, minWidth: '200px' }}
+                                  backgroundColor="white"
+                                  border="1px solid black"
+                                  onClick={(e) => e.stopPropagation()}
                                 >
-                                  Message
-                                </Button>
+                                  <Flex direction="column" gap="0">
+                                    <Button
+                                      size="small"
+                                      backgroundColor="white"
+                                      color="black"
+                                      border="none"
+                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                      onClick={() => {
+                                        setReviewingApplication(application);
+                                        setOpenKebabMenu(null);
+                                      }}
+                                    >
+                                      View Details
+                                    </Button>
+                                    {application.status === 'Approved' && (
+                                      <Button
+                                        size="small"
+                                        backgroundColor="white"
+                                        color="black"
+                                        border="none"
+                                        style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                        onClick={() => {
+                                          setMessagingStudent({ application, student: application.student });
+                                          setOpenKebabMenu(null);
+                                        }}
+                                      >
+                                        Message
+                                      </Button>
+                                    )}
+                                  </Flex>
+                                </Card>
                               )}
-                            </Flex>
+                            </View>
                           </Flex>
                         </Card>
                       )}
@@ -956,15 +1094,48 @@ const FacultyDashboard = ({ user }) => {
                               </Badge>
                             </Flex>
                             
-                            <Button 
-                              size="small"
-                              backgroundColor="white"
-                              color="black"
-                              border="1px solid black"
-                              onClick={() => setReviewingApplication(application)}
-                            >
-                              Review Now
-                            </Button>
+                            <View position="relative">
+                              <Button 
+                                size="medium"
+                                backgroundColor="transparent"
+                                color="black"
+                                border="none"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
+                                }}
+                                style={{ padding: '0.75rem' }}
+                              >
+                                ⋯
+                              </Button>
+                              {openKebabMenu === application.id && (
+                                <Card
+                                  position="absolute"
+                                  top="100%"
+                                  right="0"
+                                  style={{ zIndex: 100, minWidth: '200px' }}
+                                  backgroundColor="white"
+                                  border="1px solid black"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Flex direction="column" gap="0">
+                                    <Button
+                                      size="small"
+                                      backgroundColor="white"
+                                      color="black"
+                                      border="none"
+                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                      onClick={() => {
+                                        setReviewingApplication(application);
+                                        setOpenKebabMenu(null);
+                                      }}
+                                    >
+                                      Review Now
+                                    </Button>
+                                  </Flex>
+                                </Card>
+                              )}
+                            </View>
                           </Flex>
                         </Card>
                       )}

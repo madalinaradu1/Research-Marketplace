@@ -48,11 +48,24 @@ const CoordinatorDashboard = ({ user }) => {
   const [approvedPage, setApprovedPage] = useState(1);
   const [rejectedPage, setRejectedPage] = useState(1);
   const itemsPerPage = 10;
+  const [openKebabMenu, setOpenKebabMenu] = useState(null);
 
 
   useEffect(() => {
     fetchData();
   }, []);
+  
+  // Close kebab menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenKebabMenu(null);
+    };
+    
+    if (openKebabMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [openKebabMenu]);
 
   const fetchData = async () => {
     try {
@@ -306,18 +319,89 @@ const CoordinatorDashboard = ({ user }) => {
                           <Text fontWeight="bold">{project.title}</Text>
                           <Text fontSize="0.9rem">{project.faculty?.name} • {project.department}</Text>
                         </Flex>
-                        <Flex gap="0.5rem">
-                          <Button size="small" onClick={() => setViewingProject(project)}>View</Button>
-                          <Button size="small" onClick={() => {
-                            setProjectToApprove(project);
-                            setShowProjectApproveConfirm(true);
-                          }}>Approve</Button>
-                          <Button size="small" onClick={() => setSelectedProject(project)}>Return</Button>
-                          <Button size="small" onClick={() => {
-                            setProjectToReject(project);
-                            setShowProjectRejectConfirm(true);
-                          }}>Reject</Button>
-                        </Flex>
+                        <View position="relative">
+                          <Button 
+                            size="medium"
+                            backgroundColor="transparent"
+                            color="black"
+                            border="none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
+                            }}
+                            style={{ padding: '0.75rem' }}
+                          >
+                            ⋯
+                          </Button>
+                          {openKebabMenu === project.id && (
+                            <Card
+                              position="absolute"
+                              top="100%"
+                              right="0"
+                              style={{ zIndex: 100, minWidth: '200px' }}
+                              backgroundColor="white"
+                              border="1px solid black"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Flex direction="column" gap="0">
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setViewingProject(project);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  View
+                                </Button>
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setProjectToApprove(project);
+                                    setShowProjectApproveConfirm(true);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setSelectedProject(project);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  Return
+                                </Button>
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setProjectToReject(project);
+                                    setShowProjectRejectConfirm(true);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  Reject
+                                </Button>
+                              </Flex>
+                            </Card>
+                          )}
+                        </View>
                       </Flex>
                     </Card>
                   )}
@@ -338,18 +422,89 @@ const CoordinatorDashboard = ({ user }) => {
                           <Text fontWeight="bold">{application.project?.title}</Text>
                           <Text fontSize="0.9rem">{application.student?.name}</Text>
                         </Flex>
-                        <Flex gap="0.5rem">
-                          <Button size="small" onClick={() => setViewingApplication(application)}>View</Button>
-                          <Button size="small" onClick={() => {
-                            setApplicationToApprove(application);
-                            setShowApproveConfirm(true);
-                          }}>Approve</Button>
-                          <Button size="small" onClick={() => setSelectedApplication(application)}>Return</Button>
-                          <Button size="small" onClick={() => {
-                            setApplicationToReject(application);
-                            setShowRejectConfirm(true);
-                          }}>Reject</Button>
-                        </Flex>
+                        <View position="relative">
+                          <Button 
+                            size="medium"
+                            backgroundColor="transparent"
+                            color="black"
+                            border="none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
+                            }}
+                            style={{ padding: '0.75rem' }}
+                          >
+                            ⋯
+                          </Button>
+                          {openKebabMenu === application.id && (
+                            <Card
+                              position="absolute"
+                              top="100%"
+                              right="0"
+                              style={{ zIndex: 100, minWidth: '200px' }}
+                              backgroundColor="white"
+                              border="1px solid black"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Flex direction="column" gap="0">
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setViewingApplication(application);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  View
+                                </Button>
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setApplicationToApprove(application);
+                                    setShowApproveConfirm(true);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setSelectedApplication(application);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  Return
+                                </Button>
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setApplicationToReject(application);
+                                    setShowRejectConfirm(true);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  Reject
+                                </Button>
+                              </Flex>
+                            </Card>
+                          )}
+                        </View>
                       </Flex>
                     </Card>
                   )}
@@ -380,15 +535,48 @@ const CoordinatorDashboard = ({ user }) => {
                           <Text fontWeight="bold">{application.project?.title}</Text>
                           <Text fontSize="0.9rem">{application.student?.name} • {application.status}</Text>
                         </Flex>
-                        <Button
-                          size="small"
-                          backgroundColor="white"
-                          color="black"
-                          border="1px solid black"
-                          onClick={() => setViewingApplication(application)}
-                        >
-                          View Details
-                        </Button>
+                        <View position="relative">
+                          <Button 
+                            size="medium"
+                            backgroundColor="transparent"
+                            color="black"
+                            border="none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
+                            }}
+                            style={{ padding: '0.75rem' }}
+                          >
+                            ⋯
+                          </Button>
+                          {openKebabMenu === application.id && (
+                            <Card
+                              position="absolute"
+                              top="100%"
+                              right="0"
+                              style={{ zIndex: 100, minWidth: '200px' }}
+                              backgroundColor="white"
+                              border="1px solid black"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Flex direction="column" gap="0">
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setViewingApplication(application);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  View Details
+                                </Button>
+                              </Flex>
+                            </Card>
+                          )}
+                        </View>
                       </Flex>
                     </Card>
                   )}
@@ -409,7 +597,48 @@ const CoordinatorDashboard = ({ user }) => {
                           <Text fontWeight="bold">{project.title}</Text>
                           <Text fontSize="0.9rem">{project.faculty?.name} • {project.department}</Text>
                         </Flex>
-                        <Button size="small" onClick={() => setViewingProject(project)}>View Details</Button>
+                        <View position="relative">
+                          <Button 
+                            size="medium"
+                            backgroundColor="transparent"
+                            color="black"
+                            border="none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
+                            }}
+                            style={{ padding: '0.75rem' }}
+                          >
+                            ⋯
+                          </Button>
+                          {openKebabMenu === project.id && (
+                            <Card
+                              position="absolute"
+                              top="100%"
+                              right="0"
+                              style={{ zIndex: 100, minWidth: '200px' }}
+                              backgroundColor="white"
+                              border="1px solid black"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Flex direction="column" gap="0">
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setViewingProject(project);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  View Details
+                                </Button>
+                              </Flex>
+                            </Card>
+                          )}
+                        </View>
                       </Flex>
                     </Card>
                   )}
@@ -443,15 +672,48 @@ const CoordinatorDashboard = ({ user }) => {
                             Rejected: {new Date(project.updatedAt).toLocaleDateString()}
                           </Text>
                         </Flex>
-                        <Button
-                          size="small"
-                          backgroundColor="white"
-                          color="black"
-                          border="1px solid black"
-                          onClick={() => setViewingProject(project)}
-                        >
-                          View Details
-                        </Button>
+                        <View position="relative">
+                          <Button 
+                            size="medium"
+                            backgroundColor="transparent"
+                            color="black"
+                            border="none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
+                            }}
+                            style={{ padding: '0.75rem' }}
+                          >
+                            ⋯
+                          </Button>
+                          {openKebabMenu === project.id && (
+                            <Card
+                              position="absolute"
+                              top="100%"
+                              right="0"
+                              style={{ zIndex: 100, minWidth: '200px' }}
+                              backgroundColor="white"
+                              border="1px solid black"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Flex direction="column" gap="0">
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setViewingProject(project);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  View Details
+                                </Button>
+                              </Flex>
+                            </Card>
+                          )}
+                        </View>
                       </Flex>
                     </Card>
                   )}
@@ -475,15 +737,48 @@ const CoordinatorDashboard = ({ user }) => {
                             Rejected: {new Date(application.updatedAt).toLocaleDateString()}
                           </Text>
                         </Flex>
-                        <Button
-                          size="small"
-                          backgroundColor="white"
-                          color="black"
-                          border="1px solid black"
-                          onClick={() => setViewingApplication(application)}
-                        >
-                          View Details
-                        </Button>
+                        <View position="relative">
+                          <Button 
+                            size="medium"
+                            backgroundColor="transparent"
+                            color="black"
+                            border="none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
+                            }}
+                            style={{ padding: '0.75rem' }}
+                          >
+                            ⋯
+                          </Button>
+                          {openKebabMenu === application.id && (
+                            <Card
+                              position="absolute"
+                              top="100%"
+                              right="0"
+                              style={{ zIndex: 100, minWidth: '200px' }}
+                              backgroundColor="white"
+                              border="1px solid black"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Flex direction="column" gap="0">
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setViewingApplication(application);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  View Details
+                                </Button>
+                              </Flex>
+                            </Card>
+                          )}
+                        </View>
                       </Flex>
                     </Card>
                   )}
