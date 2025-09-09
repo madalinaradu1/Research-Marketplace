@@ -197,7 +197,7 @@ const AdminDashboard = ({ user }) => {
       const failed = results.filter(r => !r.success).length;
       
       if (successful > 0) {
-        setMessage(`${successful} users deleted successfully from both database and Cognito. ${failed > 0 ? `${failed} failed.` : ''}`);
+        setMessage(`${successful} user${successful > 1 ? 's' : ''} successfully deleted. ${failed > 0 ? `${failed} failed.` : ''}`);
       }
       if (failed > 0) {
         setError(`Failed to delete ${failed} users.`);
@@ -242,7 +242,7 @@ const AdminDashboard = ({ user }) => {
     
     try {
       const userInput = {
-        id: `manual_${Date.now()}`,
+        id: newUser.email, // Use email as ID to match with Cognito sign-up
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
@@ -291,7 +291,6 @@ const AdminDashboard = ({ user }) => {
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
       <Heading level={2}>Admin Dashboard</Heading>
-      <Text>Manage the Research Marketplace system.</Text>
       
       {error && <Alert variation="error" isDismissible onDismiss={() => setError(null)}>{error}</Alert>}
       {message && <Alert variation="success" isDismissible onDismiss={() => setMessage(null)}>{message}</Alert>}
@@ -455,7 +454,7 @@ const AdminDashboard = ({ user }) => {
                     <TableCell as="th">Role</TableCell>
                     <TableCell as="th">Department</TableCell>
                     <TableCell as="th">Created</TableCell>
-                    <TableCell as="th">Actions</TableCell>
+                    <TableCell as="th">Last Active</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -483,17 +482,8 @@ const AdminDashboard = ({ user }) => {
                       </TableCell>
                       <TableCell>{user.department || 'N/A'}</TableCell>
                       <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <Button
-                          size="small"
-                          onClick={() => handleDeleteUser(user.id)}
-                          backgroundColor="white"
-                          color="black"
-                          border="1px solid black"
-                        >
-                          Delete
-                        </Button>
-                      </TableCell>
+                      <TableCell>{user.updatedAt ? new Date(user.updatedAt).toLocaleString() : new Date(user.createdAt).toLocaleString()}</TableCell>
+
                     </TableRow>
                   ))}
                 </TableBody>

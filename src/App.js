@@ -97,7 +97,7 @@ function App({ signOut, user }) {
       if (payload.event === 'signIn') {
         try {
           const userData = await Auth.currentAuthenticatedUser();
-          const userExists = await checkUserExists(userData.username);
+          const userExists = await checkUserExists(userData.attributes.email);
           
           if (!userExists) {
             console.log('Creating new user record after sign in');
@@ -113,7 +113,7 @@ function App({ signOut, user }) {
     const checkCurrentUser = async () => {
       try {
         const userData = await Auth.currentAuthenticatedUser();
-        const userExists = await checkUserExists(userData.username);
+        const userExists = await checkUserExists(userData.attributes.email);
         
         if (!userExists) {
           console.log('Creating user record for current user');
@@ -135,15 +135,19 @@ function App({ signOut, user }) {
         // Sync user's Cognito groups with their role in DynamoDB
         await syncUserGroupsToRole(userData.username);
         
-        const result = await API.graphql(graphqlOperation(getUser, { id: userData.username }));
+        const result = await API.graphql(graphqlOperation(getUser, { id: userData.attributes.email }));
         const userProfile = result.data.getUser;
+        
+        console.log('Loaded user profile:', userProfile);
+        console.log('User email:', userData.attributes.email);
+        console.log('Is admin check:', isUserAdmin(user, userProfile));
         
         // If user doesn't exist or doesn't have a role, set default role
         if (!userProfile || !userProfile.role) {
           console.log('User profile missing or no role, creating/updating with Student role');
           await createUserAfterSignUp(userData);
           // Retry fetching the user
-          const retryResult = await API.graphql(graphqlOperation(getUser, { id: userData.username }));
+          const retryResult = await API.graphql(graphqlOperation(getUser, { id: userData.attributes.email }));
           setUserProfile(retryResult.data.getUser);
         } else {
           setUserProfile(userProfile);
@@ -154,7 +158,7 @@ function App({ signOut, user }) {
         try {
           const userData = await Auth.currentAuthenticatedUser();
           await createUserAfterSignUp(userData);
-          const result = await API.graphql(graphqlOperation(getUser, { id: userData.username }));
+          const result = await API.graphql(graphqlOperation(getUser, { id: userData.attributes.email }));
           setUserProfile(result.data.getUser);
         } catch (createError) {
           console.error('Error creating user:', createError);

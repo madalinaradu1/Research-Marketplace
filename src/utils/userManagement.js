@@ -20,7 +20,7 @@ export async function createUserAfterSignUp(userData) {
     }
     
     const userInput = {
-      id: username, // Use Cognito username as ID
+      id: attributes.email, // Use email as ID to match admin-created profiles
       name: `${attributes.given_name || ''} ${attributes.family_name || ''}`.trim() || attributes.name || '',
       email: attributes.email,
       role: role,
@@ -32,11 +32,11 @@ export async function createUserAfterSignUp(userData) {
     
     // Check if user already exists
     try {
-      const userExists = await checkUserExists(username);
+      const existingUser = await API.graphql(graphqlOperation(getUser, { id: attributes.email }));
       
-      if (userExists) {
-        console.log('User already exists, skipping creation');
-        return null;
+      if (existingUser.data.getUser) {
+        console.log('User already exists, preserving existing profile');
+        return existingUser.data.getUser;
       }
       
       const result = await API.graphql(graphqlOperation(createUser, { input: userInput }));
