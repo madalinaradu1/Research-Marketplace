@@ -22,6 +22,13 @@ export type AmplifyDependentResourcesAttributes = {
     }
   },
   "function": {
+    "adminCreateUser": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "adminDeleteUser": {
       "Arn": "string",
       "LambdaExecutionRole": "string",

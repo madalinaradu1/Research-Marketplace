@@ -17,6 +17,14 @@
           ],
           "category": "function",
           "resourceName": "adminDeleteUser"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "adminCreateUser"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -88,6 +96,12 @@
     }
   },
   "function": {
+    "adminCreateUser": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "adminDeleteUser": {
       "build": true,
       "providerPlugin": "awscloudformation",
@@ -100,6 +114,22 @@
     }
   },
   "parameters": {
+    "AMPLIFY_function_adminCreateUser_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "adminCreateUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_adminCreateUser_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "adminCreateUser"
+        }
+      ]
+    },
     "AMPLIFY_function_adminDeleteUser_deploymentBucketName": {
       "usedBy": [
         {

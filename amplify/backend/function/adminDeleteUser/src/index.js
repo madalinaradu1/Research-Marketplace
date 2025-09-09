@@ -17,21 +17,16 @@ exports.handler = async (event) => {
     try {
         const { userId } = JSON.parse(event.body);
         
-        // Get User Pool ID from environment variables
-        const userPoolId = process.env.AUTH_RESEARCHMARKETPLACE_USERPOOLID || 
-                          process.env.AUTH_RESEARCHMARKETPLACE74F5F456_USERPOOLID ||  
-                          process.env.AMPLIFY_USERPOOL_ID;
+        // Use the correct User Pool ID
+        const userPoolId = 'us-east-1_iMyhdFqsG';
         
-        if (!userId || !userPoolId) {
+        if (!userId) {
             return {
                 statusCode: 400,
                 headers,
-                body: JSON.stringify({ error: 'userId and userPoolId are required' })
+                body: JSON.stringify({ error: 'userId is required' })
             };
         }
-
-        console.log(`Deleting user: ${userId} from UserPool: ${userPoolId}`);
-        console.log('Available env vars:', Object.keys(process.env).filter(key => key.includes('USERPOOL')));
 
         // Delete from Cognito User Pool
         await cognitoIdentityServiceProvider.adminDeleteUser({
@@ -50,7 +45,6 @@ exports.handler = async (event) => {
         };
 
     } catch (error) {
-        console.error('Error deleting Cognito user:', error);
         return {
             statusCode: 500,
             headers,

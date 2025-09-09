@@ -7,7 +7,6 @@ import { deleteUser } from '../graphql/operations';
 export const deleteUserCompletely = async (userId, userEmail) => {
   try {
     let cognitoDeleted = false;
-    let databaseDeleted = false;
     
     // Step 1: Delete from Cognito using Lambda function
     try {
@@ -16,30 +15,27 @@ export const deleteUserCompletely = async (userId, userEmail) => {
       });
       
       cognitoDeleted = cognitoResponse.success;
-      
     } catch (cognitoError) {
       cognitoDeleted = false;
     }
     
     // Step 2: Delete from DynamoDB
-    try {
-      await API.graphql(graphqlOperation(deleteUser, { input: { id: userId } }));
-      databaseDeleted = true;
-    } catch (dbError) {
-      throw new Error('Failed to delete user from database');
+    const result = await API.graphql(graphqlOperation(deleteUser, { input: { id: userId } }));
+    
+    if (result.errors) {
+      throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
     }
     
     return {
       success: true,
-      databaseDeleted,
       cognitoDeleted,
       message: cognitoDeleted ? 
         'User deleted from both Cognito and database successfully.' :
-        'User deleted from database. Cognito deletion requires manual action.'
+        'User deleted from database. Cognito deletion failed - manual action required.'
     };
     
   } catch (error) {
-    throw error;
+    throw new Error(`Failed to delete user from database: ${error.message}`);
   }
 };
 

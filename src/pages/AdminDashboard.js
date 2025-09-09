@@ -251,11 +251,11 @@ const AdminDashboard = ({ user }) => {
       };
       
       await API.graphql(graphqlOperation(createUser, { input: userInput }));
-      setMessage('User created successfully!');
+      
+      setMessage(`User profile created successfully! User can now sign up with email: ${newUser.email}`);
       setNewUser({ name: '', email: '', role: 'Student', department: '' });
       fetchData();
     } catch (err) {
-      console.error('Error creating user:', err);
       setError('Failed to create user. Please try again.');
     }
   };
