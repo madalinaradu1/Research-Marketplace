@@ -45,7 +45,7 @@
         },
         "adminDeleteUser": {
           "deploymentBucketName": "amplify-researchmarketplace-dev-0c85c-deployment",
-          "s3Key": "amplify-builds/adminDeleteUser-30436e685861582b7a74-build.zip"
+          "s3Key": "amplify-builds/adminDeleteUser-474f4e6151446b494d36-build.zip"
         }
       },
       "storage": {

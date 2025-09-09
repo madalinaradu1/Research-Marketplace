@@ -18,7 +18,9 @@ exports.handler = async (event) => {
         const { userId } = JSON.parse(event.body);
         
         // Get User Pool ID from environment variables
-        const userPoolId = process.env.AUTH_RESEARCHMARKETPLACE_USERPOOLID;
+        const userPoolId = process.env.AUTH_RESEARCHMARKETPLACE_USERPOOLID || 
+                          process.env.AUTH_RESEARCHMARKETPLACE74F5F456_USERPOOLID ||  
+                          process.env.AMPLIFY_USERPOOL_ID;
         
         if (!userId || !userPoolId) {
             return {
@@ -29,6 +31,7 @@ exports.handler = async (event) => {
         }
 
         console.log(`Deleting user: ${userId} from UserPool: ${userPoolId}`);
+        console.log('Available env vars:', Object.keys(process.env).filter(key => key.includes('USERPOOL')));
 
         // Delete from Cognito User Pool
         await cognitoIdentityServiceProvider.adminDeleteUser({

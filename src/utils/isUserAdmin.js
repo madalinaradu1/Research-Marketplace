@@ -14,12 +14,7 @@ export function isUserAdmin(user, userProfile) {
   // Check role in DynamoDB
   const hasAdminRole = userProfile?.role === 'Admin';
   
-  // Log for debugging
-  console.log('Admin checks:', { 
-    hasAdminGroupInAttributes, 
-    hasAdminGroupInToken, 
-    hasAdminRole 
-  });
+
   
   return hasAdminGroupInAttributes || hasAdminGroupInToken || hasAdminRole;
 }

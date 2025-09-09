@@ -6,24 +6,18 @@ import { deleteUser } from '../graphql/operations';
  */
 export const deleteUserCompletely = async (userId, userEmail) => {
   try {
-    console.log(`Starting complete deletion for user: ${userId} (${userEmail})`);
-    
     let cognitoDeleted = false;
     let databaseDeleted = false;
     
     // Step 1: Delete from Cognito using Lambda function
     try {
-      console.log('Attempting Cognito user deletion...');
-      
-      const cognitoResponse = await API.post('adminapi', '/delete-user', {
+      const cognitoResponse = await API.post('emailapi', '/delete-user', {
         body: { userId }
       });
       
       cognitoDeleted = cognitoResponse.success;
-      console.log('Cognito deletion completed successfully');
       
     } catch (cognitoError) {
-      console.error('Error deleting from Cognito:', cognitoError);
       cognitoDeleted = false;
     }
     
@@ -31,9 +25,7 @@ export const deleteUserCompletely = async (userId, userEmail) => {
     try {
       await API.graphql(graphqlOperation(deleteUser, { input: { id: userId } }));
       databaseDeleted = true;
-      console.log('User deleted from DynamoDB successfully');
     } catch (dbError) {
-      console.error('Error deleting from DynamoDB:', dbError);
       throw new Error('Failed to delete user from database');
     }
     
@@ -47,7 +39,6 @@ export const deleteUserCompletely = async (userId, userEmail) => {
     };
     
   } catch (error) {
-    console.error('Error in complete user deletion:', error);
     throw error;
   }
 };
@@ -105,7 +96,6 @@ export const getUserDeletionImpact = async (userId) => {
     
     return impact;
   } catch (error) {
-    console.error('Error getting deletion impact:', error);
     return null;
   }
 };

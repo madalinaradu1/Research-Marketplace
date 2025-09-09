@@ -51,6 +51,8 @@ const AdminDashboard = ({ user }) => {
     sessionTimeout: 30
   });
   const [analytics, setAnalytics] = useState({});
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
   
   useEffect(() => {
     fetchData();
@@ -170,25 +172,25 @@ const AdminDashboard = ({ user }) => {
     }
   };
   
-  const handleDeleteSelectedUsers = async () => {
+  const handleDeleteSelectedUsers = () => {
     if (selectedUsers.size === 0) {
       setError('No users selected for deletion.');
       return;
     }
     
-    // Check if current user is in selection
     if (selectedUsers.has(user.id)) {
       setError('Cannot delete your own account. Please unselect yourself.');
       return;
     }
     
-    const confirmMessage = `Are you sure you want to delete ${selectedUsers.size} selected users?\n\nThis will:\n• Remove users from database\n• Remove users from Cognito User Pool\n• Completely revoke system access\n• Cannot be undone\n\nContinue?`;
-    
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-    
+    setShowDeleteConfirm(true);
+  };
+  
+  const confirmDeleteUsers = async () => {
     setIsDeleting(true);
+    setShowDeleteConfirm(false);
+    setConfirmText('');
+    
     try {
       const results = await bulkDeleteUsers(Array.from(selectedUsers), users);
       const successful = results.filter(r => r.success).length;
@@ -289,7 +291,7 @@ const AdminDashboard = ({ user }) => {
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
       <Heading level={2}>Admin Dashboard</Heading>
-      <Text>Welcome, {user.name}! Manage the Research Marketplace system.</Text>
+      <Text>Manage the Research Marketplace system.</Text>
       
       {error && <Alert variation="error" isDismissible onDismiss={() => setError(null)}>{error}</Alert>}
       {message && <Alert variation="success" isDismissible onDismiss={() => setMessage(null)}>{message}</Alert>}
@@ -370,10 +372,7 @@ const AdminDashboard = ({ user }) => {
         
         <TabItem title="User Management">
           <Flex direction="column" gap="2rem">
-            <Alert variation="info">
-              <strong>User Deletion:</strong> This will remove users from both the database and AWS Cognito User Pool, 
-              completely removing their access to the system.
-            </Alert>
+
             
             <Card>
               <Heading level={4} marginBottom="1rem">Create New User</Heading>
@@ -448,7 +447,7 @@ const AdminDashboard = ({ user }) => {
                     <TableCell as="th">
                       <CheckboxField
                         isChecked={selectAll}
-                        onChange={handleSelectAll}
+                        onChange={(e) => handleSelectAll(e.target.checked)}
                       />
                     </TableCell>
                     <TableCell as="th">Name</TableCell>
@@ -465,7 +464,7 @@ const AdminDashboard = ({ user }) => {
                       <TableCell>
                         <CheckboxField
                           isChecked={selectedUsers.has(user.id)}
-                          onChange={(checked) => handleUserSelection(user.id, checked)}
+                          onChange={(e) => handleUserSelection(user.id, e.target.checked)}
                         />
                       </TableCell>
                       <TableCell>{user.name || 'No name'}</TableCell>
@@ -705,6 +704,47 @@ const AdminDashboard = ({ user }) => {
         </TabItem>
       </Tabs>
       
+      {showDeleteConfirm && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100%"
+          height="100%"
+          backgroundColor="rgba(0,0,0,0.5)"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          style={{ zIndex: 1000 }}
+        >
+          <Card width="400px" padding="2rem">
+            <Heading level={4} marginBottom="1rem">Confirm User Deletion</Heading>
+            <Text marginBottom="1rem">
+              Are you sure you want to delete {selectedUsers.size} selected users?
+            </Text>
+            <Flex gap="1rem">
+              <Button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setConfirmText('');
+                }}
+                flex="1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDeleteUsers}
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
+                flex="1"
+              >
+                Delete Users
+              </Button>
+            </Flex>
+          </Card>
+        </View>
+      )}
 
     </Flex>
   );
