@@ -53,6 +53,9 @@ const AdminDashboard = ({ user }) => {
   const [analytics, setAnalytics] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [confirmText, setConfirmText] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 50;
+  const [searchTerm, setSearchTerm] = useState('');
   
   useEffect(() => {
     fetchData();
@@ -262,10 +265,12 @@ const AdminDashboard = ({ user }) => {
   
   const handleRoleUpdate = async (userId, newRole) => {
     try {
-      await updateUserRole(userId, newRole);
-      await syncUserGroupsToRole(userId);
+      console.log('Updating user role:', userId, 'to', newRole);
+      const result = await updateUserRole(userId, newRole);
+      console.log('Role update result:', result);
+      // await syncUserGroupsToRole(userId); // Disabled due to errors
       setMessage('User role updated successfully!');
-      fetchData();
+      await fetchData(); // Wait for data to refresh
     } catch (err) {
       console.error('Error updating role:', err);
       setError('Failed to update user role. Please try again.');
@@ -304,31 +309,58 @@ const AdminDashboard = ({ user }) => {
             <Flex wrap="wrap" gap="1rem">
               <Card flex="1" minWidth="200px">
                 <Heading level={4}>Users</Heading>
-                <Text fontSize="2rem" fontWeight="bold">{analytics.totalUsers}</Text>
-                <Flex gap="0.5rem" marginTop="0.5rem" wrap="wrap">
-                  <Badge backgroundColor={tokens.colors.blue[60]} color="white">Students: {analytics.totalStudents}</Badge>
-                  <Badge backgroundColor={tokens.colors.green[60]} color="white">Faculty: {analytics.totalFaculty}</Badge>
-                  <Badge backgroundColor={tokens.colors.orange[60]} color="white">Coordinators: {analytics.totalCoordinators}</Badge>
-                  <Badge backgroundColor={tokens.colors.purple[60]} color="white">Admins: {analytics.totalAdmins}</Badge>
+                <Text fontSize="2rem" fontWeight="bold" color="#333">{analytics.totalUsers}</Text>
+                <Flex direction="column" gap="0.3rem" marginTop="0.5rem">
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontSize="0.9rem">Students</Text>
+                    <Text fontSize="0.9rem" fontWeight="bold">{analytics.totalStudents}</Text>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontSize="0.9rem">Faculty</Text>
+                    <Text fontSize="0.9rem" fontWeight="bold">{analytics.totalFaculty}</Text>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontSize="0.9rem">Coordinators</Text>
+                    <Text fontSize="0.9rem" fontWeight="bold">{analytics.totalCoordinators}</Text>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontSize="0.9rem">Admins</Text>
+                    <Text fontSize="0.9rem" fontWeight="bold">{analytics.totalAdmins}</Text>
+                  </Flex>
                 </Flex>
               </Card>
               
               <Card flex="1" minWidth="200px">
                 <Heading level={4}>Projects</Heading>
-                <Text fontSize="2rem" fontWeight="bold">{analytics.totalProjects}</Text>
-                <Flex gap="0.5rem" marginTop="0.5rem">
-                  <Badge backgroundColor={tokens.colors.green[60]} color="white">Active: {analytics.activeProjects}</Badge>
-                  <Badge backgroundColor={tokens.colors.red[60]} color="white">Expired: {analytics.expiredProjects}</Badge>
+                <Text fontSize="2rem" fontWeight="bold" color="#333">{analytics.totalProjects}</Text>
+                <Flex direction="column" gap="0.3rem" marginTop="0.5rem">
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontSize="0.9rem">Active</Text>
+                    <Text fontSize="0.9rem" fontWeight="bold">{analytics.activeProjects}</Text>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontSize="0.9rem">Expired</Text>
+                    <Text fontSize="0.9rem" fontWeight="bold">{analytics.expiredProjects}</Text>
+                  </Flex>
                 </Flex>
               </Card>
               
               <Card flex="1" minWidth="200px">
                 <Heading level={4}>Applications</Heading>
-                <Text fontSize="2rem" fontWeight="bold">{analytics.totalApplications}</Text>
-                <Flex gap="0.5rem" marginTop="0.5rem">
-                  <Badge backgroundColor={tokens.colors.orange[60]} color="white">Pending: {analytics.pendingApplications}</Badge>
-                  <Badge backgroundColor="#4caf50" color="white">Approved: {analytics.approvedApplications}</Badge>
-                  <Badge backgroundColor={tokens.colors.red[60]} color="white">Rejected: {analytics.rejectedApplications}</Badge>
+                <Text fontSize="2rem" fontWeight="bold" color="#333">{analytics.totalApplications}</Text>
+                <Flex direction="column" gap="0.3rem" marginTop="0.5rem">
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontSize="0.9rem">Pending</Text>
+                    <Text fontSize="0.9rem" fontWeight="bold">{analytics.pendingApplications}</Text>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontSize="0.9rem">Approved</Text>
+                    <Text fontSize="0.9rem" fontWeight="bold">{analytics.approvedApplications}</Text>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontSize="0.9rem">Rejected</Text>
+                    <Text fontSize="0.9rem" fontWeight="bold">{analytics.rejectedApplications}</Text>
+                  </Flex>
                 </Flex>
               </Card>
             </Flex>
@@ -418,6 +450,25 @@ const AdminDashboard = ({ user }) => {
             <Card>
               <Flex justifyContent="space-between" alignItems="center" marginBottom="1rem">
                 <Heading level={4}>All Users ({users.length})</Heading>
+                <Flex alignItems="center" gap="0.5rem">
+                  <TextField
+                    placeholder="Search by name..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1); // Reset to first page when searching
+                    }}
+                    width="350px"
+                    size="small"
+                  />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                  </svg>
+                </Flex>
+              </Flex>
+              <Flex justifyContent="space-between" alignItems="center" marginBottom="1rem">
+                <Text fontSize="0.9rem">Showing filtered results</Text>
                 <Flex gap="1rem" alignItems="center">
                   <Text fontSize="0.9rem">{selectedUsers.size} selected</Text>
                   <Button
@@ -444,9 +495,16 @@ const AdminDashboard = ({ user }) => {
                 <TableHead>
                   <TableRow>
                     <TableCell as="th">
-                      <CheckboxField
-                        isChecked={selectAll}
-                        onChange={(e) => handleSelectAll(e.target.checked)}
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={(e) => {
+                          handleSelectAll(e.target.checked);
+                        }}
+                        onClick={(e) => {
+                          const newChecked = !selectAll;
+                          handleSelectAll(newChecked);
+                        }}
                       />
                     </TableCell>
                     <TableCell as="th">Name</TableCell>
@@ -458,21 +516,47 @@ const AdminDashboard = ({ user }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {users.map(user => (
-                    <TableRow key={user.id}>
+                  {(() => {
+                    // Filter users by search term
+                    const filteredUsers = users.filter(user => {
+                      const name = (user.name || '').toLowerCase();
+                      const search = searchTerm.toLowerCase();
+                      return name.includes(search);
+                    });
+                    
+                    // Sort filtered users alphabetically
+                    const sortedUsers = [...filteredUsers].sort((a, b) => {
+                      const nameA = (a.name || '').toLowerCase();
+                      const nameB = (b.name || '').toLowerCase();
+                      return nameA.localeCompare(nameB);
+                    });
+                    
+                    const startIndex = (currentPage - 1) * usersPerPage;
+                    const endIndex = startIndex + usersPerPage;
+                    const paginatedUsers = sortedUsers.slice(startIndex, endIndex);
+                    return paginatedUsers.map(userItem => (
+                    <TableRow key={userItem.id}>
                       <TableCell>
-                        <CheckboxField
-                          isChecked={selectedUsers.has(user.id)}
-                          onChange={(e) => handleUserSelection(user.id, e.target.checked)}
+                        <input
+                          type="checkbox"
+                          checked={selectedUsers.has(userItem.id)}
+                          onChange={(e) => {
+                            handleUserSelection(userItem.id, e.target.checked);
+                          }}
+                          onClick={(e) => {
+                            const newChecked = !selectedUsers.has(userItem.id);
+                            handleUserSelection(userItem.id, newChecked);
+                          }}
                         />
                       </TableCell>
-                      <TableCell>{user.name || 'No name'}</TableCell>
-                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{userItem.name || 'No name'}</TableCell>
+                      <TableCell>{userItem.email}</TableCell>
                       <TableCell>
                         <SelectField
-                          value={user.role || 'Student'}
-                          onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
+                          value={userItem.role || 'Student'}
+                          onChange={(e) => handleRoleUpdate(userItem.id, e.target.value)}
                           size="small"
+                          width="120px"
                         >
                           <option value="Student">Student</option>
                           <option value="Faculty">Faculty</option>
@@ -480,14 +564,55 @@ const AdminDashboard = ({ user }) => {
                           <option value="Admin">Admin</option>
                         </SelectField>
                       </TableCell>
-                      <TableCell>{user.department || 'N/A'}</TableCell>
-                      <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell>{user.updatedAt ? new Date(user.updatedAt).toLocaleString() : new Date(user.createdAt).toLocaleString()}</TableCell>
+                      <TableCell>{userItem.department || 'N/A'}</TableCell>
+                      <TableCell>{new Date(userItem.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell>{userItem.updatedAt ? new Date(userItem.updatedAt).toLocaleString() : new Date(userItem.createdAt).toLocaleString()}</TableCell>
 
                     </TableRow>
-                  ))}
+                    ));
+                  })()}
                 </TableBody>
               </Table>
+              
+              <Flex justifyContent="flex-end" marginTop="1rem" gap="0.5rem" alignItems="center">
+                {(() => {
+                  const filteredCount = users.filter(user => {
+                    const name = (user.name || '').toLowerCase();
+                    const search = searchTerm.toLowerCase();
+                    return name.includes(search);
+                  }).length;
+                  const totalPages = Math.ceil(filteredCount / usersPerPage);
+                  
+                  return (
+                    <>
+                      <Text fontSize="0.9rem">
+                        Page {currentPage} of {totalPages} 
+                        ({filteredCount} {searchTerm ? 'filtered' : 'total'} users)
+                      </Text>
+                      <Button
+                        size="small"
+                        onClick={() => {
+                          if (currentPage > 1) {
+                            setCurrentPage(prev => prev - 1);
+                          }
+                        }}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        size="small"
+                        onClick={() => {
+                          if (currentPage < totalPages) {
+                            setCurrentPage(prev => prev + 1);
+                          }
+                        }}
+                      >
+                        Next
+                      </Button>
+                    </>
+                  );
+                })()}
+              </Flex>
             </Card>
           </Flex>
         </TabItem>
@@ -558,7 +683,7 @@ const AdminDashboard = ({ user }) => {
               <Flex direction="column" gap="1rem">
                 <Flex justifyContent="space-between">
                   <Text>Database Status:</Text>
-                  <Badge backgroundColor="green" color="white">Healthy</Badge>
+                  <Text fontWeight="bold">Healthy</Text>
                 </Flex>
                 <Flex justifyContent="space-between">
                   <Text>API Response Time:</Text>
@@ -593,19 +718,19 @@ const AdminDashboard = ({ user }) => {
               <Flex direction="column" gap="1rem">
                 <Flex justifyContent="space-between">
                   <Text>AWS Cognito:</Text>
-                  <Badge backgroundColor="green" color="white">Connected</Badge>
+                  <Text fontWeight="bold">Connected</Text>
                 </Flex>
                 <Flex justifyContent="space-between">
                   <Text>AWS S3:</Text>
-                  <Badge backgroundColor="green" color="white">Connected</Badge>
+                  <Text fontWeight="bold">Connected</Text>
                 </Flex>
                 <Flex justifyContent="space-between">
                   <Text>AWS SES:</Text>
-                  <Badge backgroundColor="orange" color="white">Rate Limited</Badge>
+                  <Text fontWeight="bold">Rate Limited</Text>
                 </Flex>
                 <Flex justifyContent="space-between">
                   <Text>DynamoDB:</Text>
-                  <Badge backgroundColor="green" color="white">Connected</Badge>
+                  <Text fontWeight="bold">Connected</Text>
                 </Flex>
               </Flex>
             </Card>
@@ -617,17 +742,17 @@ const AdminDashboard = ({ user }) => {
             <Card>
               <Heading level={4} marginBottom="1rem">Application Statistics</Heading>
               <Flex wrap="wrap" gap="1rem">
-                <Card variation="outlined" padding="1rem" flex="1">
-                  <Heading level={5} color="orange">{analytics.pendingApplications}</Heading>
-                  <Text>Pending Review</Text>
+                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
+                  <Heading level={5}>{analytics.pendingApplications}</Heading>
+                  <Text fontSize="0.9rem">Pending Review</Text>
                 </Card>
-                <Card variation="outlined" padding="1rem" flex="1">
-                  <Heading level={5} color="green">{analytics.approvedApplications}</Heading>
-                  <Text>Approved</Text>
+                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
+                  <Heading level={5}>{analytics.approvedApplications}</Heading>
+                  <Text fontSize="0.9rem">Approved</Text>
                 </Card>
-                <Card variation="outlined" padding="1rem" flex="1">
-                  <Heading level={5} color="red">{analytics.rejectedApplications}</Heading>
-                  <Text>Rejected</Text>
+                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
+                  <Heading level={5}>{analytics.rejectedApplications}</Heading>
+                  <Text fontSize="0.9rem">Rejected</Text>
                 </Card>
               </Flex>
             </Card>
@@ -635,17 +760,17 @@ const AdminDashboard = ({ user }) => {
             <Card>
               <Heading level={4} marginBottom="1rem">Project Statistics</Heading>
               <Flex wrap="wrap" gap="1rem">
-                <Card variation="outlined" padding="1rem" flex="1">
-                  <Heading level={5} color="green">{analytics.activeProjects}</Heading>
-                  <Text>Active Projects</Text>
+                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
+                  <Heading level={5}>{analytics.activeProjects}</Heading>
+                  <Text fontSize="0.9rem">Active Projects</Text>
                 </Card>
-                <Card variation="outlined" padding="1rem" flex="1">
-                  <Heading level={5} color="red">{analytics.expiredProjects}</Heading>
-                  <Text>Expired Projects</Text>
+                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
+                  <Heading level={5}>{analytics.expiredProjects}</Heading>
+                  <Text fontSize="0.9rem">Expired Projects</Text>
                 </Card>
-                <Card variation="outlined" padding="1rem" flex="1">
-                  <Heading level={5}>{analytics.totalProjects}</Heading>
-                  <Text>Total Projects</Text>
+                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
+                  <Heading level={5} color="#333">{analytics.totalProjects}</Heading>
+                  <Text fontSize="0.9rem">Total Projects</Text>
                 </Card>
               </Flex>
             </Card>

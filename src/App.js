@@ -133,7 +133,7 @@ function App({ signOut, user }) {
         const userData = await Auth.currentAuthenticatedUser();
         
         // Sync user's Cognito groups with their role in DynamoDB
-        await syncUserGroupsToRole(userData.username);
+        // await syncUserGroupsToRole(userData.username); // Disabled due to GraphQL errors
         
         const result = await API.graphql(graphqlOperation(getUser, { id: userData.attributes.email }));
         const userProfile = result.data.getUser;
