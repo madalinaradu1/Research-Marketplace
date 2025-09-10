@@ -295,7 +295,12 @@ const CoordinatorDashboard = ({ user }) => {
 
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
-      <Heading level={2}>Coordinator Dashboard</Heading>
+      <Flex direction="column" gap="0.5rem">
+        <Heading level={2}>Coordinator Dashboard</Heading>
+        <Text fontSize="1.1rem" color="#666">
+          Welcome back, {user?.name || 'Coordinator'}! You are logged in as a {user?.role || 'Coordinator'}.
+        </Text>
+      </Flex>
       
 
       <Tabs

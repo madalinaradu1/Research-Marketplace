@@ -31,7 +31,7 @@ type User @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]
   studentPosts: [StudentPost] @hasMany(indexName: "byStudent", fields: ["id"])
 }
 
-type Project @model @auth(rules: [{allow: groups, groups: ["Faculty", "Coordinator", "Admin"]}, {allow: private, operations: [read]}]) {
+type Project @model @auth(rules: [{allow: owner, ownerField: "facultyID"}, {allow: groups, groups: ["Coordinator", "Admin"]}, {allow: groups, groups: ["Student"], operations: [read]}]) {
   id: ID!
   title: String!
   description: String!
@@ -80,6 +80,8 @@ type Application @model @auth(rules: [{allow: private}]) {
   facultyNotes: String
   coordinatorNotes: String
   withdrawReason: String
+  rejectionReason: String
+  acceptanceReason: String
   
   # Selection tracking
   isSelected: Boolean
@@ -183,7 +185,7 @@ type ActivityLog @model @auth(rules: [{allow: groups, groups: ["Admin"]}]) {
   timestamp: AWSDateTime!
 }
 
-type StudentPost @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}, {allow: private, operations: [read]}]) {
+type StudentPost @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin", "Faculty", "Coordinator"]}, {allow: groups, groups: ["Student"], operations: [read]}]) {
   id: ID!
   studentID: ID! @index(name: "byStudent")
   student: User @belongsTo(fields: ["studentID"])

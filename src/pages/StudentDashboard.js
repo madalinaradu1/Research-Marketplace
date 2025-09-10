@@ -276,7 +276,12 @@ const StudentDashboard = ({ user }) => {
         />
       </Flex>
       <Flex direction="column" padding="2rem" gap="2rem">
-        <Heading level={2}>Student Dashboard</Heading>
+        <Flex direction="column" gap="0.5rem">
+          <Heading level={2}>Student Dashboard</Heading>
+          <Text fontSize="1.1rem" color="#666">
+            Welcome back, {user?.name || 'Student'}! You are logged in as a {user?.role || 'Student'}.
+          </Text>
+        </Flex>
       
       {error && <Text color="red">{error}</Text>}
       

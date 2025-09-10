@@ -164,6 +164,39 @@
           ]
         }
       }
+    },
+    "CustomLambdaExecutionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "custom-lambda-execution-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "cognito-idp:AdminCreateUser",
+                "cognito-idp:AdminDeleteUser",
+                "cognito-idp:AdminAddUserToGroup",
+                "cognito-idp:AdminRemoveUserFromGroup",
+                "cognito-idp:AdminGetUser",
+                "cognito-idp:AdminListGroupsForUser",
+                "ses:SendEmail",
+                "ses:SendRawEmail"
+              ],
+              "Resource": [
+                "*"
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ]
+      },
+      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {

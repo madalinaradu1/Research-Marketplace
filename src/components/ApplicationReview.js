@@ -19,6 +19,8 @@ import { sendStatusChangeNotification } from '../utils/emailNotifications';
 const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourses = false, hideStatusUpdate = false }) => {
   const [notes, setNotes] = useState('');
   const [statusUpdate, setStatusUpdate] = useState('');
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [acceptanceReason, setAcceptanceReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -43,6 +45,11 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
   const updateStatus = async () => {
     if (!statusUpdate) {
       setError('Please select a status update');
+      return;
+    }
+    
+    if (statusUpdate === 'Rejected' && !rejectionReason.trim()) {
+      setError('Rejection reason is required when rejecting an application');
       return;
     }
     
@@ -86,6 +93,13 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
         input.coordinatorNotes = notes;
       } else if (userRole === 'Admin') {
         input.adminNotes = notes;
+      }
+      
+      // Add rejection or acceptance reasons
+      if (statusUpdate === 'Rejected' && rejectionReason) {
+        input.rejectionReason = rejectionReason;
+      } else if ((statusUpdate === 'Approved' || statusUpdate === 'Selected') && acceptanceReason) {
+        input.acceptanceReason = acceptanceReason;
       }
       
       await API.graphql(graphqlOperation(updateApplication, { input }));
@@ -282,6 +296,24 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
           </Flex>
         )}
         
+        {application.rejectionReason && (
+          <Flex direction="column" gap="0.5rem">
+            <Text fontWeight="bold" color="red">Rejection Reason</Text>
+            <Card variation="outlined" padding="0.5rem" backgroundColor="#ffebee">
+              <Text>{application.rejectionReason}</Text>
+            </Card>
+          </Flex>
+        )}
+        
+        {application.acceptanceReason && (
+          <Flex direction="column" gap="0.5rem">
+            <Text fontWeight="bold" color="green">Acceptance Reason</Text>
+            <Card variation="outlined" padding="0.5rem" backgroundColor="#e8f5e8">
+              <Text>{application.acceptanceReason}</Text>
+            </Card>
+          </Flex>
+        )}
+        
         {statusOptions.length > 0 && !hideStatusUpdate && (
           <Card variation="outlined">
             <Flex direction="column" gap="1rem">
@@ -306,6 +338,25 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add notes about your decision"
               />
+              
+              {statusUpdate === 'Rejected' && (
+                <TextAreaField
+                  label="Rejection Reason (Required)"
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Explain why this application is being rejected..."
+                  required
+                />
+              )}
+              
+              {(statusUpdate === 'Approved' || statusUpdate === 'Selected') && (
+                <TextAreaField
+                  label="Acceptance Reason (Optional)"
+                  value={acceptanceReason}
+                  onChange={(e) => setAcceptanceReason(e.target.value)}
+                  placeholder="Explain why this application is being accepted..."
+                />
+              )}
               
               {error && <Text color="red">{error}</Text>}
               

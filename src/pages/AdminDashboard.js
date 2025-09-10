@@ -42,7 +42,7 @@ const AdminDashboard = ({ user }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Student', department: '' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', role: '', department: '' });
   const [systemConfig, setSystemConfig] = useState({
     maintenanceMode: false,
     registrationEnabled: true,
@@ -200,7 +200,7 @@ const AdminDashboard = ({ user }) => {
       const failed = results.filter(r => !r.success).length;
       
       if (successful > 0) {
-        setMessage(`${successful} user${successful > 1 ? 's' : ''} successfully deleted. ${failed > 0 ? `${failed} failed.` : ''}`);
+        setMessage(`${successful} user${successful > 1 ? 's were' : ' was'} successfully deleted! ${failed > 0 ? `${failed} failed.` : ''}`);
       }
       if (failed > 0) {
         setError(`Failed to delete ${failed} users.`);
@@ -238,14 +238,33 @@ const AdminDashboard = ({ user }) => {
   };
   
   const handleCreateUser = async () => {
-    if (!newUser.name || !newUser.email) {
-      setError('Name and email are required.');
+    if (!newUser.name || !newUser.email || !newUser.role) {
+      setError('Name, email, and role are required.');
       return;
     }
     
     try {
+      // Step 1: Create user in Cognito with email
+      let cognitoSuccess = false;
+      try {
+        const cognitoResponse = await API.post('emailapi', '/create-user', {
+          body: {
+            email: newUser.email,
+            name: newUser.name,
+            role: newUser.role,
+            department: newUser.department
+          }
+        });
+        console.log('Cognito creation successful:', cognitoResponse);
+        cognitoSuccess = true;
+      } catch (cognitoError) {
+        console.error('Cognito creation failed:', cognitoError);
+        cognitoSuccess = false;
+      }
+      
+      // Step 2: Create user profile in database
       const userInput = {
-        id: newUser.email, // Use email as ID to match with Cognito sign-up
+        id: newUser.email,
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
@@ -255,10 +274,14 @@ const AdminDashboard = ({ user }) => {
       
       await API.graphql(graphqlOperation(createUser, { input: userInput }));
       
-      setMessage(`User profile created successfully! User can now sign up with email: ${newUser.email}`);
-      setNewUser({ name: '', email: '', role: 'Student', department: '' });
+      setMessage(cognitoSuccess ? 
+        `User created successfully! Welcome email sent to ${newUser.email}` :
+        `User profile created in database. Cognito creation failed - user can still sign up normally with email: ${newUser.email}`
+      );
+      setNewUser({ name: '', email: '', role: '', department: '' });
       fetchData();
     } catch (err) {
+      console.error('Error creating user:', err);
       setError('Failed to create user. Please try again.');
     }
   };
@@ -295,7 +318,12 @@ const AdminDashboard = ({ user }) => {
   
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
-      <Heading level={2}>Admin Dashboard</Heading>
+      <Flex direction="column" gap="0.5rem">
+        <Heading level={2}>Admin Dashboard</Heading>
+        <Text fontSize="1.1rem" color="#666">
+          Welcome back, {user?.name || 'Admin'}! You are logged in as an {user?.role || 'Admin'}.
+        </Text>
+      </Flex>
       
       {error && <Alert variation="error" isDismissible onDismiss={() => setError(null)}>{error}</Alert>}
       {message && <Alert variation="success" isDismissible onDismiss={() => setMessage(null)}>{message}</Alert>}
@@ -429,6 +457,7 @@ const AdminDashboard = ({ user }) => {
                   flex="1"
                   minWidth="150px"
                 >
+                  <option value="">Select Role</option>
                   <option value="Student">Student</option>
                   <option value="Faculty">Faculty</option>
                   <option value="Coordinator">Coordinator</option>

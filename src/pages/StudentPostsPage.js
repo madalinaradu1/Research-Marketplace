@@ -250,7 +250,9 @@ const StudentPostsPage = ({ user }) => {
                           </Text>
                         </Flex>
                         <Text fontSize="0.9rem" color="gray">
-                          {post.student?.name} • {post.department || 'No Department'}
+                          {(user.id || user.username) === post.student?.id || ['Admin', 'Faculty', 'Coordinator'].includes(user.role) 
+                            ? post.student?.name 
+                            : 'Anonymous Student'} • {post.department || 'No Department'}
                         </Text>
                       </Flex>
                       <Flex alignItems="center" gap="1rem">

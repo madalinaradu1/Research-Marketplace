@@ -89,6 +89,8 @@ const FacultyDashboard = ({ user }) => {
   const [pendingPage, setPendingPage] = useState(1);
   const itemsPerPage = 10;
   const [openKebabMenu, setOpenKebabMenu] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [applicationSearchTerm, setApplicationSearchTerm] = useState('');
   
   const handleDescriptionChange = useCallback((value) => {
     setProjectForm(prev => {
@@ -597,7 +599,12 @@ const FacultyDashboard = ({ user }) => {
         />
       </View>
       <Flex direction="column" padding="2rem" gap="2rem">
-      <Heading level={2}>Faculty Dashboard</Heading>
+      <Flex direction="column" gap="0.5rem">
+        <Heading level={2}>Faculty Dashboard</Heading>
+        <Text fontSize="1.1rem" color="#666">
+          Welcome back, {user?.name || 'Faculty'}! You are logged in as a {user?.role || 'Faculty'} member.
+        </Text>
+      </Flex>
       
       {error && <Text color="red">{error}</Text>}
       {successMessage && <Text color="green">{successMessage}</Text>}
@@ -674,17 +681,37 @@ const FacultyDashboard = ({ user }) => {
           }
         }}
       >
-        <TabItem title="My Projects">
+        <TabItem title="Posted Opportunities">
           <Flex direction="column" gap="2rem">
             {/* Projects Section */}
             <Card>
-              <Heading level={4} marginBottom="1rem">My Projects ({projects.length})</Heading>
+              <Flex justifyContent="space-between" alignItems="center" marginBottom="1rem">
+                <Heading level={4}>Posted Opportunities ({projects.length})</Heading>
+                <Flex alignItems="center" gap="0.5rem">
+                  <TextField
+                    placeholder="Search projects..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    width="300px"
+                    size="small"
+                  />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                  </svg>
+                </Flex>
+              </Flex>
               
               {projects.length === 0 ? (
                 <Text>No projects created yet.</Text>
               ) : (
                 <>
-                <Collection items={getPaginatedItems(projects.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), projectsPage)} type="list" gap="1rem">
+                <Collection items={getPaginatedItems(projects.filter(project => {
+                  const title = (project.title || '').toLowerCase();
+                  const department = (project.department || '').toLowerCase();
+                  const search = searchTerm.toLowerCase();
+                  return title.includes(search) || department.includes(search);
+                }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), projectsPage)} type="list" gap="1rem">
                   {(project) => (
                     <Card key={project.id} variation="outlined">
                       <Flex direction="column" gap="0.5rem">
@@ -814,14 +841,36 @@ const FacultyDashboard = ({ user }) => {
           {viewingApplicationsForProject ? (
             // Show applications for specific project
             <Card>
-              <Heading level={4} marginBottom="1rem">{viewingApplicationsForProject.title}</Heading>
+              <Flex justifyContent="space-between" alignItems="center" marginBottom="1rem">
+                <Heading level={4}>{viewingApplicationsForProject.title}</Heading>
+                <Flex alignItems="center" gap="0.5rem">
+                  <TextField
+                    placeholder="Search applications..."
+                    value={applicationSearchTerm}
+                    onChange={(e) => setApplicationSearchTerm(e.target.value)}
+                    width="250px"
+                    size="small"
+                  />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                  </svg>
+                </Flex>
+              </Flex>
               {applications.filter(app => app.projectID === viewingApplicationsForProject.id).length === 0 ? (
                 <Text>No applications submitted for this project yet.</Text>
               ) : (
                 <>
                   <Divider margin="1rem 0" />
                   <Collection
-                    items={getPaginatedItems(applications.filter(app => app.projectID === viewingApplicationsForProject.id).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage)}
+                    items={getPaginatedItems(applications.filter(app => {
+                      if (app.projectID !== viewingApplicationsForProject.id) return false;
+                      const studentName = (app.student?.name || '').toLowerCase();
+                      const studentEmail = (app.student?.email || '').toLowerCase();
+                      const status = (app.status || '').toLowerCase();
+                      const search = applicationSearchTerm.toLowerCase();
+                      return studentName.includes(search) || studentEmail.includes(search) || status.includes(search);
+                    }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage)}
                     type="list"
                     gap="1rem"
                     wrap="nowrap"

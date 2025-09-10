@@ -1,13 +1,13 @@
 export type AmplifyDependentResourcesAttributes = {
   "api": {
-    "researchmarketplace": {
-      "GraphQLAPIEndpointOutput": "string",
-      "GraphQLAPIIdOutput": "string"
-    },
-    "userManagementApi": {
+    "emailapi": {
       "ApiId": "string",
       "ApiName": "string",
       "RootUrl": "string"
+    },
+    "researchmarketplace": {
+      "GraphQLAPIEndpointOutput": "string",
+      "GraphQLAPIIdOutput": "string"
     }
   },
   "auth": {
@@ -23,13 +23,6 @@ export type AmplifyDependentResourcesAttributes = {
   },
   "function": {
     "adminCreateUser": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
-    },
-    "deleteUserFunction": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
       "LambdaExecutionRoleArn": "string",

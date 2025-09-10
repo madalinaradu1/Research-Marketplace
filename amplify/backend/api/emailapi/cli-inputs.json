@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "paths": {
+    "/send-email": {
+      "name": "/send-email",
+      "lambdaFunction": "sendEmailNotification",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/delete-user": {
+      "name": "/delete-user",
+      "lambdaFunction": "adminCreateUser",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ]
+      }
+    },
+    "/create-user": {
+      "name": "/create-user",
+      "lambdaFunction": "adminCreateUser",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ]
+      }
+    }
+  }
+}

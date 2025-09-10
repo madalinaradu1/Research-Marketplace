@@ -2693,6 +2693,28 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "rejectionReason",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "String",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "acceptanceReason",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "String",
+            "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "isSelected",
           "description" : null,
           "args" : [ ],
@@ -3199,6 +3221,24 @@
           "defaultValue" : null
         }, {
           "name" : "withdrawReason",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelStringInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "rejectionReason",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelStringInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "acceptanceReason",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -8955,6 +8995,24 @@
           },
           "defaultValue" : null
         }, {
+          "name" : "rejectionReason",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "String",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "acceptanceReason",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "String",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
           "name" : "isSelected",
           "description" : null,
           "type" : {
@@ -9221,6 +9279,24 @@
           "defaultValue" : null
         }, {
           "name" : "withdrawReason",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelStringInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "rejectionReason",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelStringInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "acceptanceReason",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -9498,6 +9574,24 @@
           "defaultValue" : null
         }, {
           "name" : "withdrawReason",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "String",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "rejectionReason",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "String",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "acceptanceReason",
           "description" : null,
           "type" : {
             "kind" : "SCALAR",
@@ -11948,6 +12042,15 @@
               "ofType" : null
             },
             "defaultValue" : null
+          }, {
+            "name" : "facultyID",
+            "description" : null,
+            "type" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            },
+            "defaultValue" : null
           } ],
           "type" : {
             "kind" : "OBJECT",
@@ -11968,6 +12071,15 @@
               "ofType" : null
             },
             "defaultValue" : null
+          }, {
+            "name" : "facultyID",
+            "description" : null,
+            "type" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            },
+            "defaultValue" : null
           } ],
           "type" : {
             "kind" : "OBJECT",
@@ -11985,6 +12097,15 @@
             "type" : {
               "kind" : "INPUT_OBJECT",
               "name" : "ModelSubscriptionProjectFilterInput",
+              "ofType" : null
+            },
+            "defaultValue" : null
+          }, {
+            "name" : "facultyID",
+            "description" : null,
+            "type" : {
+              "kind" : "SCALAR",
+              "name" : "String",
               "ofType" : null
             },
             "defaultValue" : null
@@ -13347,15 +13468,6 @@
           },
           "defaultValue" : null
         }, {
-          "name" : "facultyID",
-          "description" : null,
-          "type" : {
-            "kind" : "INPUT_OBJECT",
-            "name" : "ModelSubscriptionIDInput",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
           "name" : "isActive",
           "description" : null,
           "type" : {
@@ -13451,6 +13563,15 @@
               "name" : "ModelSubscriptionProjectFilterInput",
               "ofType" : null
             }
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "facultyID",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelStringInput",
+            "ofType" : null
           },
           "defaultValue" : null
         } ],
@@ -13563,6 +13684,24 @@
           "defaultValue" : null
         }, {
           "name" : "withdrawReason",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelSubscriptionStringInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "rejectionReason",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelSubscriptionStringInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "acceptanceReason",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
@@ -15296,23 +15435,6 @@
         "onFragment" : false,
         "onField" : true
       }, {
-        "name" : "deprecated",
-        "description" : null,
-        "locations" : [ "FIELD_DEFINITION", "ENUM_VALUE" ],
-        "args" : [ {
-          "name" : "reason",
-          "description" : null,
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
-          },
-          "defaultValue" : "\"No longer supported\""
-        } ],
-        "onOperation" : false,
-        "onFragment" : false,
-        "onField" : false
-      }, {
         "name" : "aws_auth",
         "description" : "Directs the schema to enforce authorization on a field",
         "locations" : [ "FIELD_DEFINITION" ],
@@ -15375,6 +15497,23 @@
         "description" : "Tells the service this field/object has access authorized by an OIDC token.",
         "locations" : [ "OBJECT", "FIELD_DEFINITION" ],
         "args" : [ ],
+        "onOperation" : false,
+        "onFragment" : false,
+        "onField" : false
+      }, {
+        "name" : "deprecated",
+        "description" : null,
+        "locations" : [ "FIELD_DEFINITION", "ENUM_VALUE" ],
+        "args" : [ {
+          "name" : "reason",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "String",
+            "ofType" : null
+          },
+          "defaultValue" : "\"No longer supported\""
+        } ],
         "onOperation" : false,
         "onFragment" : false,
         "onField" : false

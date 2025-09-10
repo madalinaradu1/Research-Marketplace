@@ -1,5 +1,19 @@
 {
   "api": {
+    "emailapi": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "sendEmailNotification"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    },
     "researchmarketplace": {
       "dependsOn": [
         {
@@ -68,15 +82,72 @@
   "function": {
     "adminCreateUser": {
       "build": true,
-      "dependsOn": [],
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "ResearchMarketplace"
+        }
+      ],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-
     "sendEmailNotification": {
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_adminCreateUser_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "adminCreateUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_adminCreateUser_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "adminCreateUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_adminDeleteUser_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "adminDeleteUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_adminDeleteUser_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "adminDeleteUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_sendEmailNotification_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "sendEmailNotification"
+        }
+      ]
+    },
+    "AMPLIFY_function_sendEmailNotification_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "sendEmailNotification"
+        }
+      ]
     }
   },
   "storage": {

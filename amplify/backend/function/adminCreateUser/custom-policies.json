@@ -1,6 +1,16 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Effect": "Allow",
+    "Action": [
+      "cognito-idp:AdminCreateUser",
+      "cognito-idp:AdminDeleteUser",
+      "cognito-idp:AdminAddUserToGroup",
+      "cognito-idp:AdminRemoveUserFromGroup",
+      "cognito-idp:AdminGetUser",
+      "cognito-idp:AdminListGroupsForUser",
+      "ses:SendEmail",
+      "ses:SendRawEmail"
+    ],
+    "Resource": ["*"]
   }
 ]

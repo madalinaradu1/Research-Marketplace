@@ -455,6 +455,8 @@ export const createApplication = /* GraphQL */ `
       facultyNotes
       coordinatorNotes
       withdrawReason
+      rejectionReason
+      acceptanceReason
       isSelected
       selectedAt
       submittedToFacultyAt
@@ -559,6 +561,8 @@ export const updateApplication = /* GraphQL */ `
       facultyNotes
       coordinatorNotes
       withdrawReason
+      rejectionReason
+      acceptanceReason
       isSelected
       selectedAt
       submittedToFacultyAt
@@ -663,6 +667,8 @@ export const deleteApplication = /* GraphQL */ `
       facultyNotes
       coordinatorNotes
       withdrawReason
+      rejectionReason
+      acceptanceReason
       isSelected
       selectedAt
       submittedToFacultyAt
@@ -715,6 +721,8 @@ export const createLearningContract = /* GraphQL */ `
         facultyNotes
         coordinatorNotes
         withdrawReason
+        rejectionReason
+        acceptanceReason
         isSelected
         selectedAt
         submittedToFacultyAt
@@ -764,6 +772,8 @@ export const updateLearningContract = /* GraphQL */ `
         facultyNotes
         coordinatorNotes
         withdrawReason
+        rejectionReason
+        acceptanceReason
         isSelected
         selectedAt
         submittedToFacultyAt
@@ -813,6 +823,8 @@ export const deleteLearningContract = /* GraphQL */ `
         facultyNotes
         coordinatorNotes
         withdrawReason
+        rejectionReason
+        acceptanceReason
         isSelected
         selectedAt
         submittedToFacultyAt

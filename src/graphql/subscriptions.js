@@ -197,8 +197,11 @@ export const onDeleteUser = /* GraphQL */ `
   }
 `;
 export const onCreateProject = /* GraphQL */ `
-  subscription OnCreateProject($filter: ModelSubscriptionProjectFilterInput) {
-    onCreateProject(filter: $filter) {
+  subscription OnCreateProject(
+    $filter: ModelSubscriptionProjectFilterInput
+    $facultyID: String
+  ) {
+    onCreateProject(filter: $filter, facultyID: $facultyID) {
       id
       title
       description
@@ -256,8 +259,11 @@ export const onCreateProject = /* GraphQL */ `
   }
 `;
 export const onUpdateProject = /* GraphQL */ `
-  subscription OnUpdateProject($filter: ModelSubscriptionProjectFilterInput) {
-    onUpdateProject(filter: $filter) {
+  subscription OnUpdateProject(
+    $filter: ModelSubscriptionProjectFilterInput
+    $facultyID: String
+  ) {
+    onUpdateProject(filter: $filter, facultyID: $facultyID) {
       id
       title
       description
@@ -315,8 +321,11 @@ export const onUpdateProject = /* GraphQL */ `
   }
 `;
 export const onDeleteProject = /* GraphQL */ `
-  subscription OnDeleteProject($filter: ModelSubscriptionProjectFilterInput) {
-    onDeleteProject(filter: $filter) {
+  subscription OnDeleteProject(
+    $filter: ModelSubscriptionProjectFilterInput
+    $facultyID: String
+  ) {
+    onDeleteProject(filter: $filter, facultyID: $facultyID) {
       id
       title
       description
@@ -445,6 +454,8 @@ export const onCreateApplication = /* GraphQL */ `
       facultyNotes
       coordinatorNotes
       withdrawReason
+      rejectionReason
+      acceptanceReason
       isSelected
       selectedAt
       submittedToFacultyAt
@@ -548,6 +559,8 @@ export const onUpdateApplication = /* GraphQL */ `
       facultyNotes
       coordinatorNotes
       withdrawReason
+      rejectionReason
+      acceptanceReason
       isSelected
       selectedAt
       submittedToFacultyAt
@@ -651,6 +664,8 @@ export const onDeleteApplication = /* GraphQL */ `
       facultyNotes
       coordinatorNotes
       withdrawReason
+      rejectionReason
+      acceptanceReason
       isSelected
       selectedAt
       submittedToFacultyAt
@@ -703,6 +718,8 @@ export const onCreateLearningContract = /* GraphQL */ `
         facultyNotes
         coordinatorNotes
         withdrawReason
+        rejectionReason
+        acceptanceReason
         isSelected
         selectedAt
         submittedToFacultyAt
@@ -752,6 +769,8 @@ export const onUpdateLearningContract = /* GraphQL */ `
         facultyNotes
         coordinatorNotes
         withdrawReason
+        rejectionReason
+        acceptanceReason
         isSelected
         selectedAt
         submittedToFacultyAt
@@ -801,6 +820,8 @@ export const onDeleteLearningContract = /* GraphQL */ `
         facultyNotes
         coordinatorNotes
         withdrawReason
+        rejectionReason
+        acceptanceReason
         isSelected
         selectedAt
         submittedToFacultyAt
