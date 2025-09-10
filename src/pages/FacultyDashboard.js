@@ -717,7 +717,7 @@ const FacultyDashboard = ({ user }) => {
                       <Flex direction="column" gap="0.5rem">
                         <Flex justifyContent="space-between" alignItems="flex-start">
                           <Text fontWeight="bold">{project.title}</Text>
-                          <Flex direction="column" alignItems="center" gap="0.5rem">
+                          <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
                             <Badge 
                               backgroundColor={
                                 project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'gray' :
@@ -729,7 +729,7 @@ const FacultyDashboard = ({ user }) => {
                             >
                               {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : (project.projectStatus || 'Draft')}
                             </Badge>
-                            <View position="relative" style={{ marginLeft: '0.5rem' }}>
+                            <View position="relative">
                               <Button 
                                 size="medium"
                                 backgroundColor="transparent"
@@ -767,6 +767,20 @@ const FacultyDashboard = ({ user }) => {
                                       }}
                                     >
                                       View Details
+                                    </Button>
+                                    <Button
+                                      size="small"
+                                      backgroundColor="white"
+                                      color="black"
+                                      border="none"
+                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                      onClick={() => {
+                                        editProject(project);
+                                        setOpenKebabMenu(null);
+                                      }}
+                                      isDisabled={project.applicationDeadline && new Date(project.applicationDeadline) < new Date()}
+                                    >
+                                      {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : 'Edit'}
                                     </Button>
                                     {project.projectStatus === 'Returned' ? (
                                       <Button

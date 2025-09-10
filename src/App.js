@@ -26,7 +26,7 @@ import StudentPostsPage from './pages/StudentPostsPage';
 
 // Import utilities
 import { createUserAfterSignUp, checkUserExists } from './utils/userManagement';
-import { getUser } from './graphql/operations';
+import { getUser, listUsers } from './graphql/operations';
 import { testApiAccess } from './utils/testApi';
 import { syncUserGroupsToRole } from './utils/syncUserGroups';
 import { debugAuth } from './utils/debugAuth';
@@ -128,6 +128,7 @@ function App({ signOut, user }) {
     
     // Fetch user profile data
     const fetchUserProfile = async () => {
+      console.log('fetchUserProfile called');
       try {
         // getUser is already imported at the top
         const userData = await Auth.currentAuthenticatedUser();
@@ -135,20 +136,54 @@ function App({ signOut, user }) {
         // Sync user's Cognito groups with their role in DynamoDB
         // await syncUserGroupsToRole(userData.username); // Disabled due to GraphQL errors
         
-        const result = await API.graphql(graphqlOperation(getUser, { id: userData.attributes.email }));
-        const userProfile = result.data.getUser;
+        let userProfile = null;
         
-        console.log('Loaded user profile:', userProfile);
+        console.log('Fetching user profile for UUID:', userData.username);
         console.log('User email:', userData.attributes.email);
+        
+        try {
+          const result = await API.graphql(graphqlOperation(getUser, { id: userData.username }));
+          userProfile = result.data.getUser;
+          console.log('UUID lookup successful:', userProfile);
+        } catch (uuidError) {
+          console.log('UUID lookup failed:', uuidError.message);
+          console.log('Trying email search for:', userData.attributes.email);
+          
+          // If UUID lookup fails, search by email
+          const emailFilter = { email: { eq: userData.attributes.email } };
+          console.log('Email filter:', emailFilter);
+          
+          const emailResult = await API.graphql(graphqlOperation(listUsers, { filter: emailFilter, limit: 1 }));
+          console.log('Email search result:', emailResult.data.listUsers);
+          
+          if (emailResult.data.listUsers.items.length > 0) {
+            userProfile = emailResult.data.listUsers.items[0];
+            console.log('Found user by email:', userProfile);
+          } else {
+            console.log('No user found by email search');
+          }
+        }
+        
+        console.log('Final user profile:', userProfile);
+        console.log('User profile role:', userProfile?.role);
         console.log('Is admin check:', isUserAdmin(user, userProfile));
         
         // If user doesn't exist or doesn't have a role, set default role
         if (!userProfile || !userProfile.role) {
           console.log('User profile missing or no role, creating/updating with Student role');
-          await createUserAfterSignUp(userData);
-          // Retry fetching the user
-          const retryResult = await API.graphql(graphqlOperation(getUser, { id: userData.attributes.email }));
-          setUserProfile(retryResult.data.getUser);
+          const createdUser = await createUserAfterSignUp(userData);
+          console.log('createUserAfterSignUp returned:', createdUser);
+          
+          if (createdUser) {
+            setUserProfile(createdUser);
+          } else {
+            // Fallback: retry fetching the user by email
+            const emailFilter = { email: { eq: userData.attributes.email } };
+            const retryResult = await API.graphql(graphqlOperation(listUsers, { filter: emailFilter, limit: 1 }));
+            if (retryResult.data.listUsers.items.length > 0) {
+              setUserProfile(retryResult.data.listUsers.items[0]);
+            }
+          }
         } else {
           setUserProfile(userProfile);
         }
@@ -158,7 +193,7 @@ function App({ signOut, user }) {
         try {
           const userData = await Auth.currentAuthenticatedUser();
           await createUserAfterSignUp(userData);
-          const result = await API.graphql(graphqlOperation(getUser, { id: userData.attributes.email }));
+          const result = await API.graphql(graphqlOperation(getUser, { id: userData.username }));
           setUserProfile(result.data.getUser);
         } catch (createError) {
           console.error('Error creating user:', createError);
@@ -200,6 +235,8 @@ function App({ signOut, user }) {
       <Router>
         <div className="app">
         <Header user={userProfile || user} signOut={signOut} />
+        {console.log('App.js userProfile:', userProfile)}
+        {console.log('App.js user:', user)}
         
         <main>
           <Routes>

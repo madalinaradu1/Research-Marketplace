@@ -5,14 +5,17 @@ import { deleteUser } from '../graphql/operations';
  * Comprehensive user deletion that removes user from both Cognito and DynamoDB
  */
 export const deleteUserCompletely = async (userId, userEmail) => {
+  console.log('deleteUserCompletely called with:', { userId, userEmail });
   try {
     let cognitoDeleted = false;
     
     // Step 1: Delete from Cognito using new endpoint
     try {
+      console.log('Deleting user from Cognito:', { userId, userEmail });
       const cognitoResponse = await API.post('emailapi', '/delete-user', {
-        body: { userId }
+        body: { userId, userEmail }
       });
+      console.log('Cognito deletion response:', cognitoResponse);
       
       cognitoDeleted = cognitoResponse.success;
     } catch (cognitoError) {

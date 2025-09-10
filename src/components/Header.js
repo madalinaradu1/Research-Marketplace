@@ -369,7 +369,7 @@ const Header = ({ user, signOut }) => {
                 </View>
                 <Flex direction="column" gap="0.5rem" flex="1">
                   <Text fontSize="0.9rem" fontWeight="bold" color="black">
-                    Hello, {user?.email ? user.email.split('@')[0] : user?.username || 'User'}
+                    Hello, {user?.name || (user?.email ? user.email.split('@')[0] : user?.username || 'User')}
                   </Text>
                   <Button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Edit Profile</Button>
                   <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Sign Out</Button>

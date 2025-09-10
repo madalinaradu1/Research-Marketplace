@@ -244,8 +244,10 @@ const AdminDashboard = ({ user }) => {
     }
     
     try {
-      // Step 1: Create user in Cognito with email
+      // Step 1: Create user in Cognito first to get the actual Cognito UUID
       let cognitoSuccess = false;
+      let actualCognitoUserId = null;
+      
       try {
         const cognitoResponse = await API.post('emailapi', '/create-user', {
           body: {
@@ -256,15 +258,18 @@ const AdminDashboard = ({ user }) => {
           }
         });
         console.log('Cognito creation successful:', cognitoResponse);
+        actualCognitoUserId = cognitoResponse.userId; // Use Cognito's actual UUID
         cognitoSuccess = true;
       } catch (cognitoError) {
         console.error('Cognito creation failed:', cognitoError);
         cognitoSuccess = false;
+        // Fallback to generated UUID if Cognito fails
+        actualCognitoUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       }
       
-      // Step 2: Create user profile in database
+      // Step 2: Create user profile in database using actual Cognito UUID
       const userInput = {
-        id: newUser.email,
+        id: actualCognitoUserId, // Use actual Cognito UUID
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,

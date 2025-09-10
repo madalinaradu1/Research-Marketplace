@@ -15,7 +15,8 @@ const handleUserCreation = async (event, headers) => {
     try {
         console.log('Parsing event body:', event.body);
         const { email, name, role, department } = JSON.parse(event.body);
-        console.log('Parsed data:', { email, name, role, department });
+        console.log('Parsed data:', { userId, email, name, role, department });
+        console.log('Full body received:', JSON.parse(event.body));
         
         const userPoolId = 'us-east-1_iMyhdFqsG';
         
@@ -30,7 +31,7 @@ const handleUserCreation = async (event, headers) => {
         // Generate temporary password
         const tempPassword = Math.random().toString(36).slice(-12) + 'A1!';
 
-        // Create user in Cognito
+        // Create user in Cognito (use email as username for login compatibility)
         const createParams = {
             UserPoolId: userPoolId,
             Username: email,
@@ -109,7 +110,7 @@ const handleUserCreation = async (event, headers) => {
             body: JSON.stringify({
                 success: true,
                 message: 'User created successfully in Cognito and welcome email sent',
-                userId: createResult.User.Username,
+                userId: createResult.User.Attributes.find(attr => attr.Name === 'sub')?.Value || createResult.User.Username,
                 tempPassword: tempPassword
             })
         };
@@ -130,7 +131,7 @@ const handleUserCreation = async (event, headers) => {
 // Handle user deletion from Cognito
 const handleUserDeletion = async (event, headers) => {
     try {
-        const { userId } = JSON.parse(event.body);
+        const { userId, userEmail } = JSON.parse(event.body);
         
         const userPoolId = 'us-east-1_iMyhdFqsG';
         
@@ -142,20 +143,69 @@ const handleUserDeletion = async (event, headers) => {
             };
         }
 
-        // Delete from Cognito User Pool
-        const deleteCommand = new AdminDeleteUserCommand({
-            UserPoolId: userPoolId,
-            Username: userId
-        });
-        await cognitoClient.send(deleteCommand);
+        // Try to delete using email first (since users are created with email as username), then UUID for backward compatibility
+        let deleteSuccess = false;
+        let usedIdentifier = userEmail || userId;
+        let lastError = null;
+        
+        try {
+            const deleteCommand = new AdminDeleteUserCommand({
+                UserPoolId: userPoolId,
+                Username: userEmail || userId
+            });
+            await cognitoClient.send(deleteCommand);
+            deleteSuccess = true;
+        } catch (error) {
+            lastError = error;
+            // If email fails, try with different UUID formats
+            if (error.name === 'UserNotFoundException') {
+                // Try with database UUID first
+                if (userId) {
+                    try {
+                        const deleteCommand = new AdminDeleteUserCommand({
+                            UserPoolId: userPoolId,
+                            Username: userId
+                        });
+                        await cognitoClient.send(deleteCommand);
+                        deleteSuccess = true;
+                        usedIdentifier = userId;
+                    } catch (uuidError) {
+                        lastError = uuidError;
+                        // If database UUID fails, we need to find the actual Cognito user
+                        // This requires listing users and finding by email
+                        console.log('Both email and database UUID failed. User may exist with different Cognito UUID.');
+                        deleteSuccess = false;
+                    }
+                } else {
+                    deleteSuccess = false;
+                }
+            } else {
+                deleteSuccess = false;
+            }
+        }
+
+        if (!deleteSuccess) {
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Failed to delete user from Cognito',
+                    details: lastError?.message || 'Unknown error',
+                    userId,
+                    triedIdentifiers: [userId, userEmail].filter(Boolean)
+                })
+            };
+        }
 
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 success: true,
-                message: 'User deleted from Cognito successfully',
-                userId
+                message: `User deleted from Cognito successfully using ${usedIdentifier}`,
+                userId,
+                usedIdentifier
             })
         };
 
@@ -261,7 +311,7 @@ exports.handler = async (event) => {
             body: JSON.stringify({
                 success: true,
                 message: 'User created in Cognito successfully',
-                userId: createResult.User.Username,
+                userId: createResult.User.Attributes.find(attr => attr.Name === 'sub')?.Value || createResult.User.Username,
                 tempPassword: tempPassword
             })
         };

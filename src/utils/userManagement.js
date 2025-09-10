@@ -1,5 +1,5 @@
 import { API, graphqlOperation } from 'aws-amplify';
-import { createUser, getUser } from '../graphql/operations';
+import { createUser, getUser, listUsers } from '../graphql/operations';
 
 /**
  * Creates a User record in DynamoDB after a user signs up with Cognito
@@ -20,7 +20,7 @@ export async function createUserAfterSignUp(userData) {
     }
     
     const userInput = {
-      id: attributes.email, // Use email as ID to match admin-created profiles
+      id: username, // Use UUID as primary key
       name: `${attributes.given_name || ''} ${attributes.family_name || ''}`.trim() || attributes.name || '',
       email: attributes.email,
       role: role,
@@ -30,15 +30,39 @@ export async function createUserAfterSignUp(userData) {
     console.log('Creating user with attributes:', attributes);
     console.log('User input:', userInput);
     
-    // Check if user already exists
+    // Check if user already exists by email (for admin-created users)
     try {
-      const existingUser = await API.graphql(graphqlOperation(getUser, { id: attributes.email }));
+      const emailFilter = {
+        email: {
+          eq: attributes.email
+        }
+      };
+      console.log('Searching for user with email:', attributes.email);
+      console.log('Using filter:', emailFilter);
+      const existingUsersByEmail = await API.graphql(graphqlOperation(listUsers, { 
+        filter: emailFilter,
+        limit: 1
+      }));
       
-      if (existingUser.data.getUser) {
-        console.log('User already exists, preserving existing profile');
-        return existingUser.data.getUser;
+      console.log('Email search result:', existingUsersByEmail.data.listUsers.items);
+      if (existingUsersByEmail.data.listUsers.items.length > 0) {
+        console.log('User already exists by email, preserving existing profile:', existingUsersByEmail.data.listUsers.items[0]);
+        return existingUsersByEmail.data.listUsers.items[0];
       }
       
+      // Fallback: fetch all users and filter client-side
+      console.log('GraphQL filter failed, trying client-side search');
+      const allUsers = await API.graphql(graphqlOperation(listUsers, { limit: 100 }));
+      const userByEmail = allUsers.data.listUsers.items.find(user => user.email === attributes.email);
+      
+      if (userByEmail) {
+        console.log('Found user by client-side email search:', userByEmail);
+        console.log('User role from database:', userByEmail.role);
+        return userByEmail;
+      }
+      console.log('No existing user found by email, creating new user');
+      
+      // If no existing user found, create new one with default role
       const result = await API.graphql(graphqlOperation(createUser, { input: userInput }));
       console.log('User record created successfully:', result.data.createUser);
       return result.data.createUser;
@@ -59,12 +83,13 @@ export async function createUserAfterSignUp(userData) {
 
 /**
  * Checks if a user record exists in DynamoDB
- * @param {string} userId - The user ID to check
+ * @param {string} email - The user email to check
  * @returns {Promise<boolean>} - Whether the user exists
  */
-export async function checkUserExists(userId) {
+export async function checkUserExists(email) {
   try {
-    const result = await API.graphql(graphqlOperation(getUser, { id: userId }));
+    // First try to find by email (for backward compatibility)
+    const result = await API.graphql(graphqlOperation(getUser, { id: email }));
     return !!result.data.getUser;
   } catch (error) {
     console.error('Error checking if user exists:', error);

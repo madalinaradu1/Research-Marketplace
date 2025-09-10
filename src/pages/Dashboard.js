@@ -14,6 +14,9 @@ const Dashboard = ({ user }) => {
     );
   }
 
+  console.log('Dashboard user object:', user);
+  console.log('User role:', user.role, 'Type:', typeof user.role);
+
   // Render dashboard based on user role
   switch (user.role) {
     case 'Student':
