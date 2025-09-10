@@ -41,13 +41,6 @@ export const updateStudentPost = /* GraphQL */ `
       isActive
       createdAt
       updatedAt
-      student {
-        id
-        name
-        email
-        major
-        academicYear
-      }
     }
   }
 `;

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation } from 'aws-amplify';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { 
   Flex, 
   Heading, 
@@ -10,6 +12,7 @@ import {
   TabItem,
   Collection,
   Badge,
+  TextField,
   TextAreaField,
   SelectField,
   useTheme,
@@ -49,6 +52,19 @@ const CoordinatorDashboard = ({ user }) => {
   const [rejectedPage, setRejectedPage] = useState(1);
   const itemsPerPage = 10;
   const [openKebabMenu, setOpenKebabMenu] = useState(null);
+  const [editingProject, setEditingProject] = useState(null);
+  const [projectForm, setProjectForm] = useState({
+    title: '',
+    description: '',
+    department: '',
+    skillsRequired: '',
+    tags: '',
+    qualifications: '',
+    duration: '',
+    applicationDeadline: '',
+    requiresTranscript: false,
+    isActive: true
+  });
 
 
   useEffect(() => {
@@ -213,6 +229,48 @@ const CoordinatorDashboard = ({ user }) => {
     }
   };
 
+  const handleProjectFormChange = (e) => {
+    const { name, value } = e.target;
+    setProjectForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleUpdateProject = async (e) => {
+    e.preventDefault();
+    try {
+      const skillsArray = projectForm.skillsRequired
+        ? projectForm.skillsRequired.split(',').map(skill => skill.trim()).filter(skill => skill)
+        : [];
+      
+      const tagsArray = projectForm.tags
+        ? projectForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        : [];
+      
+      const deadline = projectForm.applicationDeadline 
+        ? new Date(projectForm.applicationDeadline + 'T00:00:00Z').toISOString() 
+        : null;
+      
+      const input = {
+        id: editingProject.id,
+        title: projectForm.title,
+        description: projectForm.description,
+        department: projectForm.department,
+        skillsRequired: skillsArray,
+        tags: tagsArray,
+        qualifications: projectForm.qualifications || null,
+        duration: projectForm.duration || null,
+        applicationDeadline: deadline,
+        requiresTranscript: projectForm.requiresTranscript,
+        isActive: projectForm.isActive
+      };
+      
+      await API.graphql(graphqlOperation(updateProject, { input }));
+      setEditingProject(null);
+      fetchData();
+    } catch (error) {
+      console.error('Error updating project:', error);
+    }
+  };
+
   const handleApplicationAction = async (application, actionType) => {
     try {
       let newStatus;
@@ -361,6 +419,31 @@ const CoordinatorDashboard = ({ user }) => {
                                   }}
                                 >
                                   View
+                                </Button>
+                                <Button
+                                  size="small"
+                                  backgroundColor="white"
+                                  color="black"
+                                  border="none"
+                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                  onClick={() => {
+                                    setEditingProject(project);
+                                    setProjectForm({
+                                      title: project.title || '',
+                                      description: project.description || '',
+                                      department: project.department || '',
+                                      skillsRequired: project.skillsRequired?.join(', ') || '',
+                                      tags: project.tags?.join(', ') || '',
+                                      qualifications: project.qualifications || '',
+                                      duration: project.duration || '',
+                                      applicationDeadline: project.applicationDeadline ? new Date(project.applicationDeadline).toISOString().split('T')[0] : '',
+                                      requiresTranscript: project.requiresTranscript || false,
+                                      isActive: project.isActive !== undefined ? project.isActive : true
+                                    });
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  Edit
                                 </Button>
                                 <Button
                                   size="small"
@@ -1447,6 +1530,137 @@ const CoordinatorDashboard = ({ user }) => {
                   </Button>
                 </Flex>
               </Flex>
+            </Card>
+          </Flex>
+        </View>
+      )}
+
+      {/* Edit Project Modal */}
+      {editingProject && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setEditingProject(null)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              maxWidth="900px"
+              width="100%"
+              maxHeight="100vh"
+              style={{ overflow: 'auto', border: '1px solid black' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Heading level={4} marginBottom="1rem">Edit Project</Heading>
+              <form onSubmit={handleUpdateProject}>
+                <Flex direction="column" gap="1.5rem">
+                  <TextField
+                    name="title"
+                    label="Project Title *"
+                    value={projectForm.title}
+                    onChange={handleProjectFormChange}
+                    required
+                  />
+                  <div>
+                    <Text fontWeight="bold">Project Description *</Text>
+                    <div style={{ height: '300px' }}>
+                      <ReactQuill
+                        value={projectForm.description}
+                        onChange={(value) => setProjectForm(prev => ({ ...prev, description: value }))}
+                        placeholder="Describe the research project..."
+                        modules={{
+                          toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['clean']
+                          ]
+                        }}
+                        style={{ height: '250px' }}
+                      />
+                    </div>
+                  </div>
+                  <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
+                    <TextField
+                      name="department"
+                      label="Department *"
+                      value={projectForm.department}
+                      onChange={handleProjectFormChange}
+                      required
+                      flex="1"
+                    />
+                    <TextField
+                      name="applicationDeadline"
+                      label="Application Deadline *"
+                      type="date"
+                      value={projectForm.applicationDeadline}
+                      onChange={handleProjectFormChange}
+                      required
+                      flex="1"
+                    />
+                  </Flex>
+                  <TextField
+                    name="skillsRequired"
+                    label="Skills Required (comma-separated)"
+                    value={projectForm.skillsRequired}
+                    onChange={handleProjectFormChange}
+                    placeholder="e.g. Python, Data Analysis, Machine Learning"
+                  />
+                  <TextField
+                    name="tags"
+                    label="Research Tags (comma-separated)"
+                    value={projectForm.tags}
+                    onChange={handleProjectFormChange}
+                    placeholder="e.g. lab, field, geology, code, clinical"
+                  />
+                  <TextAreaField
+                    name="qualifications"
+                    label="Required Qualifications/Prerequisites"
+                    value={projectForm.qualifications}
+                    onChange={handleProjectFormChange}
+                    placeholder="e.g. Completion of PSYC 101, minimum GPA of 3.0"
+                    rows={4}
+                  />
+                  <TextField
+                    name="duration"
+                    label="Project Duration"
+                    value={projectForm.duration}
+                    onChange={handleProjectFormChange}
+                    placeholder="e.g. 3 months, Fall Semester"
+                  />
+                  <SelectField
+                    name="requiresTranscript"
+                    label="Requires Transcript Upload"
+                    value={projectForm.requiresTranscript.toString()}
+                    onChange={(e) => setProjectForm(prev => ({ 
+                      ...prev, 
+                      requiresTranscript: e.target.value === 'true' 
+                    }))}
+                  >
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                  </SelectField>
+                  <Flex gap="1rem">
+                    <Button onClick={() => setEditingProject(null)}>Cancel</Button>
+                    <Button 
+                      type="submit"
+                      backgroundColor="white"
+                      color="black"
+                      border="1px solid black"
+                    >
+                      Update Project
+                    </Button>
+                  </Flex>
+                </Flex>
+              </form>
             </Card>
           </Flex>
         </View>

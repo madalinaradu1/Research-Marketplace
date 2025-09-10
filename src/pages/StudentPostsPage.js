@@ -105,7 +105,6 @@ const StudentPostsPage = ({ user }) => {
       const userId = user.id || user.username;
       
       const input = {
-        studentID: editingPost ? editingPost.studentID : userId,
         type: formData.type,
         title: formData.title,
         description: formData.description,
@@ -119,8 +118,10 @@ const StudentPostsPage = ({ user }) => {
 
       if (editingPost) {
         input.id = editingPost.id;
+        // Don't include studentID when updating - it should remain unchanged
         await API.graphql(graphqlOperation(updateStudentPost, { input }));
       } else {
+        input.studentID = userId;
         await API.graphql(graphqlOperation(createStudentPost, { input }));
       }
 
@@ -259,7 +260,7 @@ const StudentPostsPage = ({ user }) => {
                         <Text fontSize="0.8rem" color="gray">
                           {new Date(post.createdAt).toLocaleDateString()}
                         </Text>
-                        {((user.id || user.username) === post.student?.id || user.role === 'Admin') && (
+                        {((user.id || user.username) === post.student?.id || ['Admin', 'Coordinator'].includes(user.role)) && (
                           <View position="relative">
                             <Button 
                               size="medium"
@@ -391,7 +392,7 @@ const StudentPostsPage = ({ user }) => {
                         <Text fontSize="0.8rem" color="gray">
                           {new Date(post.createdAt).toLocaleDateString()}
                         </Text>
-                        {((user.id || user.username) === post.student?.id || user.role === 'Admin') && (
+                        {((user.id || user.username) === post.student?.id || ['Admin', 'Coordinator'].includes(user.role)) && (
                           <View position="relative">
                             <Button 
                               size="medium"
