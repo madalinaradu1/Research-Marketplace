@@ -49,7 +49,7 @@
         },
         "adminCreateUser": {
           "deploymentBucketName": "amplify-researchmarketplace-dev-0c85c-deployment",
-          "s3Key": "amplify-builds/adminCreateUser-646e34337776634f672b-build.zip"
+          "s3Key": "amplify-builds/adminCreateUser-7057594e67504369662b-build.zip"
         },
         "deleteUserFunction": {},
         "deleteUserFromCognito": {}

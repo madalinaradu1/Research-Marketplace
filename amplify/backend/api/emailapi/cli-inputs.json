@@ -12,26 +12,14 @@
       "name": "/delete-user",
       "lambdaFunction": "adminCreateUser",
       "permissions": {
-        "setting": "private",
-        "auth": [
-          "create",
-          "read",
-          "update",
-          "delete"
-        ]
+        "setting": "open"
       }
     },
     "/create-user": {
       "name": "/create-user",
       "lambdaFunction": "adminCreateUser",
       "permissions": {
-        "setting": "private",
-        "auth": [
-          "create",
-          "read",
-          "update",
-          "delete"
-        ]
+        "setting": "open"
       }
     }
   }
