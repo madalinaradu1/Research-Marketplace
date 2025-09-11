@@ -8,15 +8,15 @@
         "setting": "open"
       }
     },
-    "/delete-user": {
-      "name": "/delete-user",
+    "/create-user": {
+      "name": "/create-user",
       "lambdaFunction": "adminCreateUser",
       "permissions": {
         "setting": "open"
       }
     },
-    "/create-user": {
-      "name": "/create-user",
+    "/delete-user": {
+      "name": "/delete-user",
       "lambdaFunction": "adminCreateUser",
       "permissions": {
         "setting": "open"
