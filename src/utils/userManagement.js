@@ -24,7 +24,7 @@ export async function createUserAfterSignUp(userData) {
       name: `${attributes.given_name || ''} ${attributes.family_name || ''}`.trim() || attributes.name || '',
       email: attributes.email,
       role: role,
-      profileComplete: role === 'Faculty' || role === 'Coordinator' // Faculty and Coordinators don't need to complete profile, Students do
+      profileComplete: role !== 'Student' // All Students must complete profile
     };
     
     console.log('Creating user with attributes:', attributes);

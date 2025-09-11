@@ -14,8 +14,18 @@ const Dashboard = ({ user }) => {
     );
   }
 
-  console.log('Dashboard user object:', user);
-  console.log('User role:', user.role, 'Type:', typeof user.role);
+
+
+  // Only redirect Students with incomplete profiles
+  if (user.role === 'Student' && !user.profileComplete) {
+    window.location.href = '/profile';
+    return (
+      <Card padding="2rem">
+        <Heading level={2}>Profile Setup Required</Heading>
+        <Text>Please complete your profile to continue...</Text>
+      </Card>
+    );
+  }
 
   // Render dashboard based on user role
   switch (user.role) {

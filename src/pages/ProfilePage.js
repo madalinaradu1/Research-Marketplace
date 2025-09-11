@@ -168,11 +168,8 @@ const ProfilePage = ({ user, refreshProfile }) => {
         profileComplete: true
       };
       
-      console.log('Sending update input:', input);
-
       // Update user in DynamoDB
       const result = await API.graphql(graphqlOperation(updateUser, { input }));
-      console.log('Profile updated:', result.data.updateUser);
       setMessage('Profile updated successfully!');
       
       // Update form state with the saved data to keep fields populated
@@ -196,7 +193,6 @@ const ProfilePage = ({ user, refreshProfile }) => {
         refreshProfile();
       }
     } catch (err) {
-      console.error('Error updating profile:', err);
       setError('An error occurred while updating your profile. Please try again.');
     } finally {
       setIsSubmitting(false);

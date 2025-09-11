@@ -64,7 +64,6 @@ const StudentDashboard = ({ user }) => {
     
     try {
       const userId = user.id || user.username;
-      console.log('Fetching applications for user ID:', userId);
       
       let userApplications = [];
       
@@ -95,8 +94,9 @@ const StudentDashboard = ({ user }) => {
         
         if (projectResult.data && projectResult.data.listProjects) {
           const allProjects = projectResult.data.listProjects.items || [];
-          // Set approved projects for display (only coordinator-approved projects)
-          setProjects(allProjects.filter(p => p.isActive && p.projectStatus === 'Approved'));
+          // Set approved/published projects for display (coordinator-approved projects)
+          const filteredProjects = allProjects.filter(p => p.isActive && (p.projectStatus === 'Approved' || p.projectStatus === 'Published'));
+          setProjects(filteredProjects);
           
           // Use all projects for enriching applications
           const enrichedApplications = userApplications.map(app => {
@@ -128,6 +128,7 @@ const StudentDashboard = ({ user }) => {
         }
       } catch (projErr) {
         console.error('Error fetching projects:', projErr);
+        console.error('Project error details:', projErr.errors);
         // Continue even if this fails
         setProjects([]);
       }

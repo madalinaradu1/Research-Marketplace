@@ -274,7 +274,7 @@ const AdminDashboard = ({ user }) => {
         email: newUser.email,
         role: newUser.role,
         department: newUser.department || null,
-        profileComplete: true
+        profileComplete: newUser.role !== 'Student' // Students must complete profile
       };
       
       await API.graphql(graphqlOperation(createUser, { input: userInput }));

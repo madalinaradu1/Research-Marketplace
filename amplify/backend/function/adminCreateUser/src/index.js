@@ -15,8 +15,7 @@ const handleUserCreation = async (event, headers) => {
     try {
         console.log('Parsing event body:', event.body);
         const { email, name, role, department } = JSON.parse(event.body);
-        console.log('Parsed data:', { userId, email, name, role, department });
-        console.log('Full body received:', JSON.parse(event.body));
+        console.log('Parsed data:', { email, name, role, department });
         
         const userPoolId = 'us-east-1_iMyhdFqsG';
         
@@ -50,7 +49,7 @@ const handleUserCreation = async (event, headers) => {
         const createResult = await cognitoClient.send(createCommand);
 
         // Add user to appropriate group based on role
-        if (role && role !== 'Student') {
+        if (role) {
             try {
                 const addToGroupCommand = new AdminAddUserToGroupCommand({
                     UserPoolId: userPoolId,
@@ -292,7 +291,7 @@ exports.handler = async (event) => {
         const createResult = await cognitoClient.send(createCommand);
 
         // Add user to appropriate group based on role
-        if (role && role !== 'Student') {
+        if (role) {
             try {
                 const addToGroupCommand = new AdminAddUserToGroupCommand({
                     UserPoolId: userPoolId,

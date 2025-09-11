@@ -219,59 +219,64 @@ const Header = ({ user, signOut }) => {
         display={{ base: 'none', xl: 'flex' }}
         padding="1.5rem 2rem"
       >
-        <Link to="/dashboard" style={{ textDecoration: isActive('/dashboard') ? 'underline white' : 'none' }}>
-          <Text
-            color={isActive('/dashboard') ? "white" : "rgba(255,255,255,0.8)"}
-            fontWeight={isActive('/dashboard') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-          >
-            Dashboard
-          </Text>
-        </Link>
-
-        {user?.role !== 'Coordinator' && (
-          <Link to="/activity" style={{ textDecoration: isActive('/activity') ? 'underline white' : 'none' }}>
-            <Text
-              color={isActive('/activity') ? "white" : "rgba(255,255,255,0.8)"}
-              fontWeight={isActive('/activity') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-            >
-              My Activity
-            </Text>
-          </Link>
-        )}
-        <Link to="/messages" style={{ position: 'relative', textDecoration: isActive('/messages') ? 'underline white' : 'none' }}>
-          <Text
-            color={isActive('/messages') ? "white" : "rgba(255,255,255,0.8)"}
-            fontWeight={isActive('/messages') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-          >
-            Messages
-          </Text>
-          {unreadCount > 0 && (
-            <View
-              position="absolute"
-              top="-8px"
-              right="-8px"
-              width="16px"
-              height="16px"
-              borderRadius="50%"
-              backgroundColor="red"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Text fontSize="10px" color="white" fontWeight="bold">
-                {unreadCount > 9 ? '9+' : unreadCount}
+        {/* Hide navigation for Students with incomplete profiles */}
+        {!(user?.role === 'Student' && !user?.profileComplete) && (
+          <>
+            <Link to="/dashboard" style={{ textDecoration: isActive('/dashboard') ? 'underline white' : 'none' }}>
+              <Text
+                color={isActive('/dashboard') ? "white" : "rgba(255,255,255,0.8)"}
+                fontWeight={isActive('/dashboard') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
+              >
+                Dashboard
               </Text>
-            </View>
-          )}
-        </Link>
-        <Link to="/community" style={{ textDecoration: isActive('/community') ? 'underline white' : 'none' }}>
-          <Text
-            color={isActive('/community') ? "white" : "rgba(255,255,255,0.8)"}
-            fontWeight={isActive('/community') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-          >
-            Community
-          </Text>
-        </Link>
+            </Link>
+
+            {user?.role !== 'Coordinator' && (
+              <Link to="/activity" style={{ textDecoration: isActive('/activity') ? 'underline white' : 'none' }}>
+                <Text
+                  color={isActive('/activity') ? "white" : "rgba(255,255,255,0.8)"}
+                  fontWeight={isActive('/activity') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
+                >
+                  My Activity
+                </Text>
+              </Link>
+            )}
+            <Link to="/messages" style={{ position: 'relative', textDecoration: isActive('/messages') ? 'underline white' : 'none' }}>
+              <Text
+                color={isActive('/messages') ? "white" : "rgba(255,255,255,0.8)"}
+                fontWeight={isActive('/messages') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
+              >
+                Messages
+              </Text>
+              {unreadCount > 0 && (
+                <View
+                  position="absolute"
+                  top="-8px"
+                  right="-8px"
+                  width="16px"
+                  height="16px"
+                  borderRadius="50%"
+                  backgroundColor="red"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Text fontSize="10px" color="white" fontWeight="bold">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </Link>
+            <Link to="/community" style={{ textDecoration: isActive('/community') ? 'underline white' : 'none' }}>
+              <Text
+                color={isActive('/community') ? "white" : "rgba(255,255,255,0.8)"}
+                fontWeight={isActive('/community') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
+              >
+                Community
+              </Text>
+            </Link>
+          </>
+        )}
         
         {isUserAdmin(user, user) && (
           <Link to="/admin" style={{ textDecoration: isActive('/admin') ? 'underline white' : 'none' }}>
@@ -371,7 +376,9 @@ const Header = ({ user, signOut }) => {
                   <Text fontSize="0.9rem" fontWeight="bold" color="black">
                     Hello, {user?.name || (user?.email ? user.email.split('@')[0] : user?.username || 'User')}
                   </Text>
-                  <Button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Edit Profile</Button>
+                  {user?.role === 'Student' && (
+                    <Button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Edit Profile</Button>
+                  )}
                   <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Sign Out</Button>
                 </Flex>
               </Flex>

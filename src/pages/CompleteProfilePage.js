@@ -77,14 +77,8 @@ const CompleteProfilePage = ({ user }) => {
         profileComplete: true
       };
 
-      try {
-        // Try to update the user first
-        await API.graphql(graphqlOperation(updateUser, { input }));
-      } catch (updateError) {
-        console.log('Update failed, trying to create user:', updateError);
-        // If update fails, try to create the user
-        await API.graphql(graphqlOperation(createUser, { input }));
-      }
+      // Update the existing user profile
+      await API.graphql(graphqlOperation(updateUser, { input }));
       
       // Force refresh of user profile and redirect to dashboard
       window.location.href = '/dashboard';

@@ -235,15 +235,18 @@ function App({ signOut, user }) {
       <Router>
         <div className="app">
         <Header user={userProfile || user} signOut={signOut} />
-        {console.log('App.js userProfile:', userProfile)}
-        {console.log('App.js user:', user)}
+
         
         <main>
           <Routes>
             <Route path="/" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <Navigate to="/dashboard" />} />
-            <Route path="/complete-profile" element={<CompleteProfilePage user={userProfile || user} />} />
+            <Route path="/complete-profile" element={
+              (userProfile || user)?.role === 'Student' ? 
+                <CompleteProfilePage user={userProfile || user} /> : 
+                <Navigate to="/dashboard" replace />
+            } />
             <Route path="/dashboard" element={
               new URLSearchParams(window.location.search).get('from') === 'email' ? 
               <Navigate to="/dashboard" replace /> :
