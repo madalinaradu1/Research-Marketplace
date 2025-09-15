@@ -62,6 +62,11 @@ const AdminDashboard = ({ user }) => {
   }, [user]);
   
   const fetchData = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     
@@ -293,10 +298,33 @@ const AdminDashboard = ({ user }) => {
   
   const handleRoleUpdate = async (userId, newRole) => {
     try {
-      console.log('Updating user role:', userId, 'to', newRole);
+      const targetUser = users.find(u => u.id === userId);
+      const oldRole = targetUser?.role;
+      
+      console.log('Updating user role:', userId, 'from', oldRole, 'to', newRole);
       const result = await updateUserRole(userId, newRole);
       console.log('Role update result:', result);
-      // await syncUserGroupsToRole(userId); // Disabled due to errors
+      
+      // Update Cognito groups if role changed
+      if (oldRole !== newRole && targetUser?.email) {
+        console.log('Attempting to update Cognito groups:', { userEmail: targetUser.email, oldRole, newRole });
+        try {
+          const response = await API.post('emailapi', '/update-user-group', {
+            body: {
+              userEmail: targetUser.email,
+              oldRole: oldRole,
+              newRole: newRole
+            }
+          });
+          console.log('Cognito group updated successfully:', response);
+        } catch (cognitoError) {
+          console.error('Failed to update Cognito group:', cognitoError);
+          setError('Role updated in database but failed to update Cognito groups. User may need to re-login.');
+        }
+      } else {
+        console.log('Skipping Cognito update:', { oldRole, newRole, hasEmail: !!targetUser?.email });
+      }
+      
       setMessage('User role updated successfully!');
       await fetchData(); // Wait for data to refresh
     } catch (err) {

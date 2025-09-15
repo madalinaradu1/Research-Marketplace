@@ -797,23 +797,6 @@ const FacultyDashboard = ({ user }) => {
                                       >
                                         Edit and Resubmit
                                       </Button>
-                                    ) : (
-                                      (user.id === project.facultyID || user.role === 'Coordinator') && (
-                                        <Button
-                                          size="small"
-                                          backgroundColor="white"
-                                          color="black"
-                                          border="none"
-                                          style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                          onClick={() => {
-                                            editProject(project);
-                                            setOpenKebabMenu(null);
-                                          }}
-                                          isDisabled={project.applicationDeadline && new Date(project.applicationDeadline) < new Date()}
-                                        >
-                                          {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : 'Edit'}
-                                        </Button>
-                                      )
                                     )}
                                     {!(project.applicationDeadline && new Date(project.applicationDeadline) < new Date()) && (
                                       <Button

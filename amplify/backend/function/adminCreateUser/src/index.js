@@ -3,7 +3,7 @@
 	REGION
 Amplify Params - DO NOT EDIT */
 
-const { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminDeleteUserCommand, AdminAddUserToGroupCommand } = require('@aws-sdk/client-cognito-identity-provider');
+const { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminDeleteUserCommand, AdminAddUserToGroupCommand, AdminRemoveUserFromGroupCommand } = require('@aws-sdk/client-cognito-identity-provider');
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
 
 const cognitoClient = new CognitoIdentityProviderClient({ region: 'us-east-1' });
@@ -127,6 +127,78 @@ const handleUserCreation = async (event, headers) => {
     }
 };
 
+// Handle user group update in Cognito
+const handleUserGroupUpdate = async (event, headers) => {
+    try {
+        const { userEmail, oldRole, newRole } = JSON.parse(event.body);
+        const userPoolId = 'us-east-1_iMyhdFqsG';
+        
+        if (!userEmail || !newRole) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'userEmail and newRole are required' })
+            };
+        }
+
+        // Remove from all possible groups to ensure clean state
+        const allGroups = ['Student', 'Faculty', 'Coordinator', 'Admin'];
+        console.log('Removing user from all groups:', userEmail);
+        for (const group of allGroups) {
+            try {
+                const removeCommand = new AdminRemoveUserFromGroupCommand({
+                    UserPoolId: userPoolId,
+                    Username: userEmail,
+                    GroupName: group
+                });
+                await cognitoClient.send(removeCommand);
+                console.log(`Successfully removed from ${group} group`);
+            } catch (removeError) {
+                console.log(`Failed to remove from ${group} group:`, removeError.message);
+            }
+        }
+
+        // Add to new group
+        console.log(`Adding user to ${newRole} group`);
+        try {
+            const addToGroupCommand = new AdminAddUserToGroupCommand({
+                UserPoolId: userPoolId,
+                Username: userEmail,
+                GroupName: newRole
+            });
+            await cognitoClient.send(addToGroupCommand);
+            console.log(`Successfully added to ${newRole} group`);
+        } catch (addError) {
+            console.log('Failed to add to new group:', addError.message);
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({ error: 'Failed to add user to new group' })
+            };
+        }
+
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                message: `User group updated from ${oldRole} to ${newRole}`
+            })
+        };
+
+    } catch (error) {
+        console.error('Error updating user group:', error);
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({
+                error: 'Failed to update user group',
+                details: error.message
+            })
+        };
+    }
+};
+
 // Handle user deletion from Cognito
 const handleUserDeletion = async (event, headers) => {
     try {
@@ -243,6 +315,11 @@ exports.handler = async (event) => {
         // Check if this is a create request based on path
         if (event.path && event.path.includes('/create-user')) {
             return handleUserCreation(event, headers);
+        }
+        
+        // Check if this is an update user group request
+        if (event.path && event.path.includes('/update-user-group')) {
+            return handleUserGroupUpdate(event, headers);
         }
     } catch (error) {
         console.error('Handler error:', error);

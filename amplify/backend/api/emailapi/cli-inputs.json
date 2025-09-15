@@ -15,6 +15,13 @@
         "setting": "open"
       }
     },
+    "/update-user-group": {
+      "name": "/update-user-group",
+      "lambdaFunction": "adminCreateUser",
+      "permissions": {
+        "setting": "open"
+      }
+    },
     "/delete-user": {
       "name": "/delete-user",
       "lambdaFunction": "adminCreateUser",
