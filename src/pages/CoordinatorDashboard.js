@@ -46,6 +46,7 @@ const CoordinatorDashboard = ({ user }) => {
   const [notes, setNotes] = useState('');
   const [action, setAction] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
+  const [approvalReason, setApprovalReason] = useState('');
   const [documentUrl, setDocumentUrl] = useState(null);
   const [viewingDocument, setViewingDocument] = useState(false);
   const [viewingProject, setViewingProject] = useState(null);
@@ -188,6 +189,11 @@ const CoordinatorDashboard = ({ user }) => {
         return;
       }
       
+      if (actionType === 'approve' && !approvalReason.trim()) {
+        alert('Approval reason is required when approving a project');
+        return;
+      }
+      
       let newStatus;
       switch (actionType) {
         case 'approve':
@@ -206,7 +212,7 @@ const CoordinatorDashboard = ({ user }) => {
       const input = {
         id: project.id,
         projectStatus: newStatus,
-        coordinatorNotes: notes,
+        coordinatorNotes: actionType === 'approve' ? approvalReason : notes,
         ...(actionType === 'reject' && { rejectionReason }),
         ...(actionType === 'approve' && { isActive: true })
       };
@@ -230,6 +236,7 @@ const CoordinatorDashboard = ({ user }) => {
       }
       
       setNotes('');
+      setApprovalReason('');
       setSelectedProject(null);
       fetchData();
     } catch (error) {
@@ -767,6 +774,11 @@ const CoordinatorDashboard = ({ user }) => {
                           <Text fontSize="0.8rem" color="gray">
                             Rejected: {new Date(project.updatedAt).toLocaleDateString()}
                           </Text>
+                          {project.rejectionReason && (
+                            <Text fontSize="0.8rem" color="red">
+                              Reason: {project.rejectionReason}
+                            </Text>
+                          )}
                         </Flex>
                         <View position="relative">
                           <Button 
@@ -1448,18 +1460,27 @@ const CoordinatorDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="400px"
+              maxWidth="600px"
               width="100%"
               onClick={(e) => e.stopPropagation()}
             >
               <Flex direction="column" gap="1rem">
                 <Heading level={4}>Approve Project</Heading>
                 <Text>Are you sure you want to approve the project "{projectToApprove.title}" by {projectToApprove.faculty?.name}?</Text>
+                <TextAreaField
+                  label="Approval Reason (Required)"
+                  value={approvalReason}
+                  onChange={(e) => setApprovalReason(e.target.value)}
+                  placeholder="Please explain why this project is being approved..."
+                  required
+                  rows={4}
+                />
                 <Flex gap="1rem" justifyContent="flex-end">
                   <Button
                     onClick={() => {
                       setShowProjectApproveConfirm(false);
                       setProjectToApprove(null);
+                      setApprovalReason('');
                     }}
                     backgroundColor="white"
                     color="black"
@@ -1472,10 +1493,12 @@ const CoordinatorDashboard = ({ user }) => {
                       await handleProjectAction(projectToApprove, 'approve');
                       setShowProjectApproveConfirm(false);
                       setProjectToApprove(null);
+                      setApprovalReason('');
                     }}
                     backgroundColor="white"
                     color="black"
                     border="1px solid black"
+                    isDisabled={!approvalReason.trim()}
                   >
                     Approve
                   </Button>
@@ -1505,7 +1528,7 @@ const CoordinatorDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="400px"
+              maxWidth="600px"
               width="100%"
               onClick={(e) => e.stopPropagation()}
             >
@@ -1543,6 +1566,7 @@ const CoordinatorDashboard = ({ user }) => {
                     backgroundColor="white"
                     color="black"
                     border="1px solid black"
+                    isDisabled={!rejectionReason.trim()}
                   >
                     Reject
                   </Button>

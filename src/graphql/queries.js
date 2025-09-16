@@ -144,6 +144,7 @@ export const getProject = /* GraphQL */ `
       requiresTranscript
       projectStatus
       coordinatorNotes
+      rejectionReason
       selectedStudentID
       filledAt
       createdAt
@@ -182,6 +183,7 @@ export const listProjects = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -223,6 +225,7 @@ export const projectsByFacultyID = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -281,6 +284,7 @@ export const getApplication = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -637,6 +641,7 @@ export const getMessageBoard = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt

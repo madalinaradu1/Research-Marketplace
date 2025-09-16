@@ -242,6 +242,7 @@ export const createProject = /* GraphQL */ `
       requiresTranscript
       projectStatus
       coordinatorNotes
+      rejectionReason
       selectedStudentID
       filledAt
       createdAt
@@ -304,6 +305,7 @@ export const updateProject = /* GraphQL */ `
       requiresTranscript
       projectStatus
       coordinatorNotes
+      rejectionReason
       selectedStudentID
       filledAt
       createdAt
@@ -366,6 +368,7 @@ export const deleteProject = /* GraphQL */ `
       requiresTranscript
       projectStatus
       coordinatorNotes
+      rejectionReason
       selectedStudentID
       filledAt
       createdAt
@@ -432,6 +435,7 @@ export const createApplication = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -538,6 +542,7 @@ export const updateApplication = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -644,6 +649,7 @@ export const deleteApplication = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -903,6 +909,7 @@ export const createMessageBoard = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -968,6 +975,7 @@ export const updateMessageBoard = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -1033,6 +1041,7 @@ export const deleteMessageBoard = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt

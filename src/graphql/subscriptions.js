@@ -242,6 +242,7 @@ export const onCreateProject = /* GraphQL */ `
       requiresTranscript
       projectStatus
       coordinatorNotes
+      rejectionReason
       selectedStudentID
       filledAt
       createdAt
@@ -304,6 +305,7 @@ export const onUpdateProject = /* GraphQL */ `
       requiresTranscript
       projectStatus
       coordinatorNotes
+      rejectionReason
       selectedStudentID
       filledAt
       createdAt
@@ -366,6 +368,7 @@ export const onDeleteProject = /* GraphQL */ `
       requiresTranscript
       projectStatus
       coordinatorNotes
+      rejectionReason
       selectedStudentID
       filledAt
       createdAt
@@ -431,6 +434,7 @@ export const onCreateApplication = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -536,6 +540,7 @@ export const onUpdateApplication = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -641,6 +646,7 @@ export const onDeleteApplication = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -899,6 +905,7 @@ export const onCreateMessageBoard = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -963,6 +970,7 @@ export const onUpdateMessageBoard = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -1027,6 +1035,7 @@ export const onDeleteMessageBoard = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt

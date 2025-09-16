@@ -521,6 +521,11 @@ const FacultyDashboard = ({ user }) => {
     return projects.filter(project => project.projectStatus === 'Returned');
   };
   
+  // Get rejected projects
+  const getRejectedProjects = () => {
+    return projects.filter(project => project.projectStatus === 'Rejected');
+  };
+  
   // Filter applications that have been processed (approved, rejected, returned)
   const getProcessedApplications = () => {
     return applications.filter(app => 
@@ -1169,6 +1174,81 @@ const FacultyDashboard = ({ user }) => {
           )}
         </TabItem>
         
+        <TabItem title="Rejected Projects">
+          {getRejectedProjects().length === 0 ? (
+            <Card>
+              <Text>No rejected projects.</Text>
+            </Card>
+          ) : (
+            <Card>
+              <Heading level={4} marginBottom="1rem">Rejected Projects ({getRejectedProjects().length})</Heading>
+              <Collection items={getPaginatedItems(getRejectedProjects().sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), projectsPage)} type="list" gap="1rem">
+                {(project) => (
+                  <Card key={project.id} variation="outlined">
+                    <Flex direction="column" gap="0.5rem">
+                      <Flex justifyContent="space-between" alignItems="flex-start">
+                        <Text fontWeight="bold">{project.title}</Text>
+                        <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
+                          <Badge backgroundColor="red" color="white">
+                            Rejected
+                          </Badge>
+                          <View position="relative">
+                            <Button 
+                              size="medium"
+                              backgroundColor="transparent"
+                              color="black"
+                              border="none"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
+                              }}
+                              style={{ padding: '0.75rem' }}
+                            >
+                              ⋯
+                            </Button>
+                            {openKebabMenu === project.id && (
+                              <Card
+                                position="absolute"
+                                top="100%"
+                                right="0"
+                                style={{ zIndex: 100, minWidth: '200px' }}
+                                backgroundColor="white"
+                                border="1px solid black"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Flex direction="column" gap="0">
+                                  <Button
+                                    size="small"
+                                    backgroundColor="white"
+                                    color="black"
+                                    border="none"
+                                    style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                    onClick={() => {
+                                      setSelectedProject(project);
+                                      setIsEditingProject(false);
+                                      setOpenKebabMenu(null);
+                                    }}
+                                  >
+                                    View Details
+                                  </Button>
+                                </Flex>
+                              </Card>
+                            )}
+                          </View>
+                        </Flex>
+                      </Flex>
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Text fontSize="0.9rem">{project.department} • Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
+                      </Flex>
+                    </Flex>
+                  </Card>
+                )}
+              </Collection>
+              {renderPagination(getRejectedProjects(), projectsPage, setProjectsPage)}
+            </Card>
+          )}
+        </TabItem>
+        
         <TabItem title="Status Guide">
           <ApplicationStatusGuide />
         </TabItem>
@@ -1758,6 +1838,13 @@ const FacultyDashboard = ({ user }) => {
                 <Text><strong>Requires Transcript Upload:</strong> {selectedProject.requiresTranscript ? 'Yes' : 'No'}</Text>
                 
                 <Text><strong>Status:</strong> {selectedProject.projectStatus || 'Draft'}</Text>
+                
+                {selectedProject.projectStatus === 'Rejected' && selectedProject.rejectionReason && (
+                  <Card backgroundColor="#f8d7da" padding="1rem" marginTop="1rem">
+                    <Text fontWeight="bold" color="#721c24">Rejection Reason:</Text>
+                    <Text color="#721c24" marginTop="0.5rem">{selectedProject.rejectionReason}</Text>
+                  </Card>
+                )}
                 
                 <Flex gap="1rem" marginTop="1rem">
                   <Button 
