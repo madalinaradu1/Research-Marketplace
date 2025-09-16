@@ -270,7 +270,7 @@ const ApplicationWizard = ({ user, projectId, onComplete }) => {
         
         <TextField
           name="department"
-          label="Department *"
+          label="College *"
           value={applicationData.department}
           onChange={handleChange}
           required
@@ -393,7 +393,7 @@ const ApplicationWizard = ({ user, projectId, onComplete }) => {
         
         <Heading level={4}>Application Summary</Heading>
         <Text>Term: {applicationData.term}</Text>
-        <Text>Department: {applicationData.department}</Text>
+        <Text>College: {applicationData.department}</Text>
         <Text>Project Title: {applicationData.projectTitle}</Text>
         <Text>Payment Type: {applicationData.paymentType}</Text>
         

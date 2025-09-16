@@ -83,7 +83,7 @@ const ProjectDetailsPage = ({ user }) => {
           
           <Card>
             <Flex direction="column" gap="1rem">
-              <Text fontWeight="bold">Department: {project.department}</Text>
+              <Text fontWeight="bold">College: {project.department}</Text>
               <Divider />
               
               <Text fontWeight="bold">Description</Text>

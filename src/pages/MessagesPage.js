@@ -478,7 +478,7 @@ const MessagesPage = ({ user }) => {
               {(message) => (
                 <Card 
                   key={message.id}
-                  backgroundColor="#f5f5f5"
+                  backgroundColor="white"
                   style={{ cursor: 'pointer' }}
                   onClick={() => setSelectedMessage(message)}
                 >

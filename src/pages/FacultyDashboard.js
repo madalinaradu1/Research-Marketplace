@@ -26,6 +26,7 @@ import { createMessage, createNotification } from '../graphql/message-operations
 import { sendEmailNotification, sendNewItemNotification } from '../utils/emailNotifications';
 import ApplicationReview from '../components/ApplicationReview';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
+import { getStatusColorValue } from '../utils/statusColors';
 
 const FacultyDashboard = ({ user }) => {
   const { tokens } = useTheme();
@@ -108,20 +109,10 @@ const FacultyDashboard = ({ user }) => {
   const createProjectQuillRef = useRef(null);
   const editProjectQuillRef = useRef(null);
   
-  // Clean HTML content to remove excessive spacing
+  // Clean HTML content - minimal cleaning to preserve user formatting
   const cleanHtmlContent = (html) => {
     if (!html || html === '<p><br></p>') return '';
-    return html
-      .replace(/<p><br><\/p>/g, '') // Remove empty paragraphs with breaks
-      .replace(/<p>\s*<\/p>/g, '') // Remove empty paragraphs
-      .replace(/(<br\s*\/??>\s*){2,}/g, '<br>') // Replace multiple breaks with single
-      .replace(/(<p>\s*){2,}/g, '<p>') // Remove multiple paragraph starts
-      .replace(/(<\/p>\s*){2,}/g, '</p>') // Remove multiple paragraph ends
-      .replace(/<\/p>\s*<br>\s*<ol>/g, '</p><ol>') // Remove breaks between paragraph and ordered list
-      .replace(/<\/p>\s*<br>\s*<ul>/g, '</p><ul>') // Remove breaks between paragraph and unordered list
-      .replace(/<\/p>(\s*<br>\s*){2,}<ol>/g, '</p><ol>') // Remove multiple breaks before ordered list
-      .replace(/<\/p>(\s*<br>\s*){2,}<ul>/g, '</p><ul>') // Remove multiple breaks before unordered list
-      .trim();
+    return html.trim();
   };
   
   useEffect(() => {
@@ -288,7 +279,7 @@ const FacultyDashboard = ({ user }) => {
     const requiredFields = {
       'Project Title': projectForm.title,
       'Project Description': projectForm.description,
-      'Department': projectForm.department,
+      'College': projectForm.department,
       'Application Deadline': projectForm.applicationDeadline
     };
     
@@ -450,7 +441,7 @@ const FacultyDashboard = ({ user }) => {
           const data = JSON.parse(cached);
           return {
             title: data.title || project.title || '',
-            description: data.description || project.description || '',
+            description: (data.description || project.description || '').replace(/<p><br><\/p>/g, '').replace(/<p>\s*<\/p>/g, ''),
             department: data.department || project.department || '',
             skillsRequired: data.skillsRequired || (project.skillsRequired?.join(', ')) || '',
             tags: data.tags || (project.tags?.join(', ')) || '',
@@ -466,7 +457,7 @@ const FacultyDashboard = ({ user }) => {
       }
       return {
         title: project.title || '',
-        description: project.description || '',
+        description: (project.description || '').replace(/<p><br><\/p>/g, '').replace(/<p>\s*<\/p>/g, ''),
         department: project.department || '',
         skillsRequired: project.skillsRequired?.join(', ') || '',
         tags: project.tags?.join(', ') || '',
@@ -721,9 +712,7 @@ const FacultyDashboard = ({ user }) => {
                             <Badge 
                               backgroundColor={
                                 project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'gray' :
-                                project.projectStatus === 'Approved' ? '#4caf50' :
-                                project.projectStatus === 'Returned' ? tokens.colors.yellow[60] :
-                                project.projectStatus === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.neutral[60]
+                                getStatusColorValue(project.projectStatus, tokens)
                               }
                               color="white"
                             >
@@ -782,7 +771,7 @@ const FacultyDashboard = ({ user }) => {
                                     >
                                       {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : 'Edit'}
                                     </Button>
-                                    {project.projectStatus === 'Returned' ? (
+                                    {project.projectStatus === 'Returned' && (
                                       <Button
                                         size="small"
                                         backgroundColor="white"
@@ -883,13 +872,7 @@ const FacultyDashboard = ({ user }) => {
                             <Text fontSize="0.9rem" width="220px">{application.student?.email}</Text>
                             <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
                             <Badge 
-                              backgroundColor={
-                                application.status === 'Approved' ? '#4caf50' :
-                                application.status === 'Returned' ? tokens.colors.yellow[60] :
-                                application.status === 'Rejected' ? tokens.colors.red[60] :
-                                application.status === 'Faculty Review' ? tokens.colors.blue[60] :
-                                application.status === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.neutral[60]
-                              }
+                              backgroundColor={getStatusColorValue(application.status, tokens)}
                               color="white"
                             >
                               {application.status}
@@ -976,7 +959,7 @@ const FacultyDashboard = ({ user }) => {
                   return (
                     <Card key={project.id}>
                       <Heading level={4}>{project.title}</Heading>
-                      <Text>Department: {project.department}</Text>
+                      <Text>College: {project.department}</Text>
                       <Divider margin="1rem 0" />
                       <Collection
                         items={getPaginatedItems(projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage)}
@@ -993,13 +976,7 @@ const FacultyDashboard = ({ user }) => {
                               <Text fontSize="0.9rem" width="220px">{application.student?.email}</Text>
                               <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
                               <Badge 
-                                backgroundColor={
-                                  application.status === 'Approved' ? '#4caf50' :
-                                  application.status === 'Returned' ? tokens.colors.yellow[60] :
-                                  application.status === 'Rejected' ? tokens.colors.red[60] :
-                                  application.status === 'Faculty Review' ? tokens.colors.blue[60] :
-                                  application.status === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.neutral[60]
-                                }
+                                backgroundColor={getStatusColorValue(application.status, tokens)}
                                 color="white"
                               >
                                 {application.status}
@@ -1131,11 +1108,7 @@ const FacultyDashboard = ({ user }) => {
                               <Text fontSize="0.9rem" width="220px">{application.student?.email}</Text>
                               <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
                               <Badge 
-                                backgroundColor={
-                                  application.status === 'Approved' ? '#4caf50' :
-                                  application.status === 'Faculty Review' ? tokens.colors.blue[60] :
-                                  application.status === 'Coordinator Review' ? tokens.colors.orange[60] : tokens.colors.orange[60]
-                                }
+                                backgroundColor={getStatusColorValue(application.status, tokens)}
                                 color="white"
                               >
                                 {application.status}
@@ -1437,7 +1410,7 @@ const FacultyDashboard = ({ user }) => {
                   <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
                     <TextField
                       name="department"
-                      label="Department *"
+                      label="College *"
                       value={projectForm.department}
                       onChange={handleProjectFormChange}
                       required
@@ -1611,7 +1584,7 @@ const FacultyDashboard = ({ user }) => {
                   
                   <TextField
                     name="department"
-                    label="Department *"
+                    label="College *"
                     value={projectForm.department}
                     onChange={handleProjectFormChange}
                     required
@@ -1740,7 +1713,7 @@ const FacultyDashboard = ({ user }) => {
               <Divider margin="1rem 0" />
               
               <Flex direction="column" gap="1rem">
-                <Text><strong>Department:</strong> {selectedProject.department}</Text>
+                <Text><strong>College:</strong> {selectedProject.department}</Text>
                 <div>
                   <Text fontWeight="bold">Description:</Text>
                   <div dangerouslySetInnerHTML={{ __html: selectedProject.description }} />

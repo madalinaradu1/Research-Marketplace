@@ -23,6 +23,7 @@ import { Storage } from 'aws-amplify';
 import { listProjects, listApplications, listUsers, updateProject, updateApplication } from '../graphql/operations';
 import { createMessage } from '../graphql/message-operations';
 import { sendStatusChangeNotification, sendEmailNotification } from '../utils/emailNotifications';
+import { getStatusColorValue } from '../utils/statusColors';
 
 const CoordinatorDashboard = ({ user }) => {
   const { tokens } = useTheme();
@@ -44,6 +45,7 @@ const CoordinatorDashboard = ({ user }) => {
   const [viewingApplication, setViewingApplication] = useState(null);
   const [notes, setNotes] = useState('');
   const [action, setAction] = useState('');
+  const [rejectionReason, setRejectionReason] = useState('');
   const [documentUrl, setDocumentUrl] = useState(null);
   const [viewingDocument, setViewingDocument] = useState(false);
   const [viewingProject, setViewingProject] = useState(null);
@@ -181,6 +183,11 @@ const CoordinatorDashboard = ({ user }) => {
 
   const handleProjectAction = async (project, actionType) => {
     try {
+      if (actionType === 'reject' && !rejectionReason.trim()) {
+        alert('Rejection reason is required when rejecting a project');
+        return;
+      }
+      
       let newStatus;
       switch (actionType) {
         case 'approve':
@@ -200,6 +207,7 @@ const CoordinatorDashboard = ({ user }) => {
         id: project.id,
         projectStatus: newStatus,
         coordinatorNotes: notes,
+        ...(actionType === 'reject' && { rejectionReason }),
         ...(actionType === 'approve' && { isActive: true })
       };
 
@@ -372,7 +380,7 @@ const CoordinatorDashboard = ({ user }) => {
           <Flex direction="column" gap="2rem">
             {/* Projects Needing Review */}
             {projects.pending && projects.pending.length > 0 && (
-              <Card>
+              <Card backgroundColor="white">
                 <Heading level={4} marginBottom="1rem">Projects ({projects.pending.length})</Heading>
                 <Collection items={getPaginatedItems(projects.pending, pendingPage)} type="list" gap="1rem">
                   {(project) => (
@@ -500,7 +508,7 @@ const CoordinatorDashboard = ({ user }) => {
             
             {/* Applications Needing Review */}
             {applications.length > 0 && (
-              <Card>
+              <Card backgroundColor="white">
                 <Heading level={4} marginBottom="1rem">Applications ({applications.length})</Heading>
                 <Collection items={getPaginatedItems(applications, pendingPage)} type="list" gap="1rem">
                   {(application) => (
@@ -602,7 +610,7 @@ const CoordinatorDashboard = ({ user }) => {
             )}
             
             {projects.pending?.length === 0 && applications.length === 0 && (
-              <Card>
+              <Card backgroundColor="white">
                 <Text>No items need your review at this time.</Text>
               </Card>
             )}
@@ -613,7 +621,7 @@ const CoordinatorDashboard = ({ user }) => {
           <Flex direction="column" gap="2rem">
             {/* Approved Applications */}
             {approvedApplications.length > 0 && (
-              <Card>
+              <Card backgroundColor="white">
                 <Heading level={4} marginBottom="1rem">Applications ({approvedApplications.length})</Heading>
                 <Collection items={getPaginatedItems(approvedApplications, approvedPage)} type="list" gap="1rem">
                   {(application) => (
@@ -675,7 +683,7 @@ const CoordinatorDashboard = ({ user }) => {
             
             {/* Approved Projects */}
             {projects.approved && projects.approved.length > 0 && (
-              <Card>
+              <Card backgroundColor="white">
                 <Heading level={4} marginBottom="1rem">Projects ({projects.approved.length})</Heading>
                 <Collection items={getPaginatedItems(projects.approved, approvedPage)} type="list" gap="1rem">
                   {(project) => (
@@ -736,7 +744,7 @@ const CoordinatorDashboard = ({ user }) => {
             )}
             
             {approvedApplications.length === 0 && projects.approved?.length === 0 && (
-              <Card>
+              <Card backgroundColor="white">
                 <Text>No approved items yet.</Text>
               </Card>
             )}
@@ -747,7 +755,7 @@ const CoordinatorDashboard = ({ user }) => {
           <Flex direction="column" gap="2rem">
             {/* Rejected Projects */}
             {projects.rejected && projects.rejected.length > 0 && (
-              <Card>
+              <Card backgroundColor="white">
                 <Heading level={4} marginBottom="1rem">Projects ({projects.rejected.length})</Heading>
                 <Collection items={getPaginatedItems(projects.rejected, rejectedPage)} type="list" gap="1rem">
                   {(project) => (
@@ -812,7 +820,7 @@ const CoordinatorDashboard = ({ user }) => {
             
             {/* Rejected Applications */}
             {rejectedApplications.length > 0 && (
-              <Card>
+              <Card backgroundColor="white">
                 <Heading level={4} marginBottom="1rem">Applications ({rejectedApplications.length})</Heading>
                 <Collection items={getPaginatedItems(rejectedApplications, rejectedPage)} type="list" gap="1rem">
                   {(application) => (
@@ -876,7 +884,7 @@ const CoordinatorDashboard = ({ user }) => {
             )}
             
             {projects.rejected?.length === 0 && rejectedApplications.length === 0 && (
-              <Card>
+              <Card backgroundColor="white">
                 <Text>No rejected items yet.</Text>
               </Card>
             )}
@@ -1011,7 +1019,7 @@ const CoordinatorDashboard = ({ user }) => {
                 <Flex direction="column" gap="0.5rem">
                   <Text fontWeight="bold">Project Information</Text>
                   <Text>Project: {viewingApplication.project?.title}</Text>
-                  <Text>Department: {viewingApplication.project?.department}</Text>
+                  <Text>College: {viewingApplication.project?.department}</Text>
                   <Text>Status: {viewingApplication.status}</Text>
                   <Text>Submitted: {new Date(viewingApplication.createdAt).toLocaleDateString()}</Text>
                 </Flex>
@@ -1219,7 +1227,7 @@ const CoordinatorDashboard = ({ user }) => {
                 <Flex direction="column" gap="0.5rem">
                   <Text fontWeight="bold">Project Information</Text>
                   <Text>Title: {viewingProject.title}</Text>
-                  <Text>Department: {viewingProject.department}</Text>
+                  <Text>College: {viewingProject.department}</Text>
                   <Text>Faculty: {viewingProject.faculty?.name}</Text>
                   <Text>Status: {viewingProject.projectStatus}</Text>
                   <Text>Created: {new Date(viewingProject.createdAt).toLocaleDateString()}</Text>
@@ -1504,11 +1512,20 @@ const CoordinatorDashboard = ({ user }) => {
               <Flex direction="column" gap="1rem">
                 <Heading level={4}>Reject Project</Heading>
                 <Text>Are you sure you want to reject the project "{projectToReject.title}" by {projectToReject.faculty?.name}?</Text>
+                <TextAreaField
+                  label="Rejection Reason (Required)"
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Please explain why this project is being rejected..."
+                  required
+                  rows={4}
+                />
                 <Flex gap="1rem" justifyContent="flex-end">
                   <Button
                     onClick={() => {
                       setShowProjectRejectConfirm(false);
                       setProjectToReject(null);
+                      setRejectionReason('');
                     }}
                     backgroundColor="white"
                     color="black"
@@ -1521,6 +1538,7 @@ const CoordinatorDashboard = ({ user }) => {
                       await handleProjectAction(projectToReject, 'reject');
                       setShowProjectRejectConfirm(false);
                       setProjectToReject(null);
+                      setRejectionReason('');
                     }}
                     backgroundColor="white"
                     color="black"
@@ -1591,7 +1609,7 @@ const CoordinatorDashboard = ({ user }) => {
                   <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
                     <TextField
                       name="department"
-                      label="Department *"
+                      label="College *"
                       value={projectForm.department}
                       onChange={handleProjectFormChange}
                       required

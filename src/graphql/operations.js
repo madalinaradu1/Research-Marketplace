@@ -114,6 +114,7 @@ export const listProjects = /* GraphQL */ `
         requiresTranscript
         projectStatus
         coordinatorNotes
+        rejectionReason
         selectedStudentID
         filledAt
         createdAt
@@ -185,6 +186,8 @@ export const listApplications = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
+        rejectionReason
+        acceptanceReason
         withdrawReason
         isSelected
         selectedAt
@@ -299,6 +302,7 @@ export const updateProject = /* GraphQL */ `
       requiresTranscript
       projectStatus
       coordinatorNotes
+      rejectionReason
       selectedStudentID
       filledAt
       createdAt
@@ -391,6 +395,8 @@ export const updateApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
+      rejectionReason
+      acceptanceReason
       withdrawReason
       isSelected
       selectedAt

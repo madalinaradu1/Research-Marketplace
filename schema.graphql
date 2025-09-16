@@ -49,7 +49,7 @@ type ResearchOpportunity @model @auth(rules: [
   description: String!
   facultyId: ID! @index(name: "byFaculty")
   faculty: User @belongsTo(fields: ["facultyId"])
-  department: String!
+  college: String!
   requirements: String
   deadline: AWSDateTime
   startDate: AWSDateTime
@@ -83,6 +83,9 @@ type Application @model @auth(rules: [
   statement: String
   resumeId: ID
   resume: Document @hasOne(fields: ["resumeId"])
+  reviewNotes: String
+  rejectionReason: String
+  acceptanceReason: String
   submissionDate: AWSDateTime!
   lastUpdated: AWSDateTime!
 }
@@ -111,6 +114,7 @@ type Project @model @auth(rules: [
   faculty: User @belongsTo(fields: ["facultyId"])
   status: ProjectStatus!
   tags: [String]
+  rejectionReason: String
   startDate: AWSDateTime!
   endDate: AWSDateTime
   files: [ProjectFile] @hasMany

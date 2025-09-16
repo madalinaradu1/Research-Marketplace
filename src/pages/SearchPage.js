@@ -25,7 +25,7 @@ const SearchPage = ({ user }) => {
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
-  const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [selectedCollege, setSelectedCollege] = useState('');
   const [selectedDuration, setSelectedDuration] = useState('');
 
   const [showAvailableOnly, setShowAvailableOnly] = useState(true);
@@ -70,7 +70,7 @@ const SearchPage = ({ user }) => {
 
   useEffect(() => {
     applyFilters();
-  }, [projects, searchTerm, selectedDepartment, selectedDuration, showAvailableOnly, sortBy]);
+  }, [projects, searchTerm, selectedCollege, selectedDuration, showAvailableOnly, sortBy]);
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -119,9 +119,9 @@ const SearchPage = ({ user }) => {
       );
     }
 
-    // Department filter
-    if (selectedDepartment) {
-      filtered = filtered.filter(project => project.department === selectedDepartment);
+    // College filter
+    if (selectedCollege) {
+      filtered = filtered.filter(project => project.department === selectedCollege);
     }
 
     // Duration filter
@@ -178,7 +178,7 @@ const SearchPage = ({ user }) => {
 
   const clearFilters = () => {
     setSearchTerm('');
-    setSelectedDepartment('');
+    setSelectedCollege('');
     setSelectedDuration('');
 
     setShowAvailableOnly(true);
@@ -247,12 +247,12 @@ const SearchPage = ({ user }) => {
           {/* Filter Row */}
           <Flex direction="row" gap="1rem" wrap="wrap" alignItems="flex-end">
             <SelectField
-              label="Department"
-              value={selectedDepartment}
-              onChange={(e) => setSelectedDepartment(e.target.value)}
+              label="College"
+              value={selectedCollege}
+              onChange={(e) => setSelectedCollege(e.target.value)}
               width="250px"
             >
-              <option value="">All Departments</option>
+              <option value="">All Colleges</option>
               {departments.map(dept => (
                 <option key={dept} value={dept}>{dept}</option>
               ))}
@@ -280,7 +280,7 @@ const SearchPage = ({ user }) => {
               <option value="oldest">Oldest First</option>
               <option value="deadline">Deadline</option>
               <option value="title">Title A-Z</option>
-              <option value="department">Department</option>
+              <option value="department">College</option>
             </SelectField>
             
             <Button 

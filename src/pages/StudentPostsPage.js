@@ -38,8 +38,10 @@ const StudentPostsPage = ({ user }) => {
   const [editingPost, setEditingPost] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [openKebabMenu, setOpenKebabMenu] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
 
-  const departments = [
+  const colleges = [
     'Computer Science',
     'Biology',
     'Chemistry',
@@ -253,7 +255,7 @@ const StudentPostsPage = ({ user }) => {
                         <Text fontSize="0.9rem" color="gray">
                           {(user.id || user.username) === post.student?.id || ['Admin', 'Faculty', 'Coordinator'].includes(user.role) 
                             ? post.student?.name 
-                            : 'Anonymous Student'} • {post.department || 'No Department'}
+                            : 'GCU Student'} • {post.department || 'No College'}
                         </Text>
                       </Flex>
                       <Flex alignItems="center" gap="1rem">
@@ -306,9 +308,8 @@ const StudentPostsPage = ({ user }) => {
                                     border="none"
                                     style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
                                     onClick={() => {
-                                      if (window.confirm('Are you sure you want to delete this post?')) {
-                                        handleDelete(post.id);
-                                      }
+                                      setPostToDelete(post);
+                                      setShowDeleteConfirm(true);
                                       setOpenKebabMenu(null);
                                     }}
                                     isLoading={isDeleting}
@@ -438,9 +439,8 @@ const StudentPostsPage = ({ user }) => {
                                     border="none"
                                     style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
                                     onClick={() => {
-                                      if (window.confirm('Are you sure you want to delete this post?')) {
-                                        handleDelete(post.id);
-                                      }
+                                      setPostToDelete(post);
+                                      setShowDeleteConfirm(true);
                                       setOpenKebabMenu(null);
                                     }}
                                     isLoading={isDeleting}
@@ -528,13 +528,13 @@ const StudentPostsPage = ({ user }) => {
 
                   <SelectField
                     name="department"
-                    label="Department"
+                    label="College"
                     value={formData.department}
                     onChange={handleFormChange}
                   >
-                    <option value="">Select Department</option>
-                    {departments.map(dept => (
-                      <option key={dept} value={dept}>{dept}</option>
+                    <option value="">Select College</option>
+                    {colleges.map(college => (
+                      <option key={college} value={college}>{college}</option>
                     ))}
                   </SelectField>
 
@@ -586,6 +586,62 @@ const StudentPostsPage = ({ user }) => {
                   </Flex>
                 </Flex>
               </form>
+            </Card>
+          </Flex>
+        </View>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          style={{ zIndex: 1000 }}
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+            padding="2rem"
+          >
+            <Card
+              width="400px"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Heading level={4} marginBottom="1rem">Delete Post</Heading>
+              <Text marginBottom="2rem">
+                Are you sure you want to delete "{postToDelete?.title}"? This action cannot be undone.
+              </Text>
+              <Flex gap="1rem">
+                <Button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setPostToDelete(null);
+                  }}
+                  flex="1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    handleDelete(postToDelete.id);
+                    setShowDeleteConfirm(false);
+                    setPostToDelete(null);
+                  }}
+                  backgroundColor="white"
+                  color="black"
+                  border="1px solid black"
+                  flex="1"
+                  isLoading={isDeleting}
+                >
+                  Delete
+                </Button>
+              </Flex>
             </Card>
           </Flex>
         </View>

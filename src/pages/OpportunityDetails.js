@@ -13,7 +13,7 @@ const OpportunityDetails = ({ user }) => {
         <Flex direction="column" gap="1rem">
           <Heading level={3}>Sample Opportunity Title</Heading>
           <Text>Faculty: Sample Faculty Name</Text>
-          <Text>Department: Sample Department</Text>
+          <Text>College: Sample College</Text>
           <Text>Deadline: January 1, 2024</Text>
           
           <Heading level={4}>Description</Heading>

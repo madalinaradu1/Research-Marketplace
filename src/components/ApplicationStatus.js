@@ -17,6 +17,7 @@ import {
 import { updateApplication } from '../graphql/operations';
 import EnhancedApplicationForm from './EnhancedApplicationForm';
 import EditApplicationForm from './EditApplicationForm';
+import { getStatusColorValue } from '../utils/statusColors';
 
 const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturnedSection = true }) => {
   const [withdrawReason, setWithdrawReason] = useState('');
@@ -30,28 +31,8 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const { tokens } = useTheme();
   
-  // Get status color
-  const getStatusColor = (status) => {
-    if (!status) return tokens.colors.neutral[60];
-    
-    switch (status) {
-      case 'Coordinator Review':
-        return tokens.colors.orange[60];
-      case 'Faculty Review':
-        return tokens.colors.blue[60];
-      case 'Approved':
-        return '#4caf50';
-      case 'Returned':
-      case 'Rejected':
-        return tokens.colors.red[60];
-      case 'Cancelled':
-        return tokens.colors.neutral[80];
-      case 'Expired':
-        return tokens.colors.neutral[40];
-      default:
-        return tokens.colors.neutral[60];
-    }
-  };
+  // Get status color using utility function
+  const getStatusColor = (status) => getStatusColorValue(status, tokens);
   
   // Handle submit to faculty
   const handleSubmitToFaculty = async () => {
@@ -139,7 +120,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
         <Flex direction="column" gap="0.5rem">
           <Text fontWeight="bold">Application Details</Text>
           <Text>Project: {application.project?.title || 'Unknown Project'}</Text>
-          <Text>Department: {application.project?.department || 'Unknown Department'}</Text>
+          <Text>College: {application.project?.department || 'Unknown College'}</Text>
           
           {application.project?.description && (
             <div dangerouslySetInnerHTML={{ __html: application.project.description }} />
@@ -244,7 +225,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                   <Flex direction="column" gap="0.5rem">
                     <Text fontWeight="bold">Project Information</Text>
                     <Text>Project: {application.project?.title || 'Unknown Project'}</Text>
-                    <Text>Department: {application.project?.department || 'Unknown Department'}</Text>
+                    <Text>College: {application.project?.department || 'Unknown College'}</Text>
                     <Text>Status: {application.status}</Text>
                     <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
                   </Flex>

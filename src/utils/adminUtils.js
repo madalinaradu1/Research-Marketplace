@@ -56,7 +56,7 @@ export const exportUserData = async (format = 'csv') => {
     const users = usersResult.data.listUsers.items;
     
     if (format === 'csv') {
-      const csvHeaders = 'ID,Name,Email,Role,Department,Created At\n';
+      const csvHeaders = 'ID,Name,Email,Role,College,Created At\n';
       const csvData = users.map(user => 
         `${user.id},${user.name || ''},${user.email},${user.role},${user.department || ''},${user.createdAt}`
       ).join('\n');

@@ -226,7 +226,7 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
           <Flex direction="column" gap="0.5rem">
             <Text fontWeight="bold">Research Project Description:</Text>
             <div dangerouslySetInnerHTML={{ __html: project.description }} />
-            {project.department && <Text><strong>Department:</strong> {project.department}</Text>}
+            {project.department && <Text><strong>College:</strong> {project.department}</Text>}
             {project.faculty?.name && <Text><strong>Faculty:</strong> {project.faculty.name}</Text>}
             {project.duration && <Text><strong>Duration:</strong> {project.duration}</Text>}
           </Flex>

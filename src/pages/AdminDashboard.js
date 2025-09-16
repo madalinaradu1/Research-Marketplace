@@ -497,7 +497,7 @@ const AdminDashboard = ({ user }) => {
                   <option value="Admin">Admin</option>
                 </SelectField>
                 <TextField
-                  label="Department"
+                  label="College"
                   value={newUser.department}
                   onChange={(e) => setNewUser(prev => ({ ...prev, department: e.target.value }))}
                   flex="1"
@@ -572,7 +572,7 @@ const AdminDashboard = ({ user }) => {
                     <TableCell as="th">Name</TableCell>
                     <TableCell as="th">Email</TableCell>
                     <TableCell as="th">Role</TableCell>
-                    <TableCell as="th">Department</TableCell>
+                    <TableCell as="th">College</TableCell>
                     <TableCell as="th">Created</TableCell>
                     <TableCell as="th">Last Active</TableCell>
                   </TableRow>

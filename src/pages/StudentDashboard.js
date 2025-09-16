@@ -333,7 +333,7 @@ const StudentDashboard = ({ user }) => {
       >
         <TabItem title="Research Opportunities">
           {projects.length === 0 ? (
-            <Card>
+            <Card backgroundColor="white">
               <Text>No active research opportunities available at this time.</Text>
             </Card>
           ) : (
@@ -350,7 +350,7 @@ const StudentDashboard = ({ user }) => {
                 const isExpired = project.applicationDeadline && new Date(project.applicationDeadline) < new Date();
                 
                 return (
-                <Card key={project.id}>
+                <Card key={project.id} backgroundColor="white">
                   <Flex direction="column" gap="0.5rem">
                     <Flex justifyContent="space-between" alignItems="center">
                       <Heading level={5}>{project.title}</Heading>
@@ -362,7 +362,7 @@ const StudentDashboard = ({ user }) => {
                       </Badge>
                     </Flex>
                     
-                    <Text fontWeight="bold">Department: {project.department}</Text>
+                    <Text fontWeight="bold">College: {project.department}</Text>
                     <div dangerouslySetInnerHTML={{ __html: project.description }} />
                     
                     {project.qualifications && (
@@ -477,7 +477,7 @@ const StudentDashboard = ({ user }) => {
         
         <TabItem title="My Applications">
           {applications.length === 0 ? (
-            <Card>
+            <Card backgroundColor="white">
               <Text>You haven't submitted any applications yet.</Text>
               <Button 
                 backgroundColor="white"
@@ -518,7 +518,7 @@ const StudentDashboard = ({ user }) => {
         
         <TabItem title="Returned Applications">
           {applications.filter(app => app.status === 'Returned').length === 0 ? (
-            <Card>
+            <Card backgroundColor="white">
               <Text>No returned applications.</Text>
             </Card>
           ) : (
@@ -591,7 +591,7 @@ const StudentDashboard = ({ user }) => {
                   <Text fontWeight="bold">Title:</Text>
                   <Text>{selectedProject.title}</Text>
                   
-                  <Text fontWeight="bold">Department:</Text>
+                  <Text fontWeight="bold">College:</Text>
                   <Text>{selectedProject.department}</Text>
                   
                   <Text fontWeight="bold">Description:</Text>
