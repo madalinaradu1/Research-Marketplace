@@ -3,100 +3,27 @@ type User @model @auth(rules: [
   { allow: groups, groups: ["Admin"], operations: [read, update] }
 ]) {
   id: ID!
-  username: String!
-  email: String!
-  name: String
-  type: UserType!
-  major: String
-  year: String
-  interests: [String]
-  bio: String
-  profilePicture: String
-  documents: [Document] @hasMany
-  applications: [Application] @hasMany
-  projects: [Project] @hasMany(indexName: "byUser", fields: ["id"])
-  createdAt: AWSDateTime!
-  updatedAt: AWSDateTime!
-}
-
-enum UserType {
-  STUDENT
-  FACULTY
-  ADMIN
-}
-
-type Document @model @auth(rules: [
-  { allow: owner, operations: [create, read, update, delete] },
-  { allow: groups, groups: ["Admin"], operations: [read] }
-]) {
-  id: ID!
-  userId: ID! @index(name: "byUser")
   name: String!
-  type: String!
-  key: String!
-  size: Int
-  uploadDate: AWSDateTime!
-  user: User @belongsTo(fields: ["userId"])
-}
-
-type ResearchOpportunity @model @auth(rules: [
-  { allow: owner, operations: [create, read, update, delete] },
-  { allow: private, operations: [read] },
-  { allow: groups, groups: ["Admin"], operations: [read, update] }
-]) {
-  id: ID!
-  title: String!
-  description: String!
-  facultyId: ID! @index(name: "byFaculty")
-  faculty: User @belongsTo(fields: ["facultyId"])
-  college: String!
-  requirements: String
-  deadline: AWSDateTime
-  startDate: AWSDateTime
-  endDate: AWSDateTime
-  status: OpportunityStatus!
-  categories: [String]!
+  email: String!
+  role: String!
+  department: String
+  major: String
+  academicYear: String
+  gpa: Float
   skills: [String]
-  applications: [Application] @hasMany(indexName: "byOpportunity", fields: ["id"])
+  researchInterests: [String]
+  careerInterests: [String]
+  resumeKey: String
+  affiliation: String
+  profileComplete: Boolean
+  status: String
+  expectedGraduation: String
+  availability: String
+  personalStatement: String
+  certificates: [String]
+  applicationCount: Int
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
-}
-
-enum OpportunityStatus {
-  DRAFT
-  PUBLISHED
-  CLOSED
-  CANCELLED
-}
-
-type Application @model @auth(rules: [
-  { allow: owner, operations: [create, read, update, delete] },
-  { allow: private, operations: [read] },
-  { allow: groups, groups: ["Admin"], operations: [read, update] }
-]) {
-  id: ID!
-  opportunityId: ID! @index(name: "byOpportunity")
-  opportunity: ResearchOpportunity @belongsTo(fields: ["opportunityId"])
-  userId: ID! @index(name: "byUser")
-  user: User @belongsTo(fields: ["userId"])
-  status: ApplicationStatus!
-  statement: String
-  resumeId: ID
-  resume: Document @hasOne(fields: ["resumeId"])
-  reviewNotes: String
-  rejectionReason: String
-  acceptanceReason: String
-  submissionDate: AWSDateTime!
-  lastUpdated: AWSDateTime!
-}
-
-enum ApplicationStatus {
-  DRAFT
-  SUBMITTED
-  UNDER_REVIEW
-  ACCEPTED
-  REJECTED
-  WITHDRAWN
 }
 
 type Project @model @auth(rules: [
@@ -108,52 +35,88 @@ type Project @model @auth(rules: [
   id: ID!
   title: String!
   description: String!
-  userId: ID! @index(name: "byUser")
-  user: User @belongsTo(fields: ["userId"])
-  facultyId: ID! @index(name: "byFaculty")
-  faculty: User @belongsTo(fields: ["facultyId"])
-  status: ProjectStatus!
+  department: String!
+  skillsRequired: [String]
   tags: [String]
+  qualifications: String
+  duration: String
+  applicationDeadline: AWSDateTime
+  facultyID: ID!
+  faculty: User @belongsTo(fields: ["facultyID"])
+  isActive: Boolean!
+  requiresTranscript: Boolean
+  projectStatus: String
+  coordinatorNotes: String
   rejectionReason: String
-  startDate: AWSDateTime!
-  endDate: AWSDateTime
-  files: [ProjectFile] @hasMany
+  selectedStudentID: ID
+  filledAt: AWSDateTime
+  applications: [Application] @hasMany(indexName: "byProject", fields: ["id"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
 
-enum ProjectStatus {
-  ACTIVE
-  COMPLETED
-  CANCELLED
+type Application @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: private, operations: [read] },
+  { allow: groups, groups: ["Admin"], operations: [read, update] }
+]) {
+  id: ID!
+  studentID: ID!
+  student: User @belongsTo(fields: ["studentID"])
+  projectID: ID! @index(name: "byProject")
+  project: Project @belongsTo(fields: ["projectID"])
+  statement: String!
+  resumeKey: String
+  transcriptLink: String
+  documentKey: String
+  relevantCourses: [RelevantCourse]
+  status: String!
+  statusDetail: String
+  facultyNotes: String
+  coordinatorNotes: String
+  rejectionReason: String
+  acceptanceReason: String
+  withdrawReason: String
+  isSelected: Boolean
+  selectedAt: AWSDateTime
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
 }
 
-type ProjectFile @model @auth(rules: [
+type RelevantCourse {
+  courseName: String!
+  courseNumber: String!
+  grade: String!
+  semester: String!
+  year: String!
+}
+
+type StudentPost @model @auth(rules: [
   { allow: owner, operations: [create, read, update, delete] },
   { allow: private, operations: [read] }
 ]) {
   id: ID!
-  projectId: ID! @index(name: "byProject")
-  project: Project @belongsTo(fields: ["projectId"])
-  name: String!
-  key: String!
-  type: String!
-  size: Int
-  uploadDate: AWSDateTime!
-  uploader: String!
+  title: String!
+  content: String!
+  authorID: ID!
+  author: User @belongsTo(fields: ["authorID"])
+  isAnonymous: Boolean!
+  tags: [String]
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
 }
 
-type Event @model @auth(rules: [
-  { allow: groups, groups: ["Admin"], operations: [create, read, update, delete] },
+type Message @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
   { allow: private, operations: [read] }
 ]) {
   id: ID!
-  title: String!
-  description: String!
-  date: AWSDateTime!
-  location: String
-  registrationRequired: Boolean!
-  registrationUrl: String
+  senderID: ID!
+  receiverID: ID!
+  subject: String!
+  body: String!
+  isRead: Boolean!
+  sentAt: AWSDateTime!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -163,41 +126,14 @@ type Notification @model @auth(rules: [
   { allow: groups, groups: ["Admin"], operations: [create] }
 ]) {
   id: ID!
-  userId: ID! @index(name: "byUser")
-  user: User @belongsTo(fields: ["userId"])
-  type: NotificationType!
+  userID: ID!
+  user: User @belongsTo(fields: ["userID"])
+  type: String!
   title: String!
   message: String!
-  read: Boolean!
-  relatedItemId: ID
+  isRead: Boolean!
+  relatedItemID: ID
   relatedItemType: String
   createdAt: AWSDateTime!
-}
-
-enum NotificationType {
-  APPLICATION_UPDATE
-  PROJECT_UPDATE
-  DEADLINE_REMINDER
-  SYSTEM_ANNOUNCEMENT
-}
-
-type Message @model @auth(rules: [
-  { allow: owner, operations: [create, read, update, delete] },
-  { allow: private, operations: [read] }
-]) {
-  id: ID!
-  senderID: ID!
-  recipientID: ID!
-  subject: String!
-  content: String!
-  isRead: Boolean!
-  threadID: String
-  projectID: ID
-  createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
-}
-
-type Query {
-  searchOpportunities(query: String!, category: String, limit: Int): [ResearchOpportunity] @function(name: "searchOpportunities")
-  getRecommendedOpportunities(userId: ID!, limit: Int): [ResearchOpportunity] @function(name: "getRecommendedOpportunities")
 }
