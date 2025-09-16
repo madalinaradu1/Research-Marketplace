@@ -49,6 +49,7 @@ type Project @model @auth(rules: [{allow: owner, ownerField: "facultyID"}, {allo
   # New approval workflow fields
   projectStatus: String! # Draft, Coordinator Review, Returned, Approved, Published, Filled
   coordinatorNotes: String
+  rejectionReason: String
   selectedStudentID: ID
   filledAt: AWSDateTime
   
