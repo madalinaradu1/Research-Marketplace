@@ -48,15 +48,13 @@ function App({ signOut, user }) {
   };
   
   useEffect(() => {
-    // Check for email link access and force logout - do this first
+    // Check for email link access and clean URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('from') === 'email') {
       // Clear the URL parameter immediately
       const cleanUrl = window.location.origin + window.location.pathname;
       window.history.replaceState({}, document.title, cleanUrl);
-      // Force sign out
-      signOut();
-      return;
+      // Don't force logout - let normal authentication flow handle it
     }
     
     // Check session timeout (2 hours = 7200000 ms)
