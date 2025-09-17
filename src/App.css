@@ -76,3 +76,20 @@ button:hover:not(:disabled) {
 button:hover:not(:disabled) {
   color: #7b1fa2 !important;
 }
+
+/* ReactQuill HTML content normalization */
+.quill-content p:empty {
+  display: none;
+}
+
+.quill-content p {
+  margin: 0 0 1rem 0;
+}
+
+.quill-content p:last-child {
+  margin-bottom: 0;
+}
+
+.quill-content br {
+  line-height: 1.5;
+}

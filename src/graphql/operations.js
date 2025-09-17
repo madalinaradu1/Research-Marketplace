@@ -81,6 +81,8 @@ export const getProject = /* GraphQL */ `
         department
       }
       isActive
+      projectStatus
+      rejectionReason
       createdAt
       updatedAt
     }

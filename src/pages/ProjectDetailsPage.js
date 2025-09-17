@@ -81,6 +81,20 @@ const ProjectDetailsPage = ({ user }) => {
         <>
           <Heading level={2}>{project.title}</Heading>
           
+          {/* Rejection Reason Banner */}
+          {project.rejectionReason && (
+            <Card 
+              backgroundColor="#fff3cd" 
+              border="1px solid #ffeaa7"
+              padding="1rem"
+              marginBottom="1rem"
+            >
+              <Text fontWeight="bold" color="black">
+                Rejection Reason: {project.rejectionReason}
+              </Text>
+            </Card>
+          )}
+          
           <Card>
             <Flex direction="column" gap="1rem">
               <Text fontWeight="bold">College: {project.department}</Text>

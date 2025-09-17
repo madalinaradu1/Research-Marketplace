@@ -93,27 +93,29 @@ const FacultyDashboard = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [applicationSearchTerm, setApplicationSearchTerm] = useState('');
   
-  const handleDescriptionChange = useCallback((value) => {
-    setProjectForm(prev => {
-      if (value !== prev.description) {
-        const newForm = { ...prev, description: value };
-        saveProjectToDraft(newForm);
-        return newForm;
-      }
-      return prev;
-    });
-  }, []);
+
+  
+
   
   // Refs for ReactQuill components to suppress findDOMNode warnings
   const messageQuillRef = useRef(null);
   const createProjectQuillRef = useRef(null);
   const editProjectQuillRef = useRef(null);
+  const resubmitQuillRef = useRef(null);
   
   // Clean HTML content - minimal cleaning to preserve user formatting
   const cleanHtmlContent = (html) => {
     if (!html || html === '<p><br></p>') return '';
     return html.trim();
   };
+  
+  // Strip HTML tags for plain text editing
+  const stripHtmlTags = (html) => {
+    if (!html) return '';
+    return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+  };
+  
+
   
   useEffect(() => {
     fetchData();
@@ -441,7 +443,7 @@ const FacultyDashboard = ({ user }) => {
           const data = JSON.parse(cached);
           return {
             title: data.title || project.title || '',
-            description: (data.description || project.description || '').replace(/<p><br><\/p>/g, '').replace(/<p>\s*<\/p>/g, ''),
+            description: data.description || project.description || '',
             department: data.department || project.department || '',
             skillsRequired: data.skillsRequired || (project.skillsRequired?.join(', ')) || '',
             tags: data.tags || (project.tags?.join(', ')) || '',
@@ -457,7 +459,7 @@ const FacultyDashboard = ({ user }) => {
       }
       return {
         title: project.title || '',
-        description: (project.description || '').replace(/<p><br><\/p>/g, '').replace(/<p>\s*<\/p>/g, ''),
+        description: project.description || '',
         department: project.department || '',
         skillsRequired: project.skillsRequired?.join(', ') || '',
         tags: project.tags?.join(', ') || '',
@@ -524,6 +526,11 @@ const FacultyDashboard = ({ user }) => {
   // Get rejected projects
   const getRejectedProjects = () => {
     return projects.filter(project => project.projectStatus === 'Rejected');
+  };
+  
+  // Get rejected applications
+  const getRejectedApplications = () => {
+    return applications.filter(app => app.status === 'Rejected');
   };
   
   // Filter applications that have been processed (approved, rejected, returned)
@@ -712,7 +719,7 @@ const FacultyDashboard = ({ user }) => {
                     <Card key={project.id} variation="outlined">
                       <Flex direction="column" gap="0.5rem">
                         <Flex justifyContent="space-between" alignItems="flex-start">
-                          <Text fontWeight="bold">{project.title}</Text>
+                          <Heading level={4}>{project.title}</Heading>
                           <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
                             <Badge 
                               backgroundColor={
@@ -1174,79 +1181,158 @@ const FacultyDashboard = ({ user }) => {
           )}
         </TabItem>
         
-        <TabItem title="Rejected Projects">
-          {getRejectedProjects().length === 0 ? (
-            <Card>
-              <Text>No rejected projects.</Text>
-            </Card>
-          ) : (
-            <Card>
-              <Heading level={4} marginBottom="1rem">Rejected Projects ({getRejectedProjects().length})</Heading>
-              <Collection items={getPaginatedItems(getRejectedProjects().sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), projectsPage)} type="list" gap="1rem">
-                {(project) => (
-                  <Card key={project.id} variation="outlined">
-                    <Flex direction="column" gap="0.5rem">
-                      <Flex justifyContent="space-between" alignItems="flex-start">
-                        <Text fontWeight="bold">{project.title}</Text>
-                        <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
-                          <Badge backgroundColor="red" color="white">
-                            Rejected
-                          </Badge>
-                          <View position="relative">
-                            <Button 
-                              size="medium"
-                              backgroundColor="transparent"
-                              color="black"
-                              border="none"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
-                              }}
-                              style={{ padding: '0.75rem' }}
-                            >
-                              ⋯
-                            </Button>
-                            {openKebabMenu === project.id && (
-                              <Card
-                                position="absolute"
-                                top="100%"
-                                right="0"
-                                style={{ zIndex: 100, minWidth: '200px' }}
-                                backgroundColor="white"
-                                border="1px solid black"
-                                onClick={(e) => e.stopPropagation()}
+        <TabItem title="Rejected Items">
+          <Flex direction="column" gap="2rem">
+            {/* Rejected Projects */}
+            {getRejectedProjects().length > 0 && (
+              <Card>
+                <Heading level={4} marginBottom="1rem">Projects ({getRejectedProjects().length})</Heading>
+                <Collection items={getPaginatedItems(getRejectedProjects().sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), projectsPage)} type="list" gap="1rem">
+                  {(project) => (
+                    <Card key={project.id} variation="outlined">
+                      <Flex direction="column" gap="0.5rem">
+                        <Flex justifyContent="space-between" alignItems="flex-start">
+                          <Heading level={4}>{project.title}</Heading>
+                          <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
+                            <Badge backgroundColor={getStatusColorValue('Rejected', tokens)} color="white">
+                              Rejected
+                            </Badge>
+                            <View position="relative">
+                              <Button 
+                                size="medium"
+                                backgroundColor="transparent"
+                                color="black"
+                                border="none"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
+                                }}
+                                style={{ padding: '0.75rem' }}
                               >
-                                <Flex direction="column" gap="0">
-                                  <Button
-                                    size="small"
-                                    backgroundColor="white"
-                                    color="black"
-                                    border="none"
-                                    style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                    onClick={() => {
-                                      setSelectedProject(project);
-                                      setIsEditingProject(false);
-                                      setOpenKebabMenu(null);
-                                    }}
-                                  >
-                                    View Details
-                                  </Button>
-                                </Flex>
-                              </Card>
-                            )}
-                          </View>
+                                ⋯
+                              </Button>
+                              {openKebabMenu === project.id && (
+                                <Card
+                                  position="absolute"
+                                  top="100%"
+                                  right="0"
+                                  style={{ zIndex: 100, minWidth: '200px' }}
+                                  backgroundColor="white"
+                                  border="1px solid black"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Flex direction="column" gap="0">
+                                    <Button
+                                      size="small"
+                                      backgroundColor="white"
+                                      color="black"
+                                      border="none"
+                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                      onClick={() => {
+                                        setSelectedProject(project);
+                                        setIsEditingProject(false);
+                                        setOpenKebabMenu(null);
+                                      }}
+                                    >
+                                      View Details
+                                    </Button>
+                                  </Flex>
+                                </Card>
+                              )}
+                            </View>
+                          </Flex>
+                        </Flex>
+                        <Flex justifyContent="space-between" alignItems="center">
+                          <Text fontSize="0.9rem">{project.department} • Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
                         </Flex>
                       </Flex>
-                      <Flex justifyContent="space-between" alignItems="center">
-                        <Text fontSize="0.9rem">{project.department} • Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
+                    </Card>
+                  )}
+                </Collection>
+                {renderPagination(getRejectedProjects(), projectsPage, setProjectsPage)}
+              </Card>
+            )}
+            
+            {/* Rejected Applications */}
+            {getRejectedApplications().length > 0 && (
+              <Card>
+                <Heading level={4} marginBottom="1rem">Applications ({getRejectedApplications().length})</Heading>
+                <Collection items={getPaginatedItems(getRejectedApplications().sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage)} type="list" gap="1rem">
+                  {(application) => (
+                    <Card key={application.id} variation="outlined">
+                      <Flex direction="column" gap="0.5rem">
+                        <Flex justifyContent="space-between" alignItems="flex-start">
+                          <Text fontWeight="bold">{application.project?.title}</Text>
+                          <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
+                            <Badge backgroundColor={getStatusColorValue('Rejected', tokens)} color="white">
+                              Rejected
+                            </Badge>
+                            <View position="relative">
+                              <Button 
+                                size="medium"
+                                backgroundColor="transparent"
+                                color="black"
+                                border="none"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
+                                }}
+                                style={{ padding: '0.75rem' }}
+                              >
+                                ⋯
+                              </Button>
+                              {openKebabMenu === application.id && (
+                                <Card
+                                  position="absolute"
+                                  top="100%"
+                                  right="0"
+                                  style={{ zIndex: 100, minWidth: '200px' }}
+                                  backgroundColor="white"
+                                  border="1px solid black"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Flex direction="column" gap="0">
+                                    <Button
+                                      size="small"
+                                      backgroundColor="white"
+                                      color="black"
+                                      border="none"
+                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                      onClick={() => {
+                                        setReviewingApplication(application);
+                                        setOpenKebabMenu(null);
+                                      }}
+                                    >
+                                      View Details
+                                    </Button>
+                                  </Flex>
+                                </Card>
+                              )}
+                            </View>
+                          </Flex>
+                        </Flex>
+                        <Flex justifyContent="space-between" alignItems="center">
+                          <Text fontSize="0.9rem">{application.student?.name} • Rejected: {new Date(application.updatedAt).toLocaleDateString()}</Text>
+                        </Flex>
+                        {application.rejectionReason && (
+                          <Text fontSize="0.8rem" color="red">
+                            Reason: {application.rejectionReason}
+                          </Text>
+                        )}
                       </Flex>
-                    </Flex>
-                  </Card>
-                )}
-              </Collection>
-              {renderPagination(getRejectedProjects(), projectsPage, setProjectsPage)}
-            </Card>
-          )}
+                    </Card>
+                  )}
+                </Collection>
+                {renderPagination(getRejectedApplications(), applicationsPage, setApplicationsPage)}
+              </Card>
+            )}
+            
+            {getRejectedProjects().length === 0 && getRejectedApplications().length === 0 && (
+              <Card>
+                <Text>No rejected items.</Text>
+              </Card>
+            )}
+          </Flex>
         </TabItem>
         
         <TabItem title="Status Guide">
@@ -1452,7 +1538,19 @@ const FacultyDashboard = ({ user }) => {
               style={{ overflow: 'auto', border: '1px solid black' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Heading level={4} marginBottom="1rem">{selectedProject ? 'Edit Project' : 'Create New Project'}</Heading>
+              <Heading level={4} marginBottom="1rem">
+                {viewingReturnReason ? 'Project Returned - Edit & Resubmit' : (selectedProject ? 'Edit Project' : 'Create New Project')}
+              </Heading>
+              
+              {viewingReturnReason?.coordinatorNotes && (
+                <Card backgroundColor="#fff3cd" padding="1rem" marginTop="1rem">
+                  <Text fontWeight="bold" color="#856404">Coordinator Notes:</Text>
+                  <Text color="#856404" marginTop="0.5rem">{viewingReturnReason.coordinatorNotes}</Text>
+                  <Text fontSize="0.9rem" color="#856404" marginTop="0.5rem" fontStyle="italic">
+                    Please address these concerns and resubmit your project.
+                  </Text>
+                </Card>
+              )}
               <form onSubmit={handleSubmitProject}>
                 <Flex direction="column" gap="1.5rem">
                   <TextField
@@ -1584,182 +1682,7 @@ const FacultyDashboard = ({ user }) => {
         </View>
       )}
       
-      {/* View Return Reason and Edit Modal */}
-      {viewingReturnReason && (
-        <View
-          position="fixed"
-          top="0"
-          left="0"
-          width="100vw"
-          height="100vh"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          style={{ zIndex: 1000 }}
-          onClick={() => {
-            setViewingReturnReason(null);
-            setSelectedProject(null);
-            setIsCreatingProject(false);
-            setIsEditingProject(false);
-          }}
-        >
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-            padding="2rem"
-          >
-            <Card
-              maxWidth="900px"
-              width="100%"
-              maxHeight="100vh"
-              style={{ overflow: 'auto', border: '1px solid black' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Heading level={4}>Project Returned - Edit & Resubmit</Heading>
-              
-              {viewingReturnReason.coordinatorNotes && (
-                <Card backgroundColor="#fff3cd" padding="1rem" marginTop="1rem">
-                  <Text fontWeight="bold" color="#856404">Coordinator Notes:</Text>
-                  <Text color="#856404" marginTop="0.5rem">{viewingReturnReason.coordinatorNotes}</Text>
-                  <Text fontSize="0.9rem" color="#856404" marginTop="0.5rem" fontStyle="italic">
-                    Please address these concerns and resubmit your project.
-                  </Text>
-                </Card>
-              )}
-              
-              <Divider margin="1rem 0" />
-              
-              <form onSubmit={handleSubmitProject}>
-                <Flex direction="column" gap="1rem">
-                  <TextField
-                    name="title"
-                    label="Project Title *"
-                    value={projectForm.title}
-                    onChange={handleProjectFormChange}
-                    required
-                  />
-                  
-                  <div>
-                    <Text fontWeight="bold">Project Description *</Text>
-                    <div style={{ height: '300px' }}>
-                      <ReactQuill
-                        ref={editProjectQuillRef}
-                        value={projectForm.description}
-                        onChange={handleDescriptionChange}
-                        placeholder="Describe the research project, objectives, and what students will learn..."
-                        modules={{
-                          toolbar: [
-                            ['bold', 'italic', 'underline'],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            ['clean']
-                          ],
-                          clipboard: {
-                            matchVisual: false
-                          }
-                        }}
-                        formats={['bold', 'italic', 'underline', 'list', 'bullet']}
-                        style={{ height: '250px' }}
-                      />
-                    </div>
-                  </div>
-                  
-                  <TextField
-                    name="department"
-                    label="College *"
-                    value={projectForm.department}
-                    onChange={handleProjectFormChange}
-                    required
-                  />
-                  
-                  <TextField
-                    name="skillsRequired"
-                    label="Skills Required (comma-separated)"
-                    value={projectForm.skillsRequired}
-                    onChange={handleSkillsChange}
-                    placeholder="e.g. Python, Data Analysis, Machine Learning"
-                  />
-                  
-                  <TextAreaField
-                    name="qualifications"
-                    label="Required Qualifications/Prerequisites"
-                    value={projectForm.qualifications}
-                    onChange={handleProjectFormChange}
-                    placeholder="e.g. Completion of PSYC 101, minimum GPA of 3.0, upper-division standing"
-                    rows={3}
-                  />
-                  
-                  <TextField
-                    name="duration"
-                    label="Project Duration"
-                    value={projectForm.duration}
-                    onChange={handleProjectFormChange}
-                    placeholder="e.g. 3 months, Fall Semester"
-                  />
-                  
-                  <TextField
-                    name="applicationDeadline"
-                    label="Application Deadline *"
-                    type="date"
-                    value={projectForm.applicationDeadline}
-                    onChange={handleProjectFormChange}
-                    required
-                  />
-                  
-                  <SelectField
-                    name="requiresTranscript"
-                    label="Requires Transcript Upload"
-                    value={(projectForm.requiresTranscript || false).toString()}
-                    onChange={(e) => setProjectForm(prev => ({ 
-                      ...prev, 
-                      requiresTranscript: e.target.value === 'true' 
-                    }))}
-                  >
-                    <option value="false">No</option>
-                    <option value="true">Yes</option>
-                  </SelectField>
-                  
-                  <SelectField
-                    name="isActive"
-                    label="Status"
-                    value={(projectForm.isActive !== undefined ? projectForm.isActive : true).toString()}
-                    onChange={(e) => setProjectForm(prev => ({ 
-                      ...prev, 
-                      isActive: e.target.value === 'true' 
-                    }))}
-                  >
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
-                  </SelectField>
-                  
-                  <Flex gap="1rem">
-                    <Button 
-                      onClick={() => {
-                        setViewingReturnReason(null);
-                        setSelectedProject(null);
-                        setIsCreatingProject(false);
-                        setIsEditingProject(false);
-                      }}
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      type="submit"
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
-                      isLoading={isSubmitting}
-                    >
-                      Resubmit Project
-                    </Button>
-                  </Flex>
-                </Flex>
-              </form>
-            </Card>
-          </Flex>
-        </View>
-      )}
+
       
       {/* Project Details Modal */}
       {selectedProject && !isCreatingProject && !isEditingProject && !viewingReturnReason && (
@@ -1790,6 +1713,21 @@ const FacultyDashboard = ({ user }) => {
               onClick={(e) => e.stopPropagation()}
             >
               <Heading level={3}>{selectedProject.title}</Heading>
+              
+              {/* Rejection Reason Banner */}
+              {selectedProject.rejectionReason && (
+                <Card 
+                  backgroundColor="#fff3cd" 
+                  border="1px solid #ffeaa7"
+                  padding="1rem"
+                  marginTop="1rem"
+                >
+                  <Text fontWeight="bold" color="black">
+                    Rejection Reason: {selectedProject.rejectionReason}
+                  </Text>
+                </Card>
+              )}
+              
               <Divider margin="1rem 0" />
               
               <Flex direction="column" gap="1rem">
@@ -1838,13 +1776,6 @@ const FacultyDashboard = ({ user }) => {
                 <Text><strong>Requires Transcript Upload:</strong> {selectedProject.requiresTranscript ? 'Yes' : 'No'}</Text>
                 
                 <Text><strong>Status:</strong> {selectedProject.projectStatus || 'Draft'}</Text>
-                
-                {selectedProject.projectStatus === 'Rejected' && selectedProject.rejectionReason && (
-                  <Card backgroundColor="#f8d7da" padding="1rem" marginTop="1rem">
-                    <Text fontWeight="bold" color="#721c24">Rejection Reason:</Text>
-                    <Text color="#721c24" marginTop="0.5rem">{selectedProject.rejectionReason}</Text>
-                  </Card>
-                )}
                 
                 <Flex gap="1rem" marginTop="1rem">
                   <Button 

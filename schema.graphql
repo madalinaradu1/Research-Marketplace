@@ -137,3 +137,16 @@ type Notification @model @auth(rules: [
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
+
+type DeletedUser @model @auth(rules: [
+  { allow: groups, groups: ["Admin"], operations: [create, read, update, delete] }
+]) {
+  id: ID!
+  originalUserID: ID!
+  deletedAt: AWSDateTime!
+  scheduledCleanupAt: AWSDateTime!
+  userData: AWSJSON!
+  status: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}

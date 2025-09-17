@@ -1,0 +1,16 @@
+{
+  "lambdaLayers": [],
+  "environmentMap": {},
+  "secretsPathAmplifyAppId": "",
+  "permissions": {
+    "storage": {
+      "DeletedUser": ["create", "read", "update", "delete"],
+      "Message": ["read", "delete"],
+      "Application": ["read", "delete"],
+      "Project": ["read", "delete"],
+      "StudentPost": ["read", "delete"],
+      "Notification": ["read", "delete"]
+    }
+  },
+  "scheduleExpression": "rate(1 day)"
+}

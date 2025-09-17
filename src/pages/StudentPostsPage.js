@@ -473,7 +473,10 @@ const StudentPostsPage = ({ user }) => {
           height="100vh"
           backgroundColor="rgba(0, 0, 0, 0.5)"
           style={{ zIndex: 1000 }}
-          onClick={() => setShowCreateForm(false)}
+          onClick={() => {
+            setShowCreateForm(false);
+            setEditingPost(null);
+          }}
         >
           <Flex
             justifyContent="center"

@@ -53,6 +53,21 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
       return;
     }
     
+    if ((statusUpdate === 'Approved' || statusUpdate === 'Selected') && !acceptanceReason.trim()) {
+      setError('Acceptance reason is required when approving an application');
+      return;
+    }
+    
+    if (statusUpdate === 'Returned' && !notes.trim()) {
+      setError('Return notes are required when returning an application');
+      return;
+    }
+    
+    if (statusUpdate === 'Coordinator Review' && !notes.trim()) {
+      setError('Notes to coordinator are required when sending to coordinator');
+      return;
+    }
+    
     setIsSubmitting(true);
     setError(null);
     
@@ -332,12 +347,7 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
                 ))}
               </SelectField>
               
-              <TextAreaField
-                label="Notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add notes about your decision"
-              />
+
               
               {statusUpdate === 'Rejected' && (
                 <TextAreaField
@@ -351,10 +361,31 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
               
               {(statusUpdate === 'Approved' || statusUpdate === 'Selected') && (
                 <TextAreaField
-                  label="Acceptance Reason (Optional)"
+                  label="Acceptance Reason (Required)"
                   value={acceptanceReason}
                   onChange={(e) => setAcceptanceReason(e.target.value)}
                   placeholder="Explain why this application is being accepted..."
+                  required
+                />
+              )}
+              
+              {statusUpdate === 'Returned' && (
+                <TextAreaField
+                  label="Return Notes (Required)"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Explain what needs to be changed or added..."
+                  required
+                />
+              )}
+              
+              {statusUpdate === 'Coordinator Review' && (
+                <TextAreaField
+                  label="Notes to Coordinator (Required)"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Add notes for the coordinator..."
+                  required
                 />
               )}
               

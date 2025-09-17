@@ -353,7 +353,7 @@ const StudentDashboard = ({ user }) => {
                 <Card key={project.id} backgroundColor="white">
                   <Flex direction="column" gap="0.5rem">
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Heading level={5}>{project.title}</Heading>
+                      <Heading level={4}>{project.title}</Heading>
                       <Badge 
                         backgroundColor={isExpired ? "gray" : "green"}
                         color="white"

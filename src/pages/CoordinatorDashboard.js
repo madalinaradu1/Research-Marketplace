@@ -288,6 +288,16 @@ const CoordinatorDashboard = ({ user }) => {
 
   const handleApplicationAction = async (application, actionType) => {
     try {
+      if (actionType === 'reject' && !rejectionReason.trim()) {
+        alert('Rejection reason is required when rejecting an application');
+        return;
+      }
+      
+      if (actionType === 'approve' && !approvalReason.trim()) {
+        alert('Approval reason is required when approving an application');
+        return;
+      }
+      
       let newStatus;
       switch (actionType) {
         case 'approve':
@@ -306,7 +316,8 @@ const CoordinatorDashboard = ({ user }) => {
       const input = {
         id: application.id,
         status: newStatus,
-        coordinatorNotes: notes
+        coordinatorNotes: actionType === 'approve' ? approvalReason : notes,
+        ...(actionType === 'reject' && { rejectionReason })
       };
 
       await API.graphql(graphqlOperation(updateApplication, { input }));
@@ -328,6 +339,7 @@ const CoordinatorDashboard = ({ user }) => {
       }
       
       setNotes('');
+      setApprovalReason('');
       setSelectedApplication(null);
       fetchData();
     } catch (error) {
@@ -774,11 +786,6 @@ const CoordinatorDashboard = ({ user }) => {
                           <Text fontSize="0.8rem" color="gray">
                             Rejected: {new Date(project.updatedAt).toLocaleDateString()}
                           </Text>
-                          {project.rejectionReason && (
-                            <Text fontSize="0.8rem" color="red">
-                              Reason: {project.rejectionReason}
-                            </Text>
-                          )}
                         </Flex>
                         <View position="relative">
                           <Button 
@@ -923,14 +930,8 @@ const CoordinatorDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              backgroundColor="white" 
-              padding="2rem" 
-              boxShadow="large" 
-              width="800px" 
-              maxWidth="90vw" 
-              height="620px" 
-              maxHeight="100vh"
-              style={{ overflow: 'auto', border: '1px solid black' }}
+              maxWidth="600px"
+              width="100%"
               onClick={(e) => e.stopPropagation()}
             >
               <Heading level={4}>Return Project for Edits</Heading>
@@ -940,7 +941,7 @@ const CoordinatorDashboard = ({ user }) => {
                 label="Notes for Faculty"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                rows={15}
+                rows={4}
                 placeholder="Explain what needs to be changed..."
               />
               
@@ -1234,6 +1235,19 @@ const CoordinatorDashboard = ({ user }) => {
                   <Button size="small" onClick={() => setViewingProject(null)}>Close</Button>
                 </Flex>
                 
+                {/* Rejection Reason Banner */}
+                {viewingProject.rejectionReason && (
+                  <Card 
+                    backgroundColor="#fff3cd" 
+                    border="1px solid #ffeaa7"
+                    padding="1rem"
+                  >
+                    <Text fontWeight="bold" color="black">
+                      Rejection Reason: {viewingProject.rejectionReason}
+                    </Text>
+                  </Card>
+                )}
+                
                 <Divider />
                 
                 <Flex direction="column" gap="0.5rem">
@@ -1251,7 +1265,10 @@ const CoordinatorDashboard = ({ user }) => {
                 <Flex direction="column" gap="0.5rem">
                   <Text fontWeight="bold">Project Description</Text>
                   <Card variation="outlined" padding="1rem">
-                    <div dangerouslySetInnerHTML={{ __html: viewingProject.description }} />
+                    <div 
+                      className="quill-content"
+                      dangerouslySetInnerHTML={{ __html: viewingProject.description }} 
+                    />
                   </Card>
                 </Flex>
                 
@@ -1346,18 +1363,27 @@ const CoordinatorDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="400px"
+              maxWidth="600px"
               width="100%"
               onClick={(e) => e.stopPropagation()}
             >
               <Flex direction="column" gap="1rem">
                 <Heading level={4}>Reject Application</Heading>
                 <Text>Are you sure you want to reject this application from {applicationToReject.student?.name} for {applicationToReject.project?.title}?</Text>
+                <TextAreaField
+                  label="Rejection Reason (Required)"
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Please explain why this application is being rejected..."
+                  required
+                  rows={4}
+                />
                 <Flex gap="1rem" justifyContent="flex-end">
                   <Button
                     onClick={() => {
                       setShowRejectConfirm(false);
                       setApplicationToReject(null);
+                      setRejectionReason('');
                     }}
                     backgroundColor="white"
                     color="black"
@@ -1370,10 +1396,12 @@ const CoordinatorDashboard = ({ user }) => {
                       await handleApplicationAction(applicationToReject, 'reject');
                       setShowRejectConfirm(false);
                       setApplicationToReject(null);
+                      setRejectionReason('');
                     }}
                     backgroundColor="white"
                     color="black"
                     border="1px solid black"
+                    isDisabled={!rejectionReason.trim()}
                   >
                     Reject
                   </Button>
@@ -1403,18 +1431,27 @@ const CoordinatorDashboard = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="400px"
+              maxWidth="600px"
               width="100%"
               onClick={(e) => e.stopPropagation()}
             >
               <Flex direction="column" gap="1rem">
                 <Heading level={4}>Approve Application</Heading>
                 <Text>Are you sure you want to approve this application from {applicationToApprove.student?.name} for {applicationToApprove.project?.title}?</Text>
+                <TextAreaField
+                  label="Approval Reason (Required)"
+                  value={approvalReason}
+                  onChange={(e) => setApprovalReason(e.target.value)}
+                  placeholder="Please explain why this application is being approved..."
+                  required
+                  rows={4}
+                />
                 <Flex gap="1rem" justifyContent="flex-end">
                   <Button
                     onClick={() => {
                       setShowApproveConfirm(false);
                       setApplicationToApprove(null);
+                      setApprovalReason('');
                     }}
                     backgroundColor="white"
                     color="black"
@@ -1427,10 +1464,12 @@ const CoordinatorDashboard = ({ user }) => {
                       await handleApplicationAction(applicationToApprove, 'approve');
                       setShowApproveConfirm(false);
                       setApplicationToApprove(null);
+                      setApprovalReason('');
                     }}
                     backgroundColor="white"
                     color="black"
                     border="1px solid black"
+                    isDisabled={!approvalReason.trim()}
                   >
                     Approve
                   </Button>

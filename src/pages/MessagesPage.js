@@ -110,13 +110,15 @@ const MessagesPage = ({ user }) => {
           };
         });
       
-      // Group messages by thread
+      // Group messages by consistent thread ID between two users
       const threadGroups = {};
       userMessages.forEach(msg => {
-        const threadId = msg.threadID || `${Math.min(msg.senderID, msg.receiverID)}-${Math.max(msg.senderID, msg.receiverID)}-${msg.subject.replace(/^Re:\s*/, '')}`;
+        const threadId = msg.threadID || (msg.senderID < msg.receiverID ? `${msg.senderID}-${msg.receiverID}` : `${msg.receiverID}-${msg.senderID}`);
         if (!threadGroups[threadId]) {
           threadGroups[threadId] = [];
         }
+        // Ensure message has threadID set
+        msg.threadID = threadId;
         threadGroups[threadId].push(msg);
       });
       
@@ -125,12 +127,13 @@ const MessagesPage = ({ user }) => {
         .map(thread => {
           const sortedThread = thread.sort((a, b) => new Date(a.sentAt || a.createdAt) - new Date(b.sentAt || b.createdAt));
           const latestMessage = sortedThread[sortedThread.length - 1];
+          const threadId = sortedThread[0].threadID;
           return {
             ...latestMessage,
+            threadID: threadId,
             thread: sortedThread,
-            threadId: sortedThread[0].threadID || `${Math.min(latestMessage.senderID, latestMessage.receiverID)}-${Math.max(latestMessage.senderID, latestMessage.receiverID)}-${latestMessage.subject.replace(/^Re:\s*/, '')}`,
-            hasUnread: sortedThread.some(msg => msg.isIncoming && !msg.isRead),
-            // Keep all conversations in inbox
+            threadId: threadId,
+            hasUnread: sortedThread.some(msg => msg.receiverID === userId && !msg.isRead && msg.senderID !== userId),
             isIncoming: true
           };
         })
@@ -233,15 +236,15 @@ const MessagesPage = ({ user }) => {
     setIsReplying(true);
     try {
       const userId = user.id || user.username;
-      const recipientId = selectedMessage.isIncoming ? selectedMessage.senderID : selectedMessage.receiverID;
+      const recipientId = selectedMessage.senderID === userId ? selectedMessage.receiverID : selectedMessage.senderID;
       
-      // Check if this message is archived - if so, create a new thread
-      const isMessageArchived = archivedMessages.includes(selectedMessage.id);
+      // Always use the thread ID from the selected message or its thread
       let threadID = selectedMessage.threadID;
-      
-      if (isMessageArchived) {
-        const baseThreadId = `${Math.min(userId, recipientId)}-${Math.max(userId, recipientId)}`;
-        threadID = `${baseThreadId}-${Date.now()}`; // Create new thread
+      if (!threadID && selectedMessage.thread && selectedMessage.thread.length > 0) {
+        threadID = selectedMessage.thread[0].threadID;
+      }
+      if (!threadID) {
+        threadID = userId < recipientId ? `${userId}-${recipientId}` : `${recipientId}-${userId}`;
       }
       
       const messageInput = {
@@ -410,7 +413,7 @@ const MessagesPage = ({ user }) => {
               {(message) => (
                 <Card 
                   key={message.id}
-                  backgroundColor={message.isRead ? 'white' : '#f0f8ff'}
+                  backgroundColor={message.hasUnread ? '#f0f8ff' : 'white'}
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
                     setSelectedMessage(message);
@@ -425,17 +428,13 @@ const MessagesPage = ({ user }) => {
                   <Flex direction="column" gap="0.5rem">
                     <Flex justifyContent="space-between" alignItems="center">
                       <Text fontWeight={message.hasUnread ? 'bold' : 'normal'}>
-                        {message.senderID === (user.id || user.username) ? `To: ${message.receiver?.name || 'Unknown'}` : `From: ${message.sender?.name || 'Unknown'}`}
+                        {message.senderID === (user.id || user.username) ? (message.receiver?.name || 'Deleted User') : (message.sender?.name || 'Deleted User')}
                       </Text>
                       <Flex alignItems="center" gap="0.5rem">
                         <Text fontSize="0.8rem">
                           {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
                         </Text>
-                        {message.thread && message.thread.length > 1 && (
-                          <Badge backgroundColor="blue" color="white" fontSize="0.7rem">
-                            {message.thread.length}
-                          </Badge>
-                        )}
+
                         <Text
                           fontSize="1.2rem"
                           color="gray"
@@ -449,9 +448,6 @@ const MessagesPage = ({ user }) => {
                         </Text>
                       </Flex>
                     </Flex>
-                    <Text fontWeight={message.hasUnread ? 'bold' : 'normal'}>
-                      {message.subject}
-                    </Text>
                     <Text fontSize="0.9rem" color="gray">
                       {(message.body || message.content || '').replace(/<[^>]*>/g, '').substring(0, 100)}...
                     </Text>
@@ -485,7 +481,7 @@ const MessagesPage = ({ user }) => {
                   <Flex direction="column" gap="0.5rem">
                     <Flex justifyContent="space-between" alignItems="center">
                       <Text>
-                        {message.senderID === (user.id || user.username) ? `To: ${message.receiver?.name || 'Unknown'}` : `From: ${message.sender?.name || 'Unknown'}`}
+                        {message.senderID === (user.id || user.username) ? `To: ${message.receiver?.name || 'Deleted User'}` : `From: ${message.sender?.name || 'Deleted User'}`}
                       </Text>
                       <Text fontSize="0.8rem">
                         {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
@@ -539,24 +535,29 @@ const MessagesPage = ({ user }) => {
                 
                 <Flex direction="column" gap="0.5rem">
                   <Text><strong>Subject:</strong> {selectedMessage.subject}</Text>
-                  <Text><strong>Conversation with:</strong> {selectedMessage.senderID === (user.id || user.username) ? selectedMessage.receiver?.name : selectedMessage.sender?.name}</Text>
+                  <Text><strong>{selectedMessage.senderID === (user.id || user.username) ? 'To:' : 'From:'}</strong> {selectedMessage.senderID === (user.id || user.username) ? (selectedMessage.receiver?.name || 'Deleted User') : (selectedMessage.sender?.name || 'Deleted User')}</Text>
                 </Flex>
                 
                 <Divider />
                 
                 {/* Show full conversation thread */}
-                <Flex direction="column" gap="1rem" maxHeight="400px" style={{ overflowY: 'auto' }}>
+                <Flex 
+                  direction="column" 
+                  gap="1rem" 
+                  maxHeight="300px" 
+                  style={{ overflowY: 'auto' }}
+                  ref={(el) => {
+                    if (el) {
+                      el.scrollTop = el.scrollHeight;
+                    }
+                  }}
+                >
                   {(selectedMessage.thread || [selectedMessage]).map((msg, index) => (
-                    <Card 
-                      key={msg.id || index}
-                      variation="outlined" 
-                      padding="1rem"
-                      backgroundColor={msg.senderID === (user.id || user.username) ? '#f0f8ff' : '#f9f9f9'}
-                    >
+                    <div key={msg.id || index} style={{ padding: '1rem 0', borderBottom: index < (selectedMessage.thread || [selectedMessage]).length - 1 ? '1px solid #eee' : 'none' }}>
                       <Flex direction="column" gap="0.5rem">
                         <Flex justifyContent="space-between" alignItems="center">
                           <Text fontSize="0.9rem" fontWeight="bold">
-                            {msg.senderID === (user.id || user.username) ? user.name : (msg.sender?.name || 'Unknown')}
+                            {msg.senderID === (user.id || user.username) ? user.name : (msg.sender?.name || 'Deleted User')}
                           </Text>
                           <Text fontSize="0.8rem" color="gray">
                             {new Date(msg.sentAt || msg.createdAt).toLocaleString()}
@@ -564,7 +565,7 @@ const MessagesPage = ({ user }) => {
                         </Flex>
                         <div dangerouslySetInnerHTML={{ __html: cleanHtmlContent(msg.body || msg.content) || 'No content' }} />
                       </Flex>
-                    </Card>
+                    </div>
                   ))}
                 </Flex>
                 
@@ -572,7 +573,7 @@ const MessagesPage = ({ user }) => {
                 
                 <div>
                   <Text fontWeight="bold">Reply</Text>
-                  <div style={{ height: '200px' }}>
+                  <div style={{ height: '120px' }}>
                     <ReactQuill
                       value={replyText}
                       onChange={(value) => {
@@ -593,12 +594,11 @@ const MessagesPage = ({ user }) => {
                           ['clean']
                         ]
                       }}
-                      style={{ height: '150px' }}
+                      style={{ height: '80px' }}
                     />
                   </div>
-                </div>
-                
-                <Flex gap="1rem" marginTop="2rem">
+                  
+                  <Flex gap="1rem" marginTop="1rem">
                   <Button 
                     onClick={() => {
                       setSelectedMessage(null);
@@ -621,7 +621,8 @@ const MessagesPage = ({ user }) => {
                   >
                     Send
                   </Button>
-                </Flex>
+                  </Flex>
+                </div>
               </Flex>
             </Card>
           </Flex>
@@ -729,20 +730,23 @@ const MessagesPage = ({ user }) => {
                           const userId = user.id || user.username;
                           const recipient = availableRecipients.find(r => r.id === newMessage.recipient);
                           
-                          // Check if there are archived conversations with this recipient
-                          const baseThreadId = `${Math.min(userId, newMessage.recipient)}-${Math.max(userId, newMessage.recipient)}`;
-                          const existingConversations = messages.filter(msg => 
-                            msg.threadId && msg.threadId.startsWith(baseThreadId)
+                          // Get all messages to check for existing thread
+                          const allMessagesResult = await API.graphql(graphqlOperation(listMessages, { limit: 100 }));
+                          const allMessages = allMessagesResult.data?.listMessages?.items || [];
+                          
+                          // Check for existing thread between these two users
+                          const existingThread = allMessages.find(msg => 
+                            (msg.senderID === userId && msg.receiverID === newMessage.recipient) ||
+                            (msg.senderID === newMessage.recipient && msg.receiverID === userId)
                           );
                           
-                          // If any conversation with this recipient is archived, create a new thread
-                          const hasArchivedConversation = existingConversations.some(conv => 
-                            archivedMessages.includes(conv.id)
-                          );
-                          
-                          const threadID = hasArchivedConversation 
-                            ? `${baseThreadId}-${Date.now()}` // Create new thread with timestamp
-                            : baseThreadId; // Use existing thread
+                          let threadID;
+                          if (existingThread) {
+                            threadID = existingThread.threadID;
+                          } else {
+                            // Create consistent thread ID using string comparison
+                            threadID = userId < newMessage.recipient ? `${userId}-${newMessage.recipient}` : `${newMessage.recipient}-${userId}`;
+                          }
                           
                           const messageInput = {
                             senderID: userId,
@@ -751,8 +755,7 @@ const MessagesPage = ({ user }) => {
                             body: newMessage.body,
                             isRead: false,
                             sentAt: new Date().toISOString(),
-                            threadID: threadID,
-                            messageType: 'NEW'
+                            threadID: threadID
                           };
                           
                           await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
