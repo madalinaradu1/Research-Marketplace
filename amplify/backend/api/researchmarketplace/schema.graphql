@@ -208,3 +208,16 @@ enum PostType {
   MENTOR_WANTED
   RESEARCH_IDEA
 } 
+
+type DeletedUser @model @auth(rules: [{allow: groups, groups: ["Admin"]}]) {
+  id: ID!
+  originalUserID: ID!
+  name: String!
+  email: String!
+  role: String!
+  deletionScheduledAt: AWSDateTime!
+  deletionExecutedAt: AWSDateTime
+  isTestMode: Boolean
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}

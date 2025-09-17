@@ -29,6 +29,7 @@ import { listApplications, listProjects, listUsers, deleteUser, updateUser, crea
 import { updateUserRole } from '../utils/updateUserRole';
 import { syncUserGroupsToRole } from '../utils/syncUserGroups';
 import { deleteUserCompletely, bulkDeleteUsers, canDeleteUser } from '../utils/adminUserManagement';
+import { scheduleUserDeletion } from '../utils/cascadeDelete';
 
 const AdminDashboard = ({ user }) => {
   const { tokens } = useTheme();
@@ -159,7 +160,7 @@ const AdminDashboard = ({ user }) => {
       return;
     }
     
-    const confirmMessage = `Are you sure you want to delete ${targetUser?.name || 'this user'}?\n\nThis will:\n• Remove user from database\n• Remove user from Cognito User Pool\n• Completely revoke system access\n• Cannot be undone\n\nContinue?`;
+    const confirmMessage = `Are you sure you want to delete ${targetUser?.name || 'this user'}?\n\nThis will:\n• Schedule user for deletion (90-day grace period)\n• Remove user from database immediately\n• Clean up related data after 90 days\n• Cannot be undone\n\nContinue?`;
     
     if (!window.confirm(confirmMessage)) {
       return;
@@ -167,10 +168,8 @@ const AdminDashboard = ({ user }) => {
     
     setIsDeleting(true);
     try {
-      const result = await deleteUserCompletely(userId, targetUser?.email);
-      if (result.success) {
-        setMessage(`User deleted successfully. ${result.cognitoDeleted ? 'Removed from both database and Cognito.' : 'Removed from database only - Cognito deletion failed.'}`);
-      }
+      await scheduleUserDeletion(targetUser, false); // false = production mode (90 days)
+      setMessage(`User scheduled for deletion. Related data will be cleaned up in 90 days.`);
       fetchData();
     } catch (err) {
       console.error('Error deleting user:', err);
@@ -200,12 +199,22 @@ const AdminDashboard = ({ user }) => {
     setConfirmText('');
     
     try {
-      const results = await bulkDeleteUsers(Array.from(selectedUsers), users);
-      const successful = results.filter(r => r.success).length;
-      const failed = results.filter(r => !r.success).length;
+      const selectedUserObjects = users.filter(u => selectedUsers.has(u.id));
+      let successful = 0;
+      let failed = 0;
+      
+      for (const userToDelete of selectedUserObjects) {
+        try {
+          await scheduleUserDeletion(userToDelete, false); // false = production mode (90 days)
+          successful++;
+        } catch (err) {
+          console.error('Error deleting user:', userToDelete.id, err);
+          failed++;
+        }
+      }
       
       if (successful > 0) {
-        setMessage(`${successful} user${successful > 1 ? 's were' : ' was'} successfully deleted! ${failed > 0 ? `${failed} failed.` : ''}`);
+        setMessage(`${successful} user${successful > 1 ? 's were' : ' was'} scheduled for deletion (90-day grace period)! ${failed > 0 ? `${failed} failed.` : ''}`);
       }
       if (failed > 0) {
         setError(`Failed to delete ${failed} users.`);

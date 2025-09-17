@@ -7,7 +7,7 @@ import {
 /**
  * Marks a user for deletion and schedules cleanup in 90 days
  */
-export const scheduleUserDeletion = async (userId, testMode = false) => {
+export const scheduleUserDeletion = async (userToDelete, testMode = false) => {
   try {
     const now = new Date();
     const cleanupDate = testMode 
@@ -15,28 +15,22 @@ export const scheduleUserDeletion = async (userId, testMode = false) => {
       : new Date(now.getTime() + (90 * 24 * 60 * 60 * 1000)); // 90 days
     
     // Get user data before deletion
-    const userResult = await API.graphql(graphqlOperation(`
-      query GetUser($id: ID!) {
-        getUser(id: $id) {
-          id name email role department major academicYear
-          gpa skills researchInterests careerInterests
-        }
-      }
-    `, { id: userId }));
+    // User data is already provided
     
     // Create deletion record
     await API.graphql(graphqlOperation(createDeletedUser, {
       input: {
-        originalUserID: userId,
-        deletedAt: now.toISOString(),
-        scheduledCleanupAt: cleanupDate.toISOString(),
-        userData: JSON.stringify(userResult.data.getUser),
-        status: testMode ? 'TEST_SCHEDULED' : 'SCHEDULED'
+        originalUserID: userToDelete.id,
+        name: userToDelete.name,
+        email: userToDelete.email,
+        role: userToDelete.role,
+        deletionScheduledAt: cleanupDate.toISOString(),
+        isTestMode: false
       }
     }));
     
     // Delete user account immediately
-    await API.graphql(graphqlOperation(deleteUser, { input: { id: userId } }));
+    await API.graphql(graphqlOperation(deleteUser, { input: { id: userToDelete.id } }));
     
     return { success: true, cleanupDate, testMode };
   } catch (error) {

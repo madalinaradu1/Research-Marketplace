@@ -1771,3 +1771,63 @@ export const deleteStudentPost = /* GraphQL */ `
     }
   }
 `;
+export const createDeletedUser = /* GraphQL */ `
+  mutation CreateDeletedUser(
+    $input: CreateDeletedUserInput!
+    $condition: ModelDeletedUserConditionInput
+  ) {
+    createDeletedUser(input: $input, condition: $condition) {
+      id
+      originalUserID
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateDeletedUser = /* GraphQL */ `
+  mutation UpdateDeletedUser(
+    $input: UpdateDeletedUserInput!
+    $condition: ModelDeletedUserConditionInput
+  ) {
+    updateDeletedUser(input: $input, condition: $condition) {
+      id
+      originalUserID
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteDeletedUser = /* GraphQL */ `
+  mutation DeleteDeletedUser(
+    $input: DeleteDeletedUserInput!
+    $condition: ModelDeletedUserConditionInput
+  ) {
+    deleteDeletedUser(input: $input, condition: $condition) {
+      id
+      originalUserID
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;

@@ -1326,3 +1326,45 @@ export const studentPostsByStudentID = /* GraphQL */ `
     }
   }
 `;
+export const getDeletedUser = /* GraphQL */ `
+  query GetDeletedUser($id: ID!) {
+    getDeletedUser(id: $id) {
+      id
+      originalUserID
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listDeletedUsers = /* GraphQL */ `
+  query ListDeletedUsers(
+    $filter: ModelDeletedUserFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listDeletedUsers(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        originalUserID
+        name
+        email
+        role
+        deletionScheduledAt
+        deletionExecutedAt
+        isTestMode
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;

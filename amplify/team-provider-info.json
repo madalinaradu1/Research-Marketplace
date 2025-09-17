@@ -52,7 +52,11 @@
           "s3Key": "amplify-builds/adminCreateUser-72496a546b4a50346442-build.zip"
         },
         "deleteUserFunction": {},
-        "deleteUserFromCognito": {}
+        "deleteUserFromCognito": {},
+        "cleanupDeletedUsers": {
+          "deploymentBucketName": "amplify-researchmarketplace-dev-0c85c-deployment",
+          "s3Key": "amplify-builds/cleanupDeletedUsers-73597351695450444254-build.zip"
+        }
       },
       "storage": {
         "applicationDocuments": {}

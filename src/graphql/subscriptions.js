@@ -1762,3 +1762,60 @@ export const onDeleteStudentPost = /* GraphQL */ `
     }
   }
 `;
+export const onCreateDeletedUser = /* GraphQL */ `
+  subscription OnCreateDeletedUser(
+    $filter: ModelSubscriptionDeletedUserFilterInput
+  ) {
+    onCreateDeletedUser(filter: $filter) {
+      id
+      originalUserID
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateDeletedUser = /* GraphQL */ `
+  subscription OnUpdateDeletedUser(
+    $filter: ModelSubscriptionDeletedUserFilterInput
+  ) {
+    onUpdateDeletedUser(filter: $filter) {
+      id
+      originalUserID
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteDeletedUser = /* GraphQL */ `
+  subscription OnDeleteDeletedUser(
+    $filter: ModelSubscriptionDeletedUserFilterInput
+  ) {
+    onDeleteDeletedUser(filter: $filter) {
+      id
+      originalUserID
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;

@@ -421,3 +421,78 @@ export const deleteUser = /* GraphQL */ `
     }
   }
 `;
+
+export const createDeletedUser = /* GraphQL */ `
+  mutation CreateDeletedUser(
+    $input: CreateDeletedUserInput!
+    $condition: ModelDeletedUserConditionInput
+  ) {
+    createDeletedUser(input: $input, condition: $condition) {
+      id
+      originalUserID
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const deleteMessage = /* GraphQL */ `
+  mutation DeleteMessage(
+    $input: DeleteMessageInput!
+    $condition: ModelMessageConditionInput
+  ) {
+    deleteMessage(input: $input, condition: $condition) {
+      id
+    }
+  }
+`;
+
+export const deleteApplication = /* GraphQL */ `
+  mutation DeleteApplication(
+    $input: DeleteApplicationInput!
+    $condition: ModelApplicationConditionInput
+  ) {
+    deleteApplication(input: $input, condition: $condition) {
+      id
+    }
+  }
+`;
+
+export const deleteProject = /* GraphQL */ `
+  mutation DeleteProject(
+    $input: DeleteProjectInput!
+    $condition: ModelProjectConditionInput
+  ) {
+    deleteProject(input: $input, condition: $condition) {
+      id
+    }
+  }
+`;
+
+export const deleteStudentPost = /* GraphQL */ `
+  mutation DeleteStudentPost(
+    $input: DeleteStudentPostInput!
+    $condition: ModelStudentPostConditionInput
+  ) {
+    deleteStudentPost(input: $input, condition: $condition) {
+      id
+    }
+  }
+`;
+
+export const deleteNotification = /* GraphQL */ `
+  mutation DeleteNotification(
+    $input: DeleteNotificationInput!
+    $condition: ModelNotificationConditionInput
+  ) {
+    deleteNotification(input: $input, condition: $condition) {
+      id
+    }
+  }
+`;

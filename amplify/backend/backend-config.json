@@ -94,6 +94,11 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "cleanupDeletedUsers": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "sendEmailNotification": {
       "build": true,
       "providerPlugin": "awscloudformation",
@@ -130,6 +135,22 @@
         {
           "category": "function",
           "resourceName": "adminDeleteUser"
+        }
+      ]
+    },
+    "AMPLIFY_function_cleanupDeletedUsers_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "cleanupDeletedUsers"
+        }
+      ]
+    },
+    "AMPLIFY_function_cleanupDeletedUsers_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "cleanupDeletedUsers"
         }
       ]
     },
