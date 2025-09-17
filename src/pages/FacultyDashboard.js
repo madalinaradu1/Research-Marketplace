@@ -719,7 +719,7 @@ const FacultyDashboard = ({ user }) => {
                     <Card key={project.id} variation="outlined">
                       <Flex direction="column" gap="0.5rem">
                         <Flex justifyContent="space-between" alignItems="flex-start">
-                          <Heading level={4}>{project.title}</Heading>
+                          <Text fontWeight="bold">{project.title}</Text>
                           <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
                             <Badge 
                               backgroundColor={
@@ -877,77 +877,79 @@ const FacultyDashboard = ({ user }) => {
                     direction="column"
                   >
                     {(application) => (
-                      <Card key={application.id}>
-                        <Flex justifyContent="space-between" alignItems="center">
-                          <Flex direction="row" gap="2rem" alignItems="center" flex="1">
-                            <Text fontWeight="bold" width="180px">{application.student?.name || 'Unknown Student'}</Text>
-                            <Text fontSize="0.9rem" width="220px">{application.student?.email}</Text>
-                            <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
-                            <Badge 
-                              backgroundColor={getStatusColorValue(application.status, tokens)}
-                              color="white"
-                            >
-                              {application.status}
-                            </Badge>
-                          </Flex>
-                          
-                          <View position="relative">
-                            <Button 
-                              size="medium"
-                              backgroundColor="transparent"
-                              color="black"
-                              border="none"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
-                              }}
-                              style={{ padding: '0.75rem' }}
-                            >
-                              ⋯
-                            </Button>
-                            {openKebabMenu === application.id && (
-                              <Card
-                                position="absolute"
-                                top="100%"
-                                right="0"
-                                style={{ zIndex: 100, minWidth: '200px' }}
-                                backgroundColor="white"
-                                border="1px solid black"
-                                onClick={(e) => e.stopPropagation()}
+                      <Card key={application.id} variation="outlined">
+                        <Flex direction="column" gap="0.5rem">
+                          <Flex justifyContent="space-between" alignItems="flex-start">
+                            <Text fontWeight="bold">{application.student?.name || 'Unknown Student'}</Text>
+                            <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
+                              <Badge 
+                                backgroundColor={getStatusColorValue(application.status, tokens)}
+                                color="white"
                               >
-                                <Flex direction="column" gap="0">
-                                  <Button
-                                    size="small"
+                                {application.status}
+                              </Badge>
+                              <View position="relative">
+                                <Button 
+                                  size="medium"
+                                  backgroundColor="transparent"
+                                  color="black"
+                                  border="none"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
+                                  }}
+                                  style={{ padding: '0.75rem' }}
+                                >
+                                  ⋯
+                                </Button>
+                                {openKebabMenu === application.id && (
+                                  <Card
+                                    position="absolute"
+                                    top="100%"
+                                    right="0"
+                                    style={{ zIndex: 100, minWidth: '200px' }}
                                     backgroundColor="white"
-                                    color="black"
-                                    border="none"
-                                    style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                    onClick={() => {
-                                      setReviewingApplication(application);
-                                      setOpenKebabMenu(null);
-                                    }}
+                                    border="1px solid black"
+                                    onClick={(e) => e.stopPropagation()}
                                   >
-                                    View Details
-                                  </Button>
-                                  {application.status === 'Approved' && (
-                                    <Button
-                                      size="small"
-                                      backgroundColor="white"
-                                      color="black"
-                                      border="none"
-                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                      onClick={() => {
-                                        setMessagingStudent({ application, student: application.student });
-                                        setOpenKebabMenu(null);
-                                      }}
-                                    >
-                                      Message
-                                    </Button>
-                                  )}
-                                </Flex>
-                              </Card>
-                            )}
-                          </View>
+                                    <Flex direction="column" gap="0">
+                                      <Button
+                                        size="small"
+                                        backgroundColor="white"
+                                        color="black"
+                                        border="none"
+                                        style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                        onClick={() => {
+                                          setReviewingApplication(application);
+                                          setOpenKebabMenu(null);
+                                        }}
+                                      >
+                                        View Details
+                                      </Button>
+                                      {application.status === 'Approved' && (
+                                        <Button
+                                          size="small"
+                                          backgroundColor="white"
+                                          color="black"
+                                          border="none"
+                                          style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                          onClick={() => {
+                                            setMessagingStudent({ application, student: application.student });
+                                            setOpenKebabMenu(null);
+                                          }}
+                                        >
+                                          Message
+                                        </Button>
+                                      )}
+                                    </Flex>
+                                  </Card>
+                                )}
+                              </View>
+                            </Flex>
+                          </Flex>
+                          <Flex justifyContent="space-between" alignItems="center">
+                            <Text fontSize="0.9rem">{application.student?.email} • Applied: {new Date(application.createdAt).toLocaleDateString()}</Text>
+                          </Flex>
                         </Flex>
                       </Card>
                     )}
@@ -1192,7 +1194,7 @@ const FacultyDashboard = ({ user }) => {
                     <Card key={project.id} variation="outlined">
                       <Flex direction="column" gap="0.5rem">
                         <Flex justifyContent="space-between" alignItems="flex-start">
-                          <Heading level={4}>{project.title}</Heading>
+                          <Text fontWeight="bold">{project.title}</Text>
                           <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
                             <Badge backgroundColor={getStatusColorValue('Rejected', tokens)} color="white">
                               Rejected
