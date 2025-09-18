@@ -16,6 +16,7 @@ import {
   TextField,
   TextAreaField,
   SelectField,
+  CheckboxField,
   Badge,
   View,
   Image,
@@ -92,6 +93,14 @@ const FacultyDashboard = ({ user }) => {
   const [openKebabMenu, setOpenKebabMenu] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [applicationSearchTerm, setApplicationSearchTerm] = useState('');
+  const [viewingProject, setViewingProject] = useState(null);
+  const [sortOptions, setSortOptions] = useState({
+    newest: true,
+    oldest: false,
+    title: false,
+    department: false,
+    deadline: false
+  });
   
 
   
@@ -585,7 +594,7 @@ const FacultyDashboard = ({ user }) => {
   }
   
   return (
-    <View width="100%">
+    <View width="100%" backgroundColor="#f5f5f5">
       <View
         position="relative"
         width="100vw"
@@ -593,12 +602,12 @@ const FacultyDashboard = ({ user }) => {
         style={{ left: '50%', marginLeft: '-50vw', marginTop: '-2rem' }}
       >
         <Image
-          alt="Faculty Meeting Banner"
-          src="/Faculty_Meeting.png"
+          alt="Faculty Banner"
+          src="/Faculty.jpg"
           width="100%"
           height="100%"
           objectFit="cover"
-          objectPosition="center 35%"
+          objectPosition="center"
         />
       </View>
       <Flex direction="column" padding="2rem" gap="2rem">
@@ -687,36 +696,117 @@ const FacultyDashboard = ({ user }) => {
         <TabItem title="Posted Opportunities">
           <Flex direction="column" gap="2rem">
             {/* Projects Section */}
-            <Card>
-              <Flex justifyContent="space-between" alignItems="center" marginBottom="1rem">
-                <Heading level={4}>Posted Opportunities ({projects.length})</Heading>
-                <Flex alignItems="center" gap="0.5rem">
-                  <TextField
-                    placeholder="Search projects..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    width="300px"
-                    size="small"
-                  />
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                  </svg>
-                </Flex>
-              </Flex>
-              
               {projects.length === 0 ? (
-                <Text>No projects created yet.</Text>
+                <Card backgroundColor="white" padding="1rem">
+                  <Text>No projects created yet.</Text>
+                </Card>
               ) : (
                 <>
-                <Collection items={getPaginatedItems(projects.filter(project => {
-                  const title = (project.title || '').toLowerCase();
-                  const department = (project.department || '').toLowerCase();
-                  const search = searchTerm.toLowerCase();
-                  return title.includes(search) || department.includes(search);
-                }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), projectsPage)} type="list" gap="1rem">
-                  {(project) => (
-                    <Card key={project.id} variation="outlined">
+                <Flex direction="column">
+                  <Card backgroundColor="white" padding="1rem">
+                    <Flex direction="column" gap="1rem">
+                      <Flex alignItems="center" gap="0.5rem">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="11" cy="11" r="8"></circle>
+                          <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <TextField
+                          placeholder="Search by project title or department..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          width="400px"
+                          size="small"
+                        />
+                      </Flex>
+                      
+                      <Flex alignItems="center" gap="2rem" wrap="wrap">
+                        <Text fontSize="0.9rem" fontWeight="bold" color="#666">Sort by:</Text>
+                        <Flex alignItems="center" gap="1.5rem" wrap="wrap">
+                          <Flex alignItems="center" gap="0.4rem">
+                            <input
+                              type="checkbox"
+                              checked={sortOptions.newest}
+                              onChange={(e) => setSortOptions(prev => ({ ...prev, newest: e.target.checked }))}
+                              onClick={(e) => setSortOptions(prev => ({ ...prev, newest: !prev.newest }))}
+                            />
+                            <Text fontSize="0.9rem">Newest First</Text>
+                          </Flex>
+                          <Flex alignItems="center" gap="0.4rem">
+                            <input
+                              type="checkbox"
+                              checked={sortOptions.oldest}
+                              onChange={(e) => setSortOptions(prev => ({ ...prev, oldest: e.target.checked }))}
+                              onClick={(e) => setSortOptions(prev => ({ ...prev, oldest: !prev.oldest }))}
+                            />
+                            <Text fontSize="0.9rem">Oldest First</Text>
+                          </Flex>
+                          <Flex alignItems="center" gap="0.4rem">
+                            <input
+                              type="checkbox"
+                              checked={sortOptions.title}
+                              onChange={(e) => setSortOptions(prev => ({ ...prev, title: e.target.checked }))}
+                              onClick={(e) => setSortOptions(prev => ({ ...prev, title: !prev.title }))}
+                            />
+                            <Text fontSize="0.9rem">Alphabetical</Text>
+                          </Flex>
+                          <Flex alignItems="center" gap="0.4rem">
+                            <input
+                              type="checkbox"
+                              checked={sortOptions.department}
+                              onChange={(e) => setSortOptions(prev => ({ ...prev, department: e.target.checked }))}
+                              onClick={(e) => setSortOptions(prev => ({ ...prev, department: !prev.department }))}
+                            />
+                            <Text fontSize="0.9rem">By Department</Text>
+                          </Flex>
+                          <Flex alignItems="center" gap="0.4rem">
+                            <input
+                              type="checkbox"
+                              checked={sortOptions.deadline}
+                              onChange={(e) => setSortOptions(prev => ({ ...prev, deadline: e.target.checked }))}
+                              onClick={(e) => setSortOptions(prev => ({ ...prev, deadline: !prev.deadline }))}
+                            />
+                            <Text fontSize="0.9rem">By Deadline</Text>
+                          </Flex>
+                        </Flex>
+                      </Flex>
+                    </Flex>
+                  </Card>
+                  <Flex direction="column" gap="1rem">
+                    {getPaginatedItems(projects.filter(project => {
+                    const title = (project.title || '').toLowerCase();
+                    const department = (project.department || '').toLowerCase();
+                    const search = searchTerm.toLowerCase();
+                    return title.includes(search) || department.includes(search);
+                  }).sort((a, b) => {
+                    // Apply multiple sorts in order of priority
+                    if (sortOptions.newest) {
+                      const dateCompare = new Date(b.createdAt) - new Date(a.createdAt);
+                      if (dateCompare !== 0) return dateCompare;
+                    }
+                    if (sortOptions.oldest) {
+                      const dateCompare = new Date(a.createdAt) - new Date(b.createdAt);
+                      if (dateCompare !== 0) return dateCompare;
+                    }
+                    if (sortOptions.title) {
+                      const titleCompare = (a.title || '').localeCompare(b.title || '');
+                      if (titleCompare !== 0) return titleCompare;
+                    }
+                    if (sortOptions.department) {
+                      const deptCompare = (a.department || '').localeCompare(b.department || '');
+                      if (deptCompare !== 0) return deptCompare;
+                    }
+                    if (sortOptions.deadline) {
+                      const aDeadline = a.applicationDeadline ? new Date(a.applicationDeadline) : new Date('9999-12-31');
+                      const bDeadline = b.applicationDeadline ? new Date(b.applicationDeadline) : new Date('9999-12-31');
+                      const deadlineCompare = aDeadline - bDeadline;
+                      if (deadlineCompare !== 0) return deadlineCompare;
+                    }
+                    return 0;
+                  }), projectsPage).map((project) => (
+                    <Card key={project.id} backgroundColor="white" padding="1rem" style={{ cursor: 'pointer' }} onClick={() => {
+                      setSelectedProject(project);
+                      setIsEditingProject(false);
+                    }}>
                       <Flex direction="column" gap="0.5rem">
                         <Flex justifyContent="space-between" alignItems="flex-start">
                           <Text fontWeight="bold">{project.title}</Text>
@@ -755,20 +845,6 @@ const FacultyDashboard = ({ user }) => {
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <Flex direction="column" gap="0">
-                                    <Button
-                                      size="small"
-                                      backgroundColor="white"
-                                      color="black"
-                                      border="none"
-                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                      onClick={() => {
-                                        setSelectedProject(project);
-                                        setIsEditingProject(false);
-                                        setOpenKebabMenu(null);
-                                      }}
-                                    >
-                                      View Details
-                                    </Button>
                                     <Button
                                       size="small"
                                       backgroundColor="white"
@@ -826,12 +902,12 @@ const FacultyDashboard = ({ user }) => {
                         </Flex>
                       </Flex>
                     </Card>
-                  )}
-                </Collection>
+                    ))}
+                  </Flex>
+                </Flex>
                 {renderPagination(projects, projectsPage, setProjectsPage)}
                 </>
               )}
-            </Card>
           </Flex>
         </TabItem>
         
@@ -877,7 +953,9 @@ const FacultyDashboard = ({ user }) => {
                     direction="column"
                   >
                     {(application) => (
-                      <Card key={application.id} variation="outlined">
+                      <Card key={application.id} backgroundColor="white" padding="1rem" style={{ cursor: 'pointer' }} onClick={() => {
+                        setReviewingApplication(application);
+                      }}>
                         <Flex direction="column" gap="0.5rem">
                           <Flex justifyContent="space-between" alignItems="flex-start">
                             <Text fontWeight="bold">{application.student?.name || 'Unknown Student'}</Text>
@@ -983,7 +1061,9 @@ const FacultyDashboard = ({ user }) => {
                         direction="column"
                       >
                       {(application) => (
-                        <Card key={application.id}>
+                        <Card key={application.id} backgroundColor="white" padding="1rem" style={{ cursor: 'pointer' }} onClick={() => {
+                          setReviewingApplication(application);
+                        }}>
                           <Flex justifyContent="space-between" alignItems="center">
                             <Flex direction="row" gap="2rem" alignItems="center" flex="1">
                               <Text fontWeight="bold" width="180px">{application.student?.name || 'Unknown Student'}</Text>
@@ -1080,7 +1160,9 @@ const FacultyDashboard = ({ user }) => {
                   <Heading level={4} marginBottom="1rem">Projects ({getProjectsNeedingAttention().length})</Heading>
                   <Collection items={getPaginatedItems(getProjectsNeedingAttention(), pendingPage)} type="list" gap="1rem">
                     {(project) => (
-                      <Card key={project.id} variation="outlined">
+                      <Card key={project.id} backgroundColor="white" padding="1rem" style={{ cursor: 'pointer' }} onClick={() => {
+                        setViewingProject(project);
+                      }}>
                         <Flex justifyContent="space-between" alignItems="center">
                           <Flex direction="column" gap="0.5rem" flex="1">
                             <Text fontWeight="bold">{project.title}</Text>
@@ -1187,130 +1269,50 @@ const FacultyDashboard = ({ user }) => {
           <Flex direction="column" gap="2rem">
             {/* Rejected Projects */}
             {getRejectedProjects().length > 0 && (
-              <Card>
-                <Heading level={4} marginBottom="1rem">Projects ({getRejectedProjects().length})</Heading>
+              <>
                 <Collection items={getPaginatedItems(getRejectedProjects().sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), projectsPage)} type="list" gap="1rem">
-                  {(project) => (
-                    <Card key={project.id} variation="outlined">
-                      <Flex direction="column" gap="0.5rem">
-                        <Flex justifyContent="space-between" alignItems="flex-start">
-                          <Text fontWeight="bold">{project.title}</Text>
-                          <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
-                            <Badge backgroundColor={getStatusColorValue('Rejected', tokens)} color="white">
-                              Rejected
-                            </Badge>
-                            <View position="relative">
-                              <Button 
-                                size="medium"
-                                backgroundColor="transparent"
-                                color="black"
-                                border="none"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
-                                }}
-                                style={{ padding: '0.75rem' }}
-                              >
-                                ⋯
-                              </Button>
-                              {openKebabMenu === project.id && (
-                                <Card
-                                  position="absolute"
-                                  top="100%"
-                                  right="0"
-                                  style={{ zIndex: 100, minWidth: '200px' }}
-                                  backgroundColor="white"
-                                  border="1px solid black"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Flex direction="column" gap="0">
-                                    <Button
-                                      size="small"
-                                      backgroundColor="white"
-                                      color="black"
-                                      border="none"
-                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                      onClick={() => {
-                                        setSelectedProject(project);
-                                        setIsEditingProject(false);
-                                        setOpenKebabMenu(null);
-                                      }}
-                                    >
-                                      View Details
-                                    </Button>
-                                  </Flex>
-                                </Card>
-                              )}
-                            </View>
+                    {(project) => (
+                      <Card key={project.id} backgroundColor="white" padding="1rem" minHeight="120px" style={{ cursor: 'pointer' }} onClick={() => {
+                        setSelectedProject(project);
+                        setIsEditingProject(false);
+                      }}>
+                        <Flex direction="column" gap="0.5rem">
+                          <Flex justifyContent="space-between" alignItems="center">
+                            <Text fontWeight="bold">{project.title}</Text>
+                            <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
+                              <Badge backgroundColor={getStatusColorValue('Rejected', tokens)} color="white">
+                                Rejected
+                              </Badge>
+
+                            </Flex>
+                          </Flex>
+                          <Flex justifyContent="space-between" alignItems="center">
+                            <Text fontSize="0.9rem">{project.department} • Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
                           </Flex>
                         </Flex>
-                        <Flex justifyContent="space-between" alignItems="center">
-                          <Text fontSize="0.9rem">{project.department} • Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
-                        </Flex>
-                      </Flex>
-                    </Card>
-                  )}
-                </Collection>
-                {renderPagination(getRejectedProjects(), projectsPage, setProjectsPage)}
-              </Card>
+                      </Card>
+                    )}
+                  </Collection>
+                  {renderPagination(getRejectedProjects(), projectsPage, setProjectsPage)}
+                </>
             )}
             
             {/* Rejected Applications */}
             {getRejectedApplications().length > 0 && (
-              <Card>
-                <Heading level={4} marginBottom="1rem">Applications ({getRejectedApplications().length})</Heading>
+              <>
                 <Collection items={getPaginatedItems(getRejectedApplications().sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage)} type="list" gap="1rem">
                   {(application) => (
-                    <Card key={application.id} variation="outlined">
+                    <Card key={application.id} backgroundColor="white" padding="1rem" minHeight="120px" style={{ cursor: 'pointer' }} onClick={() => {
+                      setReviewingApplication(application);
+                    }}>
                       <Flex direction="column" gap="0.5rem">
-                        <Flex justifyContent="space-between" alignItems="flex-start">
+                        <Flex justifyContent="space-between" alignItems="center">
                           <Text fontWeight="bold">{application.project?.title}</Text>
                           <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
                             <Badge backgroundColor={getStatusColorValue('Rejected', tokens)} color="white">
                               Rejected
                             </Badge>
-                            <View position="relative">
-                              <Button 
-                                size="medium"
-                                backgroundColor="transparent"
-                                color="black"
-                                border="none"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
-                                }}
-                                style={{ padding: '0.75rem' }}
-                              >
-                                ⋯
-                              </Button>
-                              {openKebabMenu === application.id && (
-                                <Card
-                                  position="absolute"
-                                  top="100%"
-                                  right="0"
-                                  style={{ zIndex: 100, minWidth: '200px' }}
-                                  backgroundColor="white"
-                                  border="1px solid black"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Flex direction="column" gap="0">
-                                    <Button
-                                      size="small"
-                                      backgroundColor="white"
-                                      color="black"
-                                      border="none"
-                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                      onClick={() => {
-                                        setReviewingApplication(application);
-                                        setOpenKebabMenu(null);
-                                      }}
-                                    >
-                                      View Details
-                                    </Button>
-                                  </Flex>
-                                </Card>
-                              )}
-                            </View>
+
                           </Flex>
                         </Flex>
                         <Flex justifyContent="space-between" alignItems="center">
@@ -1324,9 +1326,9 @@ const FacultyDashboard = ({ user }) => {
                       </Flex>
                     </Card>
                   )}
-                </Collection>
-                {renderPagination(getRejectedApplications(), applicationsPage, setApplicationsPage)}
-              </Card>
+                  </Collection>
+                  {renderPagination(getRejectedApplications(), applicationsPage, setApplicationsPage)}
+              </>
             )}
             
             {getRejectedProjects().length === 0 && getRejectedApplications().length === 0 && (
@@ -1364,7 +1366,8 @@ const FacultyDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="100vh"
-              style={{ overflow: 'auto', border: '1px solid black' }}
+              backgroundColor="white"
+              style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
               <ApplicationReview 
@@ -1408,7 +1411,7 @@ const FacultyDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="100vh"
-              style={{ overflow: 'auto', border: '1px solid black' }}
+              style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
               <Heading level={4}>Message Student</Heading>
@@ -1537,7 +1540,7 @@ const FacultyDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="100vh"
-              style={{ overflow: 'auto', border: '1px solid black' }}
+              style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
               <Heading level={4} marginBottom="1rem">
@@ -1711,7 +1714,7 @@ const FacultyDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="100vh"
-              style={{ overflow: 'auto', border: '1px solid black' }}
+              style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
               <Heading level={3}>{selectedProject.title}</Heading>

@@ -176,7 +176,7 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
   const statusOptions = getStatusOptions();
   
   return (
-    <Card variation="outlined" borderRadius="8px" borderWidth="2px" height="100%">
+    <Card backgroundColor="white" borderRadius="8px" height="100%">
       <Flex direction="column" gap="1rem" height="100%">
         <Heading level={4}>Review Application</Heading>
         

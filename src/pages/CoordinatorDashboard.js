@@ -379,7 +379,8 @@ const CoordinatorDashboard = ({ user }) => {
   if (loading) return <Text>Loading...</Text>;
 
   return (
-    <Flex direction="column" padding="2rem" gap="2rem">
+    <View width="100%" backgroundColor="#f5f5f5">
+      <Flex direction="column" padding="2rem" gap="2rem">
       <Flex direction="column" gap="0.5rem">
         <Heading level={2}>Coordinator Dashboard</Heading>
         <Text fontSize="1.1rem" color="#666">
@@ -1748,6 +1749,7 @@ const CoordinatorDashboard = ({ user }) => {
       )}
 
     </Flex>
+    </View>
   );
 };
 

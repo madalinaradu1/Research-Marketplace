@@ -359,7 +359,8 @@ const AdminDashboard = ({ user }) => {
   }
   
   return (
-    <Flex direction="column" padding="2rem" gap="2rem">
+    <View width="100%" backgroundColor="#f5f5f5">
+      <Flex direction="column" padding="2rem" gap="2rem">
       <Flex direction="column" gap="0.5rem">
         <Heading level={2}>Admin Dashboard</Heading>
         <Text fontSize="1.1rem" color="#666">
@@ -947,6 +948,7 @@ const AdminDashboard = ({ user }) => {
       )}
 
     </Flex>
+    </View>
   );
 };
 

@@ -252,7 +252,7 @@ const StudentDashboard = ({ user }) => {
   }
   
   return (
-    <View width="100%">
+    <View width="100%" backgroundColor="#f5f5f5">
       <Flex
         position="relative"
         width="100vw"
@@ -260,20 +260,12 @@ const StudentDashboard = ({ user }) => {
         style={{ left: '50%', marginLeft: '-50vw', marginTop: '-2rem' }}
       >
         <Image
-          alt="Student Research Banner"
-          src="/Student_Research.png"
-          width="50%"
+          alt="Library Banner"
+          src="/Library.jpg"
+          width="100%"
           height="100%"
           objectFit="cover"
-          objectPosition="center 25%"
-        />
-        <Image
-          alt="Student Presenting Banner"
-          src="/Student_Presenting.jpg"
-          width="50%"
-          height="100%"
-          objectFit="cover"
-          objectPosition="center 25%"
+          objectPosition="center"
         />
       </Flex>
       <Flex direction="column" padding="2rem" gap="2rem">
