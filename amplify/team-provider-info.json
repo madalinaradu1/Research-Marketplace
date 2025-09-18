@@ -28,7 +28,8 @@
       "StackName": "amplify-researchmarketplace-dev-0c85c",
       "StackId": "arn:aws:cloudformation:us-east-1:648937260943:stack/amplify-researchmarketplace-dev-0c85c/3bfc1a30-671f-11f0-8ed3-0afffee27add",
       "AmplifyAppId": "d33ubw0r59z0k8",
-      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-researchmarketplace-dev-0c85c-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-researchmarketplace-dev-0c85c-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-dev-0c85c-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
     },
     "categories": {
       "auth": {

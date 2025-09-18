@@ -29,7 +29,21 @@ export const scheduleUserDeletion = async (userToDelete, testMode = false) => {
       }
     }));
     
-    // Delete user account immediately
+    // Delete from Cognito first
+    try {
+      await API.post('emailapi', '/delete-user', {
+        body: { 
+          userId: userToDelete.id,
+          userEmail: userToDelete.email 
+        }
+      });
+      console.log('User deleted from Cognito successfully');
+    } catch (cognitoError) {
+      console.error('Failed to delete from Cognito:', cognitoError);
+      // Continue with database deletion even if Cognito fails
+    }
+    
+    // Delete user account from database
     await API.graphql(graphqlOperation(deleteUser, { input: { id: userToDelete.id } }));
     
     return { success: true, cleanupDate, testMode };

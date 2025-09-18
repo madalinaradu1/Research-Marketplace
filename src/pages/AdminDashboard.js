@@ -169,7 +169,7 @@ const AdminDashboard = ({ user }) => {
     setIsDeleting(true);
     try {
       await scheduleUserDeletion(targetUser, false); // false = production mode (90 days)
-      setMessage(`User scheduled for deletion. Related data will be cleaned up in 90 days.`);
+      setMessage(`User successfully deleted!`);
       fetchData();
     } catch (err) {
       console.error('Error deleting user:', err);
@@ -214,7 +214,7 @@ const AdminDashboard = ({ user }) => {
       }
       
       if (successful > 0) {
-        setMessage(`${successful} user${successful > 1 ? 's were' : ' was'} scheduled for deletion (90-day grace period)! ${failed > 0 ? `${failed} failed.` : ''}`);
+        setMessage(`${successful} user${successful > 1 ? 's were' : ' was'} successfully deleted! ${failed > 0 ? `${failed} failed.` : ''}`);
       }
       if (failed > 0) {
         setError(`Failed to delete ${failed} users.`);
@@ -369,6 +369,20 @@ const AdminDashboard = ({ user }) => {
       
       {error && <Alert variation="error" isDismissible onDismiss={() => setError(null)}>{error}</Alert>}
       {message && <Alert variation="success" isDismissible onDismiss={() => setMessage(null)}>{message}</Alert>}
+      
+      {/* Alert for users without roles */}
+      {(() => {
+        const usersWithoutRoles = users.filter(u => !u.role || u.role === '' || u.role === 'undefined');
+        if (usersWithoutRoles.length > 0) {
+          return (
+            <Alert variation="warning">
+              <strong>Action Required:</strong> {usersWithoutRoles.length} user{usersWithoutRoles.length > 1 ? 's' : ''} need{usersWithoutRoles.length === 1 ? 's' : ''} role assignment. 
+              Check the User Management tab to assign roles to: {usersWithoutRoles.map(u => u.name || u.email).join(', ')}
+            </Alert>
+          );
+        }
+        return null;
+      })()}
       
       <Tabs
         currentIndex={activeTabIndex}
