@@ -402,9 +402,6 @@ const StudentDashboard = ({ user }) => {
                         Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}
                       </Text>
                       <Flex gap="0.5rem">
-                        <Button size="small" onClick={() => handleViewDetails(project)}>
-                          View Details
-                        </Button>
                         <Button 
                           backgroundColor="white"
                           color="black"
