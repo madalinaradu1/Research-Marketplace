@@ -269,12 +269,14 @@ const StudentDashboard = ({ user }) => {
         />
       </Flex>
       <Flex direction="column" padding="2rem" gap="2rem">
-        <Flex direction="column" gap="0.5rem">
-          <Heading level={2}>Student Dashboard</Heading>
-          <Text fontSize="1.1rem" color="#666">
-            Welcome back, {user?.name || 'Student'}! You are logged in as a {user?.role || 'Student'}.
-          </Text>
-        </Flex>
+        <Card backgroundColor="white" padding="1.5rem">
+          <Flex direction="column" gap="0.5rem">
+            <Heading level={2} color="#2d3748">Student Dashboard</Heading>
+            <Text fontSize="1.1rem" color="#4a5568">
+              Welcome back, {user?.name || 'Student'}! You are logged in as a {user?.role || 'Student'}.
+            </Text>
+          </Flex>
+        </Card>
       
       {error && <Text color="red">{error}</Text>}
       
@@ -568,79 +570,87 @@ const StudentDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="100vh"
-              style={{ overflow: 'auto', border: '1px solid black' }}
+              backgroundColor="white"
+              style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Flex direction="column" gap="1rem" padding="1rem">
-                <Heading level={4}>Project Details</Heading>
-                
-                <Divider />
-                
-                <Flex direction="column" gap="0.5rem">
-                  <Text fontWeight="bold">Title:</Text>
-                  <Text>{selectedProject.title}</Text>
-                  
-                  <Text fontWeight="bold">College:</Text>
-                  <Text>{selectedProject.department}</Text>
-                  
-                  <Text fontWeight="bold">Description:</Text>
-                  <div dangerouslySetInnerHTML={{ __html: selectedProject.description }} />
-                  
-                  {selectedProject.qualifications && (
-                    <>
-                      <Text fontWeight="bold">Required Qualifications:</Text>
-                      <Text style={{ whiteSpace: 'pre-wrap' }}>{selectedProject.qualifications}</Text>
-                    </>
-                  )}
-                  
-                  {selectedProject.skillsRequired && selectedProject.skillsRequired.length > 0 && (
-                    <>
-                      <Text fontWeight="bold">Skills Required:</Text>
-                      <Flex wrap="wrap" gap="0.5rem">
-                        {selectedProject.skillsRequired.map((skill, index) => (
-                          <Badge key={index} backgroundColor="lightgray" color="white">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </Flex>
-                    </>
-                  )}
-                  
-                  {selectedProject.tags && selectedProject.tags.length > 0 && (
-                    <>
-                      <Text fontWeight="bold">Research Tags:</Text>
-                      <Flex wrap="wrap" gap="0.5rem">
-                        {selectedProject.tags.map((tag, index) => (
-                          <Badge key={index} backgroundColor="lightgray" color="white">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </Flex>
-                    </>
-                  )}
-                  
-                  {selectedProject.duration && (
-                    <>
-                      <Text fontWeight="bold">Duration:</Text>
-                      <Text>{selectedProject.duration}</Text>
-                    </>
-                  )}
-                  
-                  <Text fontWeight="bold">Application Deadline:</Text>
-                  <Text>{selectedProject.applicationDeadline ? new Date(selectedProject.applicationDeadline).toLocaleDateString() : 'Not specified'}</Text>
-                  
-                  <Text fontWeight="bold">Requires Transcript:</Text>
-                  <Text>{selectedProject.requiresTranscript ? 'Yes' : 'No'}</Text>
+              <Flex direction="column" gap="1.5rem" padding="2rem">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Heading level={3} color="#2d3748">Project Details</Heading>
+                  <Button size="small" onClick={() => setSelectedProject(null)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
                 </Flex>
                 
-                <Divider />
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Project Information</Heading>
+                  <Flex direction="column" gap="0.75rem">
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Title:</Text>
+                      <Text color="#2d3748">{selectedProject.title}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">College:</Text>
+                      <Text color="#2d3748">{selectedProject.department}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Application Deadline:</Text>
+                      <Text color="#2d3748">{selectedProject.applicationDeadline ? new Date(selectedProject.applicationDeadline).toLocaleDateString() : 'Not specified'}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Requires Transcript:</Text>
+                      <Text color="#2d3748">{selectedProject.requiresTranscript ? 'Yes' : 'No'}</Text>
+                    </Flex>
+                    {selectedProject.duration && (
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Duration:</Text>
+                        <Text color="#2d3748">{selectedProject.duration}</Text>
+                      </Flex>
+                    )}
+                  </Flex>
+                </Card>
+                
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Project Description</Heading>
+                  <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                    <div dangerouslySetInnerHTML={{ __html: selectedProject.description }} />
+                  </Card>
+                </Card>
+                
+                {selectedProject.qualifications && (
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Required Qualifications</Heading>
+                    <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                      <Text style={{ whiteSpace: 'pre-wrap' }} color="#2d3748">{selectedProject.qualifications}</Text>
+                    </Card>
+                  </Card>
+                )}
+                
+                {selectedProject.skillsRequired && selectedProject.skillsRequired.length > 0 && (
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Skills Required</Heading>
+                    <Flex wrap="wrap" gap="0.75rem">
+                      {selectedProject.skillsRequired.map((skill, index) => (
+                        <Badge key={index} backgroundColor="#4299e1" color="white" padding="0.5rem 1rem">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </Card>
+                )}
+                
+                {selectedProject.tags && selectedProject.tags.length > 0 && (
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Research Tags</Heading>
+                    <Flex wrap="wrap" gap="0.75rem">
+                      {selectedProject.tags.map((tag, index) => (
+                        <Badge key={index} backgroundColor="#38b2ac" color="white" padding="0.5rem 1rem">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </Card>
+                )}
                 
                 <Flex gap="0.5rem" justifyContent="flex-start">
-                  <Button 
-                    onClick={() => setSelectedProject(null)}
-                  >
-                    Close
-                  </Button>
                   {(() => {
                     const hasApplied = applications.some(app => app.projectID === selectedProject.id && !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status));
                     const isExpired = selectedProject.applicationDeadline && new Date(selectedProject.applicationDeadline) < new Date();

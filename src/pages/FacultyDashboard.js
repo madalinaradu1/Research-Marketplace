@@ -639,12 +639,14 @@ const FacultyDashboard = ({ user }) => {
         />
       </View>
       <Flex direction="column" padding="2rem" gap="2rem">
-      <Flex direction="column" gap="0.5rem">
-        <Heading level={2}>Faculty Dashboard</Heading>
-        <Text fontSize="1.1rem" color="#666">
-          Welcome back, {user?.name || 'Faculty'}! You are logged in as a {user?.role || 'Faculty'} member.
-        </Text>
-      </Flex>
+      <Card backgroundColor="white" padding="1.5rem">
+        <Flex direction="column" gap="0.5rem">
+          <Heading level={2} color="#2d3748">Faculty Dashboard</Heading>
+          <Text fontSize="1.1rem" color="#4a5568">
+            Welcome back, {user?.name || 'Faculty'}! You are logged in as a {user?.role || 'Faculty'} member.
+          </Text>
+        </Flex>
+      </Card>
       
       {error && <Text color="red">{error}</Text>}
       {successMessage && <Text color="green">{successMessage}</Text>}
@@ -725,8 +727,9 @@ const FacultyDashboard = ({ user }) => {
           <Flex direction="column" gap="2rem">
             {/* Projects Section */}
               {projects.length === 0 ? (
-                <Card backgroundColor="white" padding="1rem">
-                  <Text>No projects created yet.</Text>
+                <Card backgroundColor="white" padding="2rem" textAlign="center">
+                  <Text fontSize="1.1rem" color="#4a5568">No projects created yet</Text>
+                  <Text fontSize="0.9rem" color="#718096" marginTop="0.5rem">Create your first research project to get started</Text>
                 </Card>
               ) : (
                 <>
@@ -962,230 +965,171 @@ const FacultyDashboard = ({ user }) => {
         <TabItem title="Applications">
           {viewingApplicationsForProject ? (
             // Show applications for specific project
-            <Card>
-              <Flex justifyContent="space-between" alignItems="center" marginBottom="1rem">
-                <Heading level={4}>{viewingApplicationsForProject.title}</Heading>
-                <Flex alignItems="center" gap="0.5rem">
-                  <TextField
-                    placeholder="Search applications..."
-                    value={applicationSearchTerm}
-                    onChange={(e) => setApplicationSearchTerm(e.target.value)}
-                    width="250px"
-                    size="small"
-                  />
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <Flex direction="column" gap="1.5rem">
+              <Card backgroundColor="white" padding="1.5rem">
+                <Flex justifyContent="space-between" alignItems="center" marginBottom="1rem">
+                  <Flex direction="column" gap="0.5rem">
+                    <Heading level={3} color="#2d3748">{viewingApplicationsForProject.title}</Heading>
+                    <Text color="#4a5568">Applications for this project</Text>
+                  </Flex>
+                  <Button 
+                    size="small" 
+                    backgroundColor="#f7fafc" 
+                    color="#4a5568" 
+                    onClick={() => setViewingApplicationsForProject(null)}
+                  >
+                    ← Back to All Applications
+                  </Button>
+                </Flex>
+                
+                <Flex alignItems="center" gap="0.5rem" marginBottom="1rem">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="m21 21-4.35-4.35"></path>
                   </svg>
+                  <TextField
+                    placeholder="Search by student name, email, or status..."
+                    value={applicationSearchTerm}
+                    onChange={(e) => setApplicationSearchTerm(e.target.value)}
+                    width="400px"
+                    size="small"
+                  />
                 </Flex>
-              </Flex>
+              </Card>
+              
               {applications.filter(app => app.projectID === viewingApplicationsForProject.id).length === 0 ? (
-                <Text>No applications submitted for this project yet.</Text>
+                <Card backgroundColor="white" padding="2rem" textAlign="center">
+                  <Text fontSize="1.1rem" color="#4a5568">No applications submitted for this project yet.</Text>
+                  <Text fontSize="0.9rem" color="#718096" marginTop="0.5rem">Applications will appear here once students apply.</Text>
+                </Card>
               ) : (
-                <>
-                  <Divider margin="1rem 0" />
-                  <Collection
-                    items={getPaginatedItems(applications.filter(app => {
-                      if (app.projectID !== viewingApplicationsForProject.id) return false;
-                      const studentName = (app.student?.name || '').toLowerCase();
-                      const studentEmail = (app.student?.email || '').toLowerCase();
-                      const status = (app.status || '').toLowerCase();
-                      const search = applicationSearchTerm.toLowerCase();
-                      return studentName.includes(search) || studentEmail.includes(search) || status.includes(search);
-                    }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage)}
-                    type="list"
-                    gap="1rem"
-                    wrap="nowrap"
-                    direction="column"
-                  >
-                    {(application) => (
-                      <Card key={application.id} backgroundColor="white" padding="1rem" style={{ cursor: 'pointer' }} onClick={() => {
-                        setReviewingApplication(application);
-                      }}>
-                        <Flex direction="column" gap="0.5rem">
-                          <Flex justifyContent="space-between" alignItems="flex-start">
-                            <Text fontWeight="bold">{application.student?.name || 'Unknown Student'}</Text>
-                            <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
-                              <Badge 
-                                backgroundColor={getStatusColorValue(application.status, tokens)}
-                                color="white"
-                              >
-                                {application.status}
-                              </Badge>
-                              <View position="relative">
-                                <Button 
-                                  size="medium"
-                                  backgroundColor="transparent"
-                                  color="black"
-                                  border="none"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
-                                  }}
-                                  style={{ padding: '0.75rem' }}
-                                >
-                                  ⋯
-                                </Button>
-                                {openKebabMenu === application.id && (
-                                  <Card
-                                    position="absolute"
-                                    top="100%"
-                                    right="0"
-                                    style={{ zIndex: 100, minWidth: '200px' }}
-                                    backgroundColor="white"
-                                    border="1px solid black"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <Flex direction="column" gap="0">
-                                      <Button
-                                        size="small"
-                                        backgroundColor="white"
-                                        color="black"
-                                        border="none"
-                                        style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                        onClick={() => {
-                                          setReviewingApplication(application);
-                                          setOpenKebabMenu(null);
-                                        }}
-                                      >
-                                        View Details
-                                      </Button>
-                                      {application.status === 'Approved' && (
-                                        <Button
-                                          size="small"
-                                          backgroundColor="white"
-                                          color="black"
-                                          border="none"
-                                          style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                          onClick={() => {
-                                            setMessagingStudent({ application, student: application.student });
-                                            setOpenKebabMenu(null);
-                                          }}
-                                        >
-                                          Message
-                                        </Button>
-                                      )}
-                                    </Flex>
-                                  </Card>
-                                )}
-                              </View>
-                            </Flex>
+                <Flex direction="column" gap="0.75rem">
+                  {getPaginatedItems(applications.filter(app => {
+                    if (app.projectID !== viewingApplicationsForProject.id) return false;
+                    const studentName = (app.student?.name || '').toLowerCase();
+                    const studentEmail = (app.student?.email || '').toLowerCase();
+                    const status = (app.status || '').toLowerCase();
+                    const search = applicationSearchTerm.toLowerCase();
+                    return studentName.includes(search) || studentEmail.includes(search) || status.includes(search);
+                  }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage).map((application) => (
+                    <Card key={application.id} backgroundColor="white" padding="1.5rem" style={{ cursor: 'pointer' }} onClick={() => {
+                      setReviewingApplication(application);
+                    }}>
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Flex direction="column" gap="0.75rem" flex="1">
+                          <Flex alignItems="center" gap="1rem">
+                            <Text fontWeight="600" fontSize="1.1rem" color="#2d3748">{application.student?.name || 'Unknown Student'}</Text>
+                            <Badge 
+                              backgroundColor={getStatusColorValue(application.status, tokens)}
+                              color="white"
+                              fontSize="0.8rem"
+                            >
+                              {application.status}
+                            </Badge>
                           </Flex>
-                          <Flex justifyContent="space-between" alignItems="center">
-                            <Text fontSize="0.9rem">{application.student?.email} • Applied: {new Date(application.createdAt).toLocaleDateString()}</Text>
+                          <Flex alignItems="center" gap="2rem">
+                            <Text fontSize="0.9rem" color="#4a5568">
+                              📧 {application.student?.email || 'No email'}
+                            </Text>
+                            <Text fontSize="0.9rem" color="#4a5568">
+                              📅 Applied: {new Date(application.createdAt).toLocaleDateString()}
+                            </Text>
+                            {application.student?.gpa && (
+                              <Text fontSize="0.9rem" color="#4a5568">
+                                🎓 GPA: {application.student.gpa}
+                              </Text>
+                            )}
                           </Flex>
                         </Flex>
-                      </Card>
-                    )}
-                  </Collection>
+                        
+                        <Flex gap="0.5rem" alignItems="center">
+                          {application.status === 'Approved' && (
+                            <Button
+                              size="small"
+                              backgroundColor="#4299e1"
+                              color="white"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setMessagingStudent({ application, student: application.student });
+                              }}
+                            >
+                              Message
+                            </Button>
+                          )}
+
+                        </Flex>
+                      </Flex>
+                    </Card>
+                  ))}
                   {renderPagination(applications.filter(app => app.projectID === viewingApplicationsForProject.id), applicationsPage, setApplicationsPage)}
-                </>
+                </Flex>
               )}
-            </Card>
+            </Flex>
           ) : (
             // Show all applications grouped by project
             applications.length === 0 ? (
-              <Card>
-                <Text>No applications yet.</Text>
+              <Card backgroundColor="white" padding="2rem" textAlign="center">
+                <Text fontSize="1.1rem" color="#4a5568">No applications received yet.</Text>
+                <Text fontSize="0.9rem" color="#718096" marginTop="0.5rem">Applications will appear here once students apply to your projects.</Text>
               </Card>
             ) : (
-              <Flex direction="column" gap="2rem">
+              <Flex direction="column" gap="1.5rem">
                 {projects.map(project => {
                   const projectApplications = applications.filter(app => app.projectID === project.id);
                   if (projectApplications.length === 0) return null;
                   
                   return (
-                    <Card key={project.id}>
-                      <Heading level={4}>{project.title}</Heading>
-                      <Text>College: {project.department}</Text>
-                      <Divider margin="1rem 0" />
-                      <Collection
-                        items={getPaginatedItems(projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage)}
-                        type="list"
-                        gap="1rem"
-                        wrap="nowrap"
-                        direction="column"
-                      >
-                      {(application) => (
-                        <Card key={application.id} backgroundColor="white" padding="1rem" style={{ cursor: 'pointer' }} onClick={() => {
-                          setReviewingApplication(application);
-                        }}>
-                          <Flex justifyContent="space-between" alignItems="center">
-                            <Flex direction="row" gap="2rem" alignItems="center" flex="1">
-                              <Text fontWeight="bold" width="180px">{application.student?.name || 'Unknown Student'}</Text>
-                              <Text fontSize="0.9rem" width="220px">{application.student?.email}</Text>
-                              <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
-                              <Badge 
-                                backgroundColor={getStatusColorValue(application.status, tokens)}
-                                color="white"
-                              >
-                                {application.status}
-                              </Badge>
-                            </Flex>
-                            
-                            <View position="relative">
-                              <Button 
-                                size="medium"
-                                backgroundColor="transparent"
-                                color="black"
-                                border="none"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
-                                }}
-                                style={{ padding: '0.75rem' }}
-                              >
-                                ⋯
-                              </Button>
-                              {openKebabMenu === application.id && (
-                                <Card
-                                  position="absolute"
-                                  top="100%"
-                                  right="0"
-                                  style={{ zIndex: 100, minWidth: '200px' }}
-                                  backgroundColor="white"
-                                  border="1px solid black"
-                                  onClick={(e) => e.stopPropagation()}
+                    <Card key={project.id} backgroundColor="white" padding="1.5rem">
+                      <Flex justifyContent="space-between" alignItems="center" marginBottom="1rem">
+                        <Flex direction="column" gap="0.25rem">
+                          <Heading level={4} color="#2d3748">{project.title}</Heading>
+                          <Text fontSize="0.9rem" color="#4a5568">{project.department}</Text>
+                        </Flex>
+                        <Text fontSize="0.9rem" color="#718096">
+                          {projectApplications.length} application{projectApplications.length !== 1 ? 's' : ''}
+                        </Text>
+                      </Flex>
+                      
+                      <Flex direction="column" gap="0.75rem">
+                        {getPaginatedItems(projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage).map((application) => (
+                          <Card key={application.id} backgroundColor="#f8fafc" padding="1rem" border="1px solid #e2e8f0" style={{ cursor: 'pointer' }} onClick={() => {
+                            setReviewingApplication(application);
+                          }}>
+                            <Flex justifyContent="space-between" alignItems="center">
+                              <Flex alignItems="center" gap="1rem" flex="1">
+                                <Text fontWeight="600" color="#2d3748">{application.student?.name || 'Unknown Student'}</Text>
+                                <Badge 
+                                  backgroundColor={getStatusColorValue(application.status, tokens)}
+                                  color="white"
+                                  fontSize="0.8rem"
                                 >
-                                  <Flex direction="column" gap="0">
-                                    <Button
-                                      size="small"
-                                      backgroundColor="white"
-                                      color="black"
-                                      border="none"
-                                      style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                      onClick={() => {
-                                        setReviewingApplication(application);
-                                        setOpenKebabMenu(null);
-                                      }}
-                                    >
-                                      View Details
-                                    </Button>
-                                    {application.status === 'Approved' && (
-                                      <Button
-                                        size="small"
-                                        backgroundColor="white"
-                                        color="black"
-                                        border="none"
-                                        style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                        onClick={() => {
-                                          setMessagingStudent({ application, student: application.student });
-                                          setOpenKebabMenu(null);
-                                        }}
-                                      >
-                                        Message
-                                      </Button>
-                                    )}
-                                  </Flex>
-                                </Card>
-                              )}
-                            </View>
-                          </Flex>
-                        </Card>
-                      )}
-                    </Collection>
-                    {renderPagination(projectApplications, applicationsPage, setApplicationsPage)}
-                  </Card>
+                                  {application.status}
+                                </Badge>
+                                <Text fontSize="0.9rem" color="#4a5568">{application.student?.email}</Text>
+                                <Text fontSize="0.9rem" color="#718096">{new Date(application.createdAt).toLocaleDateString()}</Text>
+                              </Flex>
+                              
+                              <Flex gap="0.5rem" alignItems="center">
+                                {application.status === 'Approved' && (
+                                  <Button
+                                    size="small"
+                                    backgroundColor="#4299e1"
+                                    color="white"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setMessagingStudent({ application, student: application.student });
+                                    }}
+                                  >
+                                    Message
+                                  </Button>
+                                )}
+                              </Flex>
+                            </Flex>
+                          </Card>
+                        ))}
+                      </Flex>
+                      {renderPagination(projectApplications, applicationsPage, setApplicationsPage)}
+                    </Card>
                   );
                 })}
               </Flex>
@@ -1195,8 +1139,9 @@ const FacultyDashboard = ({ user }) => {
         
         <TabItem title="Pending Review">
           {getReviewNeededApplications().length === 0 && getProjectsNeedingAttention().length === 0 ? (
-            <Card>
-              <Text>No items need your review at this time.</Text>
+            <Card backgroundColor="white" padding="2rem" textAlign="center">
+              <Text fontSize="1.1rem" color="#4a5568">No items need your review at this time</Text>
+              <Text fontSize="0.9rem" color="#718096" marginTop="0.5rem">Items requiring your attention will appear here</Text>
             </Card>
           ) : (
             <Flex direction="column" gap="2rem">
@@ -1378,8 +1323,9 @@ const FacultyDashboard = ({ user }) => {
             )}
             
             {getRejectedProjects().length === 0 && getRejectedApplications().length === 0 && (
-              <Card>
-                <Text>No rejected items.</Text>
+              <Card backgroundColor="white" padding="2rem" textAlign="center">
+                <Text fontSize="1.1rem" color="#4a5568">No rejected items</Text>
+                <Text fontSize="0.9rem" color="#718096" marginTop="0.5rem">Rejected projects and applications will appear here</Text>
               </Card>
             )}
           </Flex>
@@ -1457,18 +1403,35 @@ const FacultyDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="100vh"
+              backgroundColor="white"
               style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Heading level={4}>Message Student</Heading>
-              <Divider margin="1rem 0" />
-              
-              <Flex direction="column" gap="1rem">
-                <Text><strong>To:</strong> {messagingStudent.student?.name} ({messagingStudent.student?.email})</Text>
-                <Text><strong>Project:</strong> {messagingStudent.application?.project?.title}</Text>
+              <Flex direction="column" gap="1.5rem" padding="2rem">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Heading level={3} color="#2d3748">Send Message</Heading>
+                  <Button size="small" onClick={() => {
+                    setMessagingStudent(null);
+                    setMessageText('');
+                  }} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                </Flex>
                 
-                <div>
-                  <Text fontWeight="bold">Message</Text>
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Message Details</Heading>
+                  <Flex direction="column" gap="0.75rem">
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">To:</Text>
+                      <Text color="#2d3748">{messagingStudent.student?.name} ({messagingStudent.student?.email})</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Regarding:</Text>
+                      <Text color="#2d3748">{messagingStudent.application?.project?.title}</Text>
+                    </Flex>
+                  </Flex>
+                </Card>
+                
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Your Message</Heading>
                   <div style={{ height: '400px' }}>
                     <ReactQuill
                       ref={messageQuillRef}
@@ -1496,25 +1459,23 @@ const FacultyDashboard = ({ user }) => {
                       style={{ height: '350px' }}
                     />
                   </div>
-                </div>
-                <div style={{ display: 'none' }}
-                  rows={6}
-                  required
-                />
+                </Card>
                 
-                <Flex gap="1rem">
+                <Flex gap="1rem" justifyContent="flex-end">
                   <Button 
                     onClick={() => {
                       setMessagingStudent(null);
                       setMessageText('');
                     }}
+                    backgroundColor="white"
+                    color="#4a5568"
+                    border="1px solid #e2e8f0"
                   >
                     Cancel
                   </Button>
                   <Button 
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
+                    backgroundColor="#4299e1"
+                    color="white"
                     isLoading={isSendingMessage}
                     onClick={async () => {
                       if (!messageText.trim()) return;
@@ -1555,7 +1516,7 @@ const FacultyDashboard = ({ user }) => {
                       }
                     }}
                   >
-                    Send
+                    Send Message
                   </Button>
                 </Flex>
               </Flex>
@@ -1760,97 +1721,109 @@ const FacultyDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="100vh"
+              backgroundColor="white"
               style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Heading level={3}>{selectedProject.title}</Heading>
-              
-              {/* Rejection Reason Banner */}
-              {selectedProject.rejectionReason && (
-                <Card 
-                  backgroundColor="#fff3cd" 
-                  border="1px solid #ffeaa7"
-                  padding="1rem"
-                  marginTop="1rem"
-                >
-                  <Text fontWeight="bold" color="black">
-                    Rejection Reason: {selectedProject.rejectionReason}
-                  </Text>
+              <Flex direction="column" gap="1.5rem" padding="2rem">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Heading level={3} color="#2d3748">{selectedProject.title}</Heading>
+                  <Button size="small" onClick={() => {
+                    setSelectedProject(null);
+                    setViewingReturnReason(null);
+                  }} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                </Flex>
+                
+                {/* Rejection Reason Banner */}
+                {selectedProject.rejectionReason && (
+                  <Card 
+                    backgroundColor="#fed7d7" 
+                    border="1px solid #feb2b2"
+                    padding="1.5rem"
+                  >
+                    <Text fontWeight="bold" color="#c53030">
+                      Rejection Reason: {selectedProject.rejectionReason}
+                    </Text>
+                  </Card>
+                )}
+                
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Project Information</Heading>
+                  <Flex direction="column" gap="0.75rem">
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">College:</Text>
+                      <Text color="#2d3748">{selectedProject.department}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Status:</Text>
+                      <Badge backgroundColor={getStatusColorValue(selectedProject.projectStatus, tokens)} color="white">
+                        {selectedProject.projectStatus || 'Draft'}
+                      </Badge>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Application Deadline:</Text>
+                      <Text color="#2d3748">{selectedProject.applicationDeadline ? new Date(selectedProject.applicationDeadline).toLocaleDateString() : 'Not specified'}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Requires Transcript Upload:</Text>
+                      <Text color="#2d3748">{selectedProject.requiresTranscript ? 'Yes' : 'No'}</Text>
+                    </Flex>
+                    {selectedProject.duration && (
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Duration:</Text>
+                        <Text color="#2d3748">{selectedProject.duration}</Text>
+                      </Flex>
+                    )}
+                  </Flex>
                 </Card>
-              )}
-              
-              <Divider margin="1rem 0" />
-              
-              <Flex direction="column" gap="1rem">
-                <Text><strong>College:</strong> {selectedProject.department}</Text>
-                <div>
-                  <Text fontWeight="bold">Description:</Text>
-                  <div dangerouslySetInnerHTML={{ __html: selectedProject.description }} />
-                </div>
+                
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Project Description</Heading>
+                  <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                    <div dangerouslySetInnerHTML={{ __html: selectedProject.description }} />
+                  </Card>
+                </Card>
                 
                 {selectedProject.qualifications && (
-                  <Text><strong>Required Qualifications/Prerequisites:</strong> {selectedProject.qualifications}</Text>
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Required Qualifications/Prerequisites</Heading>
+                    <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                      <Text style={{ whiteSpace: 'pre-wrap' }} color="#2d3748">{selectedProject.qualifications}</Text>
+                    </Card>
+                  </Card>
                 )}
                 
                 {selectedProject.skillsRequired && selectedProject.skillsRequired.length > 0 && (
-                  <>
-                    <Text><strong>Skills Required:</strong></Text>
-                    <Flex wrap="wrap" gap="0.5rem">
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Skills Required</Heading>
+                    <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.skillsRequired.map((skill, index) => (
-                        <Badge key={index} backgroundColor="lightgray" color="white">
-                          Skills: {skill}
+                        <Badge key={index} backgroundColor="#4299e1" color="white" padding="0.5rem 1rem">
+                          {skill}
                         </Badge>
                       ))}
                     </Flex>
-                  </>
+                  </Card>
                 )}
                 
                 {selectedProject.tags && selectedProject.tags.length > 0 && (
-                  <>
-                    <Text><strong>Research Tags:</strong></Text>
-                    <Flex wrap="wrap" gap="0.5rem">
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Research Tags</Heading>
+                    <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.tags.map((tag, index) => (
-                        <Badge key={index} backgroundColor="lightgray" color="white">
+                        <Badge key={index} backgroundColor="#38b2ac" color="white" padding="0.5rem 1rem">
                           {tag}
                         </Badge>
                       ))}
                     </Flex>
-                  </>
+                  </Card>
                 )}
                 
-                {selectedProject.duration && (
-                  <Text><strong>Duration:</strong> {selectedProject.duration}</Text>
+                {selectedProject.applicationDeadline && new Date(selectedProject.applicationDeadline) < new Date() && (
+                  <Card backgroundColor="#fed7d7" padding="1rem" border="1px solid #feb2b2">
+                    <Text fontWeight="bold" color="#c53030">This project has expired</Text>
+                  </Card>
                 )}
-                
-                <Text><strong>Application Deadline:</strong> {selectedProject.applicationDeadline ? new Date(selectedProject.applicationDeadline).toLocaleDateString() : 'Not specified'}</Text>
-                
-                <Text><strong>Requires Transcript Upload:</strong> {selectedProject.requiresTranscript ? 'Yes' : 'No'}</Text>
-                
-                <Text><strong>Status:</strong> {selectedProject.projectStatus || 'Draft'}</Text>
-                
-                <Flex gap="1rem" marginTop="1rem">
-                  <Button 
-                    onClick={() => {
-                      setSelectedProject(null);
-                      setViewingReturnReason(null);
-                    }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
-                  >
-                    Close
-                  </Button>
-                  {selectedProject.applicationDeadline && new Date(selectedProject.applicationDeadline) < new Date() && (
-                    <Button 
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
-                      isDisabled={true}
-                    >
-                      Expired
-                    </Button>
-                  )}
-                </Flex>
               </Flex>
             </Card>
           </Flex>

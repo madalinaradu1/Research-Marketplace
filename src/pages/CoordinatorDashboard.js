@@ -137,9 +137,10 @@ const CoordinatorDashboard = ({ user }) => {
         .map(application => {
           const student = allUsers.find(user => user.id === application.studentID);
           const project = allProjects.find(p => p.id === application.projectID);
+          console.log('Application student mapping:', { applicationID: application.id, studentID: application.studentID, foundStudent: student });
           return {
             ...application,
-            student: student || { name: 'Unknown Student' },
+            student: student || { name: 'Unknown Student', email: 'Not available' },
             project: project || { title: 'Unknown Project' }
           };
         });
@@ -152,7 +153,7 @@ const CoordinatorDashboard = ({ user }) => {
           const project = allProjects.find(p => p.id === application.projectID);
           return {
             ...application,
-            student: student || { name: 'Unknown Student' },
+            student: student || { name: 'Unknown Student', email: 'Not available' },
             project: project || { title: 'Unknown Project' }
           };
         });
@@ -165,7 +166,7 @@ const CoordinatorDashboard = ({ user }) => {
           const project = allProjects.find(p => p.id === application.projectID);
           return {
             ...application,
-            student: student || { name: 'Unknown Student' },
+            student: student || { name: 'Unknown Student', email: 'Not available' },
             project: project || { title: 'Unknown Project' }
           };
         });
@@ -381,12 +382,14 @@ const CoordinatorDashboard = ({ user }) => {
   return (
     <View width="100%" backgroundColor="#f5f5f5">
       <Flex direction="column" padding="2rem" gap="2rem">
-      <Flex direction="column" gap="0.5rem">
-        <Heading level={2}>Coordinator Dashboard</Heading>
-        <Text fontSize="1.1rem" color="#666">
-          Welcome back, {user?.name || 'Coordinator'}! You are logged in as a {user?.role || 'Coordinator'}.
-        </Text>
-      </Flex>
+      <Card backgroundColor="white" padding="1.5rem">
+        <Flex direction="column" gap="0.5rem">
+          <Heading level={2} color="#2d3748">Coordinator Dashboard</Heading>
+          <Text fontSize="1.1rem" color="#4a5568">
+            Welcome back, {user?.name || 'Coordinator'}! You are logged in as a {user?.role || 'Coordinator'}.
+          </Text>
+        </Flex>
+      </Card>
       
 
       <Tabs
@@ -645,54 +648,12 @@ const CoordinatorDashboard = ({ user }) => {
                 <Heading level={4} marginBottom="1rem">Applications ({approvedApplications.length})</Heading>
                 <Collection items={getPaginatedItems(approvedApplications, approvedPage)} type="list" gap="1rem">
                   {(application) => (
-                    <Card key={application.id} variation="outlined">
+                    <Card key={application.id} variation="outlined" style={{ cursor: 'pointer' }} onClick={() => setViewingApplication(application)}>
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{application.project?.title}</Text>
                           <Text fontSize="0.9rem">{application.student?.name} • {application.status}</Text>
                         </Flex>
-                        <View position="relative">
-                          <Button 
-                            size="medium"
-                            backgroundColor="transparent"
-                            color="black"
-                            border="none"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
-                            }}
-                            style={{ padding: '0.75rem' }}
-                          >
-                            ⋯
-                          </Button>
-                          {openKebabMenu === application.id && (
-                            <Card
-                              position="absolute"
-                              top="100%"
-                              right="0"
-                              style={{ zIndex: 100, minWidth: '200px' }}
-                              backgroundColor="white"
-                              border="1px solid black"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Flex direction="column" gap="0">
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                  onClick={() => {
-                                    setViewingApplication(application);
-                                    setOpenKebabMenu(null);
-                                  }}
-                                >
-                                  View Details
-                                </Button>
-                              </Flex>
-                            </Card>
-                          )}
-                        </View>
                       </Flex>
                     </Card>
                   )}
@@ -707,54 +668,12 @@ const CoordinatorDashboard = ({ user }) => {
                 <Heading level={4} marginBottom="1rem">Projects ({projects.approved.length})</Heading>
                 <Collection items={getPaginatedItems(projects.approved, approvedPage)} type="list" gap="1rem">
                   {(project) => (
-                    <Card key={project.id} variation="outlined">
+                    <Card key={project.id} variation="outlined" style={{ cursor: 'pointer' }} onClick={() => setViewingProject(project)}>
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{project.title}</Text>
                           <Text fontSize="0.9rem">{project.faculty?.name} • {project.department}</Text>
                         </Flex>
-                        <View position="relative">
-                          <Button 
-                            size="medium"
-                            backgroundColor="transparent"
-                            color="black"
-                            border="none"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
-                            }}
-                            style={{ padding: '0.75rem' }}
-                          >
-                            ⋯
-                          </Button>
-                          {openKebabMenu === project.id && (
-                            <Card
-                              position="absolute"
-                              top="100%"
-                              right="0"
-                              style={{ zIndex: 100, minWidth: '200px' }}
-                              backgroundColor="white"
-                              border="1px solid black"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Flex direction="column" gap="0">
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                  onClick={() => {
-                                    setViewingProject(project);
-                                    setOpenKebabMenu(null);
-                                  }}
-                                >
-                                  View Details
-                                </Button>
-                              </Flex>
-                            </Card>
-                          )}
-                        </View>
                       </Flex>
                     </Card>
                   )}
@@ -779,7 +698,7 @@ const CoordinatorDashboard = ({ user }) => {
                 <Heading level={4} marginBottom="1rem">Projects ({projects.rejected.length})</Heading>
                 <Collection items={getPaginatedItems(projects.rejected, rejectedPage)} type="list" gap="1rem">
                   {(project) => (
-                    <Card key={project.id} variation="outlined">
+                    <Card key={project.id} variation="outlined" style={{ cursor: 'pointer' }} onClick={() => setViewingProject(project)}>
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{project.title}</Text>
@@ -788,48 +707,6 @@ const CoordinatorDashboard = ({ user }) => {
                             Rejected: {new Date(project.updatedAt).toLocaleDateString()}
                           </Text>
                         </Flex>
-                        <View position="relative">
-                          <Button 
-                            size="medium"
-                            backgroundColor="transparent"
-                            color="black"
-                            border="none"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
-                            }}
-                            style={{ padding: '0.75rem' }}
-                          >
-                            ⋯
-                          </Button>
-                          {openKebabMenu === project.id && (
-                            <Card
-                              position="absolute"
-                              top="100%"
-                              right="0"
-                              style={{ zIndex: 100, minWidth: '200px' }}
-                              backgroundColor="white"
-                              border="1px solid black"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Flex direction="column" gap="0">
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                  onClick={() => {
-                                    setViewingProject(project);
-                                    setOpenKebabMenu(null);
-                                  }}
-                                >
-                                  View Details
-                                </Button>
-                              </Flex>
-                            </Card>
-                          )}
-                        </View>
                       </Flex>
                     </Card>
                   )}
@@ -844,7 +721,7 @@ const CoordinatorDashboard = ({ user }) => {
                 <Heading level={4} marginBottom="1rem">Applications ({rejectedApplications.length})</Heading>
                 <Collection items={getPaginatedItems(rejectedApplications, rejectedPage)} type="list" gap="1rem">
                   {(application) => (
-                    <Card key={application.id} variation="outlined">
+                    <Card key={application.id} variation="outlined" style={{ cursor: 'pointer' }} onClick={() => setViewingApplication(application)}>
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{application.project?.title}</Text>
@@ -853,48 +730,6 @@ const CoordinatorDashboard = ({ user }) => {
                             Rejected: {new Date(application.updatedAt).toLocaleDateString()}
                           </Text>
                         </Flex>
-                        <View position="relative">
-                          <Button 
-                            size="medium"
-                            backgroundColor="transparent"
-                            color="black"
-                            border="none"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
-                            }}
-                            style={{ padding: '0.75rem' }}
-                          >
-                            ⋯
-                          </Button>
-                          {openKebabMenu === application.id && (
-                            <Card
-                              position="absolute"
-                              top="100%"
-                              right="0"
-                              style={{ zIndex: 100, minWidth: '200px' }}
-                              backgroundColor="white"
-                              border="1px solid black"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Flex direction="column" gap="0">
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
-                                  onClick={() => {
-                                    setViewingApplication(application);
-                                    setOpenKebabMenu(null);
-                                  }}
-                                >
-                                  View Details
-                                </Button>
-                              </Flex>
-                            </Card>
-                          )}
-                        </View>
                       </Flex>
                     </Card>
                   )}
@@ -1007,7 +842,11 @@ const CoordinatorDashboard = ({ user }) => {
           height="100vh"
           backgroundColor="rgba(0, 0, 0, 0.5)"
           style={{ zIndex: 1000 }}
-          onClick={() => setViewingApplication(null)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setViewingApplication(null);
+          }}
         >
           <Flex
             justifyContent="center"
@@ -1019,74 +858,111 @@ const CoordinatorDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="100vh"
-              style={{ overflow: 'auto', border: '1px solid black' }}
+              backgroundColor="white"
+              style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Flex direction="column" gap="1rem">
+              <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
-                  <Heading level={4}>Application Details</Heading>
-                  <Button size="small" onClick={() => setViewingApplication(null)}>Close</Button>
+                  <Heading level={3} color="#2d3748">Application Details</Heading>
+                  <Button size="small" onClick={() => setViewingApplication(null)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
                 </Flex>
                 
-                <Divider />
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Project Information</Heading>
+                  <Flex direction="column" gap="0.75rem">
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Project:</Text>
+                      <Text color="#2d3748">{viewingApplication.project?.title}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">College:</Text>
+                      <Text color="#2d3748">{viewingApplication.project?.department}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Status:</Text>
+                      <Badge backgroundColor={getStatusColorValue(viewingApplication.status, tokens)} color="white">
+                        {viewingApplication.status}
+                      </Badge>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Submitted:</Text>
+                      <Text color="#2d3748">{new Date(viewingApplication.createdAt).toLocaleDateString()}</Text>
+                    </Flex>
+                  </Flex>
+                </Card>
                 
-                <Flex direction="column" gap="0.5rem">
-                  <Text fontWeight="bold">Project Information</Text>
-                  <Text>Project: {viewingApplication.project?.title}</Text>
-                  <Text>College: {viewingApplication.project?.department}</Text>
-                  <Text>Status: {viewingApplication.status}</Text>
-                  <Text>Submitted: {new Date(viewingApplication.createdAt).toLocaleDateString()}</Text>
-                </Flex>
-                
-                <Divider />
-                
-                <Flex direction="column" gap="0.5rem">
-                  <Text fontWeight="bold">Student Information</Text>
-                  <Text>Student ID: {viewingApplication.student?.id || viewingApplication.studentID}</Text>
-                  <Text>Name: {viewingApplication.student?.name}</Text>
-                  <Text>Email: {viewingApplication.student?.email}</Text>
-                  <Text>Program: {viewingApplication.student?.major || 'Not specified'}</Text>
-                  <Text>Academic Year: {viewingApplication.student?.academicYear || 'Not specified'}</Text>
-                  <Text>Expected Graduation: {viewingApplication.student?.expectedGraduation || 'Not specified'}</Text>
-                  <Text>GPA: {viewingApplication.student?.gpa || 'Not specified'}</Text>
-                </Flex>
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Student Information</Heading>
+                  {!viewingApplication.student || viewingApplication.student.name === 'Unknown Student' ? (
+                    <Card backgroundColor="#fed7d7" padding="1rem" border="1px solid #feb2b2">
+                      <Text fontWeight="bold" color="#c53030">Deleted User</Text>
+                      <Text fontSize="0.9rem" color="#9c2626">This student's account has been removed from the system.</Text>
+                    </Card>
+                  ) : (
+                    <Flex direction="column" gap="0.75rem">
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Name:</Text>
+                        <Text color="#2d3748">{viewingApplication.student.name}</Text>
+                      </Flex>
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Email:</Text>
+                        <Text color="#2d3748">{viewingApplication.student.email}</Text>
+                      </Flex>
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Program:</Text>
+                        <Text color="#2d3748">{viewingApplication.student.major || 'Not specified'}</Text>
+                      </Flex>
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Academic Year:</Text>
+                        <Text color="#2d3748">{viewingApplication.student.academicYear || 'Not specified'}</Text>
+                      </Flex>
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Expected Graduation:</Text>
+                        <Text color="#2d3748">{viewingApplication.student.expectedGraduation || 'Not specified'}</Text>
+                      </Flex>
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">GPA:</Text>
+                        <Text color="#2d3748">{viewingApplication.student.gpa || 'Not specified'}</Text>
+                      </Flex>
+                    </Flex>
+                  )}
+                </Card>
                 
                 {viewingApplication.statement && (
-                  <>
-                    <Divider />
-                    <Flex direction="column" gap="0.5rem">
-                      <Text fontWeight="bold">Statement of Interest</Text>
-                      <Card variation="outlined" padding="1rem">
-                        <div dangerouslySetInnerHTML={{ __html: viewingApplication.statement }} />
-                      </Card>
-                    </Flex>
-                  </>
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Statement of Interest</Heading>
+                    <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                      <div dangerouslySetInnerHTML={{ __html: viewingApplication.statement }} />
+                    </Card>
+                  </Card>
                 )}
                 
                 {viewingApplication.relevantCourses && viewingApplication.relevantCourses.length > 0 && (
-                  <>
-                    <Divider />
-                    <Flex direction="column" gap="0.5rem">
-                      <Text fontWeight="bold">Relevant Coursework</Text>
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Relevant Coursework</Heading>
+                    <Flex direction="column" gap="0.75rem">
                       {viewingApplication.relevantCourses.map((course, index) => (
-                        <Card key={index} variation="outlined" padding="0.5rem">
-                          <Flex justifyContent="space-between">
-                            <Text>{course.courseName} ({course.courseNumber})</Text>
-                            <Text>Grade: {course.grade} | {course.semester} {course.year}</Text>
+                        <Card key={index} backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                          <Flex justifyContent="space-between" alignItems="center">
+                            <Text fontWeight="600" color="#2d3748">{course.courseName} ({course.courseNumber})</Text>
+                            <Text fontSize="0.9rem" color="#4a5568">Grade: {course.grade} | {course.semester} {course.year}</Text>
                           </Flex>
                         </Card>
                       ))}
                     </Flex>
-                  </>
+                  </Card>
                 )}
                 
                 {viewingApplication.documentKey && (
-                  <>
-                    <Divider />
-                    <Flex direction="column" gap="0.5rem">
-                      <Text fontWeight="bold">Supporting Documents</Text>
-                      <Flex gap="0.5rem">
-                        <Button size="small" onClick={async () => {
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Supporting Documents</Heading>
+                    <Flex gap="0.75rem">
+                      <Button 
+                        size="small" 
+                        backgroundColor="#4299e1" 
+                        color="white"
+                        onClick={async () => {
                           try {
                             const url = await Storage.get(viewingApplication.documentKey, { 
                               expires: 300
@@ -1096,8 +972,16 @@ const CoordinatorDashboard = ({ user }) => {
                           } catch (err) {
                             console.error('Error loading document:', err);
                           }
-                        }}>View Document</Button>
-                        <Button size="small" backgroundColor="white" color="black" border="1px solid black" onClick={async () => {
+                        }}
+                      >
+                        View Document
+                      </Button>
+                      <Button 
+                        size="small" 
+                        backgroundColor="white" 
+                        color="#4a5568" 
+                        border="1px solid #e2e8f0"
+                        onClick={async () => {
                           try {
                             const url = await Storage.get(viewingApplication.documentKey, { 
                               expires: 300
@@ -1115,10 +999,12 @@ const CoordinatorDashboard = ({ user }) => {
                           } catch (err) {
                             console.error('Error downloading document:', err);
                           }
-                        }}>Download</Button>
-                      </Flex>
+                        }}
+                      >
+                        Download
+                      </Button>
                     </Flex>
-                  </>
+                  </Card>
                 )}
               </Flex>
             </Card>
@@ -1215,7 +1101,11 @@ const CoordinatorDashboard = ({ user }) => {
           height="100vh"
           backgroundColor="rgba(0, 0, 0, 0.5)"
           style={{ zIndex: 1000 }}
-          onClick={() => setViewingProject(null)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setViewingProject(null);
+          }}
         >
           <Flex
             justifyContent="center"
@@ -1227,117 +1117,133 @@ const CoordinatorDashboard = ({ user }) => {
               maxWidth="900px"
               width="100%"
               maxHeight="100vh"
-              style={{ overflow: 'auto', border: '1px solid black' }}
+              backgroundColor="white"
+              style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Flex direction="column" gap="1rem">
+              <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
-                  <Heading level={4}>Project Details</Heading>
-                  <Button size="small" onClick={() => setViewingProject(null)}>Close</Button>
+                  <Heading level={3} color="#2d3748">Project Details</Heading>
+                  <Button size="small" onClick={() => setViewingProject(null)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
                 </Flex>
                 
                 {/* Rejection Reason Banner */}
                 {viewingProject.rejectionReason && (
                   <Card 
-                    backgroundColor="#fff3cd" 
-                    border="1px solid #ffeaa7"
-                    padding="1rem"
+                    backgroundColor="#fed7d7" 
+                    border="1px solid #feb2b2"
+                    padding="1.5rem"
                   >
-                    <Text fontWeight="bold" color="black">
+                    <Text fontWeight="bold" color="#c53030">
                       Rejection Reason: {viewingProject.rejectionReason}
                     </Text>
                   </Card>
                 )}
                 
-                <Divider />
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Project Information</Heading>
+                  <Flex direction="column" gap="0.75rem">
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Title:</Text>
+                      <Text color="#2d3748">{viewingProject.title}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">College:</Text>
+                      <Text color="#2d3748">{viewingProject.department}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Faculty:</Text>
+                      <Text color="#2d3748">{viewingProject.faculty?.name}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Status:</Text>
+                      <Badge backgroundColor={getStatusColorValue(viewingProject.projectStatus, tokens)} color="white">
+                        {viewingProject.projectStatus}
+                      </Badge>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Created:</Text>
+                      <Text color="#2d3748">{new Date(viewingProject.createdAt).toLocaleDateString()}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Application Deadline:</Text>
+                      <Text color="#2d3748">{viewingProject.applicationDeadline ? new Date(viewingProject.applicationDeadline).toLocaleDateString() : 'Not specified'}</Text>
+                    </Flex>
+                  </Flex>
+                </Card>
                 
-                <Flex direction="column" gap="0.5rem">
-                  <Text fontWeight="bold">Project Information</Text>
-                  <Text>Title: {viewingProject.title}</Text>
-                  <Text>College: {viewingProject.department}</Text>
-                  <Text>Faculty: {viewingProject.faculty?.name}</Text>
-                  <Text>Status: {viewingProject.projectStatus}</Text>
-                  <Text>Created: {new Date(viewingProject.createdAt).toLocaleDateString()}</Text>
-                  <Text>Application Deadline: {viewingProject.applicationDeadline ? new Date(viewingProject.applicationDeadline).toLocaleDateString() : 'Not specified'}</Text>
-                </Flex>
-                
-                <Divider />
-                
-                <Flex direction="column" gap="0.5rem">
-                  <Text fontWeight="bold">Project Description</Text>
-                  <Card variation="outlined" padding="1rem">
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Project Description</Heading>
+                  <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
                     <div 
                       className="quill-content"
                       dangerouslySetInnerHTML={{ __html: viewingProject.description }} 
                     />
                   </Card>
-                </Flex>
+                </Card>
                 
                 {viewingProject.qualifications && (
-                  <>
-                    <Divider />
-                    <Flex direction="column" gap="0.5rem">
-                      <Text fontWeight="bold">Required Qualifications/Prerequisites</Text>
-                      <Card variation="outlined" padding="1rem">
-                        <Text style={{ whiteSpace: 'pre-wrap' }}>{viewingProject.qualifications}</Text>
-                      </Card>
-                    </Flex>
-                  </>
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Required Qualifications/Prerequisites</Heading>
+                    <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                      <Text style={{ whiteSpace: 'pre-wrap' }} color="#2d3748">{viewingProject.qualifications}</Text>
+                    </Card>
+                  </Card>
                 )}
                 
                 {viewingProject.skillsRequired && viewingProject.skillsRequired.length > 0 && (
-                  <>
-                    <Divider />
-                    <Flex direction="column" gap="0.5rem">
-                      <Text fontWeight="bold">Skills Required</Text>
-                      <Flex wrap="wrap" gap="0.5rem">
-                        {viewingProject.skillsRequired.map((skill, index) => (
-                          <Badge key={index} backgroundColor="lightgray" color="white">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </Flex>
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Skills Required</Heading>
+                    <Flex wrap="wrap" gap="0.75rem">
+                      {viewingProject.skillsRequired.map((skill, index) => (
+                        <Badge key={index} backgroundColor="#4299e1" color="white" padding="0.5rem 1rem">
+                          {skill}
+                        </Badge>
+                      ))}
                     </Flex>
-                  </>
+                  </Card>
                 )}
                 
                 {viewingProject.tags && viewingProject.tags.length > 0 && (
-                  <>
-                    <Divider />
-                    <Flex direction="column" gap="0.5rem">
-                      <Text fontWeight="bold">Research Tags</Text>
-                      <Flex wrap="wrap" gap="0.5rem">
-                        {viewingProject.tags.map((tag, index) => (
-                          <Badge key={index} backgroundColor="lightgray" color="white">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </Flex>
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Research Tags</Heading>
+                    <Flex wrap="wrap" gap="0.75rem">
+                      {viewingProject.tags.map((tag, index) => (
+                        <Badge key={index} backgroundColor="#38b2ac" color="white" padding="0.5rem 1rem">
+                          {tag}
+                        </Badge>
+                      ))}
                     </Flex>
-                  </>
+                  </Card>
                 )}
                 
-                <Divider />
-                
-                <Flex direction="column" gap="0.5rem">
-                  <Text fontWeight="bold">Project Details</Text>
-                  {viewingProject.duration && (
-                    <Text>Duration: {viewingProject.duration}</Text>
-                  )}
-                  <Text>Requires Transcript Upload: {viewingProject.requiresTranscript ? 'Yes' : 'No'}</Text>
-                  <Text>Active: {viewingProject.isActive ? 'Yes' : 'No'}</Text>
-                </Flex>
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Additional Details</Heading>
+                  <Flex direction="column" gap="0.75rem">
+                    {viewingProject.duration && (
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Duration:</Text>
+                        <Text color="#2d3748">{viewingProject.duration}</Text>
+                      </Flex>
+                    )}
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Requires Transcript Upload:</Text>
+                      <Text color="#2d3748">{viewingProject.requiresTranscript ? 'Yes' : 'No'}</Text>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="600" color="#4a5568">Active:</Text>
+                      <Text color="#2d3748">{viewingProject.isActive ? 'Yes' : 'No'}</Text>
+                    </Flex>
+                  </Flex>
+                </Card>
                 
                 {viewingProject.coordinatorNotes && (
-                  <>
-                    <Divider />
-                    <Flex direction="column" gap="0.5rem">
-                      <Text fontWeight="bold">Coordinator Notes</Text>
-                      <Card variation="outlined" padding="1rem">
-                        <Text style={{ whiteSpace: 'pre-wrap' }}>{viewingProject.coordinatorNotes}</Text>
-                      </Card>
-                    </Flex>
-                  </>
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Coordinator Notes</Heading>
+                    <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                      <Text style={{ whiteSpace: 'pre-wrap' }} color="#2d3748">{viewingProject.coordinatorNotes}</Text>
+                    </Card>
+                  </Card>
                 )}
               </Flex>
             </Card>

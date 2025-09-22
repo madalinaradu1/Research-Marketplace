@@ -100,78 +100,46 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
   
   return (
     <Card style={{ cursor: 'pointer' }} onClick={() => setShowDetails(true)}>
-      <Flex direction="column" gap="1rem">
-        <Flex justifyContent="space-between" alignItems="center">
-          <Heading level={4}>{application.project?.title || 'Research Application'}</Heading>
+      <Flex direction="column" gap="0.75rem">
+        <Flex justifyContent="space-between" alignItems="flex-start">
+          <Flex direction="column" gap="0.25rem" flex="1">
+            <Heading level={4} fontSize="1.1rem">{application.project?.title || 'Research Application'}</Heading>
+            {application.statusDetail && (
+              <Text fontSize="0.85rem" fontStyle="italic" color="#666">{application.statusDetail}</Text>
+            )}
+          </Flex>
           <Badge
             backgroundColor={getStatusColor(application.status)}
             color="white"
+            fontSize="0.8rem"
           >
             {application.status}
           </Badge>
         </Flex>
         
-        {application.statusDetail && (
-          <Text fontStyle="italic">{application.statusDetail}</Text>
-        )}
-        
-        <Divider />
-        
         <Flex direction="column" gap="0.5rem">
-          <Text fontWeight="bold">Application Details</Text>
-          <Text>Project: {application.project?.title || 'Unknown Project'}</Text>
-          <Text>College: {application.project?.department || 'Unknown College'}</Text>
-          
-          <Text>Status: {application.status}</Text>
-          {application.statusDetail && (
-            <Text>Status Detail: {application.statusDetail}</Text>
-          )}
-          <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
-        </Flex>
-        
-        <Divider />
-        
-        <Flex direction="column" gap="0.5rem">
-          <Text fontWeight="bold">Status Timeline</Text>
-          <Text>Created: {new Date(application.createdAt).toLocaleString()}</Text>
+          <Text fontSize="0.9rem" color="#666">{application.project?.department || 'Unknown College'}</Text>
+          <Text fontSize="0.9rem" color="#666">Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
           {application.updatedAt !== application.createdAt && (
-            <Text>Last Updated: {new Date(application.updatedAt).toLocaleString()}</Text>
-          )}
-          {application.submittedToFacultyAt && (
-            <Text>Submitted to Faculty: {new Date(application.submittedToFacultyAt).toLocaleString()}</Text>
-          )}
-          {application.approvedAt && (
-            <Text>Approved: {new Date(application.approvedAt).toLocaleString()}</Text>
-          )}
-          {application.returnedAt && (
-            <Text>Returned: {new Date(application.returnedAt).toLocaleString()}</Text>
-          )}
-          {application.cancelledAt && (
-            <Text>Cancelled: {new Date(application.cancelledAt).toLocaleString()}</Text>
+            <Text fontSize="0.9rem" color="#666">Updated: {new Date(application.updatedAt).toLocaleDateString()}</Text>
           )}
         </Flex>
-        
-        {application.proposalFileKey && (
-          <Button onClick={downloadProposal}>Download Proposal</Button>
-        )}
-        
-
-        
-
         
         {isStudent && application.status !== 'Cancelled' && application.status !== 'Expired' && application.status !== 'Draft' && (
-          <Flex gap="0.5rem">
-            {application.status === 'Returned' && showReturnedSection && (
-              <Button 
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditing(true);
-                }}
-              >
-                Edit & Resubmit
-              </Button>
-            )}
+          <Flex justifyContent="space-between" alignItems="center">
+            <Flex gap="0.5rem">
+              {application.status === 'Returned' && showReturnedSection && (
+                <Button 
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                  }}
+                >
+                  Edit & Resubmit
+                </Button>
+              )}
+            </Flex>
             <Button 
               size="small"
               onClick={(e) => {
@@ -215,7 +183,6 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                 maxWidth="900px"
                 width="100%"
                 maxHeight="100vh"
-                padding="2rem"
                 backgroundColor="white"
                 style={{ overflow: 'auto' }}
                 onClick={(e) => {
@@ -223,58 +190,70 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                   e.stopPropagation();
                 }}
               >
-                <Flex direction="column" gap="1rem">
+                <Flex direction="column" gap="1.5rem" padding="2rem">
                   <Flex justifyContent="space-between" alignItems="center">
-                    <Heading level={4}>Application Details</Heading>
-                    <Button size="small" onClick={() => setShowDetails(false)}>Close</Button>
+                    <Heading level={3} color="#2d3748">Application Details</Heading>
+                    <Button size="small" onClick={() => setShowDetails(false)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
                   </Flex>
                   
-                  <Divider />
-                  
-                  <Flex direction="column" gap="0.5rem">
-                    <Text fontWeight="bold">Project Information</Text>
-                    <Text>Project: {application.project?.title || 'Unknown Project'}</Text>
-                    <Text>College: {application.project?.department || 'Unknown College'}</Text>
-                    <Text>Status: {application.status}</Text>
-                    <Text>Submitted: {new Date(application.createdAt).toLocaleDateString()}</Text>
-                  </Flex>
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Project Information</Heading>
+                    <Flex direction="column" gap="0.75rem">
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Project:</Text>
+                        <Text color="#2d3748">{application.project?.title || 'Unknown Project'}</Text>
+                      </Flex>
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">College:</Text>
+                        <Text color="#2d3748">{application.project?.department || 'Unknown College'}</Text>
+                      </Flex>
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Status:</Text>
+                        <Badge backgroundColor={getStatusColor(application.status)} color="white">
+                          {application.status}
+                        </Badge>
+                      </Flex>
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Submitted:</Text>
+                        <Text color="#2d3748">{new Date(application.createdAt).toLocaleDateString()}</Text>
+                      </Flex>
+                    </Flex>
+                  </Card>
                   
                   {application.statement && (
-                    <>
-                      <Divider />
-                      <Flex direction="column" gap="0.5rem">
-                        <Text fontWeight="bold">Statement of Interest</Text>
-                        <Card variation="outlined" padding="0.5rem">
-                          <div dangerouslySetInnerHTML={{ __html: application.statement }} />
-                        </Card>
-                      </Flex>
-                    </>
+                    <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                      <Heading level={5} color="#2d3748" marginBottom="1rem">Statement of Interest</Heading>
+                      <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                        <div dangerouslySetInnerHTML={{ __html: application.statement }} />
+                      </Card>
+                    </Card>
                   )}
                   
                   {application.relevantCourses && application.relevantCourses.length > 0 && (
-                    <>
-                      <Divider />
-                      <Flex direction="column" gap="0.5rem">
-                        <Text fontWeight="bold">Relevant Coursework</Text>
+                    <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                      <Heading level={5} color="#2d3748" marginBottom="1rem">Relevant Coursework</Heading>
+                      <Flex direction="column" gap="0.75rem">
                         {application.relevantCourses.map((course, index) => (
-                          <Card key={index} variation="outlined" padding="0.5rem">
-                            <Flex justifyContent="space-between">
-                              <Text>{course.courseName} ({course.courseNumber})</Text>
-                              <Text>Grade: {course.grade} | {course.semester} {course.year}</Text>
+                          <Card key={index} backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                            <Flex justifyContent="space-between" alignItems="center">
+                              <Text fontWeight="600" color="#2d3748">{course.courseName} ({course.courseNumber})</Text>
+                              <Text fontSize="0.9rem" color="#4a5568">Grade: {course.grade} | {course.semester} {course.year}</Text>
                             </Flex>
                           </Card>
                         ))}
                       </Flex>
-                    </>
+                    </Card>
                   )}
                   
                   {application.documentKey && (
-                    <>
-                      <Divider />
-                      <Flex direction="column" gap="0.5rem">
-                        <Text fontWeight="bold">Supporting Documents</Text>
-                        <Flex gap="0.5rem">
-                          <Button size="small" onClick={async () => {
+                    <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                      <Heading level={5} color="#2d3748" marginBottom="1rem">Supporting Documents</Heading>
+                      <Flex gap="0.75rem">
+                        <Button 
+                          size="small" 
+                          backgroundColor="#4299e1" 
+                          color="white"
+                          onClick={async () => {
                             try {
                               const url = await Storage.get(application.documentKey, { 
                                 expires: 300
@@ -285,8 +264,16 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                               console.error('Error loading document:', err);
                               setError('Failed to load document. Please try again.');
                             }
-                          }}>View</Button>
-                          <Button size="small" backgroundColor="white" color="black" border="1px solid black" onClick={async () => {
+                          }}
+                        >
+                          View Document
+                        </Button>
+                        <Button 
+                          size="small" 
+                          backgroundColor="white" 
+                          color="#4a5568" 
+                          border="1px solid #e2e8f0"
+                          onClick={async () => {
                             try {
                               const url = await Storage.get(application.documentKey, { 
                                 expires: 300
@@ -305,34 +292,38 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                               console.error('Error downloading document:', err);
                               setError('Failed to download document. Please try again.');
                             }
-                          }}>Download</Button>
-                        </Flex>
+                          }}
+                        >
+                          Download
+                        </Button>
                       </Flex>
-                    </>
+                    </Card>
                   )}
                   
                   {(application.facultyNotes || application.coordinatorNotes || application.adminNotes) && (
-                    <>
-                      <Divider />
-                      <Flex direction="column" gap="0.5rem">
-                        <Text fontWeight="bold">Review Notes</Text>
+                    <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                      <Heading level={5} color="#2d3748" marginBottom="1rem">Review Notes</Heading>
+                      <Flex direction="column" gap="0.75rem">
                         {application.facultyNotes && (
-                          <Card backgroundColor="#fff3cd" padding="0.5rem">
-                            <Text><strong>Faculty:</strong> {application.facultyNotes}</Text>
+                          <Card backgroundColor="#fff3cd" padding="1rem" border="1px solid #ffeaa7">
+                            <Text fontWeight="600" color="#856404">Faculty:</Text>
+                            <Text color="#856404" marginTop="0.5rem">{application.facultyNotes}</Text>
                           </Card>
                         )}
                         {application.coordinatorNotes && (
-                          <Card backgroundColor="#e7f3ff" padding="0.5rem">
-                            <Text><strong>Coordinator:</strong> {application.coordinatorNotes}</Text>
+                          <Card backgroundColor="#e7f3ff" padding="1rem" border="1px solid #bee3f8">
+                            <Text fontWeight="600" color="#2b6cb0">Coordinator:</Text>
+                            <Text color="#2b6cb0" marginTop="0.5rem">{application.coordinatorNotes}</Text>
                           </Card>
                         )}
                         {application.adminNotes && (
-                          <Card backgroundColor="#f0f8f0" padding="0.5rem">
-                            <Text><strong>Admin:</strong> {application.adminNotes}</Text>
+                          <Card backgroundColor="#f0f8f0" padding="1rem" border="1px solid #c6f6d5">
+                            <Text fontWeight="600" color="#276749">Admin:</Text>
+                            <Text color="#276749" marginTop="0.5rem">{application.adminNotes}</Text>
                           </Card>
                         )}
                       </Flex>
-                    </>
+                    </Card>
                   )}
                 </Flex>
               </Card>

@@ -361,12 +361,14 @@ const AdminDashboard = ({ user }) => {
   return (
     <View width="100%" backgroundColor="#f5f5f5">
       <Flex direction="column" padding="2rem" gap="2rem">
-      <Flex direction="column" gap="0.5rem">
-        <Heading level={2}>Admin Dashboard</Heading>
-        <Text fontSize="1.1rem" color="#666">
-          Welcome back, {user?.name || 'Admin'}! You are logged in as an {user?.role || 'Admin'}.
-        </Text>
-      </Flex>
+      <Card backgroundColor="white" padding="1.5rem">
+        <Flex direction="column" gap="0.5rem">
+          <Heading level={2} color="#2d3748">Admin Dashboard</Heading>
+          <Text fontSize="1.1rem" color="#4a5568">
+            Welcome back, {user?.name || 'Admin'}! You are logged in as an {user?.role || 'Admin'}.
+          </Text>
+        </Flex>
+      </Card>
       
       {error && <Alert variation="error" isDismissible onDismiss={() => setError(null)}>{error}</Alert>}
       {message && <Alert variation="success" isDismissible onDismiss={() => setMessage(null)}>{message}</Alert>}

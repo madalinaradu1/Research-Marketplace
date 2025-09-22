@@ -84,42 +84,46 @@ const ApplicationStatusGuide = () => {
   ];
   
   return (
-    <Card>
-      <Flex direction="column" gap="1rem">
-        <Heading level={3}>Understanding Application Status Codes</Heading>
-        <Text>Below you will find a list of the status codes you may encounter during the application process and what each one means.</Text>
+    <Card backgroundColor="white" padding="1.5rem">
+      <Flex direction="column" gap="1.5rem">
+        <Flex direction="column" gap="0.5rem">
+          <Heading level={3} color="#2d3748">Understanding Application Status Codes</Heading>
+          <Text color="#4a5568">Below you will find a list of the status codes you may encounter during the application process and what each one means.</Text>
+        </Flex>
         
-        <Divider />
-        
-        {statusCodes.map((statusCode, index) => (
-          <Flex key={index} direction="column" gap="0.5rem">
-            <Flex alignItems="center" gap="0.5rem">
-              <div 
-                style={{ 
-                  width: '12px', 
-                  height: '12px', 
-                  borderRadius: '50%', 
-                  backgroundColor: statusCode.color 
-                }} 
-              />
-              <Text fontWeight="bold">{statusCode.status}</Text>
-            </Flex>
-            <Text>{statusCode.description}</Text>
-            
-            {statusCode.subStatuses && (
-              <Flex direction="column" gap="0.5rem" paddingLeft="1.5rem">
-                {statusCode.subStatuses.map((subStatus, subIndex) => (
-                  <Flex key={subIndex} direction="column" gap="0.25rem">
-                    <Text fontWeight="bold" fontSize="0.9rem">{subStatus.status}</Text>
-                    <Text fontSize="0.9rem">{subStatus.description}</Text>
-                  </Flex>
-                ))}
+        <Flex direction="column" gap="1rem">
+          {statusCodes.map((statusCode, index) => (
+            <Card key={index} backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+              <Flex direction="column" gap="0.75rem">
+                <Flex alignItems="center" gap="0.75rem">
+                  <div 
+                    style={{ 
+                      width: '16px', 
+                      height: '16px', 
+                      borderRadius: '50%', 
+                      backgroundColor: statusCode.color 
+                    }} 
+                  />
+                  <Heading level={5} color="#2d3748">{statusCode.status}</Heading>
+                </Flex>
+                <Text color="#4a5568">{statusCode.description}</Text>
+                
+                {statusCode.subStatuses && (
+                  <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                    <Flex direction="column" gap="0.75rem">
+                      {statusCode.subStatuses.map((subStatus, subIndex) => (
+                        <Flex key={subIndex} direction="column" gap="0.25rem">
+                          <Text fontWeight="600" fontSize="0.9rem" color="#2d3748">{subStatus.status}</Text>
+                          <Text fontSize="0.9rem" color="#4a5568">{subStatus.description}</Text>
+                        </Flex>
+                      ))}
+                    </Flex>
+                  </Card>
+                )}
               </Flex>
-            )}
-            
-            {index < statusCodes.length - 1 && <Divider />}
-          </Flex>
-        ))}
+            </Card>
+          ))}
+        </Flex>
       </Flex>
     </Card>
   );

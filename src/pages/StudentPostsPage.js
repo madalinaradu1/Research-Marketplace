@@ -209,55 +209,55 @@ const StudentPostsPage = ({ user }) => {
   }
 
   return (
-    <Flex direction="column" padding="2rem" gap="2rem">
-      <Flex justifyContent="space-between" alignItems="center">
-        <Heading level={2}>Student Research Community</Heading>
-        <Button
-          backgroundColor="white"
-          color="black"
-          border="1px solid black"
-          size="small"
-          onClick={() => setShowCreateForm(true)}
-        >
-          Create Post
-        </Button>
-      </Flex>
-
-      <Text>
-        Share your research interests, find mentors, or propose research ideas to connect with the research community.
-      </Text>
+    <View width="100%" backgroundColor="#f5f5f5">
+      <Flex direction="column" padding="2rem" gap="2rem">
+        <Card backgroundColor="white" padding="1.5rem">
+          <Flex justifyContent="space-between" alignItems="center">
+            <Flex direction="column" gap="0.5rem">
+              <Heading level={2} color="#2d3748">Student Research Community</Heading>
+              <Text color="#4a5568">
+                Share your research interests, find mentors, or propose research ideas to connect with the research community.
+              </Text>
+            </Flex>
+            <Button
+              backgroundColor="#4299e1"
+              color="white"
+              size="small"
+              onClick={() => setShowCreateForm(true)}
+            >
+              ➕ Create Post
+            </Button>
+          </Flex>
+        </Card>
 
       <Tabs currentIndex={activeTabIndex} onChange={setActiveTabIndex}>
         <TabItem title="All Posts">
-          {posts.length === 0 ? (
-            <Card>
-              <Text>No posts yet. Be the first to share your research interests!</Text>
-            </Card>
-          ) : (
-            <Collection
-              items={posts.filter(post => post.isActive)}
-              type="list"
-              gap="1rem"
-              wrap="nowrap"
-              direction="column"
-            >
-              {(post) => (
-                <Card key={post.id}>
-                  <Flex direction="column" gap="1rem">
-                    <Flex justifyContent="space-between" alignItems="flex-start">
-                      <Flex direction="column" gap="0.5rem" flex="1">
-                        <Flex alignItems="center" gap="1rem">
-                          <Heading level={4}>{post.title}</Heading>
-                          <Text fontSize="0.8rem" color="gray" fontWeight="bold">
-                            {getPostTypeLabel(post.type)}
+          <Card backgroundColor="white" padding="1.5rem">
+            {posts.length === 0 ? (
+              <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
+                <Text fontSize="3rem">💬</Text>
+                <Text fontSize="1.1rem" color="#4a5568">No posts yet</Text>
+                <Text fontSize="0.9rem" color="#718096">Be the first to share your research interests!</Text>
+              </Flex>
+            ) : (
+              <Flex direction="column" gap="0.75rem">
+                {posts.filter(post => post.isActive).map((post) => (
+                  <Card key={post.id} backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Flex direction="column" gap="1rem">
+                      <Flex justifyContent="space-between" alignItems="flex-start">
+                        <Flex direction="column" gap="0.5rem" flex="1">
+                          <Flex alignItems="center" gap="1rem">
+                            <Heading level={4} color="#2d3748">{post.title}</Heading>
+                            <Badge backgroundColor={getPostTypeColor(post.type)} color="white" fontSize="0.8rem">
+                              {getPostTypeLabel(post.type)}
+                            </Badge>
+                          </Flex>
+                          <Text fontSize="0.9rem" color="#4a5568">
+                            {(user.id || user.username) === post.student?.id || ['Admin', 'Faculty', 'Coordinator'].includes(user.role) 
+                              ? post.student?.name 
+                              : 'GCU Student'} • {post.department || 'No College'}
                           </Text>
                         </Flex>
-                        <Text fontSize="0.9rem" color="gray">
-                          {(user.id || user.username) === post.student?.id || ['Admin', 'Faculty', 'Coordinator'].includes(user.role) 
-                            ? post.student?.name 
-                            : 'GCU Student'} • {post.department || 'No College'}
-                        </Text>
-                      </Flex>
                       <Flex alignItems="center" gap="1rem">
                         <Text fontSize="0.8rem" color="gray">
                           {new Date(post.createdAt).toLocaleDateString()}
@@ -324,71 +324,65 @@ const StudentPostsPage = ({ user }) => {
                       </Flex>
                     </Flex>
 
-                    <Text>{post.description}</Text>
+                      <Text color="#4a5568">{post.description}</Text>
 
-                    {post.researchAreas && post.researchAreas.length > 0 && (
-                      <Text fontSize="0.9rem">
-                        <strong>Research Areas:</strong> {post.researchAreas.join(', ')}
-                      </Text>
-                    )}
+                      {post.researchAreas && post.researchAreas.length > 0 && (
+                        <Text fontSize="0.9rem" color="#4a5568">
+                          <strong>Research Areas:</strong> {post.researchAreas.join(', ')}
+                        </Text>
+                      )}
 
-                    {post.skillsOffered && post.skillsOffered.length > 0 && (
-                      <Text fontSize="0.9rem">
-                        <strong>Skills Offered:</strong> {post.skillsOffered.join(', ')}
-                      </Text>
-                    )}
+                      {post.skillsOffered && post.skillsOffered.length > 0 && (
+                        <Text fontSize="0.9rem" color="#4a5568">
+                          <strong>Skills Offered:</strong> {post.skillsOffered.join(', ')}
+                        </Text>
+                      )}
 
-                    {post.skillsNeeded && post.skillsNeeded.length > 0 && (
-                      <Text fontSize="0.9rem">
-                        <strong>Skills Needed:</strong> {post.skillsNeeded.join(', ')}
-                      </Text>
-                    )}
+                      {post.skillsNeeded && post.skillsNeeded.length > 0 && (
+                        <Text fontSize="0.9rem" color="#4a5568">
+                          <strong>Skills Needed:</strong> {post.skillsNeeded.join(', ')}
+                        </Text>
+                      )}
 
-                    {post.timeCommitment && (
-                      <Text fontSize="0.9rem">
-                        <strong>Time Commitment:</strong> {post.timeCommitment}
-                      </Text>
-                    )}
-                  </Flex>
-                </Card>
-              )}
-            </Collection>
-          )}
+                      {post.timeCommitment && (
+                        <Text fontSize="0.9rem" color="#4a5568">
+                          <strong>Time Commitment:</strong> {post.timeCommitment}
+                        </Text>
+                      )}
+                    </Flex>
+                  </Card>
+                ))}
+              </Flex>
+            )}
+          </Card>
         </TabItem>
 
         <TabItem title="My Posts">
-          {getMyPosts().length === 0 ? (
-            <Card>
-              <Text>You haven't created any posts yet.</Text>
-              <Button
-                backgroundColor="white"
-                color="black"
-                border="1px solid black"
-                size="small"
-                onClick={() => setShowCreateForm(true)}
-                marginTop="1rem"
-              >
-                Create Your First Post
-              </Button>
-            </Card>
-          ) : (
-            <Collection
-              items={getMyPosts()}
-              type="list"
-              gap="1rem"
-              wrap="nowrap"
-              direction="column"
-            >
-              {(post) => (
-                <Card key={post.id}>
-                  <Flex direction="column" gap="1rem">
-                    <Flex justifyContent="space-between" alignItems="center">
-                      <Flex alignItems="center" gap="1rem">
-                        <Heading level={4}>{post.title}</Heading>
-                        <Text fontSize="0.8rem" color="gray" fontWeight="bold">
-                          {getPostTypeLabel(post.type)}
-                        </Text>
-                      </Flex>
+          <Card backgroundColor="white" padding="1.5rem">
+            {getMyPosts().length === 0 ? (
+              <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
+                <Text fontSize="1.1rem" color="#4a5568">You haven't created any posts yet</Text>
+                <Button
+                  backgroundColor="#4299e1"
+                  color="white"
+                  size="small"
+                  onClick={() => setShowCreateForm(true)}
+                >
+                  Create Your First Post
+                </Button>
+              </Flex>
+            ) : (
+              <Flex direction="column" gap="0.75rem">
+                {getMyPosts().map((post) => (
+                  <Card key={post.id} backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Flex direction="column" gap="1rem">
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Flex alignItems="center" gap="1rem">
+                          <Heading level={4} color="#2d3748">{post.title}</Heading>
+                          <Badge backgroundColor={getPostTypeColor(post.type)} color="white" fontSize="0.8rem">
+                            {getPostTypeLabel(post.type)}
+                          </Badge>
+                        </Flex>
                       <Flex alignItems="center" gap="1rem">
                         <Text fontSize="0.8rem" color="gray">
                           {new Date(post.createdAt).toLocaleDateString()}
@@ -454,15 +448,16 @@ const StudentPostsPage = ({ user }) => {
                         )}
                       </Flex>
                     </Flex>
-                    <Text>{post.description}</Text>
-                  </Flex>
-                </Card>
-              )}
-            </Collection>
-          )}
+                      <Text color="#4a5568">{post.description}</Text>
+                    </Flex>
+                  </Card>
+                ))}
+              </Flex>
+            )}
+          </Card>
         </TabItem>
       </Tabs>
-
+      
       {/* Create Post Modal */}
       {showCreateForm && (
         <View
@@ -485,14 +480,21 @@ const StudentPostsPage = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="800px"
+              maxWidth="900px"
               width="100%"
               maxHeight="100vh"
+              backgroundColor="white"
               style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Heading level={3}>{editingPost ? 'Edit Post' : 'Create New Post'}</Heading>
-              <Divider margin="1rem 0" />
+              <Flex direction="column" gap="1.5rem" padding="2rem">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Heading level={3} color="#2d3748">{editingPost ? 'Edit Post' : 'Create New Post'}</Heading>
+                  <Button size="small" onClick={() => {
+                    setShowCreateForm(false);
+                    setEditingPost(null);
+                  }} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                </Flex>
 
               <form onSubmit={handleSubmit}>
                 <Flex direction="column" gap="1rem">
@@ -573,15 +575,22 @@ const StudentPostsPage = ({ user }) => {
                     placeholder="e.g. 10 hours/week, Flexible, Summer only"
                   />
 
-                  <Flex gap="1rem" marginTop="1rem">
-                    <Button onClick={() => setShowCreateForm(false)}>
+                  <Flex gap="1rem" marginTop="1rem" justifyContent="flex-end">
+                    <Button 
+                      onClick={() => {
+                        setShowCreateForm(false);
+                        setEditingPost(null);
+                      }}
+                      backgroundColor="white"
+                      color="#4a5568"
+                      border="1px solid #e2e8f0"
+                    >
                       Cancel
                     </Button>
                     <Button
                       type="submit"
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
+                      backgroundColor="#4299e1"
+                      color="white"
                       isLoading={isSubmitting}
                     >
                       {editingPost ? 'Update Post' : 'Create Post'}
@@ -589,6 +598,7 @@ const StudentPostsPage = ({ user }) => {
                   </Flex>
                 </Flex>
               </form>
+              </Flex>
             </Card>
           </Flex>
         </View>
@@ -649,7 +659,8 @@ const StudentPostsPage = ({ user }) => {
           </Flex>
         </View>
       )}
-    </Flex>
+      </Flex>
+    </View>
   );
 };
 

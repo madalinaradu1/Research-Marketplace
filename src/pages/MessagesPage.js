@@ -53,10 +53,20 @@ const MessagesPage = ({ user }) => {
   const [archivedMessages, setArchivedMessages] = useState([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
+  const [messageScrollRef, setMessageScrollRef] = useState(null);
 
   useEffect(() => {
     fetchData();
   }, [user]);
+  
+  // Scroll to bottom when message modal first opens
+  useEffect(() => {
+    if (selectedMessage && messageScrollRef) {
+      setTimeout(() => {
+        messageScrollRef.scrollTop = messageScrollRef.scrollHeight;
+      }, 100);
+    }
+  }, [selectedMessage, messageScrollRef]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -158,7 +168,11 @@ const MessagesPage = ({ user }) => {
   
   const fetchAvailableRecipients = async (userId, allUsers) => {
     try {
-      if (user.role === 'Coordinator') {
+      if (user.role === 'Admin') {
+        // Admins can message anyone
+        const allOtherUsers = allUsers.filter(u => u.id !== userId);
+        setAvailableRecipients(allOtherUsers);
+      } else if (user.role === 'Coordinator') {
         // Coordinators can message all faculty members
         const facultyUsers = allUsers.filter(u => u.role === 'Faculty');
         setAvailableRecipients(facultyUsers);
@@ -355,32 +369,41 @@ const MessagesPage = ({ user }) => {
   }
 
   return (
-    <Flex direction="column" padding="2rem" gap="2rem">
-      <Flex justifyContent="space-between" alignItems="center">
-        <Heading level={2}>Messages</Heading>
-        <Button 
-          backgroundColor="white"
-          color="black"
-          border="1px solid black"
-          size="small"
-          onClick={() => setShowNewMessage(true)}
-          isDisabled={availableRecipients.length === 0}
-        >
-          Send New Message
-        </Button>
-      </Flex>
-      
-      {error && <Text color="red">{error}</Text>}
-      
-      {availableRecipients.length === 0 && user.role !== 'Coordinator' && (
-        <Card backgroundColor="#fff3cd" padding="1rem">
-          <Text color="#856404">
-            {user.role === 'Faculty' 
-              ? 'You can send messages to students once their applications are approved.' 
-              : 'You can send messages to faculty once your applications are approved.'}
-          </Text>
+    <View width="100%" backgroundColor="#f5f5f5">
+      <Flex direction="column" padding="2rem" gap="2rem">
+        <Card backgroundColor="white" padding="1.5rem">
+          <Flex justifyContent="space-between" alignItems="center">
+            <Flex direction="column" gap="0.5rem">
+              <Heading level={2} color="#2d3748">Messages</Heading>
+              <Text color="#4a5568">Communicate with students and faculty</Text>
+            </Flex>
+            <Button 
+              backgroundColor="#4299e1"
+              color="white"
+              size="small"
+              onClick={() => setShowNewMessage(true)}
+              isDisabled={availableRecipients.length === 0}
+            >
+              ✉️ New Message
+            </Button>
+          </Flex>
         </Card>
-      )}
+        
+        {error && (
+          <Card backgroundColor="#fed7d7" padding="1rem" border="1px solid #feb2b2">
+            <Text color="#c53030">{error}</Text>
+          </Card>
+        )}
+        
+        {availableRecipients.length === 0 && user.role !== 'Coordinator' && user.role !== 'Admin' && (
+          <Card backgroundColor="#fff3cd" padding="1.5rem" border="1px solid #ffeaa7">
+            <Text color="#856404">
+              {user.role === 'Faculty' 
+                ? '💡 You can send messages to students once their applications are approved.' 
+                : '💡 You can send messages to faculty once your applications are approved.'}
+            </Text>
+          </Card>
+        )}
       
 
       
@@ -398,64 +421,73 @@ const MessagesPage = ({ user }) => {
             )}
           </Flex>
         }>
-          {getInboxMessages().length === 0 ? (
-            <Card>
-              <Text>No messages in your inbox.</Text>
-            </Card>
-          ) : (
-            <Collection
-              items={getInboxMessages()}
-              type="list"
-              gap="1rem"
-              wrap="nowrap"
-              direction="column"
-            >
-              {(message) => (
-                <Card 
-                  key={message.id}
-                  backgroundColor={message.hasUnread ? '#f0f8ff' : 'white'}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    setSelectedMessage(message);
-                    // Mark all unread messages in thread as read
-                    message.thread?.forEach(msg => {
-                      if (msg.isIncoming && !msg.isRead) {
-                        markAsRead(msg.id);
-                      }
-                    });
-                  }}
-                >
-                  <Flex direction="column" gap="0.5rem">
-                    <Flex justifyContent="space-between" alignItems="center">
-                      <Text fontWeight={message.hasUnread ? 'bold' : 'normal'}>
-                        {message.senderID === (user.id || user.username) ? (message.receiver?.name || 'Deleted User') : (message.sender?.name || 'Deleted User')}
-                      </Text>
-                      <Flex alignItems="center" gap="0.5rem">
-                        <Text fontSize="0.8rem">
-                          {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
-                        </Text>
-
-                        <Text
-                          fontSize="1.2rem"
-                          color="gray"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            confirmDelete(message);
-                          }}
-                          style={{ cursor: 'pointer', alignSelf: 'flex-end', userSelect: 'none' }}
-                        >
-                          ×
-                        </Text>
+          <Card backgroundColor="white" padding="1.5rem">
+            {getInboxMessages().length === 0 ? (
+              <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
+                <Text fontSize="3rem">📨</Text>
+                <Text fontSize="1.1rem" color="#4a5568">No messages in your inbox</Text>
+                <Text fontSize="0.9rem" color="#718096">Messages will appear here when you receive them</Text>
+              </Flex>
+            ) : (
+              <Flex direction="column" gap="0.75rem">
+                {getInboxMessages().map((message) => (
+                  <Card 
+                    key={message.id}
+                    backgroundColor={message.hasUnread ? '#e6f3ff' : '#f8fafc'}
+                    padding="1rem"
+                    border={message.hasUnread ? '1px solid #4299e1' : '1px solid #e2e8f0'}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      setSelectedMessage(message);
+                      message.thread?.forEach(msg => {
+                        if (msg.isIncoming && !msg.isRead) {
+                          markAsRead(msg.id);
+                        }
+                      });
+                    }}
+                  >
+                    <Flex direction="column" gap="0.5rem">
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Flex alignItems="center" gap="0.75rem">
+                          <Text fontWeight={message.hasUnread ? '600' : '500'} color="#2d3748">
+                            {message.senderID === (user.id || user.username) ? (message.receiver?.name || 'Deleted User') : (message.sender?.name || 'Deleted User')}
+                          </Text>
+                          {message.hasUnread && (
+                            <Badge backgroundColor="#4299e1" color="white" fontSize="0.7rem">
+                              New
+                            </Badge>
+                          )}
+                        </Flex>
+                        <Flex alignItems="center" gap="0.75rem">
+                          <Text fontSize="0.8rem" color="#718096">
+                            {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
+                          </Text>
+                          <Button
+                            size="small"
+                            backgroundColor="transparent"
+                            color="#718096"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              confirmDelete(message);
+                            }}
+                            style={{ padding: '0.25rem' }}
+                          >
+                            🗑️
+                          </Button>
+                        </Flex>
                       </Flex>
+                      <Text fontSize="0.9rem" color="#4a5568" fontWeight={message.hasUnread ? '500' : '400'}>
+                        {message.subject}
+                      </Text>
+                      <Text fontSize="0.85rem" color="#718096">
+                        {(message.body || message.content || '').replace(/<[^>]*>/g, '').substring(0, 120)}...
+                      </Text>
                     </Flex>
-                    <Text fontSize="0.9rem" color="gray">
-                      {(message.body || message.content || '').replace(/<[^>]*>/g, '').substring(0, 100)}...
-                    </Text>
-                  </Flex>
-                </Card>
-              )}
-            </Collection>
-          )}
+                  </Card>
+                ))}
+              </Flex>
+            )}
+          </Card>
         </TabItem>
         
         <TabItem title="Archive">
@@ -499,6 +531,7 @@ const MessagesPage = ({ user }) => {
         </TabItem>
 
       </Tabs>
+      </Flex>
       
       {/* Message Detail Modal */}
       {selectedMessage && (
@@ -519,61 +552,71 @@ const MessagesPage = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="700px"
+              maxWidth="900px"
               width="100%"
               maxHeight="100vh"
-              style={{ overflow: 'auto' }}
+              backgroundColor="white"
+              style={{ overflow: 'hidden' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Flex direction="column" gap="1rem">
-                <Flex justifyContent="space-between" alignItems="center">
-                  <Heading level={4}>Message Details</Heading>
-                  <Button size="small" onClick={() => setSelectedMessage(null)}>Close</Button>
+              <Flex direction="column" height="100vh" maxHeight="100vh">
+                <Flex direction="column" gap="1.5rem" padding="2rem" paddingBottom="1rem">
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Heading level={3} color="#2d3748">Message Details</Heading>
+                    <Button size="small" onClick={() => setSelectedMessage(null)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  </Flex>
+                  
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Conversation</Heading>
+                    <Flex direction="column" gap="0.75rem">
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">Subject:</Text>
+                        <Text color="#2d3748">{selectedMessage.subject}</Text>
+                      </Flex>
+                      <Flex justifyContent="space-between">
+                        <Text fontWeight="600" color="#4a5568">{selectedMessage.senderID === (user.id || user.username) ? 'To:' : 'From:'}</Text>
+                        <Text color="#2d3748">{selectedMessage.senderID === (user.id || user.username) ? (selectedMessage.receiver?.name || 'Deleted User') : (selectedMessage.sender?.name || 'Deleted User')}</Text>
+                      </Flex>
+                    </Flex>
+                  </Card>
                 </Flex>
-                
-                <Divider />
-                
-                <Flex direction="column" gap="0.5rem">
-                  <Text><strong>Subject:</strong> {selectedMessage.subject}</Text>
-                  <Text><strong>{selectedMessage.senderID === (user.id || user.username) ? 'To:' : 'From:'}</strong> {selectedMessage.senderID === (user.id || user.username) ? (selectedMessage.receiver?.name || 'Deleted User') : (selectedMessage.sender?.name || 'Deleted User')}</Text>
-                </Flex>
-                
-                <Divider />
                 
                 {/* Show full conversation thread */}
-                <Flex 
-                  direction="column" 
-                  gap="1rem" 
-                  maxHeight="300px" 
-                  style={{ overflowY: 'auto' }}
-                  ref={(el) => {
-                    if (el) {
-                      el.scrollTop = el.scrollHeight;
-                    }
-                  }}
-                >
-                  {(selectedMessage.thread || [selectedMessage]).map((msg, index) => (
-                    <div key={msg.id || index} style={{ padding: '1rem 0', borderBottom: index < (selectedMessage.thread || [selectedMessage]).length - 1 ? '1px solid #eee' : 'none' }}>
-                      <Flex direction="column" gap="0.5rem">
-                        <Flex justifyContent="space-between" alignItems="center">
-                          <Text fontSize="0.9rem" fontWeight="bold">
-                            {msg.senderID === (user.id || user.username) ? user.name : (msg.sender?.name || 'Deleted User')}
-                          </Text>
-                          <Text fontSize="0.8rem" color="gray">
-                            {new Date(msg.sentAt || msg.createdAt).toLocaleString()}
-                          </Text>
-                        </Flex>
-                        <div dangerouslySetInnerHTML={{ __html: cleanHtmlContent(msg.body || msg.content) || 'No content' }} />
+                <div style={{ margin: '0 2rem', flex: '1', minHeight: '0' }}>
+                  <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0" height="100%">
+                    <Heading level={5} color="#2d3748" marginBottom="1rem">Messages</Heading>
+                    <div 
+                      ref={setMessageScrollRef}
+                      style={{ 
+                        height: 'calc(100% - 3rem)',
+                        overflowY: 'scroll',
+                        paddingRight: '0.5rem'
+                      }}
+                    >
+                      <Flex direction="column" gap="1rem">
+                        {(selectedMessage.thread || [selectedMessage]).map((msg, index) => (
+                          <Card key={msg.id || index} backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
+                            <Flex direction="column" gap="0.5rem">
+                              <Flex justifyContent="space-between" alignItems="center">
+                                <Text fontSize="0.9rem" fontWeight="600" color="#2d3748">
+                                  {msg.senderID === (user.id || user.username) ? user.name : (msg.sender?.name || 'Deleted User')}
+                                </Text>
+                                <Text fontSize="0.8rem" color="#718096">
+                                  {new Date(msg.sentAt || msg.createdAt).toLocaleString()}
+                                </Text>
+                              </Flex>
+                              <div style={{ color: '#4a5568' }} dangerouslySetInnerHTML={{ __html: cleanHtmlContent(msg.body || msg.content) || 'No content' }} />
+                            </Flex>
+                          </Card>
+                        ))}
                       </Flex>
                     </div>
-                  ))}
-                </Flex>
+                  </Card>
+                </div>
                 
-                <Divider />
-                
-                <div>
-                  <Text fontWeight="bold">Reply</Text>
-                  <div style={{ height: '120px' }}>
+                <Card backgroundColor="#f8fafc" margin="2rem" marginTop="1rem" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Reply</Heading>
+                  <div style={{ height: '120px', marginBottom: '1rem' }}>
                     <ReactQuill
                       value={replyText}
                       onChange={(value) => {
@@ -598,31 +641,30 @@ const MessagesPage = ({ user }) => {
                     />
                   </div>
                   
-                  <Flex gap="1rem" marginTop="1rem">
-                  <Button 
-                    onClick={() => {
-                      setSelectedMessage(null);
-                      setReplyText('');
-                    }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
-                    size="small"
-                  >
-                    Close
-                  </Button>
-                  <Button 
-                    onClick={sendReply}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
-                    size="small"
-                    isLoading={isReplying}
-                  >
-                    Send
-                  </Button>
+                  <Flex gap="1rem" justifyContent="flex-end">
+                    <Button 
+                      onClick={() => {
+                        setSelectedMessage(null);
+                        setReplyText('');
+                      }}
+                      backgroundColor="white"
+                      color="#4a5568"
+                      border="1px solid #e2e8f0"
+                      size="small"
+                    >
+                      Close
+                    </Button>
+                    <Button 
+                      onClick={sendReply}
+                      backgroundColor="#4299e1"
+                      color="white"
+                      size="small"
+                      isLoading={isReplying}
+                    >
+                      Send Reply
+                    </Button>
                   </Flex>
-                </div>
+                </Card>
               </Flex>
             </Card>
           </Flex>
@@ -648,41 +690,45 @@ const MessagesPage = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="600px"
+              maxWidth="900px"
               width="100%"
+              backgroundColor="white"
               onClick={(e) => e.stopPropagation()}
             >
-              <Flex direction="column" gap="1rem">
+              <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
-                  <Heading level={4}>Send New Message</Heading>
-                  <Button size="small" onClick={() => setShowNewMessage(false)}>Close</Button>
+                  <Heading level={3} color="#2d3748">Send New Message</Heading>
+                  <Button size="small" onClick={() => setShowNewMessage(false)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
                 </Flex>
                 
-                <Divider />
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Message Details</Heading>
+                  <Flex direction="column" gap="1rem">
+                    <SelectField
+                      label={`Select ${user.role === 'Admin' ? 'User' : user.role === 'Faculty' ? 'Student' : 'Faculty Member'}`}
+                      value={newMessage.recipient}
+                      onChange={(e) => setNewMessage(prev => ({ ...prev, recipient: e.target.value }))}
+                      required
+                    >
+                      <option value="">Choose recipient...</option>
+                      {availableRecipients.map(recipient => (
+                        <option key={recipient.id} value={recipient.id}>
+                          {recipient.name} ({recipient.email})
+                        </option>
+                      ))}
+                    </SelectField>
+                    
+                    <TextField
+                      label="Subject"
+                      value={newMessage.subject}
+                      onChange={(e) => setNewMessage(prev => ({ ...prev, subject: e.target.value }))}
+                      required
+                    />
+                  </Flex>
+                </Card>
                 
-                <SelectField
-                  label={`Select ${user.role === 'Faculty' ? 'Student' : 'Faculty Member'}`}
-                  value={newMessage.recipient}
-                  onChange={(e) => setNewMessage(prev => ({ ...prev, recipient: e.target.value }))}
-                  required
-                >
-                  <option value="">Choose recipient...</option>
-                  {availableRecipients.map(recipient => (
-                    <option key={recipient.id} value={recipient.id}>
-                      {recipient.name} ({recipient.email})
-                    </option>
-                  ))}
-                </SelectField>
-                
-                <TextField
-                  label="Subject"
-                  value={newMessage.subject}
-                  onChange={(e) => setNewMessage(prev => ({ ...prev, subject: e.target.value }))}
-                  required
-                />
-                
-                <div>
-                  <Text fontWeight="bold">Message *</Text>
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Heading level={5} color="#2d3748" marginBottom="1rem">Your Message</Heading>
                   <div style={{ height: '300px' }}>
                     <ReactQuill
                       value={newMessage.body}
@@ -708,101 +754,100 @@ const MessagesPage = ({ user }) => {
                       style={{ height: '250px' }}
                     />
                   </div>
-                  
-                  <Flex gap="1rem" marginTop="1rem">
-                    <Button 
-                      onClick={() => {
+                </Card>
+                
+                <Flex gap="1rem" justifyContent="flex-end">
+                  <Button 
+                    onClick={() => {
+                      setShowNewMessage(false);
+                      setNewMessage({ recipient: '', subject: '', body: '' });
+                    }}
+                    backgroundColor="white"
+                    color="#4a5568"
+                    border="1px solid #e2e8f0"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={async () => {
+                      if (!newMessage.recipient || !newMessage.subject || !newMessage.body) return;
+                      
+                      setIsSendingNew(true);
+                      try {
+                        const userId = user.id || user.username;
+                        const recipient = availableRecipients.find(r => r.id === newMessage.recipient);
+                        
+                        // Get all messages to check for existing thread
+                        const allMessagesResult = await API.graphql(graphqlOperation(listMessages, { limit: 100 }));
+                        const allMessages = allMessagesResult.data?.listMessages?.items || [];
+                        
+                        // Check for existing thread between these two users
+                        const existingThread = allMessages.find(msg => 
+                          (msg.senderID === userId && msg.receiverID === newMessage.recipient) ||
+                          (msg.senderID === newMessage.recipient && msg.receiverID === userId)
+                        );
+                        
+                        let threadID;
+                        if (existingThread) {
+                          threadID = existingThread.threadID;
+                        } else {
+                          // Create consistent thread ID using string comparison
+                          threadID = userId < newMessage.recipient ? `${userId}-${newMessage.recipient}` : `${newMessage.recipient}-${userId}`;
+                        }
+                        
+                        const messageInput = {
+                          senderID: userId,
+                          receiverID: newMessage.recipient,
+                          subject: newMessage.subject,
+                          body: newMessage.body,
+                          isRead: false,
+                          sentAt: new Date().toISOString(),
+                          threadID: threadID
+                        };
+                        
+                        await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
+                        
+                        // Create notification
+                        const notificationInput = {
+                          userID: newMessage.recipient,
+                          type: 'MESSAGE_RECEIVED',
+                          message: `You have a new message from ${user.name}`,
+                          isRead: false
+                        };
+                        
+                        await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
+                        
+                        // Send email notification
+                        try {
+                          await sendEmailNotification(
+                            recipient?.email,
+                            recipient?.name,
+                            user.name,
+                            newMessage.subject,
+                            newMessage.body,
+                            'Research Project'
+                          );
+                        } catch (emailError) {
+                          console.log('Email notification prepared (SES integration pending):', emailError);
+                        }
+                        
                         setShowNewMessage(false);
                         setNewMessage({ recipient: '', subject: '', body: '' });
-                      }}
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      onClick={async () => {
-                        if (!newMessage.recipient || !newMessage.subject || !newMessage.body) return;
-                        
-                        setIsSendingNew(true);
-                        try {
-                          const userId = user.id || user.username;
-                          const recipient = availableRecipients.find(r => r.id === newMessage.recipient);
-                          
-                          // Get all messages to check for existing thread
-                          const allMessagesResult = await API.graphql(graphqlOperation(listMessages, { limit: 100 }));
-                          const allMessages = allMessagesResult.data?.listMessages?.items || [];
-                          
-                          // Check for existing thread between these two users
-                          const existingThread = allMessages.find(msg => 
-                            (msg.senderID === userId && msg.receiverID === newMessage.recipient) ||
-                            (msg.senderID === newMessage.recipient && msg.receiverID === userId)
-                          );
-                          
-                          let threadID;
-                          if (existingThread) {
-                            threadID = existingThread.threadID;
-                          } else {
-                            // Create consistent thread ID using string comparison
-                            threadID = userId < newMessage.recipient ? `${userId}-${newMessage.recipient}` : `${newMessage.recipient}-${userId}`;
-                          }
-                          
-                          const messageInput = {
-                            senderID: userId,
-                            receiverID: newMessage.recipient,
-                            subject: newMessage.subject,
-                            body: newMessage.body,
-                            isRead: false,
-                            sentAt: new Date().toISOString(),
-                            threadID: threadID
-                          };
-                          
-                          await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
-                          
-                          // Create notification
-                          const notificationInput = {
-                            userID: newMessage.recipient,
-                            type: 'MESSAGE_RECEIVED',
-                            message: `You have a new message from ${user.name}`,
-                            isRead: false
-                          };
-                          
-                          await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
-                          
-                          // Send email notification
-                          try {
-                            await sendEmailNotification(
-                              recipient?.email,
-                              recipient?.name,
-                              user.name,
-                              newMessage.subject,
-                              newMessage.body,
-                              'Research Project'
-                            );
-                          } catch (emailError) {
-                            console.log('Email notification prepared (SES integration pending):', emailError);
-                          }
-                          
-                          setShowNewMessage(false);
-                          setNewMessage({ recipient: '', subject: '', body: '' });
-                          fetchData(); // Refresh messages
-                        } catch (err) {
-                          console.error('Error sending message:', err);
-                          setError('Failed to send message. Please try again.');
-                        } finally {
-                          setIsSendingNew(false);
-                        }
-                      }}
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
-                      isLoading={isSendingNew}
-                    >
-                      Send
-                    </Button>
-                  </Flex>
-                </div>
+                        fetchData(); // Refresh messages
+                      } catch (err) {
+                        console.error('Error sending message:', err);
+                        setError('Failed to send message. Please try again.');
+                      } finally {
+                        setIsSendingNew(false);
+                      }
+                    }}
+                    backgroundColor="#4299e1"
+                    color="white"
+                    isLoading={isSendingNew}
+                  >
+                    Send Message
+                  </Button>
+                </Flex>
               </Flex>
             </Card>
           </Flex>
@@ -858,7 +903,7 @@ const MessagesPage = ({ user }) => {
           </Flex>
         </View>
       )}
-    </Flex>
+    </View>
   );
 };
 
