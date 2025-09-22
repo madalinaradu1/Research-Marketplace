@@ -99,7 +99,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
   };
   
   return (
-    <Card>
+    <Card style={{ cursor: 'pointer' }} onClick={() => setShowDetails(true)}>
       <Flex direction="column" gap="1rem">
         <Flex justifyContent="space-between" alignItems="center">
           <Heading level={4}>{application.project?.title || 'Research Application'}</Heading>
@@ -121,10 +121,6 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
           <Text fontWeight="bold">Application Details</Text>
           <Text>Project: {application.project?.title || 'Unknown Project'}</Text>
           <Text>College: {application.project?.department || 'Unknown College'}</Text>
-          
-          {application.project?.description && (
-            <div dangerouslySetInnerHTML={{ __html: application.project.description }} />
-          )}
           
           <Text>Status: {application.status}</Text>
           {application.statusDetail && (
@@ -165,23 +161,23 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
         
         {isStudent && application.status !== 'Cancelled' && application.status !== 'Expired' && application.status !== 'Draft' && (
           <Flex gap="0.5rem">
-            <Button 
-              size="small"
-              onClick={() => setShowDetails(true)}
-            >
-              View Details
-            </Button>
             {application.status === 'Returned' && showReturnedSection && (
               <Button 
                 size="small"
-                onClick={() => setIsEditing(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditing(true);
+                }}
               >
                 Edit & Resubmit
               </Button>
             )}
             <Button 
               size="small"
-              onClick={() => setShowWithdrawModal(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowWithdrawModal(true);
+              }}
             >
               Withdraw Application
             </Button>
@@ -198,21 +194,34 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
             height="100vh"
             backgroundColor="rgba(0, 0, 0, 0.5)"
             style={{ zIndex: 1000 }}
-            onClick={() => setShowDetails(false)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowDetails(false);
+            }}
           >
             <Flex
               justifyContent="center"
               alignItems="center"
               height="100%"
               padding="2rem"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowDetails(false);
+              }}
             >
               <Card
                 maxWidth="900px"
                 width="100%"
                 maxHeight="100vh"
                 padding="2rem"
-                style={{ overflow: 'auto', border: '1px solid black' }}
-                onClick={(e) => e.stopPropagation()}
+                backgroundColor="white"
+                style={{ overflow: 'auto' }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
               >
                 <Flex direction="column" gap="1rem">
                   <Flex justifyContent="space-between" alignItems="center">
@@ -314,8 +323,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                         )}
                         {application.coordinatorNotes && (
                           <Card backgroundColor="#e7f3ff" padding="0.5rem">
-                            <Text><strong>Coordinator:</strong></Text>
-                            <Text style={{ whiteSpace: 'pre-wrap' }}>{application.coordinatorNotes}</Text>
+                            <Text><strong>Coordinator:</strong> {application.coordinatorNotes}</Text>
                           </Card>
                         )}
                         {application.adminNotes && (

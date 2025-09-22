@@ -144,6 +144,30 @@ const FacultyDashboard = ({ user }) => {
   
 
   
+  // Cleanup expired projects
+  const cleanupExpiredProjects = async (projects) => {
+    const now = new Date();
+    const projectsToDelete = projects.filter(project => {
+      if (project.applicationDeadline) {
+        const deadline = new Date(project.applicationDeadline);
+        const daysSinceExpired = (now - deadline) / (1000 * 60 * 60 * 24);
+        return daysSinceExpired > 14;
+      }
+      return false;
+    });
+    
+    for (const project of projectsToDelete) {
+      try {
+        await API.graphql(graphqlOperation(updateProject, { 
+          input: { id: project.id, isActive: false }
+        }));
+        console.log(`Deactivated expired project: ${project.title}`);
+      } catch (err) {
+        console.error(`Error deactivating project ${project.id}:`, err);
+      }
+    }
+  };
+  
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -166,6 +190,10 @@ const FacultyDashboard = ({ user }) => {
       }));
       
       const allProjects = projectResult.data.listProjects.items;
+      
+      // Cleanup expired projects (deactivate them)
+      await cleanupExpiredProjects(allProjects);
+      
       setProjects(allProjects);
       
       // Fetch applications for faculty's projects
@@ -771,8 +799,23 @@ const FacultyDashboard = ({ user }) => {
                       </Flex>
                     </Flex>
                   </Card>
-                  <Flex direction="column" gap="1rem">
+                  <Flex direction="column" gap="0.5rem">
                     {getPaginatedItems(projects.filter(project => {
+                    // Filter out deactivated projects
+                    if (project.isActive === false) {
+                      return false;
+                    }
+                    
+                    // Filter out projects expired for more than 14 days
+                    if (project.applicationDeadline) {
+                      const deadline = new Date(project.applicationDeadline);
+                      const now = new Date();
+                      const daysSinceExpired = (now - deadline) / (1000 * 60 * 60 * 24);
+                      if (daysSinceExpired > 14) {
+                        return false; // Hide projects expired for more than 14 days
+                      }
+                    }
+                    
                     const title = (project.title || '').toLowerCase();
                     const department = (project.department || '').toLowerCase();
                     const search = searchTerm.toLowerCase();
@@ -820,7 +863,9 @@ const FacultyDashboard = ({ user }) => {
                             >
                               {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : (project.projectStatus || 'Draft')}
                             </Badge>
-                            <View position="relative">
+                            {/* Only show meatball menu for non-expired projects */}
+                            {(!project.applicationDeadline || new Date(project.applicationDeadline) >= new Date()) && (
+                              <View position="relative">
                               <Button 
                                 size="medium"
                                 backgroundColor="transparent"
@@ -894,7 +939,8 @@ const FacultyDashboard = ({ user }) => {
                                   </Flex>
                                 </Card>
                               )}
-                            </View>
+                              </View>
+                            )}
                           </Flex>
                         </Flex>
                         <Flex justifyContent="space-between" alignItems="center">
