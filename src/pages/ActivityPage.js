@@ -119,15 +119,42 @@ const ActivityPage = ({ user }) => {
   
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
-      <Heading level={2}>My Activity</Heading>
+      {/* Header */}
+      <Card
+        backgroundColor="white"
+        padding="1.5rem"
+        style={{
+          borderRadius: '8px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}
+      >
+        <Heading 
+          level={2} 
+          color="#2d3748"
+          fontWeight="600"
+          margin="0"
+        >
+          My Activity
+        </Heading>
+      </Card>
       
       {error && <Text color="red">{error}</Text>}
       
       <Tabs>
         <TabItem title="Applications">
           {applications.length === 0 ? (
-            <Card>
-              <Text>{user.role === 'Faculty' ? 'No applications received yet.' : 'No applications submitted yet.'}</Text>
+            <Card
+              backgroundColor="#f8fafc"
+              padding="2rem"
+              textAlign="center"
+              style={{
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
+            >
+              <Text color="#4a5568" fontSize="1.1rem">
+                {user.role === 'Faculty' ? 'No applications received yet.' : 'No applications submitted yet.'}
+              </Text>
             </Card>
           ) : (
             <Collection
@@ -139,10 +166,18 @@ const ActivityPage = ({ user }) => {
             >
               {(application) => (
                 user.role === 'Faculty' ? (
-                  <Card key={application.id}>
+                  <Card 
+                    key={application.id}
+                    backgroundColor="white"
+                    padding="1.5rem"
+                    style={{
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                  >
                     <Flex direction="column" gap="0.5rem">
                       <Flex justifyContent="space-between" alignItems="center">
-                        <Heading level={5}>{application.project?.title}</Heading>
+                        <Heading level={5} color="#2d3748">{application.project?.title}</Heading>
                         <Badge 
                           backgroundColor={
                             application.status === 'Faculty Review' ? 'orange' :
@@ -154,9 +189,9 @@ const ActivityPage = ({ user }) => {
                           {application.status}
                         </Badge>
                       </Flex>
-                      <Text><strong>Student:</strong> {application.student?.name}</Text>
-                      <Text><strong>Email:</strong> {application.student?.email}</Text>
-                      <Text><strong>Submitted:</strong> {new Date(application.createdAt).toLocaleDateString()}</Text>
+                      <Text color="#4a5568"><strong>Student:</strong> {application.student?.name}</Text>
+                      <Text color="#4a5568"><strong>Email:</strong> {application.student?.email}</Text>
+                      <Text color="#4a5568"><strong>Submitted:</strong> {new Date(application.createdAt).toLocaleDateString()}</Text>
                     </Flex>
                   </Card>
                 ) : (
@@ -174,8 +209,18 @@ const ActivityPage = ({ user }) => {
         
         <TabItem title="Projects">
           {projects.length === 0 ? (
-            <Card>
-              <Text>{user.role === 'Faculty' ? 'No projects created yet.' : 'No active projects.'}</Text>
+            <Card
+              backgroundColor="#f8fafc"
+              padding="2rem"
+              textAlign="center"
+              style={{
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
+            >
+              <Text color="#4a5568" fontSize="1.1rem">
+                {user.role === 'Faculty' ? 'No projects created yet.' : 'No active projects.'}
+              </Text>
             </Card>
           ) : (
             <Collection
@@ -186,10 +231,18 @@ const ActivityPage = ({ user }) => {
               direction="column"
             >
               {(project) => (
-                <Card key={project.id}>
+                <Card 
+                  key={project.id}
+                  backgroundColor="white"
+                  padding="1.5rem"
+                  style={{
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                >
                   <Flex direction="column" gap="0.5rem">
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Heading level={5}>{project.title}</Heading>
+                      <Heading level={5} color="#2d3748">{project.title}</Heading>
                       <Badge 
                         backgroundColor={project.isActive ? 'green' : 'gray'}
                         color="white"
@@ -197,10 +250,10 @@ const ActivityPage = ({ user }) => {
                         {project.isActive ? 'Active' : 'Inactive'}
                       </Badge>
                     </Flex>
-                    <Text fontWeight="bold">Department: {project.department}</Text>
+                    <Text fontWeight="bold" color="#2d3748">Department: {project.department}</Text>
                     <div dangerouslySetInnerHTML={{ __html: project.description }} />
                     {user.role === 'Faculty' && (
-                      <Text fontSize="0.9rem">
+                      <Text fontSize="0.9rem" color="#4a5568">
                         <strong>Deadline:</strong> {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}
                       </Text>
                     )}

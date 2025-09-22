@@ -201,10 +201,35 @@ const ProfilePage = ({ user, refreshProfile }) => {
 
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
-      <Heading level={2}>My Profile</Heading>
+      {/* Header */}
+      <Card
+        backgroundColor="white"
+        padding="1.5rem"
+        style={{
+          borderRadius: '8px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}
+      >
+        <Heading 
+          level={2} 
+          color="#2d3748"
+          fontWeight="600"
+          margin="0"
+        >
+          My Profile
+        </Heading>
+      </Card>
       
       <Flex direction="row" gap="2rem">
-        <Card flex="2">
+        <Card 
+          flex="2"
+          backgroundColor="white"
+          padding="1.5rem"
+          style={{
+            borderRadius: '8px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}
+        >
         <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="1rem">
             <TextField
@@ -301,10 +326,19 @@ const ProfilePage = ({ user, refreshProfile }) => {
         </Card>
         
         {/* Calendar Sidebar */}
-        <Card flex="1" height="fit-content">
+        <Card 
+          flex="1" 
+          height="fit-content"
+          backgroundColor="white"
+          padding="1.5rem"
+          style={{
+            borderRadius: '8px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}
+        >
           <Flex direction="column" gap="1rem">
             <Flex justifyContent="space-between" alignItems="center">
-              <Heading level={4}>My Calendar</Heading>
+              <Heading level={4} color="#2d3748">My Calendar</Heading>
               <Button
                 size="small"
                 backgroundColor="white"
@@ -446,17 +480,17 @@ const ProfilePage = ({ user, refreshProfile }) => {
             
             {/* Upcoming Events */}
             <Card variation="outlined" padding="1rem">
-              <Text fontWeight="bold" marginBottom="0.5rem">Upcoming Events</Text>
+              <Text fontWeight="bold" marginBottom="0.5rem" color="#2d3748">Upcoming Events</Text>
               {calendarEvents.length === 0 && scheduledEvents.length === 0 ? (
-                <Text fontSize="0.9rem" color="gray">No events scheduled</Text>
+                <Text fontSize="0.9rem" color="#4a5568">No events scheduled</Text>
               ) : (
                 <Flex direction="column" gap="0.5rem">
                   {calendarEvents.slice(0, 2).map((event, index) => (
                     <Card key={`project-${index}`} variation="outlined" padding="0.5rem">
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" flex="1">
-                          <Text fontSize="0.9rem" fontWeight="bold">{event.title}</Text>
-                          <Text fontSize="0.8rem" color="gray">{event.date}</Text>
+                          <Text fontSize="0.9rem" fontWeight="bold" color="#2d3748">{event.title}</Text>
+                          <Text fontSize="0.8rem" color="#4a5568">{event.date}</Text>
                           <Text fontSize="0.7rem" color="green">Research Project</Text>
                         </Flex>
                         <Button
@@ -503,14 +537,14 @@ const ProfilePage = ({ user, refreshProfile }) => {
                     <Card key={`scheduled-${index}`} variation="outlined" padding="0.5rem">
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" flex="1">
-                          <Text fontSize="0.9rem" fontWeight="bold">{event.title}</Text>
-                          <Text fontSize="0.8rem" color="gray">
+                          <Text fontSize="0.9rem" fontWeight="bold" color="#2d3748">{event.title}</Text>
+                          <Text fontSize="0.8rem" color="#4a5568">
                           {event.startDate === event.endDate ? 
                             (event.startDate ? new Date(event.startDate + 'T00:00:00').toLocaleDateString() : 'No date') : 
                             `${event.startDate ? new Date(event.startDate + 'T00:00:00').toLocaleDateString() : 'No date'} - ${event.endDate ? new Date(event.endDate + 'T00:00:00').toLocaleDateString() : 'No date'}`
                           }
                         </Text>
-                          {event.description && <Text fontSize="0.8rem">{event.description}</Text>}
+                          {event.description && <Text fontSize="0.8rem" color="#4a5568">{event.description}</Text>}
                           <Text fontSize="0.7rem" color="blue">Scheduled Event</Text>
                         </Flex>
                         <Flex direction="column" gap="0.25rem">

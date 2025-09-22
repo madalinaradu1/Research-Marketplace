@@ -229,10 +229,34 @@ const SearchPage = ({ user }) => {
         `}
       </style>
       <Flex direction="column" padding="2rem" gap="2rem">
-        <Heading level={2}>Search Research Opportunities</Heading>
+        {/* Header */}
+        <Card
+          backgroundColor="white"
+          padding="1.5rem"
+          style={{
+            borderRadius: '8px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}
+        >
+          <Heading 
+            level={2} 
+            color="#2d3748"
+            fontWeight="600"
+            margin="0"
+          >
+            Search Research Opportunities
+          </Heading>
+        </Card>
         
         {/* Search and Filters */}
-        <Card>
+        <Card
+          backgroundColor="#f8fafc"
+          padding="1.5rem"
+          style={{
+            borderRadius: '8px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}
+        >
           <Flex direction="column" gap="1.5rem">
             {/* Search Bar */}
             <SearchField
@@ -312,12 +336,12 @@ const SearchPage = ({ user }) => {
       
       {/* Results Summary */}
       <Flex justifyContent="space-between" alignItems="center">
-        <Text>
+        <Text color="#2d3748" fontWeight="500">
           {filteredProjects.length} project{filteredProjects.length !== 1 ? 's' : ''} found
           {searchTerm && ` for "${searchTerm}"`}
         </Text>
         {totalPages > 1 && (
-          <Text fontSize="0.9rem" color="gray">
+          <Text fontSize="0.9rem" color="#4a5568">
             Page {currentPage} of {totalPages}
           </Text>
         )}
@@ -325,8 +349,18 @@ const SearchPage = ({ user }) => {
       
       {/* Results */}
       {filteredProjects.length === 0 ? (
-        <Card>
-          <Text>No projects match your search criteria. Try adjusting your filters.</Text>
+        <Card
+          backgroundColor="#f8fafc"
+          padding="2rem"
+          textAlign="center"
+          style={{
+            borderRadius: '8px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}
+        >
+          <Text color="#4a5568" fontSize="1.1rem">
+            No projects match your search criteria. Try adjusting your filters.
+          </Text>
         </Card>
       ) : (
         <>
@@ -338,12 +372,20 @@ const SearchPage = ({ user }) => {
           direction="column"
         >
           {(project) => (
-            <Card key={project.id}>
+            <Card 
+              key={project.id}
+              backgroundColor="white"
+              padding="1.5rem"
+              style={{
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
+            >
               <Flex direction="column" gap="1rem">
                 <Flex justifyContent="space-between" alignItems="flex-start">
                   <Flex direction="column" gap="0.5rem" flex="1">
-                    <Heading level={4}>{project.title}</Heading>
-                    <Text fontSize="0.9rem" color="gray">
+                    <Heading level={4} color="#2d3748">{project.title}</Heading>
+                    <Text fontSize="0.9rem" color="#4a5568">
                       {project.faculty?.name} • {project.department}
                     </Text>
                   </Flex>
@@ -359,7 +401,7 @@ const SearchPage = ({ user }) => {
                        project.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                     {project.applicationDeadline && (
-                      <Text fontSize="0.8rem" color="gray">
+                      <Text fontSize="0.8rem" color="#4a5568">
                         Deadline: {new Date(project.applicationDeadline).toLocaleDateString()}
                       </Text>
                     )}
@@ -370,7 +412,7 @@ const SearchPage = ({ user }) => {
                 
                 {project.skillsRequired && project.skillsRequired.length > 0 && (
                   <Flex direction="column" gap="0.5rem">
-                    <Text fontWeight="bold" fontSize="0.9rem">Skills Required:</Text>
+                    <Text fontWeight="bold" fontSize="0.9rem" color="#2d3748">Skills Required:</Text>
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.skillsRequired.map((skill, index) => (
                         <Badge key={index} backgroundColor="lightgray" color="white">
@@ -383,7 +425,7 @@ const SearchPage = ({ user }) => {
                 
                 {project.tags && project.tags.length > 0 && (
                   <Flex direction="column" gap="0.5rem">
-                    <Text fontWeight="bold" fontSize="0.9rem">Research Tags:</Text>
+                    <Text fontWeight="bold" fontSize="0.9rem" color="#2d3748">Research Tags:</Text>
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.tags.map((tag, index) => (
                         <Badge key={index} backgroundColor="lightgray" color="white">
@@ -397,7 +439,7 @@ const SearchPage = ({ user }) => {
                 <Divider />
                 
                 <Flex justifyContent="space-between" alignItems="center">
-                  <Text fontSize="0.8rem">Duration: {project.duration}</Text>
+                  <Text fontSize="0.8rem" color="#4a5568">Duration: {project.duration}</Text>
                   
                   {user?.role === 'Student' && (
                     <Button 
@@ -424,7 +466,7 @@ const SearchPage = ({ user }) => {
         {/* Results Counter */}
         {filteredProjects.length > 0 && (
           <Flex justifyContent="flex-end" marginTop="1rem">
-            <Text fontSize="0.9rem" color="gray">
+            <Text fontSize="0.9rem" color="#4a5568">
               Showing {startIndex + 1}-{Math.min(endIndex, filteredProjects.length)} of {filteredProjects.length}
             </Text>
           </Flex>
