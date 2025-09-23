@@ -612,6 +612,179 @@ header {
   background-color: black !important;
 }
 
+/* Make header text white */
+header * {
+  color: white !important;
+}
+
+header h1,
+header h2,
+header h3,
+header p,
+header span,
+header div {
+  color: white !important;
+}
+
+/* Force white text for Amplify UI components in header */
+[data-amplify-theme] header .amplify-text,
+[data-amplify-theme] header .amplify-heading,
+[data-amplify-theme] header [class*="amplify"] {
+  color: white !important;
+}
+
+/* Override any inline styles in header */
+header [style*="color"]:not(.header-search-field input) {
+  color: white !important;
+}
+
+/* Keep search field text black and visible */
+header .header-search-field input {
+  color: black !important;
+}
+
+header .amplify-searchfield input {
+  color: black !important;
+}
+
+/* Search field placeholder styling */
+header .header-search-field input::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+header .amplify-searchfield input::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+/* Search field clear button styling - minimal X button */
+header .header-search-field button[type="button"],
+header .amplify-searchfield button[type="button"] {
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: black !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: auto !important;
+  height: 100% !important;
+  min-width: auto !important;
+  min-height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  top: 0 !important;
+}
+
+header .header-search-field button[type="button"]:hover,
+header .amplify-searchfield button[type="button"]:hover {
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: black !important;
+}
+
+header .header-search-field button[type="button"]:focus,
+header .amplify-searchfield button[type="button"]:focus {
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Force X button SVG to be black */
+header .header-search-field svg,
+header .amplify-searchfield svg,
+header .header-search-field button svg,
+header .amplify-searchfield button svg {
+  fill: black !important;
+  color: black !important;
+  stroke: none !important;
+  stroke-width: 0 !important;
+  outline: none !important;
+  border: none !important;
+}
+
+/* Force all elements inside clear button to be black */
+header .header-search-field button[type="button"] *,
+header .amplify-searchfield button[type="button"] * {
+  color: black !important;
+  fill: black !important;
+  stroke: none !important;
+  stroke-width: 0 !important;
+  outline: none !important;
+  border: none !important;
+}
+
+/* Target SVG paths specifically */
+header .header-search-field svg path,
+header .amplify-searchfield svg path,
+header .header-search-field button svg path,
+header .amplify-searchfield button svg path {
+  fill: black !important;
+  stroke: none !important;
+  stroke-width: 0 !important;
+  outline: none !important;
+}
+
+/* Search submit button styling - make it white */
+header .header-search-field button[type="submit"],
+header .amplify-searchfield button[type="submit"] {
+  color: white !important;
+  fill: white !important;
+}
+
+header .header-search-field button[type="submit"] svg,
+header .amplify-searchfield button[type="submit"] svg,
+header .header-search-field button[type="submit"] svg path,
+header .amplify-searchfield button[type="submit"] svg path {
+  fill: white !important;
+  color: white !important;
+  stroke: white !important;
+}
+
+/* Exception: Profile dropdown buttons should have black text */
+header .amplify-flex[style*="position: absolute"] button,
+header .amplify-flex[style*="position: absolute"] .amplify-text {
+  color: black !important;
+}
+
+/* Profile dropdown styling to match meatball dropdowns */
+header .amplify-flex[style*="position: absolute"] {
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 0.5rem 0 !important;
+}
+
+header .amplify-flex[style*="position: absolute"] button {
+  width: 100% !important;
+  padding: 0.75rem 1rem !important;
+  text-align: left !important;
+  background-color: white !important;
+  color: #2d3748 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-size: 0.9rem !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+}
+
+header .amplify-flex[style*="position: absolute"] button:hover {
+  background-color: #f7fafc !important;
+  color: #2d3748 !important;
+}
+
 /* Ensure meatball dropdown has consistent styling */
 .meatball-dropdown {
   position: absolute !important;
@@ -676,5 +849,79 @@ header {
 [data-amplify-theme] [data-amplify-authenticator] button[data-variation="link"]:hover {
   background-color: white !important;
   background: white !important;
+}
+
+/* Complete Profile Page Styling */
+[data-amplify-theme] .amplify-card {
+  background-color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+  padding: 2rem !important;
+}
+
+[data-amplify-theme] .amplify-card:hover {
+  background-color: white !important;
+  opacity: 1 !important;
+}
+
+/* Complete Profile form styling */
+[data-amplify-theme] .amplify-textfield,
+[data-amplify-theme] .amplify-selectfield,
+[data-amplify-theme] .amplify-textareafield {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-amplify-theme] .amplify-textfield input,
+[data-amplify-theme] .amplify-selectfield select,
+[data-amplify-theme] .amplify-textareafield textarea {
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 4px !important;
+  color: #2d3748 !important;
+}
+
+[data-amplify-theme] .amplify-textfield input:focus,
+[data-amplify-theme] .amplify-selectfield select:focus,
+[data-amplify-theme] .amplify-textareafield textarea:focus {
+  border-color: #4a5568 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Complete Profile button styling */
+[data-amplify-theme] .amplify-button--primary {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid black !important;
+  border-radius: 4px !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 500 !important;
+}
+
+[data-amplify-theme] .amplify-button--primary:hover {
+  background-color: #f7fafc !important;
+  color: black !important;
+  border: 1px solid black !important;
+}
+
+/* Complete Profile heading styling */
+[data-amplify-theme] .amplify-heading {
+  color: #2d3748 !important;
+  font-weight: 600 !important;
+}
+
+/* Complete Profile text styling */
+[data-amplify-theme] .amplify-text {
+  color: #4a5568 !important;
+}
+
+/* Complete Profile label styling */
+[data-amplify-theme] .amplify-label {
+  color: #4a5568 !important;
+  font-weight: 500 !important;
+  margin-bottom: 0.5rem !important;
 }
 
