@@ -1,0 +1,680 @@
+/* Global styles for consistent UI across the application */
+
+:root {
+  --color-primary: #2d3748;
+  --color-secondary: #4a5568;
+  --color-tertiary: #718096;
+  --color-background: #f5f5f5;
+  --color-card-background: white;
+  --color-border: #e2e8f0;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+}
+
+/* Consistent card styling */
+.app-card {
+  background-color: var(--color-card-background);
+  padding: var(--spacing-lg);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Consistent button styling */
+.app-button-primary {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+}
+
+.app-button-secondary {
+  background-color: #f7fafc;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+}
+
+/* Modal overlay styling */
+.app-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.app-modal-content {
+  max-width: 900px;
+  width: 100%;
+  max-height: 100vh;
+  background-color: white;
+  overflow: auto;
+}
+
+/* Override Amplify UI tab text colors */
+[data-amplify-theme] [role="tab"] {
+  color: black !important;
+}
+
+[data-amplify-theme] [role="tab"][aria-selected="true"] {
+  color: black !important;
+  border-bottom-color: black !important;
+}
+
+[data-amplify-theme] [role="tab"]:hover {
+  color: black !important;
+}
+
+[data-amplify-theme] [role="tab"]:focus {
+  color: black !important;
+}
+
+/* Override tab bottom border colors */
+[data-amplify-theme] [role="tablist"] [role="tab"][aria-selected="true"]::after {
+  background-color: black !important;
+}
+
+[data-amplify-theme] [role="tablist"] [role="tab"][aria-selected="true"] {
+  border-bottom: 2px solid black !important;
+}
+
+/* Remove purple highlights and focus states */
+[data-amplify-theme] *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-amplify-theme] button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: inherit !important;
+}
+
+[data-amplify-theme] input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-amplify-theme] textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-amplify-theme] select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Remove purple hover states */
+[data-amplify-theme] button:hover {
+  box-shadow: none !important;
+}
+
+[data-amplify-theme] [role="tab"]:hover {
+  background-color: transparent !important;
+}
+
+/* Meatball dropdown menu styling */
+.meatball-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  min-width: 180px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem 0;
+}
+
+.meatball-dropdown-item {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background-color: white;
+  color: #2d3748;
+  border: none;
+  border-radius: 0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.meatball-dropdown-item:hover {
+  background-color: #f7fafc !important;
+  color: #2d3748 !important;
+}
+
+.meatball-dropdown-item:disabled {
+  color: #a0aec0;
+  cursor: not-allowed;
+  background-color: white;
+}
+
+.meatball-dropdown-item:disabled:hover {
+  background-color: white !important;
+  color: #a0aec0 !important;
+}
+
+.meatball-button {
+  background-color: transparent;
+  color: #4a5568;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.2s ease;
+}
+
+.meatball-button:hover {
+  background-color: #f7fafc !important;
+  color: #2d3748 !important;
+}
+
+/* Archive button styling */
+.archive-button {
+  background-color: transparent !important;
+  color: #718096 !important;
+  border: none !important;
+  outline: none !important;
+  padding: 0.25rem !important;
+  transition: color 0.2s ease;
+}
+
+.archive-button:hover {
+  background-color: transparent !important;
+  color: #4a5568 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.archive-button:focus {
+  background-color: transparent !important;
+  color: #718096 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.archive-button:active {
+  background-color: transparent !important;
+  color: #4a5568 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Remove all borders from Amplify authenticator buttons */
+[data-amplify-theme] [data-amplify-authenticator] button,
+[data-amplify-theme] [data-amplify-authenticator] button[type="submit"],
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button--primary,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs__item {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  text-decoration: none !important;
+}
+
+/* Additional selectors for tab buttons */
+[data-amplify-theme] .amplify-tabs button,
+[data-amplify-theme] .amplify-tabs__item,
+[data-amplify-theme] .amplify-tabs [role="tab"] {
+  border: none !important;
+  border-bottom: none !important;
+  text-decoration: none !important;
+}
+
+/* Override any underline text decoration */
+[data-amplify-theme] [data-amplify-authenticator] * {
+  text-decoration: none !important;
+}
+
+/* Consistent styling for Amplify authenticator */
+[data-amplify-theme] [data-amplify-authenticator] {
+  background: linear-gradient(180deg, rgb(117, 81, 194), rgb(255, 255, 255)) !important;
+  font-family: inherit !important;
+}
+
+/* Authenticator container styling */
+[data-amplify-theme] [data-amplify-authenticator] .amplify-authenticator {
+  background: linear-gradient(180deg, rgb(117, 81, 194), rgb(255, 255, 255)) !important;
+  padding: 2rem !important;
+}
+
+/* Form container styling - single unified box */
+[data-amplify-theme] [data-amplify-authenticator] form,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-card {
+  background-color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+  padding: 2rem !important;
+  max-width: 500px !important;
+  margin: 0 auto !important;
+}
+
+/* Heading styling */
+[data-amplify-theme] [data-amplify-authenticator] h1,
+[data-amplify-theme] [data-amplify-authenticator] h2,
+[data-amplify-theme] [data-amplify-authenticator] h3 {
+  color: #2d3748 !important;
+  font-weight: 600 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Input field styling */
+[data-amplify-theme] [data-amplify-authenticator] input,
+[data-amplify-theme] [data-amplify-authenticator] select {
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 4px !important;
+  padding: 0.75rem !important;
+  color: #2d3748 !important;
+  font-size: 1rem !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] input:focus,
+[data-amplify-theme] [data-amplify-authenticator] select:focus {
+  border-color: #4a5568 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Label styling */
+[data-amplify-theme] [data-amplify-authenticator] label {
+  color: #4a5568 !important;
+  font-weight: 500 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Primary button styling */
+[data-amplify-theme] [data-amplify-authenticator] button[type="submit"],
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button--primary {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid black !important;
+  border-radius: 4px !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] button[type="submit"]:hover,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button--primary:hover {
+  background-color: #f7fafc !important;
+  color: black !important;
+}
+
+/* Replace light purple highlights with authenticator button hover color for all buttons */
+[data-amplify-theme] button:hover {
+  background-color: #f7fafc !important;
+}
+
+[data-amplify-theme] .amplify-button:hover {
+  background-color: #f7fafc !important;
+}
+
+/* Override any purple hover states throughout the app */
+[data-amplify-theme] *:hover {
+  background-color: inherit;
+}
+
+[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button) {
+  background-color: #f7fafc !important;
+  color: black !important;
+}
+
+/* Pagination button hover */
+[data-amplify-theme] button[style*="#552b9a"]:hover {
+  background-color: #f7fafc !important;
+  color: black !important;
+  border-color: #552b9a !important;
+}
+
+/* Secondary button styling */
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button--link,
+[data-amplify-theme] [data-amplify-authenticator] button[data-variation="link"] {
+  background-color: transparent !important;
+  color: #4a5568 !important;
+  border: none !important;
+  text-decoration: underline !important;
+  padding: 0.5rem !important;
+}
+
+/* Tab styling */
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs {
+  background-color: white !important;
+  border: none !important;
+  border-bottom: none !important;
+  border-top: none !important;
+  margin-bottom: 1.5rem !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs button {
+  background-color: transparent !important;
+  color: #4a5568 !important;
+  border: none !important;
+  padding: 1rem 1.5rem !important;
+  font-weight: 500 !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs button[aria-selected="true"] {
+  color: black !important;
+  border-bottom: 2px solid black !important;
+  background-color: transparent !important;
+}
+
+/* Error message styling - plain text without border */
+[data-amplify-theme] [data-amplify-authenticator] .amplify-alert--error {
+  background-color: transparent !important;
+  border: none !important;
+  color: #c53030 !important;
+  border-radius: 0 !important;
+  padding: 0.5rem 0 !important;
+  margin-bottom: 1rem !important;
+  box-shadow: none !important;
+}
+
+/* Hide close button (X) from error messages */
+[data-amplify-theme] [data-amplify-authenticator] .amplify-alert--error button,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-alert--error .amplify-button,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-alert__dismiss {
+  display: none !important;
+}
+
+/* Admin dashboard card hover fixes */
+[data-amplify-theme] .amplify-card,
+[data-amplify-theme] .amplify-card:hover {
+  background-color: white !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Admin dashboard button hover - light gray without blue highlights */
+[data-amplify-theme] .amplify-card button:hover {
+  background-color: #f7fafc !important;
+  color: black !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: inherit !important;
+}
+
+[data-amplify-theme] .amplify-card button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: inherit !important;
+}
+
+[data-amplify-theme] .amplify-card button:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: inherit !important;
+}
+
+/* Make all admin dashboard buttons use consistent white/black styling */
+[data-amplify-theme] .amplify-card button {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid black !important;
+}
+
+/* Override any blue button styling in admin dashboard */
+[data-amplify-theme] button {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid black !important;
+}
+
+[data-amplify-theme] button:hover {
+  background-color: #f7fafc !important;
+  color: black !important;
+  border: 1px solid black !important;
+}
+
+/* Style meatball dropdown buttons in Student Research Community */
+.meatball-dropdown-item {
+  background-color: white !important;
+  color: black !important;
+  border: none !important;
+  padding: 0.75rem 1rem !important;
+  text-align: left !important;
+  width: 100% !important;
+  cursor: pointer !important;
+}
+
+.meatball-dropdown-item:hover {
+  background-color: #f7fafc !important;
+  color: black !important;
+  border: none !important;
+}
+
+/* Ensure meatball dropdown styling applies to admin community section */
+.meatball-dropdown .meatball-dropdown-item {
+  background-color: white !important;
+  color: black !important;
+  border: none !important;
+  padding: 0.75rem 1rem !important;
+  text-align: left !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+}
+
+.meatball-dropdown .meatball-dropdown-item:hover {
+  background-color: #f7fafc !important;
+  color: black !important;
+  border: none !important;
+}
+
+/* Override any blue styling in community meatball buttons */
+[data-amplify-theme] .meatball-dropdown button {
+  background-color: white !important;
+  color: black !important;
+  border: none !important;
+}
+
+[data-amplify-theme] .meatball-dropdown button:hover {
+  background-color: #f7fafc !important;
+  color: black !important;
+  border: none !important;
+}
+
+/* Copy exact Faculty Dashboard meatball button styling for community section */
+.meatball-button {
+  background-color: transparent !important;
+  color: #4a5568 !important;
+  border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  padding: 0.5rem !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-size: 1.2rem !important;
+  transition: background-color 0.2s ease !important;
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+.meatball-button:hover {
+  background-color: #f7fafc !important;
+  color: #2d3748 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.meatball-button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.meatball-button:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Override Amplify UI button styling for meatball buttons */
+[data-amplify-theme] .meatball-button,
+[data-amplify-theme] button.meatball-button,
+[data-amplify-theme] .amplify-button.meatball-button {
+  border: none !important;
+  border-width: 0 !important;
+  outline: none !important;
+  outline-width: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+[data-amplify-theme] .meatball-button:hover,
+[data-amplify-theme] button.meatball-button:hover,
+[data-amplify-theme] .amplify-button.meatball-button:hover {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: #f7fafc !important;
+}
+
+[data-amplify-theme] .meatball-button:focus,
+[data-amplify-theme] button.meatball-button:focus,
+[data-amplify-theme] .amplify-button.meatball-button:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Tab styling for all dashboards - black text always, gray underline for inactive, black underline for active */
+[data-amplify-theme] [role="tab"] {
+  border-bottom: 2px solid #d1d5db !important;
+  color: black !important;
+  background-color: transparent !important;
+  padding: 1rem 1.5rem !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-amplify-theme] [role="tab"]:hover {
+  border-bottom: 2px solid #9ca3af !important;
+  color: black !important;
+  background-color: transparent !important;
+}
+
+[data-amplify-theme] [role="tab"][aria-selected="true"] {
+  border-bottom: 2px solid black !important;
+  color: black !important;
+  background-color: transparent !important;
+}
+
+/* Override any existing tab styling */
+[data-amplify-theme] .amplify-tabs [role="tab"] {
+  border-bottom: 2px solid #d1d5db !important;
+  color: black !important;
+}
+
+[data-amplify-theme] .amplify-tabs [role="tab"]:hover {
+  border-bottom: 2px solid #9ca3af !important;
+  color: black !important;
+}
+
+[data-amplify-theme] .amplify-tabs [role="tab"][aria-selected="true"] {
+  border-bottom: 2px solid black !important;
+  color: black !important;
+}
+
+/* Add gray underline to the right of the last tab for continuous appearance */
+[data-amplify-theme] .amplify-tabs {
+  border-bottom: 2px solid #d1d5db !important;
+}
+
+[data-amplify-theme] .amplify-tabs [role="tablist"] {
+  border-bottom: 2px solid #d1d5db !important;
+}
+
+/* Make header background black */
+header {
+  background-color: black !important;
+}
+
+/* Override inline styles for header */
+[style*="background-color: #552b9a"] {
+  background-color: black !important;
+}
+
+/* Ensure meatball dropdown has consistent styling */
+.meatball-dropdown {
+  position: absolute !important;
+  top: 100% !important;
+  right: 0 !important;
+  z-index: 100 !important;
+  min-width: 180px !important;
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 0.5rem 0 !important;
+}
+
+/* Success message styling */
+[data-amplify-theme] [data-amplify-authenticator] .amplify-alert--info {
+  background-color: #e6f3ff !important;
+  border: 1px solid #4299e1 !important;
+  color: #2b6cb0 !important;
+  border-radius: 4px !important;
+  padding: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Show email field explicitly to ensure it's visible */
+[data-amplify-theme] [data-amplify-authenticator] input[name="email"],
+[data-amplify-theme] [data-amplify-authenticator] input[type="email"],
+[data-amplify-theme] [data-amplify-authenticator] label[for*="email"] {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Force form background to stay white on hover - comprehensive approach */
+[data-amplify-theme] [data-amplify-authenticator] form,
+[data-amplify-theme] [data-amplify-authenticator] form:hover,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-card,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-card:hover,
+[data-amplify-theme] [data-amplify-authenticator] form *,
+[data-amplify-theme] [data-amplify-authenticator] form *:hover,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-card *,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-card *:hover,
+[data-amplify-theme] [data-amplify-authenticator] div,
+[data-amplify-theme] [data-amplify-authenticator] div:hover {
+  background-color: white !important;
+  background: white !important;
+}
+
+/* Override any global hover effects */
+[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button) {
+  background-color: #f7fafc !important;
+  color: black !important;
+}
+
+/* Specific override for authenticator elements */
+[data-amplify-theme] [data-amplify-authenticator] *:hover {
+  background-color: white !important;
+  background: white !important;
+}
+
+/* Keep link buttons white background on hover */
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button--link:hover,
+[data-amplify-theme] [data-amplify-authenticator] button[data-variation="link"]:hover {
+  background-color: white !important;
+  background: white !important;
+}
+

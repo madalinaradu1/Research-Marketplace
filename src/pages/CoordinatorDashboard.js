@@ -415,48 +415,30 @@ const CoordinatorDashboard = ({ user }) => {
                         </Flex>
                         <View position="relative">
                           <Button 
-                            size="medium"
-                            backgroundColor="transparent"
-                            color="black"
-                            border="none"
+                            className="meatball-button"
                             onClick={(e) => {
                               e.stopPropagation();
                               setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
                             }}
-                            style={{ padding: '0.75rem' }}
                           >
                             ⋯
                           </Button>
                           {openKebabMenu === project.id && (
-                            <Card
-                              position="absolute"
-                              top="100%"
-                              right="0"
-                              style={{ zIndex: 100, minWidth: '200px' }}
-                              backgroundColor="white"
-                              border="1px solid black"
+                            <div
+                              className="meatball-dropdown"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <Flex direction="column" gap="0">
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                <button
+                                  className="meatball-dropdown-item"
                                   onClick={() => {
                                     setViewingProject(project);
                                     setOpenKebabMenu(null);
                                   }}
                                 >
                                   View
-                                </Button>
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                </button>
+                                <button
+                                  className="meatball-dropdown-item"
                                   onClick={() => {
                                     setEditingProject(project);
                                     setProjectForm({
@@ -475,13 +457,9 @@ const CoordinatorDashboard = ({ user }) => {
                                   }}
                                 >
                                   Edit
-                                </Button>
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                </button>
+                                <button
+                                  className="meatball-dropdown-item"
                                   onClick={() => {
                                     setProjectToApprove(project);
                                     setShowProjectApproveConfirm(true);
@@ -489,26 +467,18 @@ const CoordinatorDashboard = ({ user }) => {
                                   }}
                                 >
                                   Approve
-                                </Button>
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                </button>
+                                <button
+                                  className="meatball-dropdown-item"
                                   onClick={() => {
                                     setSelectedProject(project);
                                     setOpenKebabMenu(null);
                                   }}
                                 >
                                   Return
-                                </Button>
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                </button>
+                                <button
+                                  className="meatball-dropdown-item"
                                   onClick={() => {
                                     setProjectToReject(project);
                                     setShowProjectRejectConfirm(true);
@@ -516,9 +486,8 @@ const CoordinatorDashboard = ({ user }) => {
                                   }}
                                 >
                                   Reject
-                                </Button>
-                              </Flex>
-                            </Card>
+                                </button>
+                            </div>
                           )}
                         </View>
                       </Flex>
@@ -543,48 +512,30 @@ const CoordinatorDashboard = ({ user }) => {
                         </Flex>
                         <View position="relative">
                           <Button 
-                            size="medium"
-                            backgroundColor="transparent"
-                            color="black"
-                            border="none"
+                            className="meatball-button"
                             onClick={(e) => {
                               e.stopPropagation();
                               setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
                             }}
-                            style={{ padding: '0.75rem' }}
                           >
                             ⋯
                           </Button>
                           {openKebabMenu === application.id && (
-                            <Card
-                              position="absolute"
-                              top="100%"
-                              right="0"
-                              style={{ zIndex: 100, minWidth: '200px' }}
-                              backgroundColor="white"
-                              border="1px solid black"
+                            <div
+                              className="meatball-dropdown"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <Flex direction="column" gap="0">
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                <button
+                                  className="meatball-dropdown-item"
                                   onClick={() => {
                                     setViewingApplication(application);
                                     setOpenKebabMenu(null);
                                   }}
                                 >
                                   View
-                                </Button>
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                </button>
+                                <button
+                                  className="meatball-dropdown-item"
                                   onClick={() => {
                                     setApplicationToApprove(application);
                                     setShowApproveConfirm(true);
@@ -592,26 +543,18 @@ const CoordinatorDashboard = ({ user }) => {
                                   }}
                                 >
                                   Approve
-                                </Button>
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                </button>
+                                <button
+                                  className="meatball-dropdown-item"
                                   onClick={() => {
                                     setSelectedApplication(application);
                                     setOpenKebabMenu(null);
                                   }}
                                 >
                                   Return
-                                </Button>
-                                <Button
-                                  size="small"
-                                  backgroundColor="white"
-                                  color="black"
-                                  border="none"
-                                  style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                </button>
+                                <button
+                                  className="meatball-dropdown-item"
                                   onClick={() => {
                                     setApplicationToReject(application);
                                     setShowRejectConfirm(true);
@@ -619,9 +562,8 @@ const CoordinatorDashboard = ({ user }) => {
                                   }}
                                 >
                                   Reject
-                                </Button>
-                              </Flex>
-                            </Card>
+                                </button>
+                            </div>
                           )}
                         </View>
                       </Flex>

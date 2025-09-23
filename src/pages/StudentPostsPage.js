@@ -86,7 +86,31 @@ const StudentPostsPage = ({ user }) => {
         limit: 100
       }));
       
-      setPosts(result.data.listStudentPosts.items || []);
+      const posts = result.data.listStudentPosts.items || [];
+      
+      // Fetch student data for each post if not already included
+      const postsWithStudents = await Promise.all(
+        posts.map(async (post) => {
+          if (!post.student && post.studentID) {
+            try {
+              const { getUser } = await import('../graphql/operations');
+              const studentResult = await API.graphql(graphqlOperation(getUser, {
+                id: post.studentID
+              }));
+              return {
+                ...post,
+                student: studentResult.data.getUser
+              };
+            } catch (error) {
+              console.error('Error fetching student for post:', post.id, error);
+              return post;
+            }
+          }
+          return post;
+        })
+      );
+      
+      setPosts(postsWithStudents);
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
@@ -233,15 +257,17 @@ const StudentPostsPage = ({ user }) => {
       <Tabs currentIndex={activeTabIndex} onChange={setActiveTabIndex}>
         <TabItem title="All Posts">
           <Card backgroundColor="white" padding="1.5rem">
-            {posts.length === 0 ? (
-              <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
-                <Text fontSize="3rem">💬</Text>
-                <Text fontSize="1.1rem" color="#4a5568">No posts yet</Text>
-                <Text fontSize="0.9rem" color="#718096">Be the first to share your research interests!</Text>
-              </Flex>
-            ) : (
-              <Flex direction="column" gap="0.75rem">
-                {posts.filter(post => post.isActive).map((post) => (
+            {(() => {
+              const validPosts = posts.filter(post => post.isActive && post.student);
+              return validPosts.length === 0 ? (
+                <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
+                  <Text fontSize="3rem">💬</Text>
+                  <Text fontSize="1.1rem" color="#4a5568">No posts yet</Text>
+                  <Text fontSize="0.9rem" color="#718096">Be the first to share your research interests!</Text>
+                </Flex>
+              ) : (
+                <Flex direction="column" gap="0.75rem">
+                  {validPosts.map((post) => (
                   <Card key={post.id} backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
                     <Flex direction="column" gap="1rem">
                       <Flex justifyContent="space-between" alignItems="flex-start">
@@ -351,15 +377,16 @@ const StudentPostsPage = ({ user }) => {
                       )}
                     </Flex>
                   </Card>
-                ))}
-              </Flex>
-            )}
+                  ))}
+                </Flex>
+              );
+            })()}
           </Card>
         </TabItem>
 
         <TabItem title="My Posts">
           <Card backgroundColor="white" padding="1.5rem">
-            {getMyPosts().length === 0 ? (
+            {getMyPosts().filter(post => post.student).length === 0 ? (
               <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
                 <Text fontSize="1.1rem" color="#4a5568">You haven't created any posts yet</Text>
                 <Button
@@ -373,7 +400,7 @@ const StudentPostsPage = ({ user }) => {
               </Flex>
             ) : (
               <Flex direction="column" gap="0.75rem">
-                {getMyPosts().map((post) => (
+                {getMyPosts().filter(post => post.student).map((post) => (
                   <Card key={post.id} backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
                     <Flex direction="column" gap="1rem">
                       <Flex justifyContent="space-between" alignItems="center">

@@ -5,6 +5,7 @@ import '@aws-amplify/ui-react/styles.css';
 import { theme } from './theme';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import './styles/globalStyles.css';
 
 // Import components
 import Header from './components/Header';

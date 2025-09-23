@@ -274,6 +274,13 @@ const MessagesPage = ({ user }) => {
       await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
       console.log('Message sent successfully');
       
+      // If replying to an archived message, move it back to inbox
+      if (archivedMessages.includes(selectedMessage.id)) {
+        const newArchived = archivedMessages.filter(id => id !== selectedMessage.id);
+        setArchivedMessages(newArchived);
+        localStorage.setItem(`archived_messages_${userId}`, JSON.stringify(newArchived));
+      }
+      
       // Create notification
       const recipient = users.find(u => u.id === recipientId);
       const notificationInput = {
@@ -470,7 +477,12 @@ const MessagesPage = ({ user }) => {
                               e.stopPropagation();
                               confirmDelete(message);
                             }}
-                            style={{ padding: '0.25rem' }}
+                            style={{ 
+                              padding: '0.25rem',
+                              border: 'none',
+                              outline: 'none'
+                            }}
+                            className="archive-button"
                           >
                             🗑️
                           </Button>
@@ -491,43 +503,50 @@ const MessagesPage = ({ user }) => {
         </TabItem>
         
         <TabItem title="Archive">
-          {getArchivedMessages().length === 0 ? (
-            <Card>
-              <Text>No archived messages.</Text>
-            </Card>
-          ) : (
-            <Collection
-              items={getArchivedMessages()}
-              type="list"
-              gap="1rem"
-              wrap="nowrap"
-              direction="column"
-            >
-              {(message) => (
-                <Card 
-                  key={message.id}
-                  backgroundColor="white"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => setSelectedMessage(message)}
-                >
-                  <Flex direction="column" gap="0.5rem">
-                    <Flex justifyContent="space-between" alignItems="center">
-                      <Text>
-                        {message.senderID === (user.id || user.username) ? `To: ${message.receiver?.name || 'Deleted User'}` : `From: ${message.sender?.name || 'Deleted User'}`}
+          <Card backgroundColor="white" padding="1.5rem">
+            {getArchivedMessages().length === 0 ? (
+              <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
+                <Text fontSize="3rem">📁</Text>
+                <Text fontSize="1.1rem" color="#4a5568">No archived messages</Text>
+                <Text fontSize="0.9rem" color="#718096">Archived messages will appear here</Text>
+              </Flex>
+            ) : (
+              <Flex direction="column" gap="0.75rem">
+                {getArchivedMessages().map((message) => (
+                  <Card 
+                    key={message.id}
+                    backgroundColor="#f8fafc"
+                    padding="1rem"
+                    border="1px solid #e2e8f0"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setSelectedMessage(message)}
+                  >
+                    <Flex direction="column" gap="0.5rem">
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Flex alignItems="center" gap="0.75rem">
+                          <Text fontWeight="500" color="#2d3748">
+                            {message.senderID === (user.id || user.username) ? (message.receiver?.name || 'Deleted User') : (message.sender?.name || 'Deleted User')}
+                          </Text>
+                          <Badge backgroundColor="#718096" color="white" fontSize="0.7rem">
+                            Archived
+                          </Badge>
+                        </Flex>
+                        <Text fontSize="0.8rem" color="#718096">
+                          {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
+                        </Text>
+                      </Flex>
+                      <Text fontSize="0.9rem" color="#4a5568" fontWeight="400">
+                        {message.subject}
                       </Text>
-                      <Text fontSize="0.8rem">
-                        {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
+                      <Text fontSize="0.85rem" color="#718096">
+                        {(message.body || message.content || '').replace(/<[^>]*>/g, '').substring(0, 120)}...
                       </Text>
                     </Flex>
-                    <Text>{message.subject}</Text>
-                    <Text fontSize="0.9rem" color="gray">
-                      {(message.body || message.content || '').replace(/<[^>]*>/g, '').substring(0, 100)}...
-                    </Text>
-                  </Flex>
-                </Card>
-              )}
-            </Collection>
-          )}
+                  </Card>
+                ))}
+              </Flex>
+            )}
+          </Card>
         </TabItem>
 
       </Tabs>
@@ -873,19 +892,26 @@ const MessagesPage = ({ user }) => {
             padding="2rem"
           >
             <Card
-              maxWidth="400px"
+              maxWidth="500px"
               width="100%"
+              backgroundColor="white"
               onClick={(e) => e.stopPropagation()}
             >
-              <Flex direction="column" gap="1rem">
-                <Heading level={4}>Archive Message</Heading>
-                <Text>Are you sure you want to archive this message? It will be moved to your Archive folder.</Text>
+              <Flex direction="column" gap="1.5rem" padding="2rem">
+                <Heading level={3} color="#2d3748">Archive Message</Heading>
+                
+                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+                  <Text color="#4a5568" fontSize="1rem">
+                    Are you sure you want to archive this message? It will be moved to your Archive folder.
+                  </Text>
+                </Card>
+                
                 <Flex gap="1rem" justifyContent="flex-end">
                   <Button
                     onClick={() => setShowDeleteConfirm(false)}
                     backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
+                    color="#4a5568"
+                    border="1px solid #e2e8f0"
                   >
                     Cancel
                   </Button>
@@ -895,7 +921,7 @@ const MessagesPage = ({ user }) => {
                     color="black"
                     border="1px solid black"
                   >
-                    Yes
+                    Archive Message
                   </Button>
                 </Flex>
               </Flex>

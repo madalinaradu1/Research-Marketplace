@@ -180,9 +180,8 @@ const SearchPage = ({ user }) => {
     setSearchTerm('');
     setSelectedCollege('');
     setSelectedDuration('');
-
-    setShowAvailableOnly(true);
     setSortBy('newest');
+    // Don't reset showAvailableOnly - let user control this
   };
 
   if (loading) {
@@ -318,18 +317,22 @@ const SearchPage = ({ user }) => {
           
           {/* Checkboxes */}
           <Flex direction="row" gap="2rem">
-            <CheckboxField
-              label="Available to apply"
-              name="availableToApply"
-              value="available"
-              checked={showAvailableOnly}
-              onChange={(e) => setShowAvailableOnly(e.target.checked)}
-              style={{
-                '--amplify-components-checkbox-button-background-color-checked': 'white',
-                '--amplify-components-checkbox-button-border-color-checked': 'black',
-                '--amplify-components-checkbox-button-color-checked': 'black'
+            <div 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowAvailableOnly(!showAvailableOnly);
               }}
-            />
+            >
+              <input
+                type="checkbox"
+                checked={showAvailableOnly}
+                onChange={() => {}}
+                style={{ cursor: 'pointer', pointerEvents: 'none' }}
+              />
+              <span>Available to apply</span>
+            </div>
           </Flex>
         </Flex>
       </Card>
@@ -416,7 +419,7 @@ const SearchPage = ({ user }) => {
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.skillsRequired.map((skill, index) => (
                         <Badge key={index} backgroundColor="lightgray" color="white">
-                          Skills: {skill}
+                          {skill}
                         </Badge>
                       ))}
                     </Flex>
