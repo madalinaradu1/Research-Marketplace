@@ -561,14 +561,17 @@
   border-bottom: 2px solid #d1d5db !important;
   color: black !important;
   background-color: transparent !important;
-  padding: 1rem 1.5rem !important;
+  padding: 1rem 0.5rem !important;
   transition: all 0.2s ease !important;
+  position: relative !important;
+  overflow: visible !important;
 }
 
 [data-amplify-theme] [role="tab"]:hover {
   border-bottom: 2px solid #9ca3af !important;
   color: black !important;
-  background-color: transparent !important;
+  background-color: #f7fafc !important;
+  overflow: visible !important;
 }
 
 [data-amplify-theme] [role="tab"][aria-selected="true"] {
@@ -925,3 +928,53 @@ header .amplify-flex[style*="position: absolute"] button:hover {
   margin-bottom: 0.5rem !important;
 }
 
+
+/* Make tabs flexible width based on content without scrolling */
+[data-amplify-theme] .amplify-tabs {
+  width: 100% !important;
+  overflow-x: visible !important;
+}
+
+[data-amplify-theme] .amplify-tabs [role="tablist"] {
+  display: flex !important;
+  width: 100% !important;
+  flex-wrap: nowrap !important;
+  overflow-x: visible !important;
+}
+
+[data-amplify-theme] .amplify-tabs [role="tab"] {
+  flex: 0 0 auto !important;
+  min-width: fit-content !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  padding: 1rem 1.5rem !important;
+  font-size: 0.9rem !important;
+}
+
+/* Ensure tabs container doesn't overflow */
+[data-amplify-theme] .amplify-tabs__list,
+[data-amplify-theme] .amplify-tabs__item {
+  flex: 0 0 auto !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  min-width: fit-content !important;
+}
+
+/* Force admin dashboard container to use 1320px width */
+[data-amplify-theme] .amplify-view > .amplify-flex[style*="max-width"] {
+  max-width: 1320px !important;
+  width: 100% !important;
+}
+
+/* Ensure tabs have proper width within the container */
+[data-amplify-theme] .amplify-tabs {
+  max-width: 1320px !important;
+  width: 100% !important;
+}
+
+/* Force specific 1320px width for dashboard container */
+[data-amplify-theme] .amplify-view > .amplify-flex {
+  max-width: 1320px !important;
+  width: 100% !important;
+}
