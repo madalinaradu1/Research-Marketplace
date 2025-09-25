@@ -164,6 +164,44 @@
           ]
         }
       }
+    },
+    "CustomLambdaExecutionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "custom-lambda-execution-policy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:ListTables",
+                "dynamodb:CreateBackup",
+                "dynamodb:DescribeTable",
+                "s3:ListBucket",
+                "s3:GetObject",
+                "s3:DeleteObject",
+                "s3:DeleteObjects",
+                "cloudwatch:GetMetricStatistics",
+                "cloudwatch:ListMetrics",
+                "cloudwatch:GetMetricData"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:*:*:table/*",
+                "arn:aws:s3:::*",
+                "arn:aws:s3:::*/*",
+                "arn:aws:cloudwatch:*:*:*"
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ]
+      },
+      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {

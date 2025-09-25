@@ -973,8 +973,30 @@ header .amplify-flex[style*="position: absolute"] button:hover {
   width: 100% !important;
 }
 
-/* Force specific 1320px width for dashboard container */
-[data-amplify-theme] .amplify-view > .amplify-flex {
-  max-width: 1320px !important;
+/* Force specific 1400px width for dashboard container - aggressive overrides */
+[data-amplify-theme] .amplify-view > .amplify-flex,
+[data-amplify-theme] .amplify-view .amplify-flex[style*="max-width"],
+[data-amplify-theme] .amplify-flex[style*="1400px"],
+.amplify-flex[style*="max-width"] {
+  max-width: 1400px !important;
   width: 100% !important;
+}
+
+/* Override any container max-width constraints */
+[data-amplify-theme] .amplify-view {
+  max-width: 1400px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+/* Force dashboard tabs container width */
+[data-amplify-theme] .amplify-view .amplify-tabs,
+[data-amplify-theme] .amplify-view .amplify-tabs [role="tablist"] {
+  max-width: 1400px !important;
+  width: 100% !important;
+}
+
+/* Override main element max-width */
+main {
+  max-width: 1320px !important;
 }

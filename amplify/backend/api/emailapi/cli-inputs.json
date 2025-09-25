@@ -28,6 +28,41 @@
       "permissions": {
         "setting": "open"
       }
+    },
+    "/cloudwatch-metrics": {
+      "name": "/cloudwatch-metrics",
+      "lambdaFunction": "sendEmailNotification",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/backup-database": {
+      "name": "/backup-database",
+      "lambdaFunction": "sendEmailNotification",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/clean-old-files": {
+      "name": "/clean-old-files",
+      "lambdaFunction": "sendEmailNotification",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/update-system-config": {
+      "name": "/update-system-config",
+      "lambdaFunction": "sendEmailNotification",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/get-system-config": {
+      "name": "/get-system-config",
+      "lambdaFunction": "sendEmailNotification",
+      "permissions": {
+        "setting": "open"
+      }
     }
   }
 }

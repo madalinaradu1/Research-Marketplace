@@ -8,6 +8,7 @@ import './App.css';
 import './styles/globalStyles.css';
 
 // Import components
+// import MFASetup from './components/MFASetup';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -42,6 +43,7 @@ function App({ signOut, user }) {
   const [loading, setLoading] = useState(true);
   const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
   const [lastActivity, setLastActivity] = useState(Date.now());
+  // const [mfaComplete, setMfaComplete] = useState(false);
   
   // Function to refresh user profile
   const refreshUserProfile = () => {
@@ -229,11 +231,16 @@ function App({ signOut, user }) {
     return <div>Loading...</div>;
   }
 
+  // MFA disabled due to auth deployment issues
+  // if (!mfaComplete) {
+  //   return <MFASetup user={user} onComplete={() => setMfaComplete(true)} />;
+  // }
+
   return (
     <ThemeProvider theme={theme}>
-      <Router>
-        <div className="app">
-        <Header user={userProfile || user} signOut={signOut} />
+        <Router>
+          <div className="app">
+          <Header user={userProfile || user} signOut={signOut} />
 
         
         <main>
@@ -283,9 +290,9 @@ function App({ signOut, user }) {
           </Routes>
         </main>
         
-        <Footer />
-        </div>
-      </Router>
+          <Footer />
+          </div>
+        </Router>
     </ThemeProvider>
   );
 }

@@ -6,8 +6,10 @@ Amplify Params - DO NOT EDIT */
 const { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminDeleteUserCommand, AdminAddUserToGroupCommand, AdminRemoveUserFromGroupCommand } = require('@aws-sdk/client-cognito-identity-provider');
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
 
+
 const cognitoClient = new CognitoIdentityProviderClient({ region: 'us-east-1' });
 const sesClient = new SESClient({ region: 'us-east-1' });
+
 
 // Handle user creation in Cognito with email notification
 const handleUserCreation = async (event, headers) => {
@@ -321,6 +323,8 @@ exports.handler = async (event) => {
         if (event.path && event.path.includes('/update-user-group')) {
             return handleUserGroupUpdate(event, headers);
         }
+        
+
     } catch (error) {
         console.error('Handler error:', error);
         return {
@@ -404,3 +408,4 @@ exports.handler = async (event) => {
         };
     }
 };
+

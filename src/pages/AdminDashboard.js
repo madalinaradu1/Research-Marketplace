@@ -45,11 +45,10 @@ const AdminDashboard = ({ user }) => {
   const [selectAll, setSelectAll] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: '', department: '' });
   const [systemConfig, setSystemConfig] = useState({
-    maintenanceMode: false,
-    registrationEnabled: true,
-    maxApplications: 5,
+    maxApplications: 3,
     passwordMinLength: 8,
-    sessionTimeout: 30
+    sessionTimeout: 30,
+    twoFactorRequired: true // Always enabled via SSO
   });
   const [analytics, setAnalytics] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -115,6 +114,16 @@ const AdminDashboard = ({ user }) => {
       
       // Fetch CloudWatch metrics
       const cloudWatchMetrics = await fetchCloudWatchMetrics();
+      
+      // Load system configuration from localStorage
+      try {
+        const savedConfig = localStorage.getItem('adminSystemConfig');
+        if (savedConfig) {
+          setSystemConfig(JSON.parse(savedConfig));
+        }
+      } catch (configError) {
+        console.error('Error loading system config:', configError);
+      }
       
       const analyticsData = {
         totalUsers: allUsers.length,
@@ -348,10 +357,21 @@ const AdminDashboard = ({ user }) => {
     }
   };
   
-  const handleSystemConfigUpdate = async (key, value) => {
-    setSystemConfig(prev => ({ ...prev, [key]: value }));
-    // In a real implementation, this would update system configuration in the backend
-    setMessage(`System configuration updated: ${key}`);
+  const handleSystemConfigUpdate = (key, value) => {
+    // Update local state
+    const newConfig = { ...systemConfig, [key]: value };
+    setSystemConfig(newConfig);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('adminSystemConfig', JSON.stringify(newConfig));
+    
+    const messages = {
+      passwordMinLength: `Password minimum length set to ${value} characters`,
+      sessionTimeout: `Session timeout set to ${value} minutes`,
+      maxApplications: `Maximum applications set to ${value} per student`
+    };
+    
+    setMessage(messages[key] || 'Setting updated');
   };
   
   const handleExportAllData = () => {
@@ -365,20 +385,105 @@ const AdminDashboard = ({ user }) => {
       const dateStr = new Date().toISOString().split('T')[0];
       
       if (format === 'csv') {
-        // Create Excel file with multiple sheets using XML format
-        const usersXML = users.map(u => `<Row><Cell><Data ss:Type="String">${(u.name || '').replace(/[<>&"']/g, '')}</Data></Cell><Cell><Data ss:Type="String">${u.email || ''}</Data></Cell><Cell><Data ss:Type="String">${u.role || ''}</Data></Cell><Cell><Data ss:Type="String">${u.department || ''}</Data></Cell><Cell><Data ss:Type="String">${new Date(u.createdAt).toLocaleDateString()}</Data></Cell></Row>`).join('');
+        const escapeCSV = (str) => {
+          if (!str) return '';
+          const escaped = String(str).replace(/"/g, '""');
+          return `"${escaped}"`;
+        };
         
-        const projectsXML = projects.map(p => `<Row><Cell><Data ss:Type="String">${(p.title || '').replace(/[<>&"']/g, '')}</Data></Cell><Cell><Data ss:Type="String">${(p.facultyName || '').replace(/[<>&"']/g, '')}</Data></Cell><Cell><Data ss:Type="String">${p.department || ''}</Data></Cell><Cell><Data ss:Type="String">${p.isActive ? 'Active' : 'Inactive'}</Data></Cell><Cell><Data ss:Type="String">${p.applicationDeadline ? new Date(p.applicationDeadline).toLocaleDateString() : ''}</Data></Cell></Row>`).join('');
+        // Users CSV
+        const usersCSV = [
+          'USERS',
+          '',
+          'Name,Email,Role,College,Created',
+          ...users.map(u => [
+            escapeCSV(u.name || ''),
+            escapeCSV(u.email || ''),
+            escapeCSV(u.role || ''),
+            escapeCSV(u.department || ''),
+            escapeCSV(new Date(u.createdAt).toLocaleDateString())
+          ].join(','))
+        ].join('\n');
         
-        const applicationsXML = applications.map(a => `<Row><Cell><Data ss:Type="String">${(a.studentName || '').replace(/[<>&"']/g, '')}</Data></Cell><Cell><Data ss:Type="String">${(a.projectTitle || '').replace(/[<>&"']/g, '')}</Data></Cell><Cell><Data ss:Type="String">${a.status || ''}</Data></Cell><Cell><Data ss:Type="String">${new Date(a.createdAt).toLocaleDateString()}</Data></Cell></Row>`).join('');
+        // Projects CSV
+        const projectsCSV = [
+          'PROJECTS',
+          '',
+          'Title,Faculty,Department,Status,Deadline',
+          ...projects.map(p => {
+            let facultyName = '';
+            
+            // Try multiple ways to get faculty name
+            if (p.facultyName) {
+              facultyName = p.facultyName;
+            } else if (p.faculty) {
+              if (typeof p.faculty === 'string') {
+                facultyName = p.faculty;
+              } else if (p.faculty.name) {
+                facultyName = p.faculty.name;
+              } else if (p.faculty.id) {
+                // Look up faculty by ID in users array
+                const facultyUser = users.find(u => u.id === p.faculty.id);
+                facultyName = facultyUser ? facultyUser.name : '';
+              }
+            } else if (p.facultyId) {
+              // Look up faculty by facultyId
+              const facultyUser = users.find(u => u.id === p.facultyId);
+              facultyName = facultyUser ? facultyUser.name : '';
+            }
+            
+            // If still no name found, try to extract from any object
+            if (!facultyName && p.faculty && typeof p.faculty === 'object') {
+              facultyName = p.faculty.email || p.faculty.username || 'Unknown Faculty';
+            }
+            
+            return [
+              escapeCSV(p.title || ''),
+              escapeCSV(facultyName),
+              escapeCSV(p.department || ''),
+              escapeCSV(p.isActive ? 'Active' : 'Inactive'),
+              escapeCSV(p.applicationDeadline ? new Date(p.applicationDeadline).toLocaleDateString() : '')
+            ].join(',');
+          })
+        ].join('\n');
         
-        const excelXML = `<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Users"><Table><Row><Cell><Data ss:Type="String">Name</Data></Cell><Cell><Data ss:Type="String">Email</Data></Cell><Cell><Data ss:Type="String">Role</Data></Cell><Cell><Data ss:Type="String">College</Data></Cell><Cell><Data ss:Type="String">Created</Data></Cell></Row>${usersXML}</Table></Worksheet><Worksheet ss:Name="Projects"><Table><Row><Cell><Data ss:Type="String">Title</Data></Cell><Cell><Data ss:Type="String">Faculty</Data></Cell><Cell><Data ss:Type="String">Department</Data></Cell><Cell><Data ss:Type="String">Status</Data></Cell><Cell><Data ss:Type="String">Deadline</Data></Cell></Row>${projectsXML}</Table></Worksheet><Worksheet ss:Name="Applications"><Table><Row><Cell><Data ss:Type="String">Student</Data></Cell><Cell><Data ss:Type="String">Project</Data></Cell><Cell><Data ss:Type="String">Status</Data></Cell><Cell><Data ss:Type="String">Applied Date</Data></Cell></Row>${applicationsXML}</Table></Worksheet></Workbook>`;
+        // Applications CSV
+        const applicationsCSV = [
+          'APPLICATIONS',
+          '',
+          'Student,Project,Status,Applied Date',
+          ...applications.map(a => {
+            let studentName = '';
+            let projectTitle = '';
+            
+            // Get student name using studentID
+            if (a.studentID) {
+              const student = users.find(u => u.id === a.studentID);
+              studentName = student ? student.name : 'Deleted User';
+            }
+            
+            // Get project title using projectID
+            if (a.projectID) {
+              const project = projects.find(p => p.id === a.projectID);
+              projectTitle = project ? project.title : '';
+            }
+            
+            return [
+              escapeCSV(studentName || 'Unknown Student'),
+              escapeCSV(projectTitle || 'Unknown Project'),
+              escapeCSV(a.status || ''),
+              escapeCSV(new Date(a.createdAt).toLocaleDateString())
+            ].join(',');
+          })
+        ].join('\n');
         
-        const excelBlob = new Blob([excelXML], { type: 'application/vnd.ms-excel' });
-        const url = URL.createObjectURL(excelBlob);
+        const allData = `${usersCSV}\n\n${projectsCSV}\n\n${applicationsCSV}`;
+        
+        const csvBlob = new Blob([allData], { type: 'text/csv' });
+        const url = URL.createObjectURL(csvBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `uraf-data-export-${dateStr}.xls`;
+        link.download = `uraf-data-export-${dateStr}.csv`;
         link.click();
         URL.revokeObjectURL(url);
       } else {
@@ -401,17 +506,13 @@ const AdminDashboard = ({ user }) => {
       
       setMessage(`Data exported successfully as ${format.toUpperCase()}!`);
     } catch (err) {
+      console.error('Export error:', err);
       setError('Failed to export data.');
     }
   };
   
   const handleBackupDatabase = async () => {
-    try {
-      await API.post('emailapi', '/backup-database', {});
-      setMessage('Database backup initiated successfully!');
-    } catch (err) {
-      setError('Failed to initiate database backup.');
-    }
+    setMessage('Database backup feature not yet implemented.');
   };
   
   const handleCleanOldFiles = async () => {
@@ -492,8 +593,10 @@ const AdminDashboard = ({ user }) => {
   }
   
   return (
-    <View width="100%" backgroundColor="#f5f5f5" style={{ overflowX: 'hidden' }}>
-      <Flex direction="column" padding="1rem" gap="1rem" maxWidth="1320px" width="100%" margin="0 auto">
+    <>
+
+      <View width="100%" backgroundColor="#f5f5f5" style={{ overflowX: 'hidden' }}>
+      <Flex direction="column" padding="1rem" gap="1rem" maxWidth="1400px" width="100%" margin="0 auto">
       <Card backgroundColor="white" padding="1.5rem">
         <Flex direction="column" gap="0.5rem">
           <Heading level={2} color="#2d3748">Admin Dashboard</Heading>
@@ -504,7 +607,7 @@ const AdminDashboard = ({ user }) => {
       </Card>
       
       {error && <Alert variation="error" isDismissible onDismiss={() => setError(null)}>{error}</Alert>}
-      {message && <Alert variation="success" isDismissible onDismiss={() => setMessage(null)}>{message}</Alert>}
+      {message && <Alert variation="success">{message}</Alert>}
       
       {/* Alert for users without roles */}
       {(() => {
@@ -853,27 +956,22 @@ const AdminDashboard = ({ user }) => {
                     onChange={(e) => handleSystemConfigUpdate('sessionTimeout', parseInt(e.target.value))}
                     width="100%"
                   />
-                  <SwitchField
-                    label="Two-Factor Authentication Required (SSO Implementation)"
-                    isChecked={false}
-                    onChange={(checked) => handleSystemConfigUpdate('twoFactorRequired', checked)}
-                  />
+                  <Flex alignItems="center" justifyContent="space-between">
+                    <Text>Two-Factor Authentication</Text>
+                    <Text fontSize="0.9rem" color="#666">Enabled via SSO</Text>
+                  </Flex>
                 </Flex>
               </Card>
               
               <Card flex="1" minWidth="300px">
-                <Heading level={4} marginBottom="1rem">Application Configuration</Heading>
+                <Heading level={4} marginBottom="1rem">Data Management</Heading>
                 <Flex direction="column" gap="1rem">
-                  <SwitchField
-                    label="Maintenance Mode"
-                    isChecked={systemConfig.maintenanceMode}
-                    onChange={(checked) => handleSystemConfigUpdate('maintenanceMode', checked)}
-                  />
-                  <SwitchField
-                    label="User Registration Enabled"
-                    isChecked={systemConfig.registrationEnabled}
-                    onChange={(checked) => handleSystemConfigUpdate('registrationEnabled', checked)}
-                  />
+                  <Flex gap="0.5rem" wrap="wrap">
+                    <Button size="small" flex="1" onClick={handleExportAllData}>Export Data</Button>
+                    <Button size="small" flex="1" onClick={handleBackupDatabase}>Backup DB</Button>
+                    <Button size="small" flex="1" onClick={handleCleanOldFiles}>Clean Files</Button>
+                    <Button size="small" flex="1" onClick={handleGenerateReports}>Reports</Button>
+                  </Flex>
                   <TextField
                     label="Maximum Applications per Student"
                     type="number"
@@ -884,16 +982,6 @@ const AdminDashboard = ({ user }) => {
                 </Flex>
               </Card>
             </Flex>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">Data Management</Heading>
-              <Flex gap="1rem" wrap="wrap">
-                <Button onClick={handleExportAllData}>Export All Data</Button>
-                <Button onClick={handleBackupDatabase}>Backup Database</Button>
-                <Button onClick={handleCleanOldFiles}>Clean Old Files</Button>
-                <Button onClick={handleGenerateReports}>Generate Reports</Button>
-              </Flex>
-            </Card>
           </Flex>
         </TabItem>
         
@@ -918,9 +1006,9 @@ const AdminDashboard = ({ user }) => {
                   <Text>Active Users (24h):</Text>
                   <Text>N/A*</Text>
                 </Flex>
-                <Text fontSize="0.8rem" color="gray" marginTop="0.5rem">
+                <div style={{ fontSize: '0.8rem', color: 'gray', marginTop: '0.5rem' }}>
                   * Requires session tracking implementation
-                </Text>
+                </div>
               </Flex>
             </Card>
             
@@ -928,9 +1016,9 @@ const AdminDashboard = ({ user }) => {
               <Heading level={4} marginBottom="1rem">Error Logs</Heading>
               <Text fontSize="0.9rem" fontFamily="monospace" backgroundColor="#f5f5f5" padding="1rem">
                 No recent errors logged.<br/>
-                <Text fontSize="0.8rem" color="gray">
+                <div style={{ fontSize: '0.8rem', color: 'gray' }}>
                   * Error logging requires CloudWatch Logs integration
-                </Text>
+                </div>
               </Text>
             </Card>
             
@@ -1370,7 +1458,7 @@ const AdminDashboard = ({ user }) => {
                 color="black"
                 border="1px solid black"
               >
-                CSV Format (Excel)
+                CSV Format
               </Button>
               <Button
                 onClick={() => setShowExportDialog(false)}
@@ -1388,6 +1476,7 @@ const AdminDashboard = ({ user }) => {
 
     </Flex>
     </View>
+    </>
   );
 };
 

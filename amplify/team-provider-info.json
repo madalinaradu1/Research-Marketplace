@@ -33,7 +33,8 @@
     },
     "categories": {
       "auth": {
-        "ResearchMarketplace": {}
+        "ResearchMarketplace": {},
+        "userPoolGroups": {}
       },
       "api": {
         "researchmarketplace": {},
@@ -42,7 +43,7 @@
       "function": {
         "sendEmailNotification": {
           "deploymentBucketName": "amplify-researchmarketplace-dev-0c85c-deployment",
-          "s3Key": "amplify-builds/sendEmailNotification-4873757a746e34415146-build.zip"
+          "s3Key": "amplify-builds/sendEmailNotification-58556942746952665a77-build.zip"
         },
         "adminDeleteUser": {
           "deploymentBucketName": "amplify-researchmarketplace-dev-0c85c-deployment",
@@ -50,7 +51,7 @@
         },
         "adminCreateUser": {
           "deploymentBucketName": "amplify-researchmarketplace-dev-0c85c-deployment",
-          "s3Key": "amplify-builds/adminCreateUser-72496a546b4a50346442-build.zip"
+          "s3Key": "amplify-builds/adminCreateUser-666a474c6e784a69624f-build.zip"
         },
         "deleteUserFunction": {},
         "deleteUserFromCognito": {},
