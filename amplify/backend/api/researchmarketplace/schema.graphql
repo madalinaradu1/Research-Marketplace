@@ -224,11 +224,9 @@ type DeletedUser @model @auth(rules: [{allow: groups, groups: ["Admin"]}]) {
 
 type SystemConfig @model @auth(rules: [{allow: groups, groups: ["Admin"]}]) {
   id: ID!
-  maintenanceMode: Boolean
-  registrationEnabled: Boolean
-  twoFactorRequired: Boolean
-  passwordMinLength: Int
-  sessionTimeout: Int
-  maxApplications: Int
+  configKey: String!
+  configValue: String!
+  description: String
+  createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }

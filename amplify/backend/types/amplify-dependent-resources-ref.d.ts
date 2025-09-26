@@ -14,18 +14,11 @@ export type AmplifyDependentResourcesAttributes = {
     "ResearchMarketplace": {
       "AppClientID": "string",
       "AppClientIDWeb": "string",
-      "CreatedSNSRole": "string",
       "IdentityPoolId": "string",
       "IdentityPoolName": "string",
       "UserPoolArn": "string",
       "UserPoolId": "string",
       "UserPoolName": "string"
-    },
-    "userPoolGroups": {
-      "AdminGroupRole": "string",
-      "CoordinatorGroupRole": "string",
-      "FacultyGroupRole": "string",
-      "StudentGroupRole": "string"
     }
   },
   "function": {
