@@ -229,4 +229,5 @@ type SystemConfig @model @auth(rules: [{allow: groups, groups: ["Admin"]}]) {
   description: String
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
+  # Force rebuild to sync auth configuration
 }
