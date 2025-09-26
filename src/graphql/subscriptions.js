@@ -1819,3 +1819,48 @@ export const onDeleteDeletedUser = /* GraphQL */ `
     }
   }
 `;
+export const onCreateSystemConfig = /* GraphQL */ `
+  subscription OnCreateSystemConfig(
+    $filter: ModelSubscriptionSystemConfigFilterInput
+  ) {
+    onCreateSystemConfig(filter: $filter) {
+      id
+      configKey
+      configValue
+      description
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateSystemConfig = /* GraphQL */ `
+  subscription OnUpdateSystemConfig(
+    $filter: ModelSubscriptionSystemConfigFilterInput
+  ) {
+    onUpdateSystemConfig(filter: $filter) {
+      id
+      configKey
+      configValue
+      description
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteSystemConfig = /* GraphQL */ `
+  subscription OnDeleteSystemConfig(
+    $filter: ModelSubscriptionSystemConfigFilterInput
+  ) {
+    onDeleteSystemConfig(filter: $filter) {
+      id
+      configKey
+      configValue
+      description
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;

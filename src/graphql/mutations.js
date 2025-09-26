@@ -1831,3 +1831,51 @@ export const deleteDeletedUser = /* GraphQL */ `
     }
   }
 `;
+export const createSystemConfig = /* GraphQL */ `
+  mutation CreateSystemConfig(
+    $input: CreateSystemConfigInput!
+    $condition: ModelSystemConfigConditionInput
+  ) {
+    createSystemConfig(input: $input, condition: $condition) {
+      id
+      configKey
+      configValue
+      description
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateSystemConfig = /* GraphQL */ `
+  mutation UpdateSystemConfig(
+    $input: UpdateSystemConfigInput!
+    $condition: ModelSystemConfigConditionInput
+  ) {
+    updateSystemConfig(input: $input, condition: $condition) {
+      id
+      configKey
+      configValue
+      description
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteSystemConfig = /* GraphQL */ `
+  mutation DeleteSystemConfig(
+    $input: DeleteSystemConfigInput!
+    $condition: ModelSystemConfigConditionInput
+  ) {
+    deleteSystemConfig(input: $input, condition: $condition) {
+      id
+      configKey
+      configValue
+      description
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;

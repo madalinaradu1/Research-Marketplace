@@ -1368,3 +1368,37 @@ export const listDeletedUsers = /* GraphQL */ `
     }
   }
 `;
+export const getSystemConfig = /* GraphQL */ `
+  query GetSystemConfig($id: ID!) {
+    getSystemConfig(id: $id) {
+      id
+      configKey
+      configValue
+      description
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listSystemConfigs = /* GraphQL */ `
+  query ListSystemConfigs(
+    $filter: ModelSystemConfigFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listSystemConfigs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        configKey
+        configValue
+        description
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
