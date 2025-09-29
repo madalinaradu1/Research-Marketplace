@@ -31,6 +31,43 @@ import { syncUserGroupsToRole } from '../utils/syncUserGroups';
 import { deleteUserCompletely, bulkDeleteUsers, canDeleteUser } from '../utils/adminUserManagement';
 import { scheduleUserDeletion } from '../utils/cascadeDelete';
 
+// GraphQL queries for audit logs
+const createAuditLogMutation = `
+  mutation CreateAuditLog($input: CreateAuditLogInput!) {
+    createAuditLog(input: $input) {
+      id
+      timestamp
+    }
+  }
+`;
+
+const listAuditLogsQuery = `
+  query ListAuditLogs($limit: Int) {
+    listAuditLogs(limit: $limit) {
+      items {
+        id
+        userId
+        userName
+        userEmail
+        action
+        resource
+        details
+        timestamp
+        ipAddress
+        userAgent
+      }
+    }
+  }
+`;
+
+const deleteAuditLogMutation = `
+  mutation DeleteAuditLog($input: DeleteAuditLogInput!) {
+    deleteAuditLog(input: $input) {
+      id
+    }
+  }
+`;
+
 const AdminDashboard = ({ user }) => {
   const { tokens } = useTheme();
   const [applications, setApplications] = useState([]);
@@ -58,10 +95,28 @@ const AdminDashboard = ({ user }) => {
   const [showBackupDialog, setShowBackupDialog] = useState(false);
   const [showCleanFilesDialog, setShowCleanFilesDialog] = useState(false);
   const [showReportsDialog, setShowReportsDialog] = useState(false);
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [showAuditExportDialog, setShowAuditExportDialog] = useState(false);
+  const [auditCurrentPage, setAuditCurrentPage] = useState(1);
+  const auditLogsPerPage = 50;
   
   useEffect(() => {
     fetchData();
   }, [user]);
+  
+  useEffect(() => {
+    if (user) {
+      loadAuditLogs();
+    }
+  }, [user]);
+  
+  // Reload audit logs when users data changes to update user names
+  useEffect(() => {
+    if (users.length > 0 && auditLogs.length > 0) {
+      // Force re-render of audit logs to update user names
+      setAuditLogs(prev => [...prev]);
+    }
+  }, [users]);
   
   const fetchData = async () => {
     if (!user) {
@@ -208,6 +263,7 @@ const AdminDashboard = ({ user }) => {
     setIsDeleting(true);
     try {
       await scheduleUserDeletion(targetUser, false); // false = production mode (90 days)
+      logAuditAction('User Deleted', `User: ${targetUser.email}`, `Scheduled for deletion (90-day grace period)`);
       setMessage(`User successfully deleted!`);
       fetchData();
     } catch (err) {
@@ -253,6 +309,8 @@ const AdminDashboard = ({ user }) => {
       }
       
       if (successful > 0) {
+        const deletedEmails = selectedUserObjects.slice(0, successful).map(u => `User: ${u.email}`).join(', ');
+        logAuditAction('User Deleted', deletedEmails, `${successful} user${successful > 1 ? 's' : ''} deleted${failed > 0 ? `, ${failed} failed` : ''}`);
         setMessage(`${successful} user${successful > 1 ? 's were' : ' was'} successfully deleted! ${failed > 0 ? `${failed} failed.` : ''}`);
       }
       if (failed > 0) {
@@ -332,6 +390,7 @@ const AdminDashboard = ({ user }) => {
       
       await API.graphql(graphqlOperation(createUser, { input: userInput }));
       
+      logAuditAction('User Created', `User: ${newUser.email}`, `Role: ${newUser.role}${newUser.department ? `, Department: ${newUser.department}` : ''}`);
       setMessage(cognitoSuccess ? 
         `User created successfully! Welcome email sent to ${newUser.email}` :
         `User profile created in database. Cognito creation failed - user can still sign up normally with email: ${newUser.email}`
@@ -373,6 +432,7 @@ const AdminDashboard = ({ user }) => {
         console.log('Skipping Cognito update:', { oldRole, newRole, hasEmail: !!targetUser?.email });
       }
       
+      logAuditAction('Role Updated', `User: ${targetUser.email}`, `Changed from ${oldRole} to ${newRole}`);
       setMessage('User role updated successfully!');
       await fetchData(); // Wait for data to refresh
     } catch (err) {
@@ -526,6 +586,7 @@ const AdminDashboard = ({ user }) => {
         URL.revokeObjectURL(url);
       }
       
+      logAuditAction('Data Export', `Format: ${format.toUpperCase()}`, `Users: ${users.length}, Projects: ${projects.length}, Applications: ${applications.length}`);
       setMessage(`Data exported successfully as ${format.toUpperCase()}!`);
     } catch (err) {
       console.error('Export error:', err);
@@ -556,6 +617,7 @@ const AdminDashboard = ({ user }) => {
         link.click();
         URL.revokeObjectURL(url);
         
+        logAuditAction('Database Backup', 'DDL Script Generated', 'Database schema backup created');
         setMessage('Database DDL script downloaded successfully!');
       } else {
         setError('Failed to generate database DDL script');
@@ -577,6 +639,7 @@ const AdminDashboard = ({ user }) => {
     try {
       setLoading(true);
       await API.post('emailapi', '/clean-old-files', {});
+      logAuditAction('File Cleanup', 'Old Files Deleted', 'Files older than 365 days removed from storage');
       setMessage('Old files cleanup initiated successfully!');
     } catch (err) {
       setError('Failed to initiate file cleanup.');
@@ -664,6 +727,7 @@ const AdminDashboard = ({ user }) => {
         URL.revokeObjectURL(url);
       }
       
+      logAuditAction('Report Generated', `Analytics Report (${format.toUpperCase()})`, `Users: ${analytics.totalUsers}, Projects: ${analytics.totalProjects}, Applications: ${analytics.totalApplications}`);
       setMessage(`Report generated and downloaded successfully as ${format.toUpperCase()}!`);
     } catch (err) {
       setError('Failed to generate report.');
@@ -690,6 +754,112 @@ const AdminDashboard = ({ user }) => {
       };
     }
   };
+  
+  const logAuditAction = async (action, resource, details = '') => {
+    const newLog = {
+      id: `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      userId: user?.id || 'unknown',
+      userName: user?.name || user?.email || 'Admin User',
+      userEmail: user?.email || 'unknown@example.com',
+      action,
+      resource,
+      details,
+      timestamp: new Date().toISOString(),
+      ipAddress: 'N/A',
+      userAgent: navigator.userAgent || 'N/A'
+    };
+    
+    // Update local state immediately
+    setAuditLogs(prev => [newLog, ...prev]);
+    
+    try {
+      // Store in DynamoDB via GraphQL API
+      await API.graphql(graphqlOperation(createAuditLogMutation, {
+        input: {
+          id: newLog.id,
+          userId: newLog.userId,
+          userName: newLog.userName,
+          userEmail: newLog.userEmail,
+          action: newLog.action,
+          resource: newLog.resource,
+          details: newLog.details,
+          timestamp: newLog.timestamp,
+          ipAddress: newLog.ipAddress,
+          userAgent: newLog.userAgent
+        }
+      }));
+    } catch (error) {
+      console.error('Failed to store audit log:', error);
+      // Keep local copy as fallback
+      const savedLogs = JSON.parse(localStorage.getItem('adminAuditLogs') || '[]');
+      const updatedLogs = [newLog, ...savedLogs.slice(0, 99)];
+      localStorage.setItem('adminAuditLogs', JSON.stringify(updatedLogs));
+    }
+  };
+  
+  const loadAuditLogs = async () => {
+    try {
+      // Fetch from DynamoDB via GraphQL API
+      const response = await API.graphql(graphqlOperation(listAuditLogsQuery, {
+        limit: 1000
+      }));
+      
+      if (response.data?.listAuditLogs?.items) {
+        const logs = response.data.listAuditLogs.items.map(item => ({
+          id: item.id,
+          userId: item.userId,
+          userName: item.userName,
+          userEmail: item.userEmail,
+          user: item.userName || item.userEmail || 'Unknown User',
+          action: item.action,
+          resource: item.resource,
+          details: item.details,
+          timestamp: item.timestamp,
+          ipAddress: item.ipAddress || 'N/A',
+          userAgent: item.userAgent || 'N/A'
+        }));
+        
+        // Sort by timestamp (newest first)
+        logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setAuditLogs(logs);
+      } else {
+        // Fallback to localStorage
+        const savedLogs = JSON.parse(localStorage.getItem('adminAuditLogs') || '[]');
+        setAuditLogs(savedLogs);
+      }
+    } catch (error) {
+      console.error('Error loading audit logs:', error);
+      // Fallback to localStorage
+      const savedLogs = JSON.parse(localStorage.getItem('adminAuditLogs') || '[]');
+      setAuditLogs(savedLogs);
+    }
+  };
+  
+  // Helper function to get user display name for audit logs
+  const getUserDisplayName = (log) => {
+    // If we have userName stored in the log, use it
+    if (log.userName && log.userName !== 'Admin User') {
+      return log.userName;
+    }
+    
+    // If we have userEmail, use it
+    if (log.userEmail && log.userEmail !== 'unknown@example.com') {
+      return log.userEmail;
+    }
+    
+    // Try to find the user in the current users list by userId
+    if (log.userId && users.length > 0) {
+      const foundUser = users.find(u => u.id === log.userId);
+      if (foundUser) {
+        return foundUser.name || foundUser.email || 'Unknown User';
+      }
+    }
+    
+    // Fallback to stored user field or Unknown User
+    return log.user || 'Unknown User';
+  };
+  
+
   
 
   
@@ -1061,145 +1231,123 @@ const AdminDashboard = ({ user }) => {
           </Flex>
         </TabItem>
         
-        <TabItem title="Monitoring">
-          <Flex direction="column" gap="2rem">
-            <Card>
-              <Heading level={4} marginBottom="1rem">System Health</Heading>
-              <Flex direction="column" gap="1rem">
-                <Flex justifyContent="space-between">
-                  <Text>Database Status:</Text>
-                  <Text fontWeight="bold">Healthy</Text>
-                </Flex>
-                <Flex justifyContent="space-between">
-                  <Text>API Response Time:</Text>
-                  <Text>{analytics.avgResponseTime}</Text>
-                </Flex>
-                <Flex justifyContent="space-between">
-                  <Text>Storage Usage:</Text>
-                  <Text>{analytics.storageUsed}</Text>
-                </Flex>
-                <Flex justifyContent="space-between">
-                  <Text>Active Users (24h):</Text>
-                  <Text>N/A*</Text>
-                </Flex>
-                <div style={{ fontSize: '0.8rem', color: 'gray', marginTop: '0.5rem' }}>
-                  * Requires session tracking implementation
-                </div>
-              </Flex>
-            </Card>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">Error Logs</Heading>
-              <Text fontSize="0.9rem" fontFamily="monospace" backgroundColor="#f5f5f5" padding="1rem">
-                No recent errors logged.<br/>
-                <div style={{ fontSize: '0.8rem', color: 'gray' }}>
-                  * Error logging requires CloudWatch Logs integration
-                </div>
-              </Text>
-            </Card>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">Integration Status</Heading>
-              <Flex direction="column" gap="1rem">
-                <Flex justifyContent="space-between">
-                  <Text>AWS Cognito:</Text>
-                  <Text fontWeight="bold">Connected</Text>
-                </Flex>
-                <Flex justifyContent="space-between">
-                  <Text>AWS S3:</Text>
-                  <Text fontWeight="bold">Connected</Text>
-                </Flex>
-                <Flex justifyContent="space-between">
-                  <Text>AWS SES:</Text>
-                  <Text fontWeight="bold">Rate Limited</Text>
-                </Flex>
-                <Flex justifyContent="space-between">
-                  <Text>DynamoDB:</Text>
-                  <Text fontWeight="bold">Connected</Text>
-                </Flex>
-              </Flex>
-            </Card>
-          </Flex>
-        </TabItem>
+
         
-        <TabItem title="System Overview">
-          <Flex direction="column" gap="2rem">
-            <Card>
-              <Heading level={4} marginBottom="1rem">Application Statistics</Heading>
-              <Flex wrap="wrap" gap="1rem">
-                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>{analytics.pendingApplications}</Heading>
-                  <Text fontSize="0.9rem">Pending Review</Text>
-                </Card>
-                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>{analytics.approvedApplications}</Heading>
-                  <Text fontSize="0.9rem">Approved</Text>
-                </Card>
-                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>{analytics.rejectedApplications}</Heading>
-                  <Text fontSize="0.9rem">Rejected</Text>
-                </Card>
-              </Flex>
-            </Card>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">Project Statistics</Heading>
-              <Flex wrap="wrap" gap="1rem">
-                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>{analytics.activeProjects}</Heading>
-                  <Text fontSize="0.9rem">Active Projects</Text>
-                </Card>
-                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>{analytics.expiredProjects}</Heading>
-                  <Text fontSize="0.9rem">Expired Projects</Text>
-                </Card>
-                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5} color="#333">{analytics.totalProjects}</Heading>
-                  <Text fontSize="0.9rem">Total Projects</Text>
-                </Card>
-              </Flex>
-            </Card>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">System Information</Heading>
-              <Text>Admins can view system statistics and manage users, but do not participate in the application approval process. Faculty and Coordinators handle application reviews.</Text>
-            </Card>
-          </Flex>
-        </TabItem>
-        
-        <TabItem title="Permissions">
+
+        <TabItem title="Audit Logs">
           <Flex direction="column" gap="2rem">
             <Card>
               <Heading level={4} marginBottom="1rem">Access Audits</Heading>
-              <Text marginBottom="1rem">Track who changed what and when</Text>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell as="th">User</TableCell>
-                    <TableCell as="th">Action</TableCell>
-                    <TableCell as="th">Resource</TableCell>
-                    <TableCell as="th">Timestamp</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>Admin User</TableCell>
-                    <TableCell>Role Updated</TableCell>
-                    <TableCell>User: john.doe@gcu.edu</TableCell>
-                    <TableCell>{new Date().toLocaleString()}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>System</TableCell>
-                    <TableCell>User Created</TableCell>
-                    <TableCell>User: jane.smith@gcu.edu</TableCell>
-                    <TableCell>{new Date(Date.now() - 3600000).toLocaleString()}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <Text marginBottom="1rem">Track who changed what and when ({auditLogs.length} total actions)</Text>
+              {auditLogs.length > 0 ? (
+                <>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell as="th">User</TableCell>
+                        <TableCell as="th">Action</TableCell>
+                        <TableCell as="th">Resource</TableCell>
+                        <TableCell as="th">Details</TableCell>
+                        <TableCell as="th">Timestamp</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {(() => {
+                        const startIndex = (auditCurrentPage - 1) * auditLogsPerPage;
+                        const endIndex = startIndex + auditLogsPerPage;
+                        const paginatedLogs = auditLogs.slice(startIndex, endIndex);
+                        return paginatedLogs.map(log => (
+                          <TableRow key={log.id}>
+                            <TableCell>{getUserDisplayName(log)}</TableCell>
+                            <TableCell>{log.action}</TableCell>
+                            <TableCell>{log.resource}</TableCell>
+                            <TableCell fontSize="0.9rem">{log.details}</TableCell>
+                            <TableCell fontSize="0.8rem">
+                              {new Date(log.timestamp).toLocaleString()}
+                            </TableCell>
+                          </TableRow>
+                        ));
+                      })()}
+                    </TableBody>
+                  </Table>
+                  <Flex justifyContent="flex-end" marginTop="1rem" gap="0.5rem" alignItems="center">
+                    {(() => {
+                      const totalPages = Math.ceil(auditLogs.length / auditLogsPerPage);
+                      return (
+                        <>
+                          <Text fontSize="0.9rem">
+                            Page {auditCurrentPage} of {totalPages} ({auditLogs.length} total logs)
+                          </Text>
+                          <Button
+                            size="small"
+                            onClick={() => {
+                              if (auditCurrentPage > 1) {
+                                setAuditCurrentPage(prev => prev - 1);
+                              }
+                            }}
+                          >
+                            Previous
+                          </Button>
+                          <Button
+                            size="small"
+                            onClick={() => {
+                              if (auditCurrentPage < totalPages) {
+                                setAuditCurrentPage(prev => prev + 1);
+                              }
+                            }}
+                          >
+                            Next
+                          </Button>
+                        </>
+                      );
+                    })()}
+                  </Flex>
+                </>
+              ) : (
+                <Text fontSize="0.9rem" color="#666" padding="2rem" textAlign="center">
+                  No audit logs available. Actions will be tracked here as they occur.
+                </Text>
+              )}
               <Flex gap="1rem" marginTop="1rem">
-                <Button>Export Audit Log</Button>
-                <Button>Filter by Date Range</Button>
-                <Button>Filter by User</Button>
+                <Button onClick={() => setShowAuditExportDialog(true)}>Export Audit Log</Button>
+                <Button onClick={async () => {
+                  if (window.confirm('Are you sure you want to clear all audit logs? This action cannot be undone.')) {
+                    try {
+                      // Get all audit logs first
+                      const response = await API.graphql(graphqlOperation(listAuditLogsQuery));
+                      
+                      if (response.data?.listAuditLogs?.items) {
+                        // Delete each audit log
+                        let deletedCount = 0;
+                        for (const log of response.data.listAuditLogs.items) {
+                          try {
+                            await API.graphql(graphqlOperation(deleteAuditLogMutation, {
+                              input: { id: log.id }
+                            }));
+                            deletedCount++;
+                          } catch (deleteError) {
+                            console.error('Error deleting audit log:', deleteError);
+                          }
+                        }
+                        
+                        setMessage(`Cleared ${deletedCount} audit log entries.`);
+                      }
+                      
+                      // Clear local state and localStorage
+                      setAuditLogs([]);
+                      setAuditCurrentPage(1);
+                      localStorage.removeItem('adminAuditLogs');
+                      
+                    } catch (error) {
+                      console.error('Error clearing audit logs:', error);
+                      // Clear local anyway
+                      setAuditLogs([]);
+                      setAuditCurrentPage(1);
+                      localStorage.removeItem('adminAuditLogs');
+                      setMessage('Audit logs cleared locally.');
+                    }
+                  }
+                }}>Clear Logs</Button>
               </Flex>
             </Card>
           </Flex>
@@ -1705,6 +1853,72 @@ const AdminDashboard = ({ user }) => {
                 border="1px solid #e2e8f0"
               >
                 Cancel
+              </Button>
+            </Flex>
+          </Card>
+        </View>
+      )}
+      
+      {showAuditExportDialog && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100%"
+          height="100%"
+          backgroundColor="rgba(0,0,0,0.5)"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          style={{ zIndex: 1000 }}
+        >
+          <Card width="500px" padding="2rem">
+            <Heading level={4} marginBottom="1rem">Export Audit Log</Heading>
+            <Text marginBottom="1.5rem">
+              This will download a CSV file containing all audit log entries:
+            </Text>
+            <Text fontSize="0.9rem" marginBottom="1rem">
+              • All administrative actions and timestamps<br/>
+              • User information for each action<br/>
+              • Resource details and action descriptions<br/>
+              • {auditLogs.length} total log entries
+            </Text>
+            <Text fontSize="0.9rem" marginBottom="2rem" color="#666">
+              The file will be saved as audit-log-YYYY-MM-DD.csv
+            </Text>
+            <Flex gap="1rem">
+              <Button
+                onClick={() => setShowAuditExportDialog(false)}
+                flex="1"
+                backgroundColor="#f7fafc"
+                color="black"
+                border="1px solid #e2e8f0"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowAuditExportDialog(false);
+                  const auditData = auditLogs.map(log => 
+                    `${new Date(log.timestamp).toISOString()},${getUserDisplayName(log)},${log.action},"${log.resource}","${log.details}"`
+                  ).join('\n');
+                  const csvContent = `Timestamp,User,Action,Resource,Details\n${auditData}`;
+                  const blob = new Blob([csvContent], { type: 'text/csv' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `audit-log-${new Date().toISOString().split('T')[0]}.csv`;
+                  link.click();
+                  URL.revokeObjectURL(url);
+                  logAuditAction('Audit Log Export', 'CSV File Downloaded', `${auditLogs.length} log entries exported`);
+                  setMessage('Audit log exported successfully!');
+                }}
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
+                flex="1"
+              >
+                Export CSV
               </Button>
             </Flex>
           </Card>

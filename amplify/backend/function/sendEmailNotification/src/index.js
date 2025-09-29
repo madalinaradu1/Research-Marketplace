@@ -1,14 +1,20 @@
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
-const { DynamoDBClient, ListTablesCommand, CreateBackupCommand } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient, ListTablesCommand, CreateBackupCommand, PutItemCommand, QueryCommand, ScanCommand, DeleteItemCommand } = require('@aws-sdk/client-dynamodb');
 const { S3Client, ListObjectsV2Command, DeleteObjectsCommand } = require('@aws-sdk/client-s3');
 const { CloudWatchClient, GetMetricDataCommand } = require('@aws-sdk/client-cloudwatch');
+const { CloudWatchLogsClient, CreateLogGroupCommand, CreateLogStreamCommand, PutLogEventsCommand } = require('@aws-sdk/client-cloudwatch-logs');
 const { CognitoIdentityProviderClient, UpdateUserPoolCommand, ListUserPoolClientsCommand, UpdateUserPoolClientCommand, ListUserPoolsCommand } = require('@aws-sdk/client-cognito-identity-provider');
 
 const ses = new SESClient({ region: 'us-east-1' });
 const dynamodb = new DynamoDBClient({ region: 'us-east-1' });
 const s3 = new S3Client({ region: 'us-east-1' });
 const cloudwatch = new CloudWatchClient({ region: 'us-east-1' });
+const cloudwatchLogs = new CloudWatchLogsClient({ region: 'us-east-1' });
 const cognito = new CognitoIdentityProviderClient({ region: 'us-east-1' });
+
+// Use GraphQL API for audit logs instead of direct DynamoDB
+const GRAPHQL_ENDPOINT = process.env.API_RESEARCHMARKETPLACE_GRAPHQLAPIENDPOINTOUTPUT;
+const GRAPHQL_API_KEY = process.env.API_RESEARCHMARKETPLACE_GRAPHQLAPIKEYOUTPUT;
 
 exports.handler = async (event) => {
     console.log('Lambda started, event received:', JSON.stringify(event, null, 2));
@@ -40,6 +46,18 @@ exports.handler = async (event) => {
         } else if (path && path.includes('system-config')) {
             console.log('Routing to system config handler');
             return await handleSystemConfig(event, headers);
+        } else if (path && path.includes('audit-log')) {
+            console.log('Routing to audit log handler');
+            return await handleAuditLog(event, headers);
+        } else if (path && path.includes('get-audit-logs')) {
+            console.log('Routing to get audit logs handler');
+            return await handleGetAuditLogs(event, headers);
+        } else if (path && path.includes('clear-audit-logs')) {
+            console.log('Routing to clear audit logs handler');
+            return await handleClearAuditLogs(event, headers);
+        } else if (path && path.includes('cloudwatch-log')) {
+            console.log('Routing to CloudWatch log handler');
+            return await handleCloudWatchLog(event, headers);
         } else {
             console.log('Routing to email handler');
             return await handleSendEmail(event, headers);
@@ -172,6 +190,25 @@ CREATE TABLE IF NOT EXISTS ActivityLog (
     FOREIGN KEY (userID) REFERENCES Users(id)
 );
 
+-- AuditLogs Table (for admin audit trail)
+CREATE TABLE IF NOT EXISTS AuditLogs (
+    id VARCHAR(255) PRIMARY KEY,
+    userId VARCHAR(255),
+    userName VARCHAR(255),
+    userEmail VARCHAR(255),
+    action VARCHAR(255),
+    resource VARCHAR(500),
+    details TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ipAddress VARCHAR(45),
+    userAgent TEXT
+);
+
+-- Indexes for AuditLogs table
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON AuditLogs(userId);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON AuditLogs(action);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON AuditLogs(timestamp);
+
 -- MessageBoard Table
 CREATE TABLE IF NOT EXISTS MessageBoard (
     id VARCHAR(255) PRIMARY KEY,
@@ -207,6 +244,9 @@ CREATE INDEX IF NOT EXISTS idx_learning_contracts_student ON LearningContracts(s
 CREATE INDEX IF NOT EXISTS idx_student_posts_student ON StudentPosts(studentID);
 CREATE INDEX IF NOT EXISTS idx_activity_log_user ON ActivityLog(userID);
 CREATE INDEX IF NOT EXISTS idx_message_board_author ON MessageBoard(authorID);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON AuditLogs(userId);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON AuditLogs(action);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON AuditLogs(timestamp);
 
 -- End of DDL Script
 `;
@@ -417,4 +457,294 @@ async function handleSendEmail(event, headers) {
             messageId: result.MessageId
         })
     };
+}
+
+async function handleAuditLog(event, headers) {
+    try {
+        const auditData = JSON.parse(event.body || '{}');
+        console.log('Storing audit log:', auditData);
+        
+        const mutation = `
+            mutation CreateAuditLog($input: CreateAuditLogInput!) {
+                createAuditLog(input: $input) {
+                    id
+                    timestamp
+                }
+            }
+        `;
+        
+        const variables = {
+            input: {
+                id: auditData.id,
+                userId: auditData.userId,
+                userName: auditData.userName,
+                userEmail: auditData.userEmail,
+                action: auditData.action,
+                resource: auditData.resource,
+                details: auditData.details,
+                timestamp: auditData.timestamp,
+                ipAddress: auditData.ipAddress || 'N/A',
+                userAgent: auditData.userAgent || 'N/A'
+            }
+        };
+        
+        const response = await fetch(GRAPHQL_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': GRAPHQL_API_KEY
+            },
+            body: JSON.stringify({ query: mutation, variables })
+        });
+        
+        const result = await response.json();
+        
+        if (result.errors) {
+            throw new Error(result.errors[0].message);
+        }
+        
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                message: 'Audit log stored successfully'
+            })
+        };
+    } catch (error) {
+        console.error('Audit log error:', error);
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ error: error.message })
+        };
+    }
+}
+
+async function handleGetAuditLogs(event, headers) {
+    try {
+        const { limit = 1000, sortOrder = 'DESC' } = JSON.parse(event.body || '{}');
+        
+        const query = `
+            query ListAuditLogs($limit: Int, $sortDirection: ModelSortDirection) {
+                listAuditLogs(limit: $limit, sortDirection: $sortDirection) {
+                    items {
+                        id
+                        userId
+                        userName
+                        userEmail
+                        action
+                        resource
+                        details
+                        timestamp
+                        ipAddress
+                        userAgent
+                    }
+                }
+            }
+        `;
+        
+        const variables = {
+            limit: parseInt(limit),
+            sortDirection: sortOrder === 'DESC' ? 'DESC' : 'ASC'
+        };
+        
+        const response = await fetch(GRAPHQL_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': GRAPHQL_API_KEY
+            },
+            body: JSON.stringify({ query, variables })
+        });
+        
+        const result = await response.json();
+        
+        if (result.errors) {
+            throw new Error(result.errors[0].message);
+        }
+        
+        const logs = result.data.listAuditLogs.items.map(item => ({
+            id: item.id,
+            userId: item.userId,
+            user: item.userName,
+            action: item.action,
+            resource: item.resource,
+            details: item.details,
+            timestamp: item.timestamp,
+            ipAddress: item.ipAddress || 'N/A',
+            userAgent: item.userAgent || 'N/A'
+        }));
+        
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                logs: logs,
+                count: logs.length
+            })
+        };
+    } catch (error) {
+        console.error('Get audit logs error:', error);
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ error: error.message })
+        };
+    }
+}
+
+async function handleClearAuditLogs(event, headers) {
+    try {
+        const { confirm } = JSON.parse(event.body || '{}');
+        
+        if (!confirm) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'Confirmation required to clear audit logs' })
+            };
+        }
+        
+        // Get all audit logs first
+        const listQuery = `
+            query ListAuditLogs {
+                listAuditLogs {
+                    items {
+                        id
+                    }
+                }
+            }
+        `;
+        
+        const listResponse = await fetch(GRAPHQL_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': GRAPHQL_API_KEY
+            },
+            body: JSON.stringify({ query: listQuery })
+        });
+        
+        const listResult = await listResponse.json();
+        
+        if (listResult.errors) {
+            throw new Error(listResult.errors[0].message);
+        }
+        
+        const auditLogs = listResult.data.listAuditLogs.items;
+        
+        // Delete each audit log
+        const deleteMutation = `
+            mutation DeleteAuditLog($input: DeleteAuditLogInput!) {
+                deleteAuditLog(input: $input) {
+                    id
+                }
+            }
+        `;
+        
+        let deletedCount = 0;
+        for (const log of auditLogs) {
+            try {
+                const deleteResponse = await fetch(GRAPHQL_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': GRAPHQL_API_KEY
+                    },
+                    body: JSON.stringify({
+                        query: deleteMutation,
+                        variables: { input: { id: log.id } }
+                    })
+                });
+                
+                const deleteResult = await deleteResponse.json();
+                if (!deleteResult.errors) {
+                    deletedCount++;
+                }
+            } catch (deleteError) {
+                console.error('Error deleting audit log:', deleteError);
+            }
+        }
+        
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                message: `Cleared ${deletedCount} audit log entries`,
+                deletedCount: deletedCount
+            })
+        };
+    } catch (error) {
+        console.error('Clear audit logs error:', error);
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ error: error.message })
+        };
+    }
+}
+
+async function handleCloudWatchLog(event, headers) {
+    try {
+        const { logGroup, logStream, message } = JSON.parse(event.body || '{}');
+        
+        // Create log group if it doesn't exist
+        try {
+            await cloudwatchLogs.send(new CreateLogGroupCommand({ logGroupName: logGroup }));
+        } catch (error) {
+            // Log group might already exist, ignore error
+            if (!error.name?.includes('ResourceAlreadyExistsException')) {
+                console.warn('Log group creation warning:', error.message);
+            }
+        }
+        
+        // Create log stream if it doesn't exist
+        try {
+            await cloudwatchLogs.send(new CreateLogStreamCommand({ 
+                logGroupName: logGroup, 
+                logStreamName: logStream 
+            }));
+        } catch (error) {
+            // Log stream might already exist, ignore error
+            if (!error.name?.includes('ResourceAlreadyExistsException')) {
+                console.warn('Log stream creation warning:', error.message);
+            }
+        }
+        
+        // Put log event
+        const logParams = {
+            logGroupName: logGroup,
+            logStreamName: logStream,
+            logEvents: [{
+                timestamp: Date.now(),
+                message: typeof message === 'string' ? message : JSON.stringify(message)
+            }]
+        };
+        
+        await cloudwatchLogs.send(new PutLogEventsCommand(logParams));
+        
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                message: 'Log sent to CloudWatch successfully'
+            })
+        };
+    } catch (error) {
+        console.error('CloudWatch log error:', error);
+        // Don't fail the request if CloudWatch logging fails
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                message: 'CloudWatch logging attempted (may have failed)',
+                warning: error.message
+            })
+        };
+    }
 }

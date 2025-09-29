@@ -1402,3 +1402,121 @@ export const listSystemConfigs = /* GraphQL */ `
     }
   }
 `;
+export const getAuditLog = /* GraphQL */ `
+  query GetAuditLog($id: ID!) {
+    getAuditLog(id: $id) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listAuditLogs = /* GraphQL */ `
+  query ListAuditLogs(
+    $filter: ModelAuditLogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listAuditLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        userId
+        userName
+        userEmail
+        action
+        resource
+        details
+        timestamp
+        ipAddress
+        userAgent
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const auditLogsByActionAndTimestamp = /* GraphQL */ `
+  query AuditLogsByActionAndTimestamp(
+    $action: String!
+    $timestamp: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelAuditLogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    auditLogsByActionAndTimestamp(
+      action: $action
+      timestamp: $timestamp
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        userId
+        userName
+        userEmail
+        action
+        resource
+        details
+        timestamp
+        ipAddress
+        userAgent
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const auditLogsByTimestamp = /* GraphQL */ `
+  query AuditLogsByTimestamp(
+    $timestamp: AWSDateTime!
+    $sortDirection: ModelSortDirection
+    $filter: ModelAuditLogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    auditLogsByTimestamp(
+      timestamp: $timestamp
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        userId
+        userName
+        userEmail
+        action
+        resource
+        details
+        timestamp
+        ipAddress
+        userAgent
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;

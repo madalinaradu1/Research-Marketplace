@@ -231,3 +231,18 @@ type SystemConfig @model @auth(rules: [{allow: groups, groups: ["Admin"]}]) {
   updatedAt: AWSDateTime
   # Force rebuild to sync auth configuration
 }
+
+type AuditLog @model @auth(rules: [{allow: groups, groups: ["Admin"]}]) {
+  id: ID!
+  userId: String!
+  userName: String!
+  userEmail: String!
+  action: String! @index(name: "byAction", sortKeyFields: ["timestamp"])
+  resource: String!
+  details: String
+  timestamp: AWSDateTime! @index(name: "byTimestamp")
+  ipAddress: String
+  userAgent: String
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}

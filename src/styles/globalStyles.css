@@ -948,7 +948,7 @@ header .amplify-flex[style*="position: absolute"] button:hover {
   text-align: center !important;
   white-space: nowrap !important;
   overflow: visible !important;
-  padding: 1rem 1.5rem !important;
+  padding: 1rem 2.5rem !important;
   font-size: 0.9rem !important;
 }
 
@@ -998,5 +998,5 @@ header .amplify-flex[style*="position: absolute"] button:hover {
 
 /* Override main element max-width */
 main {
-  max-width: 1390px !important;
+  max-width: 1380px !important;
 }

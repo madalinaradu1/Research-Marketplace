@@ -1864,3 +1864,60 @@ export const onDeleteSystemConfig = /* GraphQL */ `
     }
   }
 `;
+export const onCreateAuditLog = /* GraphQL */ `
+  subscription OnCreateAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+    onCreateAuditLog(filter: $filter) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateAuditLog = /* GraphQL */ `
+  subscription OnUpdateAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+    onUpdateAuditLog(filter: $filter) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteAuditLog = /* GraphQL */ `
+  subscription OnDeleteAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+    onDeleteAuditLog(filter: $filter) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
