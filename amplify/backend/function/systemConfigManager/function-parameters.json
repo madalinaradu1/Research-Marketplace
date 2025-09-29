@@ -1,0 +1,9 @@
+{
+    "lambdaLayers": [],
+    "environmentVariableList": [
+        {
+            "cloudFormationParameterName": "authResearchMarketplaceUserPoolId",
+            "environmentVariableName": "AUTH_RESEARCHMARKETPLACE_USERPOOLID"
+        }
+    ]
+}

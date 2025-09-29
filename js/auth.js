@@ -148,6 +148,8 @@ async function resetPassword(username, code, newPassword) {
     }
 }
 
+
+
 // Auth Modal Functions
 function openAuthModal() {
     const modal = document.getElementById('auth-modal');
@@ -387,6 +389,8 @@ function createAuthModal() {
         
         resetPassword(username, code, password);
     });
+    
+
     
     // Display the modal
     modal.style.display = 'block';

@@ -36,6 +36,7 @@ const AdminDashboard = ({ user }) => {
   const [applications, setApplications] = useState([]);
   const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [deletedUsers, setDeletedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
@@ -45,10 +46,7 @@ const AdminDashboard = ({ user }) => {
   const [selectAll, setSelectAll] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: '', department: '' });
   const [systemConfig, setSystemConfig] = useState({
-    maxApplications: 3,
-    passwordMinLength: 8,
-    sessionTimeout: 30,
-    twoFactorRequired: true // Always enabled via SSO
+    maxApplications: 3
   });
   const [analytics, setAnalytics] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -57,6 +55,9 @@ const AdminDashboard = ({ user }) => {
   const usersPerPage = 50;
   const [searchTerm, setSearchTerm] = useState('');
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showBackupDialog, setShowBackupDialog] = useState(false);
+  const [showCleanFilesDialog, setShowCleanFilesDialog] = useState(false);
+  const [showReportsDialog, setShowReportsDialog] = useState(false);
   
   useEffect(() => {
     fetchData();
@@ -109,6 +110,26 @@ const AdminDashboard = ({ user }) => {
         allUsers = [];
       }
       
+      // Fetch deleted users
+      let allDeletedUsers = [];
+      try {
+        const deletedUsersQuery = `
+          query ListDeletedUsers {
+            listDeletedUsers {
+              items {
+                id
+                originalUserID
+              }
+            }
+          }
+        `;
+        const deletedUsersResult = await API.graphql(graphqlOperation(deletedUsersQuery));
+        allDeletedUsers = deletedUsersResult.data?.listDeletedUsers?.items || [];
+      } catch (deletedError) {
+        console.error('Error fetching deleted users:', deletedError);
+        allDeletedUsers = [];
+      }
+      
       // Calculate analytics
       const now = new Date();
       
@@ -119,7 +140,8 @@ const AdminDashboard = ({ user }) => {
       try {
         const savedConfig = localStorage.getItem('adminSystemConfig');
         if (savedConfig) {
-          setSystemConfig(JSON.parse(savedConfig));
+          const config = JSON.parse(savedConfig);
+          setSystemConfig({ maxApplications: config.maxApplications || 3 });
         }
       } catch (configError) {
         console.error('Error loading system config:', configError);
@@ -131,6 +153,7 @@ const AdminDashboard = ({ user }) => {
         totalFaculty: allUsers.filter(u => u.role === 'Faculty').length,
         totalCoordinators: allUsers.filter(u => u.role === 'Coordinator').length,
         totalAdmins: allUsers.filter(u => u.role === 'Admin').length,
+        totalDeletedUsers: allDeletedUsers.length,
         totalProjects: allProjects.length,
         activeProjects: allProjects.filter(p => {
           if (!p.applicationDeadline) return p.isActive;
@@ -155,6 +178,7 @@ const AdminDashboard = ({ user }) => {
       setApplications(allApplications);
       setUsers(allUsers);
       setProjects(allProjects);
+      setDeletedUsers(allDeletedUsers);
       setAnalytics(analyticsData);
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -366,8 +390,6 @@ const AdminDashboard = ({ user }) => {
     localStorage.setItem('adminSystemConfig', JSON.stringify(newConfig));
     
     const messages = {
-      passwordMinLength: `Password minimum length set to ${value} characters`,
-      sessionTimeout: `Session timeout set to ${value} minutes`,
       maxApplications: `Maximum applications set to ${value} per student`
     };
     
@@ -511,21 +533,67 @@ const AdminDashboard = ({ user }) => {
     }
   };
   
-  const handleBackupDatabase = async () => {
-    setMessage('Database backup feature not yet implemented.');
+  const handleBackupDatabase = () => {
+    setShowBackupDialog(true);
   };
   
-  const handleCleanOldFiles = async () => {
+  const confirmBackupDatabase = async () => {
+    setShowBackupDialog(false);
     try {
+      setLoading(true);
+      const response = await API.post('emailapi', '/backup-database', {
+        body: { format: 'ddl' }
+      });
+      
+      if (response.success && response.ddlScript) {
+        // Download DDL script as file
+        const dateStr = new Date().toISOString().split('T')[0];
+        const ddlBlob = new Blob([response.ddlScript], { type: 'text/sql' });
+        const url = URL.createObjectURL(ddlBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `database-backup-${dateStr}.sql`;
+        link.click();
+        URL.revokeObjectURL(url);
+        
+        setMessage('Database DDL script downloaded successfully!');
+      } else {
+        setError('Failed to generate database DDL script');
+      }
+    } catch (error) {
+      console.error('Error generating DDL script:', error);
+      setError('Failed to generate database backup script');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleCleanOldFiles = () => {
+    setShowCleanFilesDialog(true);
+  };
+  
+  const confirmCleanOldFiles = async () => {
+    setShowCleanFilesDialog(false);
+    try {
+      setLoading(true);
       await API.post('emailapi', '/clean-old-files', {});
       setMessage('Old files cleanup initiated successfully!');
     } catch (err) {
       setError('Failed to initiate file cleanup.');
+    } finally {
+      setLoading(false);
     }
   };
   
-  const handleGenerateReports = async () => {
+  const handleGenerateReports = () => {
+    setShowReportsDialog(true);
+  };
+  
+  const generateReport = async (format) => {
+    setShowReportsDialog(false);
     try {
+      setLoading(true);
+      const dateStr = new Date().toISOString().split('T')[0];
       const reportData = {
         summary: {
           totalUsers: analytics.totalUsers,
@@ -537,7 +605,8 @@ const AdminDashboard = ({ user }) => {
           students: analytics.totalStudents,
           faculty: analytics.totalFaculty,
           coordinators: analytics.totalCoordinators,
-          admins: analytics.totalAdmins
+          admins: analytics.totalAdmins,
+          deletedUsers: analytics.totalDeletedUsers
         },
         projectStatus: {
           active: analytics.activeProjects,
@@ -549,17 +618,57 @@ const AdminDashboard = ({ user }) => {
           rejected: analytics.rejectedApplications
         }
       };
-      const reportStr = JSON.stringify(reportData, null, 2);
-      const reportBlob = new Blob([reportStr], { type: 'application/json' });
-      const url = URL.createObjectURL(reportBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `uraf-report-${new Date().toISOString().split('T')[0]}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
-      setMessage('Report generated and downloaded successfully!');
+      
+      if (format === 'csv') {
+        const csvData = [
+          'SYSTEM ANALYTICS REPORT',
+          `Generated: ${new Date().toLocaleString()}`,
+          '',
+          'SUMMARY',
+          `Total Users,${analytics.totalUsers}`,
+          `Total Projects,${analytics.totalProjects}`,
+          `Total Applications,${analytics.totalApplications}`,
+          '',
+          'USER BREAKDOWN',
+          `Students,${analytics.totalStudents}`,
+          `Faculty,${analytics.totalFaculty}`,
+          `Coordinators,${analytics.totalCoordinators}`,
+          `Admins,${analytics.totalAdmins}`,
+          `Deleted Users,${analytics.totalDeletedUsers}`,
+          '',
+          'PROJECT STATUS',
+          `Active Projects,${analytics.activeProjects}`,
+          `Expired Projects,${analytics.expiredProjects}`,
+          '',
+          'APPLICATION STATUS',
+          `Pending Applications,${analytics.pendingApplications}`,
+          `Approved Applications,${analytics.approvedApplications}`,
+          `Rejected Applications,${analytics.rejectedApplications}`
+        ].join('\n');
+        
+        const csvBlob = new Blob([csvData], { type: 'text/csv' });
+        const url = URL.createObjectURL(csvBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `uraf-report-${dateStr}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const reportStr = JSON.stringify(reportData, null, 2);
+        const reportBlob = new Blob([reportStr], { type: 'application/json' });
+        const url = URL.createObjectURL(reportBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `uraf-report-${dateStr}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+      
+      setMessage(`Report generated and downloaded successfully as ${format.toUpperCase()}!`);
     } catch (err) {
       setError('Failed to generate report.');
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -936,52 +1045,19 @@ const AdminDashboard = ({ user }) => {
           </Flex>
         </TabItem>
         
-        <TabItem title="Security">
+        <TabItem title="Data Management">
           <Flex direction="column" gap="2rem">
-            <Flex gap="2rem" wrap="wrap">
-              <Card flex="1" minWidth="300px">
-                <Heading level={4} marginBottom="1rem">Security Settings</Heading>
-                <Flex direction="column" gap="1rem">
-                  <TextField
-                    label="Minimum Password Length"
-                    type="number"
-                    value={systemConfig.passwordMinLength}
-                    onChange={(e) => handleSystemConfigUpdate('passwordMinLength', parseInt(e.target.value))}
-                    width="100%"
-                  />
-                  <TextField
-                    label="Session Timeout (minutes)"
-                    type="number"
-                    value={systemConfig.sessionTimeout}
-                    onChange={(e) => handleSystemConfigUpdate('sessionTimeout', parseInt(e.target.value))}
-                    width="100%"
-                  />
-                  <Flex alignItems="center" justifyContent="space-between">
-                    <Text>Two-Factor Authentication</Text>
-                    <Text fontSize="0.9rem" color="#666">Enabled via SSO</Text>
-                  </Flex>
+            <Card>
+              <Heading level={4} marginBottom="1rem">Data Management</Heading>
+              <Flex direction="column" gap="1rem">
+                <Flex gap="0.5rem" wrap="wrap">
+                  <Button size="small" flex="1" onClick={handleExportAllData}>Export Data</Button>
+                  <Button size="small" flex="1" onClick={handleBackupDatabase}>Backup Database</Button>
+                  <Button size="small" flex="1" onClick={handleCleanOldFiles}>Clean Files</Button>
+                  <Button size="small" flex="1" onClick={handleGenerateReports}>Reports</Button>
                 </Flex>
-              </Card>
-              
-              <Card flex="1" minWidth="300px">
-                <Heading level={4} marginBottom="1rem">Data Management</Heading>
-                <Flex direction="column" gap="1rem">
-                  <Flex gap="0.5rem" wrap="wrap">
-                    <Button size="small" flex="1" onClick={handleExportAllData}>Export Data</Button>
-                    <Button size="small" flex="1" onClick={handleBackupDatabase}>Backup DB</Button>
-                    <Button size="small" flex="1" onClick={handleCleanOldFiles}>Clean Files</Button>
-                    <Button size="small" flex="1" onClick={handleGenerateReports}>Reports</Button>
-                  </Flex>
-                  <TextField
-                    label="Maximum Applications per Student"
-                    type="number"
-                    value={systemConfig.maxApplications}
-                    onChange={(e) => handleSystemConfigUpdate('maxApplications', parseInt(e.target.value))}
-                    width="100%"
-                  />
-                </Flex>
-              </Card>
-            </Flex>
+              </Flex>
+            </Card>
           </Flex>
         </TabItem>
         
@@ -1462,6 +1538,167 @@ const AdminDashboard = ({ user }) => {
               </Button>
               <Button
                 onClick={() => setShowExportDialog(false)}
+                width="100%"
+                backgroundColor="#f7fafc"
+                color="black"
+                border="1px solid #e2e8f0"
+              >
+                Cancel
+              </Button>
+            </Flex>
+          </Card>
+        </View>
+      )}
+      
+      {showBackupDialog && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100%"
+          height="100%"
+          backgroundColor="rgba(0,0,0,0.5)"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          style={{ zIndex: 1000 }}
+        >
+          <Card width="500px" padding="2rem">
+            <Heading level={4} marginBottom="1rem">Backup Database</Heading>
+            <Text marginBottom="1.5rem">
+              This will generate and download a DDL script containing:
+            </Text>
+            <Text fontSize="0.9rem" marginBottom="1rem">
+              • Database schema (CREATE TABLE statements)<br/>
+              • All table structures and relationships<br/>
+              • Performance indexes<br/>
+              • Foreign key constraints
+            </Text>
+            <Text fontSize="0.9rem" marginBottom="2rem" color="#666">
+              The backup file will be saved as database-backup-YYYY-MM-DD.sql
+            </Text>
+            <Flex gap="1rem">
+              <Button
+                onClick={() => setShowBackupDialog(false)}
+                flex="1"
+                backgroundColor="#f7fafc"
+                color="black"
+                border="1px solid #e2e8f0"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmBackupDatabase}
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
+                flex="1"
+              >
+                Generate Backup
+              </Button>
+            </Flex>
+          </Card>
+        </View>
+      )}
+      
+      {showCleanFilesDialog && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100%"
+          height="100%"
+          backgroundColor="rgba(0,0,0,0.5)"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          style={{ zIndex: 1000 }}
+        >
+          <Card width="500px" padding="2rem">
+            <Heading level={4} marginBottom="1rem">Clean Old Files</Heading>
+            <Text marginBottom="1.5rem">
+              This will permanently delete files older than 365 days from storage:
+            </Text>
+            <Text fontSize="0.9rem" marginBottom="1rem">
+              • Application documents uploaded over 1 year ago<br/>
+              • Profile pictures older than 1 year<br/>
+              • Other uploaded files in public storage
+            </Text>
+            <Text fontSize="0.9rem" marginBottom="2rem" color="#d69e2e">
+              This action cannot be undone. Deleted files cannot be recovered.
+            </Text>
+            <Flex gap="1rem">
+              <Button
+                onClick={() => setShowCleanFilesDialog(false)}
+                flex="1"
+                backgroundColor="#f7fafc"
+                color="black"
+                border="1px solid #e2e8f0"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmCleanOldFiles}
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
+                flex="1"
+              >
+                Clean Files
+              </Button>
+            </Flex>
+          </Card>
+        </View>
+      )}
+      
+      {showReportsDialog && (
+        <View
+          position="fixed"
+          top="0"
+          left="0"
+          width="100%"
+          height="100%"
+          backgroundColor="rgba(0,0,0,0.5)"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          style={{ zIndex: 1000 }}
+        >
+          <Card width="500px" padding="2rem">
+            <Heading level={4} marginBottom="1rem">Generate Analytics Report</Heading>
+            <Text marginBottom="1.5rem">
+              This will generate a comprehensive analytics report containing:
+            </Text>
+            <Text fontSize="0.9rem" marginBottom="1rem">
+              • System summary statistics<br/>
+              • User breakdown by role (including deleted users)<br/>
+              • Project status overview<br/>
+              • Application status metrics
+            </Text>
+            <Text fontSize="0.9rem" marginBottom="2rem" color="#666">
+              Choose your preferred format for the report download:
+            </Text>
+            <Flex direction="column" gap="1rem">
+              <Button
+                onClick={() => generateReport('json')}
+                width="100%"
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
+              >
+                JSON Format
+              </Button>
+              <Button
+                onClick={() => generateReport('csv')}
+                width="100%"
+                backgroundColor="white"
+                color="black"
+                border="1px solid black"
+              >
+                CSV Format
+              </Button>
+              <Button
+                onClick={() => setShowReportsDialog(false)}
                 width="100%"
                 backgroundColor="#f7fafc"
                 color="black"

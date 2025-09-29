@@ -183,13 +183,18 @@
                 "s3:DeleteObjects",
                 "cloudwatch:GetMetricStatistics",
                 "cloudwatch:ListMetrics",
-                "cloudwatch:GetMetricData"
+                "cloudwatch:GetMetricData",
+                "cognito-idp:UpdateUserPool",
+                "cognito-idp:ListUserPoolClients",
+                "cognito-idp:UpdateUserPoolClient",
+                "cognito-idp:ListUserPools"
               ],
               "Resource": [
                 "arn:aws:dynamodb:*:*:table/*",
                 "arn:aws:s3:::*",
                 "arn:aws:s3:::*/*",
-                "arn:aws:cloudwatch:*:*:*"
+                "arn:aws:cloudwatch:*:*:*",
+                "arn:aws:cognito-idp:*:*:userpool/*"
               ],
               "Effect": "Allow"
             }

@@ -63,6 +63,13 @@
       "permissions": {
         "setting": "open"
       }
+    },
+    "/system-config": {
+      "name": "/system-config",
+      "lambdaFunction": "sendEmailNotification",
+      "permissions": {
+        "setting": "open"
+      }
     }
   }
 }
