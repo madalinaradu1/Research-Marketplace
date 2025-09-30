@@ -51,6 +51,7 @@ const MessagesPage = ({ user }) => {
   const [newMessage, setNewMessage] = useState({ recipient: '', subject: '', body: '' });
   const [isSendingNew, setIsSendingNew] = useState(false);
   const [archivedMessages, setArchivedMessages] = useState([]);
+  const [archivedSentMessages, setArchivedSentMessages] = useState([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
   const [messageScrollRef, setMessageScrollRef] = useState(null);
@@ -106,6 +107,12 @@ const MessagesPage = ({ user }) => {
         .filter(msg => {
           const isSender = msg.senderID === userId;
           const isReceiver = msg.receiverID === userId;
+          
+          // Filter out announcement messages only for the sender
+          if (isSender && msg.subject && msg.subject.includes('[Announcement to')) {
+            return false;
+          }
+          
           console.log(`Message ${msg.id}: sender=${msg.senderID}, receiver=${msg.receiverID}, isSender=${isSender}, isReceiver=${isReceiver}`);
           return isSender || isReceiver;
         })
@@ -155,6 +162,10 @@ const MessagesPage = ({ user }) => {
       // Load archived messages from localStorage
       const archived = JSON.parse(localStorage.getItem(`archived_messages_${userId}`) || '[]');
       setArchivedMessages(archived);
+      
+      // Load archived sent messages from localStorage (for admins)
+      const archivedSent = JSON.parse(localStorage.getItem(`archived_sent_messages_${userId}`) || '[]');
+      setArchivedSentMessages(archivedSent);
       
       // Fetch available recipients based on user role
       await fetchAvailableRecipients(userId, allUsers);
@@ -326,15 +337,38 @@ const MessagesPage = ({ user }) => {
   };
 
   const getInboxMessages = () => messages.filter(msg => !archivedMessages.includes(msg.id));
-  const getSentMessages = () => [];
+  const getSentMessages = () => {
+    if (user.role !== 'Admin') return [];
+    return messages.filter(msg => 
+      msg.senderID === (user.id || user.username) && 
+      msg.subject && 
+      msg.subject.startsWith('[Announcement]') &&
+      !archivedSentMessages.includes(msg.id)
+    );
+  };
   const getArchivedMessages = () => messages.filter(msg => archivedMessages.includes(msg.id));
+  const getArchivedSentMessages = () => {
+    if (user.role !== 'Admin') return [];
+    return messages.filter(msg => 
+      msg.senderID === (user.id || user.username) && 
+      msg.subject && 
+      msg.subject.startsWith('[Announcement]') &&
+      archivedSentMessages.includes(msg.id)
+    );
+  };
   const getUnreadCount = () => getInboxMessages().filter(msg => msg.hasUnread).length;
   
-  const archiveMessage = (messageId) => {
+  const archiveMessage = (messageId, isSentMessage = false) => {
     const userId = user.id || user.username;
-    const newArchived = [...archivedMessages, messageId];
-    setArchivedMessages(newArchived);
-    localStorage.setItem(`archived_messages_${userId}`, JSON.stringify(newArchived));
+    if (isSentMessage) {
+      const newArchivedSent = [...archivedSentMessages, messageId];
+      setArchivedSentMessages(newArchivedSent);
+      localStorage.setItem(`archived_sent_messages_${userId}`, JSON.stringify(newArchivedSent));
+    } else {
+      const newArchived = [...archivedMessages, messageId];
+      setArchivedMessages(newArchived);
+      localStorage.setItem(`archived_messages_${userId}`, JSON.stringify(newArchived));
+    }
     setShowDeleteConfirm(false);
     setMessageToDelete(null);
   };
@@ -457,7 +491,8 @@ const MessagesPage = ({ user }) => {
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex alignItems="center" gap="0.75rem">
                           <Text fontWeight={message.hasUnread ? '600' : '500'} color="#2d3748">
-                            {message.senderID === (user.id || user.username) ? (message.receiver?.name || 'Deleted User') : (message.sender?.name || 'Deleted User')}
+                            {message.senderID === (user.id || user.username) ? (message.receiver?.name || 'Deleted User') : 
+                             (message.subject && (message.subject.startsWith('[Announcement]') || message.subject.includes('[Announcement to')) ? 'GCU UROP Admin' : (message.sender?.name || 'Deleted User'))}
                           </Text>
                           {message.hasUnread && (
                             <Badge backgroundColor="#4299e1" color="white" fontSize="0.7rem">
@@ -502,50 +537,104 @@ const MessagesPage = ({ user }) => {
           </Card>
         </TabItem>
         
+
         <TabItem title="Archive">
           <Card backgroundColor="white" padding="1.5rem">
-            {getArchivedMessages().length === 0 ? (
+            {user.role === 'Admin' && getArchivedSentMessages().length > 0 && (
+              <>
+                <Heading level={4} marginBottom="1rem" color="#2d3748">Archived Sent Announcements</Heading>
+                <Flex direction="column" gap="0.75rem" marginBottom="2rem">
+                  {getArchivedSentMessages().map((message) => (
+                    <Card 
+                      key={message.id}
+                      backgroundColor="#f8fafc"
+                      padding="1rem"
+                      border="1px solid #e2e8f0"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => setSelectedMessage(message)}
+                    >
+                      <Flex direction="column" gap="0.5rem">
+                        <Flex justifyContent="space-between" alignItems="center">
+                          <Flex alignItems="center" gap="0.75rem">
+                            <Text fontWeight="500" color="#2d3748">
+                              To: {message.subject && message.subject.includes('All Users') ? 'All Users' :
+                                   message.subject && message.subject.includes('Students') ? 'Students' :
+                                   message.subject && message.subject.includes('Faculty') ? 'Faculty' : 'Coordinators'}
+                            </Text>
+                            <Badge backgroundColor="#718096" color="white" fontSize="0.7rem">
+                              Archived Sent
+                            </Badge>
+                          </Flex>
+                          <Text fontSize="0.8rem" color="#718096">
+                            {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
+                          </Text>
+                        </Flex>
+                        <Text fontSize="0.9rem" color="#4a5568" fontWeight="400">
+                          {message.subject}
+                        </Text>
+                        <Text fontSize="0.85rem" color="#718096">
+                          {(message.body || message.content || '').replace(/<[^>]*>/g, '').substring(0, 120)}...
+                        </Text>
+                      </Flex>
+                    </Card>
+                  ))}
+                </Flex>
+                <Divider marginBottom="2rem" />
+              </>
+            )}
+            
+            {user.role === 'Admin' && getArchivedMessages().length === 0 && getArchivedSentMessages().length === 0 ? (
               <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
                 <Text fontSize="3rem">📁</Text>
                 <Text fontSize="1.1rem" color="#4a5568">No archived messages</Text>
                 <Text fontSize="0.9rem" color="#718096">Archived messages will appear here</Text>
               </Flex>
-            ) : (
-              <Flex direction="column" gap="0.75rem">
-                {getArchivedMessages().map((message) => (
-                  <Card 
-                    key={message.id}
-                    backgroundColor="#f8fafc"
-                    padding="1rem"
-                    border="1px solid #e2e8f0"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setSelectedMessage(message)}
-                  >
-                    <Flex direction="column" gap="0.5rem">
-                      <Flex justifyContent="space-between" alignItems="center">
-                        <Flex alignItems="center" gap="0.75rem">
-                          <Text fontWeight="500" color="#2d3748">
-                            {message.senderID === (user.id || user.username) ? (message.receiver?.name || 'Deleted User') : (message.sender?.name || 'Deleted User')}
+            ) : getArchivedMessages().length === 0 && user.role !== 'Admin' ? (
+              <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
+                <Text fontSize="3rem">📁</Text>
+                <Text fontSize="1.1rem" color="#4a5568">No archived messages</Text>
+                <Text fontSize="0.9rem" color="#718096">Archived messages will appear here</Text>
+              </Flex>
+            ) : getArchivedMessages().length > 0 ? (
+              <>
+                {user.role === 'Admin' && <Heading level={4} marginBottom="1rem" color="#2d3748">Archived Received Messages</Heading>}
+                <Flex direction="column" gap="0.75rem">
+                  {getArchivedMessages().map((message) => (
+                    <Card 
+                      key={message.id}
+                      backgroundColor="#f8fafc"
+                      padding="1rem"
+                      border="1px solid #e2e8f0"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => setSelectedMessage(message)}
+                    >
+                      <Flex direction="column" gap="0.5rem">
+                        <Flex justifyContent="space-between" alignItems="center">
+                          <Flex alignItems="center" gap="0.75rem">
+                            <Text fontWeight="500" color="#2d3748">
+                              {message.senderID === (user.id || user.username) ? (message.receiver?.name || 'Deleted User') : 
+                               (message.subject && message.subject.startsWith('[Announcement]') ? 'GCU UROP Admin' : (message.sender?.name || 'Deleted User'))}
+                            </Text>
+                            <Badge backgroundColor="#718096" color="white" fontSize="0.7rem">
+                              Archived
+                            </Badge>
+                          </Flex>
+                          <Text fontSize="0.8rem" color="#718096">
+                            {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
                           </Text>
-                          <Badge backgroundColor="#718096" color="white" fontSize="0.7rem">
-                            Archived
-                          </Badge>
                         </Flex>
-                        <Text fontSize="0.8rem" color="#718096">
-                          {new Date(message.sentAt || message.createdAt).toLocaleDateString()}
+                        <Text fontSize="0.9rem" color="#4a5568" fontWeight="400">
+                          {message.subject}
+                        </Text>
+                        <Text fontSize="0.85rem" color="#718096">
+                          {(message.body || message.content || '').replace(/<[^>]*>/g, '').substring(0, 120)}...
                         </Text>
                       </Flex>
-                      <Text fontSize="0.9rem" color="#4a5568" fontWeight="400">
-                        {message.subject}
-                      </Text>
-                      <Text fontSize="0.85rem" color="#718096">
-                        {(message.body || message.content || '').replace(/<[^>]*>/g, '').substring(0, 120)}...
-                      </Text>
-                    </Flex>
-                  </Card>
-                ))}
-              </Flex>
-            )}
+                    </Card>
+                  ))}
+                </Flex>
+              </>
+            ) : null}
           </Card>
         </TabItem>
 
@@ -594,7 +683,8 @@ const MessagesPage = ({ user }) => {
                       </Flex>
                       <Flex justifyContent="space-between">
                         <Text fontWeight="600" color="#4a5568">{selectedMessage.senderID === (user.id || user.username) ? 'To:' : 'From:'}</Text>
-                        <Text color="#2d3748">{selectedMessage.senderID === (user.id || user.username) ? (selectedMessage.receiver?.name || 'Deleted User') : (selectedMessage.sender?.name || 'Deleted User')}</Text>
+                        <Text color="#2d3748">{selectedMessage.senderID === (user.id || user.username) ? (selectedMessage.receiver?.name || 'Deleted User') : 
+                         (selectedMessage.subject && (selectedMessage.subject.startsWith('[Announcement]') || selectedMessage.subject.includes('[Announcement to')) ? 'GCU UROP Admin' : (selectedMessage.sender?.name || 'Deleted User'))}</Text>
                       </Flex>
                     </Flex>
                   </Card>
@@ -618,7 +708,8 @@ const MessagesPage = ({ user }) => {
                             <Flex direction="column" gap="0.5rem">
                               <Flex justifyContent="space-between" alignItems="center">
                                 <Text fontSize="0.9rem" fontWeight="600" color="#2d3748">
-                                  {msg.senderID === (user.id || user.username) ? user.name : (msg.sender?.name || 'Deleted User')}
+                                  {msg.senderID === (user.id || user.username) ? user.name : 
+                                   (msg.subject && (msg.subject.startsWith('[Announcement]') || msg.subject.includes('[Announcement to')) ? 'GCU UROP Admin' : (msg.sender?.name || 'Deleted User'))}
                                 </Text>
                                 <Text fontSize="0.8rem" color="#718096">
                                   {new Date(msg.sentAt || msg.createdAt).toLocaleString()}
@@ -916,7 +1007,7 @@ const MessagesPage = ({ user }) => {
                     Cancel
                   </Button>
                   <Button
-                    onClick={() => archiveMessage(messageToDelete.id)}
+                    onClick={() => archiveMessage(messageToDelete.id, messageToDelete.isSentMessage)}
                     backgroundColor="white"
                     color="black"
                     border="1px solid black"

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation } from 'aws-amplify';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { 
   Flex, 
   Heading, 
@@ -99,6 +101,8 @@ const AdminDashboard = ({ user }) => {
   const [showAuditExportDialog, setShowAuditExportDialog] = useState(false);
   const [auditCurrentPage, setAuditCurrentPage] = useState(1);
   const auditLogsPerPage = 50;
+  const [announcement, setAnnouncement] = useState({ title: '', message: '', audience: 'all' });
+  const [isSendingAnnouncement, setIsSendingAnnouncement] = useState(false);
   
   useEffect(() => {
     fetchData();
@@ -755,6 +759,201 @@ const AdminDashboard = ({ user }) => {
     }
   };
   
+  const exportAnalytics = async (format) => {
+    try {
+      const dateStr = new Date().toISOString().split('T')[0];
+      const monthAgo = new Date();
+      monthAgo.setDate(monthAgo.getDate() - 30);
+      
+      const analyticsData = {
+        userActivity: {
+          activeToday: users.filter(u => {
+            const today = new Date();
+            const userDate = new Date(u.updatedAt || u.createdAt);
+            return userDate.toDateString() === today.toDateString();
+          }).length,
+          activeThisWeek: users.filter(u => {
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            const userDate = new Date(u.updatedAt || u.createdAt);
+            return userDate >= weekAgo;
+          }).length,
+          activeThisMonth: users.filter(u => {
+            const userDate = new Date(u.updatedAt || u.createdAt);
+            return userDate >= monthAgo;
+          }).length
+        },
+        registrationTrends: {
+          newUsers30d: users.filter(u => {
+            const userDate = new Date(u.createdAt);
+            return userDate >= monthAgo;
+          }).length,
+          profileCompletionRate: Math.round((users.filter(u => u.profileComplete).length / users.length) * 100) || 0,
+          deletedUsers: analytics.totalDeletedUsers || 0
+        },
+        applicationActivity: {
+          totalApplications: analytics.totalApplications,
+          applicationsThisMonth: applications.filter(a => {
+            const appDate = new Date(a.createdAt);
+            return appDate >= monthAgo;
+          }).length,
+          approvalRate: applications.length > 0 ? Math.round((analytics.approvedApplications / analytics.totalApplications) * 100) : 0,
+          pendingReview: analytics.pendingApplications
+        },
+        projectMetrics: {
+          totalProjects: analytics.totalProjects,
+          activeProjects: analytics.activeProjects,
+          projectsCreatedThisMonth: projects.filter(p => {
+            const projDate = new Date(p.createdAt);
+            return projDate >= monthAgo;
+          }).length,
+          avgApplicationsPerProject: projects.length > 0 ? Math.round(applications.length / projects.length * 10) / 10 : 0
+        },
+        userRoleDistribution: {
+          studentsPercent: Math.round((analytics.totalStudents / analytics.totalUsers) * 100) || 0,
+          studentsCount: analytics.totalStudents,
+          facultyPercent: Math.round((analytics.totalFaculty / analytics.totalUsers) * 100) || 0,
+          facultyCount: analytics.totalFaculty,
+          staffPercent: Math.round(((analytics.totalCoordinators + analytics.totalAdmins) / analytics.totalUsers) * 100) || 0,
+          staffCount: analytics.totalCoordinators + analytics.totalAdmins
+        },
+        generatedAt: new Date().toISOString()
+      };
+      
+      if (format === 'csv') {
+        const csvData = [
+          'ANALYTICS EXPORT',
+          `Generated: ${new Date().toLocaleString()}`,
+          '',
+          'USER ACTIVITY',
+          `Active Today,${analyticsData.userActivity.activeToday}`,
+          `Active This Week,${analyticsData.userActivity.activeThisWeek}`,
+          `Active This Month,${analyticsData.userActivity.activeThisMonth}`,
+          '',
+          'REGISTRATION TRENDS',
+          `New Users (30d),${analyticsData.registrationTrends.newUsers30d}`,
+          `Profile Completion Rate,${analyticsData.registrationTrends.profileCompletionRate}%`,
+          `Deleted Users,${analyticsData.registrationTrends.deletedUsers}`,
+          '',
+          'APPLICATION ACTIVITY',
+          `Total Applications,${analyticsData.applicationActivity.totalApplications}`,
+          `Applications This Month,${analyticsData.applicationActivity.applicationsThisMonth}`,
+          `Approval Rate,${analyticsData.applicationActivity.approvalRate}%`,
+          `Pending Review,${analyticsData.applicationActivity.pendingReview}`,
+          '',
+          'PROJECT METRICS',
+          `Total Projects,${analyticsData.projectMetrics.totalProjects}`,
+          `Active Projects,${analyticsData.projectMetrics.activeProjects}`,
+          `Projects Created This Month,${analyticsData.projectMetrics.projectsCreatedThisMonth}`,
+          `Avg Applications per Project,${analyticsData.projectMetrics.avgApplicationsPerProject}`,
+          '',
+          'USER ROLE DISTRIBUTION',
+          `Students,${analyticsData.userRoleDistribution.studentsPercent}% (${analyticsData.userRoleDistribution.studentsCount})`,
+          `Faculty,${analyticsData.userRoleDistribution.facultyPercent}% (${analyticsData.userRoleDistribution.facultyCount})`,
+          `Staff,${analyticsData.userRoleDistribution.staffPercent}% (${analyticsData.userRoleDistribution.staffCount})`
+        ].join('\n');
+        
+        const csvBlob = new Blob([csvData], { type: 'text/csv' });
+        const url = URL.createObjectURL(csvBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `analytics-export-${dateStr}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const analyticsStr = JSON.stringify(analyticsData, null, 2);
+        const analyticsBlob = new Blob([analyticsStr], { type: 'application/json' });
+        const url = URL.createObjectURL(analyticsBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `analytics-export-${dateStr}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+      
+      logAuditAction('Analytics Export', `Analytics Data (${format.toUpperCase()})`, `User Activity, Registration Trends, Application Activity, Project Metrics, Role Distribution`);
+      setMessage(`Analytics exported successfully as ${format.toUpperCase()}!`);
+    } catch (err) {
+      setError('Failed to export analytics.');
+    }
+  };
+  
+  const sendAnnouncement = async () => {
+    if (!announcement.title || !announcement.message) {
+      setError('Title and message are required.');
+      return;
+    }
+    
+    setIsSendingAnnouncement(true);
+    try {
+      // Filter users based on audience selection (exclude admin sender)
+      let targetUsers = users.filter(u => u.id !== user.id);
+      if (announcement.audience === 'students') {
+        targetUsers = users.filter(u => u.role === 'Student' && u.id !== user.id);
+      } else if (announcement.audience === 'faculty') {
+        targetUsers = users.filter(u => u.role === 'Faculty' && u.id !== user.id);
+      } else if (announcement.audience === 'coordinators') {
+        targetUsers = users.filter(u => u.role === 'Coordinator' && u.id !== user.id);
+      }
+      
+      // Create a single grouped message for the audience
+      const createMessageMutation = `
+        mutation CreateMessage($input: CreateMessageInput!) {
+          createMessage(input: $input) {
+            id
+          }
+        }
+      `;
+      
+      let successCount = 0;
+      let failCount = 0;
+      
+      const targetAudience = announcement.audience === 'all' ? 'All Users' : 
+                          announcement.audience === 'students' ? 'Students' :
+                          announcement.audience === 'faculty' ? 'Faculty' : 'Coordinators';
+      
+      // Create one message per user but with audience grouping info
+      for (const targetUser of targetUsers) {
+        try {
+          await API.graphql(graphqlOperation(createMessageMutation, {
+            input: {
+              senderID: user.id,
+              receiverID: targetUser.id,
+              subject: `[Announcement to ${targetAudience}] ${announcement.title}`,
+              body: announcement.message,
+              messageType: 'SYSTEM'
+            }
+          }));
+          successCount++;
+        } catch (err) {
+          console.error('Failed to send message to:', targetUser.email, err);
+          failCount++;
+        }
+      }
+      
+      const audienceText = announcement.audience === 'all' ? 'All Users' : 
+                          announcement.audience === 'students' ? 'Students' :
+                          announcement.audience === 'faculty' ? 'Faculty' : 'Coordinators';
+      
+      logAuditAction('Announcement Sent', `"${announcement.title}"`, `Sent to ${audienceText} (${successCount} delivered${failCount > 0 ? `, ${failCount} failed` : ''})`);
+      
+      if (successCount > 0) {
+        setMessage(`Announcement sent successfully to ${successCount} user${successCount > 1 ? 's' : ''}!${failCount > 0 ? ` ${failCount} failed.` : ''}`);
+      }
+      if (failCount > 0 && successCount === 0) {
+        setError(`Failed to send announcement to all ${failCount} users.`);
+      }
+      
+      // Clear form
+      setAnnouncement({ title: '', message: '', audience: 'all' });
+    } catch (err) {
+      console.error('Error sending announcement:', err);
+      setError('Failed to send announcement. Please try again.');
+    } finally {
+      setIsSendingAnnouncement(false);
+    }
+  };
+  
   const logAuditAction = async (action, resource, details = '') => {
     const newLog = {
       id: `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -1356,118 +1555,138 @@ const AdminDashboard = ({ user }) => {
         <TabItem title="Analytics">
           <Flex direction="column" gap="2rem">
             <Card>
-              <Heading level={4} marginBottom="1rem">Active Users</Heading>
+              <Heading level={4} marginBottom="1rem">User Activity</Heading>
               <Flex wrap="wrap" gap="1rem">
                 <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>245</Heading>
-                  <Text fontSize="0.9rem">Daily Active Users</Text>
+                  <Heading level={5}>{users.filter(u => {
+                    const today = new Date();
+                    const userDate = new Date(u.updatedAt || u.createdAt);
+                    return userDate.toDateString() === today.toDateString();
+                  }).length}</Heading>
+                  <Text fontSize="0.9rem">Active Today</Text>
                 </Card>
                 <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>1,234</Heading>
-                  <Text fontSize="0.9rem">Weekly Active Users</Text>
+                  <Heading level={5}>{users.filter(u => {
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    const userDate = new Date(u.updatedAt || u.createdAt);
+                    return userDate >= weekAgo;
+                  }).length}</Heading>
+                  <Text fontSize="0.9rem">Active This Week</Text>
                 </Card>
                 <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>3,456</Heading>
-                  <Text fontSize="0.9rem">Monthly Active Users</Text>
+                  <Heading level={5}>{users.filter(u => {
+                    const monthAgo = new Date();
+                    monthAgo.setDate(monthAgo.getDate() - 30);
+                    const userDate = new Date(u.updatedAt || u.createdAt);
+                    return userDate >= monthAgo;
+                  }).length}</Heading>
+                  <Text fontSize="0.9rem">Active This Month</Text>
                 </Card>
               </Flex>
             </Card>
             
             <Card>
-              <Heading level={4} marginBottom="1rem">User Engagement</Heading>
-              <Flex direction="column" gap="1rem">
-                <Flex justifyContent="space-between">
-                  <Text>Average Time Spent:</Text>
-                  <Text fontWeight="bold">24 minutes</Text>
-                </Flex>
-                <Flex justifyContent="space-between">
-                  <Text>Average Pages Visited:</Text>
-                  <Text fontWeight="bold">8.5 pages</Text>
-                </Flex>
-                <Flex justifyContent="space-between">
-                  <Text>Most Used Feature:</Text>
-                  <Text fontWeight="bold">Project Search</Text>
-                </Flex>
-              </Flex>
-            </Card>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">Adoption Metrics</Heading>
+              <Heading level={4} marginBottom="1rem">Registration Trends</Heading>
               <Flex wrap="wrap" gap="1rem">
                 <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>89</Heading>
-                  <Text fontSize="0.9rem">New Registrations (30d)</Text>
+                  <Heading level={5}>{users.filter(u => {
+                    const monthAgo = new Date();
+                    monthAgo.setDate(monthAgo.getDate() - 30);
+                    const userDate = new Date(u.createdAt);
+                    return userDate >= monthAgo;
+                  }).length}</Heading>
+                  <Text fontSize="0.9rem">New Users (30d)</Text>
                 </Card>
                 <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>12%</Heading>
-                  <Text fontSize="0.9rem">Drop-off Rate</Text>
-                </Card>
-                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>76%</Heading>
+                  <Heading level={5}>{Math.round((users.filter(u => u.profileComplete).length / users.length) * 100) || 0}%</Heading>
                   <Text fontSize="0.9rem">Profile Completion Rate</Text>
                 </Card>
+                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
+                  <Heading level={5}>{analytics.totalDeletedUsers || 0}</Heading>
+                  <Text fontSize="0.9rem">Deleted Users</Text>
+                </Card>
               </Flex>
             </Card>
             
             <Card>
-              <Heading level={4} marginBottom="1rem">Top Activities</Heading>
+              <Heading level={4} marginBottom="1rem">Application Activity</Heading>
               <Flex direction="column" gap="0.5rem">
                 <Flex justifyContent="space-between">
-                  <Text>Research Applications:</Text>
-                  <Text fontWeight="bold">156 this month</Text>
+                  <Text>Total Applications:</Text>
+                  <Text fontWeight="bold">{analytics.totalApplications}</Text>
                 </Flex>
                 <Flex justifyContent="space-between">
-                  <Text>Profile Updates:</Text>
-                  <Text fontWeight="bold">89 this month</Text>
+                  <Text>Applications This Month:</Text>
+                  <Text fontWeight="bold">{applications.filter(a => {
+                    const monthAgo = new Date();
+                    monthAgo.setDate(monthAgo.getDate() - 30);
+                    const appDate = new Date(a.createdAt);
+                    return appDate >= monthAgo;
+                  }).length}</Text>
                 </Flex>
                 <Flex justifyContent="space-between">
-                  <Text>Project Views:</Text>
-                  <Text fontWeight="bold">2,345 this month</Text>
+                  <Text>Approval Rate:</Text>
+                  <Text fontWeight="bold">{applications.length > 0 ? Math.round((analytics.approvedApplications / analytics.totalApplications) * 100) : 0}%</Text>
                 </Flex>
                 <Flex justifyContent="space-between">
-                  <Text>Messages Sent:</Text>
-                  <Text fontWeight="bold">567 this month</Text>
+                  <Text>Pending Review:</Text>
+                  <Text fontWeight="bold">{analytics.pendingApplications}</Text>
                 </Flex>
               </Flex>
             </Card>
             
             <Card>
-              <Heading level={4} marginBottom="1rem">Device/Platform Breakdown</Heading>
+              <Heading level={4} marginBottom="1rem">Project Metrics</Heading>
+              <Flex direction="column" gap="0.5rem">
+                <Flex justifyContent="space-between">
+                  <Text>Total Projects:</Text>
+                  <Text fontWeight="bold">{analytics.totalProjects}</Text>
+                </Flex>
+                <Flex justifyContent="space-between">
+                  <Text>Active Projects:</Text>
+                  <Text fontWeight="bold">{analytics.activeProjects}</Text>
+                </Flex>
+                <Flex justifyContent="space-between">
+                  <Text>Projects Created This Month:</Text>
+                  <Text fontWeight="bold">{projects.filter(p => {
+                    const monthAgo = new Date();
+                    monthAgo.setDate(monthAgo.getDate() - 30);
+                    const projDate = new Date(p.createdAt);
+                    return projDate >= monthAgo;
+                  }).length}</Text>
+                </Flex>
+                <Flex justifyContent="space-between">
+                  <Text>Average Applications per Project:</Text>
+                  <Text fontWeight="bold">{projects.length > 0 ? Math.round(applications.length / projects.length * 10) / 10 : 0}</Text>
+                </Flex>
+              </Flex>
+            </Card>
+            
+            <Card>
+              <Heading level={4} marginBottom="1rem">User Role Distribution</Heading>
               <Flex wrap="wrap" gap="1rem">
                 <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>65%</Heading>
-                  <Text fontSize="0.9rem">Web Browser</Text>
+                  <Heading level={5}>{Math.round((analytics.totalStudents / analytics.totalUsers) * 100) || 0}%</Heading>
+                  <Text fontSize="0.9rem">Students ({analytics.totalStudents})</Text>
                 </Card>
                 <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>25%</Heading>
-                  <Text fontSize="0.9rem">iOS Mobile</Text>
+                  <Heading level={5}>{Math.round((analytics.totalFaculty / analytics.totalUsers) * 100) || 0}%</Heading>
+                  <Text fontSize="0.9rem">Faculty ({analytics.totalFaculty})</Text>
                 </Card>
                 <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>10%</Heading>
-                  <Text fontSize="0.9rem">Android Mobile</Text>
+                  <Heading level={5}>{Math.round(((analytics.totalCoordinators + analytics.totalAdmins) / analytics.totalUsers) * 100) || 0}%</Heading>
+                  <Text fontSize="0.9rem">Staff ({analytics.totalCoordinators + analytics.totalAdmins})</Text>
                 </Card>
               </Flex>
             </Card>
             
+
             <Card>
-              <Heading level={4} marginBottom="1rem">Usage Heatmaps</Heading>
-              <Text marginBottom="1rem">Peak login times and app usage patterns</Text>
-              <Flex direction="column" gap="0.5rem">
-                <Text fontSize="0.9rem">• Peak usage: 10 AM - 2 PM weekdays</Text>
-                <Text fontSize="0.9rem">• Secondary peak: 7 PM - 9 PM</Text>
-                <Text fontSize="0.9rem">• Lowest usage: Weekends 6 AM - 10 AM</Text>
-                <Text fontSize="0.9rem">• Most active day: Tuesday</Text>
-              </Flex>
-            </Card>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">Export Reports</Heading>
+              <Heading level={4} marginBottom="1rem">Export Analytics</Heading>
               <Flex gap="1rem" wrap="wrap">
-                <Button>Export User Analytics</Button>
-                <Button>Export Engagement Report</Button>
-                <Button>Export Usage Statistics</Button>
-                <Button>Generate Leadership Report</Button>
-                <Button>Custom Report Builder</Button>
+                <Button onClick={() => exportAnalytics('csv')}>Export CSV Report</Button>
+                <Button onClick={() => exportAnalytics('json')}>Export JSON Report</Button>
               </Flex>
             </Card>
           </Flex>
@@ -1476,95 +1695,55 @@ const AdminDashboard = ({ user }) => {
         <TabItem title="Communication">
           <Flex direction="column" gap="2rem">
             <Card>
-              <Heading level={4} marginBottom="1rem">Announcements Management</Heading>
-              <Text marginBottom="1rem">Post campus-wide updates and notifications</Text>
+              <Heading level={4} marginBottom="1rem">Send Announcement</Heading>
               <Flex direction="column" gap="1rem">
                 <TextField
                   label="Announcement Title"
                   placeholder="Enter announcement title"
+                  value={announcement.title}
+                  onChange={(e) => setAnnouncement(prev => ({ ...prev, title: e.target.value }))}
                 />
-                <TextField
-                  label="Message"
-                  placeholder="Enter announcement message"
-                  as="textarea"
-                  rows={4}
-                />
-                <SelectField label="Target Audience">
-                  <option value="all">All Users</option>
-                  <option value="students">Students Only</option>
-                  <option value="faculty">Faculty Only</option>
-                  <option value="coordinators">Coordinators Only</option>
+                <div>
+                  <Text fontSize="0.9rem" fontWeight="500" color="#4a5568" marginBottom="0.5rem">Message</Text>
+                  <div style={{ height: '200px', marginBottom: '1rem' }}>
+                    <ReactQuill
+                      value={announcement.message}
+                      onChange={(value) => setAnnouncement(prev => ({ ...prev, message: value }))}
+                      placeholder="Enter announcement message"
+                      modules={{
+                        toolbar: [
+                          ['bold', 'italic', 'underline'],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['link'],
+                          ['clean']
+                        ]
+                      }}
+                      style={{ height: '150px' }}
+                    />
+                  </div>
+                </div>
+                <SelectField 
+                  label="Target Audience"
+                  value={announcement.audience}
+                  onChange={(e) => setAnnouncement(prev => ({ ...prev, audience: e.target.value }))}
+                >
+                  <option value="all">All Users ({users.length})</option>
+                  <option value="students">Students Only ({analytics.totalStudents})</option>
+                  <option value="faculty">Faculty Only ({analytics.totalFaculty})</option>
+                  <option value="coordinators">Coordinators Only ({analytics.totalCoordinators})</option>
                 </SelectField>
                 <Flex gap="1rem">
-                  <Button>Send Announcement</Button>
-                  <Button>Schedule for Later</Button>
-                  <Button>Save as Draft</Button>
+                  <Button 
+                    onClick={sendAnnouncement}
+                    isLoading={isSendingAnnouncement}
+                    isDisabled={!announcement.title || !announcement.message}
+                  >
+                    Send Announcement
+                  </Button>
                 </Flex>
               </Flex>
             </Card>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">Recent Announcements</Heading>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell as="th">Title</TableCell>
-                    <TableCell as="th">Audience</TableCell>
-                    <TableCell as="th">Sent Date</TableCell>
-                    <TableCell as="th">Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>Spring Research Fair Registration Open</TableCell>
-                    <TableCell>All Users</TableCell>
-                    <TableCell>{new Date().toLocaleDateString()}</TableCell>
-                    <TableCell>Sent</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>New Application Deadline Reminder</TableCell>
-                    <TableCell>Students</TableCell>
-                    <TableCell>{new Date(Date.now() - 86400000).toLocaleDateString()}</TableCell>
-                    <TableCell>Sent</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </Card>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">Engagement Analytics</Heading>
-              <Text marginBottom="1rem">Track message delivery and engagement rates</Text>
-              <Flex wrap="wrap" gap="1rem">
-                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>98.5%</Heading>
-                  <Text fontSize="0.9rem">Delivery Rate</Text>
-                </Card>
-                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>67%</Heading>
-                  <Text fontSize="0.9rem">Open Rate</Text>
-                </Card>
-                <Card variation="outlined" padding="1rem" flex="1" textAlign="center">
-                  <Heading level={5}>23%</Heading>
-                  <Text fontSize="0.9rem">Click-through Rate</Text>
-                </Card>
-              </Flex>
-              <Flex direction="column" gap="0.5rem" marginTop="1rem">
-                <Text fontSize="0.9rem">• Most engaged audience: Faculty (78% open rate)</Text>
-                <Text fontSize="0.9rem">• Best send time: Tuesday 10 AM</Text>
-                <Text fontSize="0.9rem">• Average response time: 4.2 hours</Text>
-              </Flex>
-            </Card>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">Message Templates</Heading>
-              <Flex gap="1rem" wrap="wrap">
-                <Button>Welcome Message</Button>
-                <Button>Deadline Reminder</Button>
-                <Button>Application Status Update</Button>
-                <Button>System Maintenance Notice</Button>
-                <Button>Create New Template</Button>
-              </Flex>
-            </Card>
+
           </Flex>
         </TabItem>
         
