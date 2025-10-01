@@ -1427,6 +1427,18 @@ const AdminDashboard = ({ user }) => {
                 </Flex>
               </Flex>
             </Card>
+            
+            <Card>
+              <Heading level={4} marginBottom="1rem">Export Analytics</Heading>
+              <Flex direction="column" gap="1rem">
+                <Flex gap="0.5rem" wrap="wrap">
+                  <Button size="small" flex="1" onClick={() => exportAnalytics('csv')}>Export Analytics CSV</Button>
+                  <Button size="small" flex="1" onClick={() => exportAnalytics('json')}>Export Analytics JSON</Button>
+                  <div style={{ flex: '1' }}></div>
+                  <div style={{ flex: '1' }}></div>
+                </Flex>
+              </Flex>
+            </Card>
           </Flex>
         </TabItem>
         
@@ -1682,13 +1694,7 @@ const AdminDashboard = ({ user }) => {
             </Card>
             
 
-            <Card>
-              <Heading level={4} marginBottom="1rem">Export Analytics</Heading>
-              <Flex gap="1rem" wrap="wrap">
-                <Button onClick={() => exportAnalytics('csv')}>Export CSV Report</Button>
-                <Button onClick={() => exportAnalytics('json')}>Export JSON Report</Button>
-              </Flex>
-            </Card>
+
           </Flex>
         </TabItem>
         
@@ -1747,41 +1753,7 @@ const AdminDashboard = ({ user }) => {
           </Flex>
         </TabItem>
         
-        <TabItem title="Support">
-          <Flex direction="column" gap="2rem">
-            <Card>
-              <Heading level={4} marginBottom="1rem">Troubleshooting Tools</Heading>
-              <Flex gap="1rem" wrap="wrap">
-                <Button>Clear Cache</Button>
-                <Button>Restart Services</Button>
-                <Button>Test Connections</Button>
-                <Button>Validate Data</Button>
-                <Button>Check Permissions</Button>
-              </Flex>
-            </Card>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">System Maintenance</Heading>
-              <Flex direction="column" gap="1rem">
-                <Button>Schedule Maintenance Window</Button>
-                <Button>Update System Components</Button>
-                <Button>Apply Security Patches</Button>
-                <Button>Optimize Database</Button>
-              </Flex>
-            </Card>
-            
-            <Card>
-              <Heading level={4} marginBottom="1rem">Policy Enforcement</Heading>
-              <Text>Ensure compliance with university policies:</Text>
-              <Flex direction="column" gap="0.5rem" marginTop="1rem">
-                <Text fontSize="0.9rem">• Data retention policies: 7 years</Text>
-                <Text fontSize="0.9rem">• Privacy compliance: FERPA compliant</Text>
-                <Text fontSize="0.9rem">• Security standards: SOC 2 Type II</Text>
-                <Text fontSize="0.9rem">• Access controls: Role-based permissions</Text>
-              </Flex>
-            </Card>
-          </Flex>
-        </TabItem>
+
       </Tabs>
       
       {showDeleteConfirm && (
