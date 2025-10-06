@@ -1,181 +1,27 @@
 {
-  "api": {
-    "emailapi": {
-      "dependsOn": [
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
-          "resourceName": "sendEmailNotification"
-        },
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
-          "resourceName": "adminCreateUser"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "API Gateway"
-    },
-    "researchmarketplace": {
-      "dependsOn": [
-        {
-          "attributes": [
-            "UserPoolId"
-          ],
-          "category": "auth",
-          "resourceName": "ResearchMarketplace"
-        }
-      ],
-      "output": {
-        "authConfig": {
-          "additionalAuthenticationProviders": [
-            {
-              "authenticationType": "AWS_IAM"
-            }
-          ],
-          "defaultAuthentication": {
-            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
-            "userPoolConfig": {
-              "userPoolId": "authResearchMarketplace"
-            }
-          }
-        }
-      },
-      "providerPlugin": "awscloudformation",
-      "service": "AppSync"
-    }
-  },
-  "auth": {
-    "ResearchMarketplace": {
-      "customAuth": false,
-      "dependsOn": [],
-      "frontendAuthConfig": {
-        "mfaConfiguration": "OFF",
-        "mfaTypes": [
-          "SMS"
-        ],
-        "passwordProtectionSettings": {
-          "passwordPolicyCharacters": [
-            "REQUIRES_LOWERCASE",
-            "REQUIRES_NUMBERS",
-            "REQUIRES_SYMBOLS",
-            "REQUIRES_UPPERCASE"
-          ],
-          "passwordPolicyMinLength": 8
-        },
-        "signupAttributes": [
-          "EMAIL",
-          "GIVEN_NAME",
-          "FAMILY_NAME",
-          "PREFERRED_USERNAME"
-        ],
-        "socialProviders": [],
-        "usernameAttributes": [
-          "EMAIL"
-        ],
-        "verificationMechanisms": [
-          "EMAIL"
-        ]
-      },
-      "providerPlugin": "awscloudformation",
-      "service": "Cognito"
-    }
-  },
-  "function": {
-    "adminCreateUser": {
-      "build": true,
-      "dependsOn": [],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
-    "cleanupDeletedUsers": {
-      "build": true,
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
-    "sendEmailNotification": {
-      "build": true,
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
+  "hosting": {
+    "amplifyhosting": {
+      "lastPushTimeStamp": "2025-10-06T21:14:56.656Z",
+      "service": "amplifyhosting",
+      "type": "cicd"
     }
   },
   "parameters": {
-    "AMPLIFY_function_adminCreateUser_deploymentBucketName": {
+    "AMPLIFY_hosting_amplifyhosting_appId": {
       "usedBy": [
         {
-          "category": "function",
-          "resourceName": "adminCreateUser"
+          "category": "hosting",
+          "resourceName": "amplifyhosting"
         }
       ]
     },
-    "AMPLIFY_function_adminCreateUser_s3Key": {
+    "AMPLIFY_hosting_amplifyhosting_type": {
       "usedBy": [
         {
-          "category": "function",
-          "resourceName": "adminCreateUser"
+          "category": "hosting",
+          "resourceName": "amplifyhosting"
         }
       ]
-    },
-    "AMPLIFY_function_adminDeleteUser_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "adminDeleteUser"
-        }
-      ]
-    },
-    "AMPLIFY_function_adminDeleteUser_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "adminDeleteUser"
-        }
-      ]
-    },
-    "AMPLIFY_function_cleanupDeletedUsers_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "cleanupDeletedUsers"
-        }
-      ]
-    },
-    "AMPLIFY_function_cleanupDeletedUsers_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "cleanupDeletedUsers"
-        }
-      ]
-    },
-    "AMPLIFY_function_sendEmailNotification_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "sendEmailNotification"
-        }
-      ]
-    },
-    "AMPLIFY_function_sendEmailNotification_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "sendEmailNotification"
-        }
-      ]
-    }
-  },
-  "storage": {
-    "applicationDocuments": {
-      "dependsOn": [],
-      "providerPlugin": "awscloudformation",
-      "service": "S3"
     }
   }
 }

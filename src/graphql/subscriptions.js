@@ -22,45 +22,13 @@ export const onCreateUser = /* GraphQL */ `
       affiliation
       profileComplete
       status
-      applicationCount
       expectedGraduation
       availability
       personalStatement
       certificates
+      applicationCount
       createdAt
       updatedAt
-      facultyProjects {
-        nextToken
-        __typename
-      }
-      studentApplications {
-        nextToken
-        __typename
-      }
-      sentMessages {
-        nextToken
-        __typename
-      }
-      receivedMessages {
-        nextToken
-        __typename
-      }
-      notifications {
-        nextToken
-        __typename
-      }
-      activityLogs {
-        nextToken
-        __typename
-      }
-      messageBoards {
-        nextToken
-        __typename
-      }
-      studentPosts {
-        nextToken
-        __typename
-      }
       owner
       __typename
     }
@@ -87,45 +55,13 @@ export const onUpdateUser = /* GraphQL */ `
       affiliation
       profileComplete
       status
-      applicationCount
       expectedGraduation
       availability
       personalStatement
       certificates
+      applicationCount
       createdAt
       updatedAt
-      facultyProjects {
-        nextToken
-        __typename
-      }
-      studentApplications {
-        nextToken
-        __typename
-      }
-      sentMessages {
-        nextToken
-        __typename
-      }
-      receivedMessages {
-        nextToken
-        __typename
-      }
-      notifications {
-        nextToken
-        __typename
-      }
-      activityLogs {
-        nextToken
-        __typename
-      }
-      messageBoards {
-        nextToken
-        __typename
-      }
-      studentPosts {
-        nextToken
-        __typename
-      }
       owner
       __typename
     }
@@ -152,45 +88,13 @@ export const onDeleteUser = /* GraphQL */ `
       affiliation
       profileComplete
       status
-      applicationCount
       expectedGraduation
       availability
       personalStatement
       certificates
+      applicationCount
       createdAt
       updatedAt
-      facultyProjects {
-        nextToken
-        __typename
-      }
-      studentApplications {
-        nextToken
-        __typename
-      }
-      sentMessages {
-        nextToken
-        __typename
-      }
-      receivedMessages {
-        nextToken
-        __typename
-      }
-      notifications {
-        nextToken
-        __typename
-      }
-      activityLogs {
-        nextToken
-        __typename
-      }
-      messageBoards {
-        nextToken
-        __typename
-      }
-      studentPosts {
-        nextToken
-        __typename
-      }
       owner
       __typename
     }
@@ -199,9 +103,9 @@ export const onDeleteUser = /* GraphQL */ `
 export const onCreateProject = /* GraphQL */ `
   subscription OnCreateProject(
     $filter: ModelSubscriptionProjectFilterInput
-    $facultyID: String
+    $owner: String
   ) {
-    onCreateProject(filter: $filter, facultyID: $facultyID) {
+    onCreateProject(filter: $filter, owner: $owner) {
       id
       title
       description
@@ -212,32 +116,6 @@ export const onCreateProject = /* GraphQL */ `
       duration
       applicationDeadline
       facultyID
-      faculty {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       isActive
       requiresTranscript
       projectStatus
@@ -245,16 +123,13 @@ export const onCreateProject = /* GraphQL */ `
       rejectionReason
       selectedStudentID
       filledAt
-      createdAt
-      updatedAt
       applications {
         nextToken
         __typename
       }
-      messageBoards {
-        nextToken
-        __typename
-      }
+      createdAt
+      updatedAt
+      owner
       __typename
     }
   }
@@ -262,9 +137,9 @@ export const onCreateProject = /* GraphQL */ `
 export const onUpdateProject = /* GraphQL */ `
   subscription OnUpdateProject(
     $filter: ModelSubscriptionProjectFilterInput
-    $facultyID: String
+    $owner: String
   ) {
-    onUpdateProject(filter: $filter, facultyID: $facultyID) {
+    onUpdateProject(filter: $filter, owner: $owner) {
       id
       title
       description
@@ -275,32 +150,6 @@ export const onUpdateProject = /* GraphQL */ `
       duration
       applicationDeadline
       facultyID
-      faculty {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       isActive
       requiresTranscript
       projectStatus
@@ -308,16 +157,13 @@ export const onUpdateProject = /* GraphQL */ `
       rejectionReason
       selectedStudentID
       filledAt
-      createdAt
-      updatedAt
       applications {
         nextToken
         __typename
       }
-      messageBoards {
-        nextToken
-        __typename
-      }
+      createdAt
+      updatedAt
+      owner
       __typename
     }
   }
@@ -325,9 +171,9 @@ export const onUpdateProject = /* GraphQL */ `
 export const onDeleteProject = /* GraphQL */ `
   subscription OnDeleteProject(
     $filter: ModelSubscriptionProjectFilterInput
-    $facultyID: String
+    $owner: String
   ) {
-    onDeleteProject(filter: $filter, facultyID: $facultyID) {
+    onDeleteProject(filter: $filter, owner: $owner) {
       id
       title
       description
@@ -338,32 +184,6 @@ export const onDeleteProject = /* GraphQL */ `
       duration
       applicationDeadline
       facultyID
-      faculty {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       isActive
       requiresTranscript
       projectStatus
@@ -371,16 +191,13 @@ export const onDeleteProject = /* GraphQL */ `
       rejectionReason
       selectedStudentID
       filledAt
-      createdAt
-      updatedAt
       applications {
         nextToken
         __typename
       }
-      messageBoards {
-        nextToken
-        __typename
-      }
+      createdAt
+      updatedAt
+      owner
       __typename
     }
   }
@@ -388,59 +205,12 @@ export const onDeleteProject = /* GraphQL */ `
 export const onCreateApplication = /* GraphQL */ `
   subscription OnCreateApplication(
     $filter: ModelSubscriptionApplicationFilterInput
+    $owner: String
   ) {
-    onCreateApplication(filter: $filter) {
+    onCreateApplication(filter: $filter, owner: $owner) {
       id
       studentID
-      student {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       projectID
-      project {
-        id
-        title
-        description
-        department
-        skillsRequired
-        tags
-        qualifications
-        duration
-        applicationDeadline
-        facultyID
-        isActive
-        requiresTranscript
-        projectStatus
-        coordinatorNotes
-        rejectionReason
-        selectedStudentID
-        filledAt
-        createdAt
-        updatedAt
-        __typename
-      }
       statement
       resumeKey
       transcriptLink
@@ -457,36 +227,14 @@ export const onCreateApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      withdrawReason
       rejectionReason
       acceptanceReason
+      withdrawReason
       isSelected
       selectedAt
-      submittedToFacultyAt
-      submittedToDepartmentAt
-      submittedToAdminAt
-      approvedAt
-      returnedAt
-      rejectedAt
-      cancelledAt
       createdAt
       updatedAt
-      learningContract {
-        id
-        applicationID
-        researchSchedule
-        researchRequirements
-        learningObjectives
-        evaluationCriteria
-        mentorApproved
-        studentConfirmed
-        submittedAt
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      applicationLearningContractId
+      owner
       __typename
     }
   }
@@ -494,59 +242,12 @@ export const onCreateApplication = /* GraphQL */ `
 export const onUpdateApplication = /* GraphQL */ `
   subscription OnUpdateApplication(
     $filter: ModelSubscriptionApplicationFilterInput
+    $owner: String
   ) {
-    onUpdateApplication(filter: $filter) {
+    onUpdateApplication(filter: $filter, owner: $owner) {
       id
       studentID
-      student {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       projectID
-      project {
-        id
-        title
-        description
-        department
-        skillsRequired
-        tags
-        qualifications
-        duration
-        applicationDeadline
-        facultyID
-        isActive
-        requiresTranscript
-        projectStatus
-        coordinatorNotes
-        rejectionReason
-        selectedStudentID
-        filledAt
-        createdAt
-        updatedAt
-        __typename
-      }
       statement
       resumeKey
       transcriptLink
@@ -563,36 +264,14 @@ export const onUpdateApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      withdrawReason
       rejectionReason
       acceptanceReason
+      withdrawReason
       isSelected
       selectedAt
-      submittedToFacultyAt
-      submittedToDepartmentAt
-      submittedToAdminAt
-      approvedAt
-      returnedAt
-      rejectedAt
-      cancelledAt
       createdAt
       updatedAt
-      learningContract {
-        id
-        applicationID
-        researchSchedule
-        researchRequirements
-        learningObjectives
-        evaluationCriteria
-        mentorApproved
-        studentConfirmed
-        submittedAt
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      applicationLearningContractId
+      owner
       __typename
     }
   }
@@ -600,59 +279,12 @@ export const onUpdateApplication = /* GraphQL */ `
 export const onDeleteApplication = /* GraphQL */ `
   subscription OnDeleteApplication(
     $filter: ModelSubscriptionApplicationFilterInput
+    $owner: String
   ) {
-    onDeleteApplication(filter: $filter) {
+    onDeleteApplication(filter: $filter, owner: $owner) {
       id
       studentID
-      student {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       projectID
-      project {
-        id
-        title
-        description
-        department
-        skillsRequired
-        tags
-        qualifications
-        duration
-        applicationDeadline
-        facultyID
-        isActive
-        requiresTranscript
-        projectStatus
-        coordinatorNotes
-        rejectionReason
-        selectedStudentID
-        filledAt
-        createdAt
-        updatedAt
-        __typename
-      }
       statement
       resumeKey
       transcriptLink
@@ -669,84 +301,11 @@ export const onDeleteApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      withdrawReason
       rejectionReason
       acceptanceReason
+      withdrawReason
       isSelected
       selectedAt
-      submittedToFacultyAt
-      submittedToDepartmentAt
-      submittedToAdminAt
-      approvedAt
-      returnedAt
-      rejectedAt
-      cancelledAt
-      createdAt
-      updatedAt
-      learningContract {
-        id
-        applicationID
-        researchSchedule
-        researchRequirements
-        learningObjectives
-        evaluationCriteria
-        mentorApproved
-        studentConfirmed
-        submittedAt
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      applicationLearningContractId
-      __typename
-    }
-  }
-`;
-export const onCreateLearningContract = /* GraphQL */ `
-  subscription OnCreateLearningContract(
-    $filter: ModelSubscriptionLearningContractFilterInput
-    $owner: String
-  ) {
-    onCreateLearningContract(filter: $filter, owner: $owner) {
-      id
-      applicationID
-      application {
-        id
-        studentID
-        projectID
-        statement
-        resumeKey
-        transcriptLink
-        documentKey
-        status
-        statusDetail
-        facultyNotes
-        coordinatorNotes
-        withdrawReason
-        rejectionReason
-        acceptanceReason
-        isSelected
-        selectedAt
-        submittedToFacultyAt
-        submittedToDepartmentAt
-        submittedToAdminAt
-        approvedAt
-        returnedAt
-        rejectedAt
-        cancelledAt
-        createdAt
-        updatedAt
-        applicationLearningContractId
-        __typename
-      }
-      researchSchedule
-      researchRequirements
-      learningObjectives
-      evaluationCriteria
-      mentorApproved
-      studentConfirmed
-      submittedAt
       createdAt
       updatedAt
       owner
@@ -754,50 +313,18 @@ export const onCreateLearningContract = /* GraphQL */ `
     }
   }
 `;
-export const onUpdateLearningContract = /* GraphQL */ `
-  subscription OnUpdateLearningContract(
-    $filter: ModelSubscriptionLearningContractFilterInput
+export const onCreateStudentPost = /* GraphQL */ `
+  subscription OnCreateStudentPost(
+    $filter: ModelSubscriptionStudentPostFilterInput
     $owner: String
   ) {
-    onUpdateLearningContract(filter: $filter, owner: $owner) {
+    onCreateStudentPost(filter: $filter, owner: $owner) {
       id
-      applicationID
-      application {
-        id
-        studentID
-        projectID
-        statement
-        resumeKey
-        transcriptLink
-        documentKey
-        status
-        statusDetail
-        facultyNotes
-        coordinatorNotes
-        withdrawReason
-        rejectionReason
-        acceptanceReason
-        isSelected
-        selectedAt
-        submittedToFacultyAt
-        submittedToDepartmentAt
-        submittedToAdminAt
-        approvedAt
-        returnedAt
-        rejectedAt
-        cancelledAt
-        createdAt
-        updatedAt
-        applicationLearningContractId
-        __typename
-      }
-      researchSchedule
-      researchRequirements
-      learningObjectives
-      evaluationCriteria
-      mentorApproved
-      studentConfirmed
-      submittedAt
+      title
+      content
+      authorID
+      isAnonymous
+      tags
       createdAt
       updatedAt
       owner
@@ -805,50 +332,18 @@ export const onUpdateLearningContract = /* GraphQL */ `
     }
   }
 `;
-export const onDeleteLearningContract = /* GraphQL */ `
-  subscription OnDeleteLearningContract(
-    $filter: ModelSubscriptionLearningContractFilterInput
+export const onUpdateStudentPost = /* GraphQL */ `
+  subscription OnUpdateStudentPost(
+    $filter: ModelSubscriptionStudentPostFilterInput
     $owner: String
   ) {
-    onDeleteLearningContract(filter: $filter, owner: $owner) {
+    onUpdateStudentPost(filter: $filter, owner: $owner) {
       id
-      applicationID
-      application {
-        id
-        studentID
-        projectID
-        statement
-        resumeKey
-        transcriptLink
-        documentKey
-        status
-        statusDetail
-        facultyNotes
-        coordinatorNotes
-        withdrawReason
-        rejectionReason
-        acceptanceReason
-        isSelected
-        selectedAt
-        submittedToFacultyAt
-        submittedToDepartmentAt
-        submittedToAdminAt
-        approvedAt
-        returnedAt
-        rejectedAt
-        cancelledAt
-        createdAt
-        updatedAt
-        applicationLearningContractId
-        __typename
-      }
-      researchSchedule
-      researchRequirements
-      learningObjectives
-      evaluationCriteria
-      mentorApproved
-      studentConfirmed
-      submittedAt
+      title
+      content
+      authorID
+      isAnonymous
+      tags
       createdAt
       updatedAt
       owner
@@ -856,197 +351,21 @@ export const onDeleteLearningContract = /* GraphQL */ `
     }
   }
 `;
-export const onCreateMessageBoard = /* GraphQL */ `
-  subscription OnCreateMessageBoard(
-    $filter: ModelSubscriptionMessageBoardFilterInput
+export const onDeleteStudentPost = /* GraphQL */ `
+  subscription OnDeleteStudentPost(
+    $filter: ModelSubscriptionStudentPostFilterInput
+    $owner: String
   ) {
-    onCreateMessageBoard(filter: $filter) {
+    onDeleteStudentPost(filter: $filter, owner: $owner) {
       id
-      facultyID
-      faculty {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      projectID
-      project {
-        id
-        title
-        description
-        department
-        skillsRequired
-        tags
-        qualifications
-        duration
-        applicationDeadline
-        facultyID
-        isActive
-        requiresTranscript
-        projectStatus
-        coordinatorNotes
-        rejectionReason
-        selectedStudentID
-        filledAt
-        createdAt
-        updatedAt
-        __typename
-      }
       title
       content
-      isPublic
+      authorID
+      isAnonymous
+      tags
       createdAt
       updatedAt
-      __typename
-    }
-  }
-`;
-export const onUpdateMessageBoard = /* GraphQL */ `
-  subscription OnUpdateMessageBoard(
-    $filter: ModelSubscriptionMessageBoardFilterInput
-  ) {
-    onUpdateMessageBoard(filter: $filter) {
-      id
-      facultyID
-      faculty {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      projectID
-      project {
-        id
-        title
-        description
-        department
-        skillsRequired
-        tags
-        qualifications
-        duration
-        applicationDeadline
-        facultyID
-        isActive
-        requiresTranscript
-        projectStatus
-        coordinatorNotes
-        rejectionReason
-        selectedStudentID
-        filledAt
-        createdAt
-        updatedAt
-        __typename
-      }
-      title
-      content
-      isPublic
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onDeleteMessageBoard = /* GraphQL */ `
-  subscription OnDeleteMessageBoard(
-    $filter: ModelSubscriptionMessageBoardFilterInput
-  ) {
-    onDeleteMessageBoard(filter: $filter) {
-      id
-      facultyID
-      faculty {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      projectID
-      project {
-        id
-        title
-        description
-        department
-        skillsRequired
-        tags
-        qualifications
-        duration
-        applicationDeadline
-        facultyID
-        isActive
-        requiresTranscript
-        projectStatus
-        coordinatorNotes
-        rejectionReason
-        selectedStudentID
-        filledAt
-        createdAt
-        updatedAt
-        __typename
-      }
-      title
-      content
-      isPublic
-      createdAt
-      updatedAt
+      owner
       __typename
     }
   }
@@ -1059,90 +378,11 @@ export const onCreateMessage = /* GraphQL */ `
     onCreateMessage(filter: $filter, owner: $owner) {
       id
       senderID
-      sender {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       receiverID
-      receiver {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       subject
       body
       isRead
       sentAt
-      readAt
-      threadID
-      projectID
-      messageType
-      parentMessageID
-      parentMessage {
-        id
-        senderID
-        receiverID
-        subject
-        body
-        isRead
-        sentAt
-        readAt
-        threadID
-        projectID
-        messageType
-        parentMessageID
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      replies {
-        nextToken
-        __typename
-      }
       createdAt
       updatedAt
       owner
@@ -1158,90 +398,11 @@ export const onUpdateMessage = /* GraphQL */ `
     onUpdateMessage(filter: $filter, owner: $owner) {
       id
       senderID
-      sender {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       receiverID
-      receiver {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       subject
       body
       isRead
       sentAt
-      readAt
-      threadID
-      projectID
-      messageType
-      parentMessageID
-      parentMessage {
-        id
-        senderID
-        receiverID
-        subject
-        body
-        isRead
-        sentAt
-        readAt
-        threadID
-        projectID
-        messageType
-        parentMessageID
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      replies {
-        nextToken
-        __typename
-      }
       createdAt
       updatedAt
       owner
@@ -1257,90 +418,11 @@ export const onDeleteMessage = /* GraphQL */ `
     onDeleteMessage(filter: $filter, owner: $owner) {
       id
       senderID
-      sender {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       receiverID
-      receiver {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       subject
       body
       isRead
       sentAt
-      readAt
-      threadID
-      projectID
-      messageType
-      parentMessageID
-      parentMessage {
-        id
-        senderID
-        receiverID
-        subject
-        body
-        isRead
-        sentAt
-        readAt
-        threadID
-        projectID
-        messageType
-        parentMessageID
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      replies {
-        nextToken
-        __typename
-      }
       createdAt
       updatedAt
       owner
@@ -1356,35 +438,12 @@ export const onCreateNotification = /* GraphQL */ `
     onCreateNotification(filter: $filter, owner: $owner) {
       id
       userID
-      user {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       type
+      title
       message
       isRead
+      relatedItemID
+      relatedItemType
       createdAt
       updatedAt
       owner
@@ -1400,35 +459,12 @@ export const onUpdateNotification = /* GraphQL */ `
     onUpdateNotification(filter: $filter, owner: $owner) {
       id
       userID
-      user {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       type
+      title
       message
       isRead
+      relatedItemID
+      relatedItemType
       createdAt
       updatedAt
       owner
@@ -1444,317 +480,12 @@ export const onDeleteNotification = /* GraphQL */ `
     onDeleteNotification(filter: $filter, owner: $owner) {
       id
       userID
-      user {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       type
+      title
       message
       isRead
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const onCreateActivityLog = /* GraphQL */ `
-  subscription OnCreateActivityLog(
-    $filter: ModelSubscriptionActivityLogFilterInput
-  ) {
-    onCreateActivityLog(filter: $filter) {
-      id
-      userID
-      user {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      action
-      resourceType
-      resourceID
-      detail
-      timestamp
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onUpdateActivityLog = /* GraphQL */ `
-  subscription OnUpdateActivityLog(
-    $filter: ModelSubscriptionActivityLogFilterInput
-  ) {
-    onUpdateActivityLog(filter: $filter) {
-      id
-      userID
-      user {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      action
-      resourceType
-      resourceID
-      detail
-      timestamp
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onDeleteActivityLog = /* GraphQL */ `
-  subscription OnDeleteActivityLog(
-    $filter: ModelSubscriptionActivityLogFilterInput
-  ) {
-    onDeleteActivityLog(filter: $filter) {
-      id
-      userID
-      user {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      action
-      resourceType
-      resourceID
-      detail
-      timestamp
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onCreateStudentPost = /* GraphQL */ `
-  subscription OnCreateStudentPost(
-    $filter: ModelSubscriptionStudentPostFilterInput
-    $owner: String
-  ) {
-    onCreateStudentPost(filter: $filter, owner: $owner) {
-      id
-      studentID
-      student {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      type
-      title
-      description
-      department
-      researchAreas
-      skillsOffered
-      skillsNeeded
-      timeCommitment
-      isActive
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const onUpdateStudentPost = /* GraphQL */ `
-  subscription OnUpdateStudentPost(
-    $filter: ModelSubscriptionStudentPostFilterInput
-    $owner: String
-  ) {
-    onUpdateStudentPost(filter: $filter, owner: $owner) {
-      id
-      studentID
-      student {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      type
-      title
-      description
-      department
-      researchAreas
-      skillsOffered
-      skillsNeeded
-      timeCommitment
-      isActive
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const onDeleteStudentPost = /* GraphQL */ `
-  subscription OnDeleteStudentPost(
-    $filter: ModelSubscriptionStudentPostFilterInput
-    $owner: String
-  ) {
-    onDeleteStudentPost(filter: $filter, owner: $owner) {
-      id
-      studentID
-      student {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      type
-      title
-      description
-      department
-      researchAreas
-      skillsOffered
-      skillsNeeded
-      timeCommitment
-      isActive
+      relatedItemID
+      relatedItemType
       createdAt
       updatedAt
       owner
@@ -1769,12 +500,10 @@ export const onCreateDeletedUser = /* GraphQL */ `
     onCreateDeletedUser(filter: $filter) {
       id
       originalUserID
-      name
-      email
-      role
-      deletionScheduledAt
-      deletionExecutedAt
-      isTestMode
+      deletedAt
+      scheduledCleanupAt
+      userData
+      status
       createdAt
       updatedAt
       __typename
@@ -1788,12 +517,10 @@ export const onUpdateDeletedUser = /* GraphQL */ `
     onUpdateDeletedUser(filter: $filter) {
       id
       originalUserID
-      name
-      email
-      role
-      deletionScheduledAt
-      deletionExecutedAt
-      isTestMode
+      deletedAt
+      scheduledCleanupAt
+      userData
+      status
       createdAt
       updatedAt
       __typename
@@ -1807,114 +534,10 @@ export const onDeleteDeletedUser = /* GraphQL */ `
     onDeleteDeletedUser(filter: $filter) {
       id
       originalUserID
-      name
-      email
-      role
-      deletionScheduledAt
-      deletionExecutedAt
-      isTestMode
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onCreateSystemConfig = /* GraphQL */ `
-  subscription OnCreateSystemConfig(
-    $filter: ModelSubscriptionSystemConfigFilterInput
-  ) {
-    onCreateSystemConfig(filter: $filter) {
-      id
-      configKey
-      configValue
-      description
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onUpdateSystemConfig = /* GraphQL */ `
-  subscription OnUpdateSystemConfig(
-    $filter: ModelSubscriptionSystemConfigFilterInput
-  ) {
-    onUpdateSystemConfig(filter: $filter) {
-      id
-      configKey
-      configValue
-      description
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onDeleteSystemConfig = /* GraphQL */ `
-  subscription OnDeleteSystemConfig(
-    $filter: ModelSubscriptionSystemConfigFilterInput
-  ) {
-    onDeleteSystemConfig(filter: $filter) {
-      id
-      configKey
-      configValue
-      description
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onCreateAuditLog = /* GraphQL */ `
-  subscription OnCreateAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
-    onCreateAuditLog(filter: $filter) {
-      id
-      userId
-      userName
-      userEmail
-      action
-      resource
-      details
-      timestamp
-      ipAddress
-      userAgent
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onUpdateAuditLog = /* GraphQL */ `
-  subscription OnUpdateAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
-    onUpdateAuditLog(filter: $filter) {
-      id
-      userId
-      userName
-      userEmail
-      action
-      resource
-      details
-      timestamp
-      ipAddress
-      userAgent
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const onDeleteAuditLog = /* GraphQL */ `
-  subscription OnDeleteAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
-    onDeleteAuditLog(filter: $filter) {
-      id
-      userId
-      userName
-      userEmail
-      action
-      resource
-      details
-      timestamp
-      ipAddress
-      userAgent
+      deletedAt
+      scheduledCleanupAt
+      userData
+      status
       createdAt
       updatedAt
       __typename

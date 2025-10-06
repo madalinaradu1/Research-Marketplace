@@ -19,45 +19,13 @@ export const getUser = /* GraphQL */ `
       affiliation
       profileComplete
       status
-      applicationCount
       expectedGraduation
       availability
       personalStatement
       certificates
+      applicationCount
       createdAt
       updatedAt
-      facultyProjects {
-        nextToken
-        __typename
-      }
-      studentApplications {
-        nextToken
-        __typename
-      }
-      sentMessages {
-        nextToken
-        __typename
-      }
-      receivedMessages {
-        nextToken
-        __typename
-      }
-      notifications {
-        nextToken
-        __typename
-      }
-      activityLogs {
-        nextToken
-        __typename
-      }
-      messageBoards {
-        nextToken
-        __typename
-      }
-      studentPosts {
-        nextToken
-        __typename
-      }
       owner
       __typename
     }
@@ -86,11 +54,11 @@ export const listUsers = /* GraphQL */ `
         affiliation
         profileComplete
         status
-        applicationCount
         expectedGraduation
         availability
         personalStatement
         certificates
+        applicationCount
         createdAt
         updatedAt
         owner
@@ -114,32 +82,6 @@ export const getProject = /* GraphQL */ `
       duration
       applicationDeadline
       facultyID
-      faculty {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       isActive
       requiresTranscript
       projectStatus
@@ -147,16 +89,13 @@ export const getProject = /* GraphQL */ `
       rejectionReason
       selectedStudentID
       filledAt
-      createdAt
-      updatedAt
       applications {
         nextToken
         __typename
       }
-      messageBoards {
-        nextToken
-        __typename
-      }
+      createdAt
+      updatedAt
+      owner
       __typename
     }
   }
@@ -188,48 +127,7 @@ export const listProjects = /* GraphQL */ `
         filledAt
         createdAt
         updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const projectsByFacultyID = /* GraphQL */ `
-  query ProjectsByFacultyID(
-    $facultyID: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelProjectFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    projectsByFacultyID(
-      facultyID: $facultyID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        title
-        description
-        department
-        skillsRequired
-        tags
-        qualifications
-        duration
-        applicationDeadline
-        facultyID
-        isActive
-        requiresTranscript
-        projectStatus
-        coordinatorNotes
-        rejectionReason
-        selectedStudentID
-        filledAt
-        createdAt
-        updatedAt
+        owner
         __typename
       }
       nextToken
@@ -242,55 +140,7 @@ export const getApplication = /* GraphQL */ `
     getApplication(id: $id) {
       id
       studentID
-      student {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       projectID
-      project {
-        id
-        title
-        description
-        department
-        skillsRequired
-        tags
-        qualifications
-        duration
-        applicationDeadline
-        facultyID
-        isActive
-        requiresTranscript
-        projectStatus
-        coordinatorNotes
-        rejectionReason
-        selectedStudentID
-        filledAt
-        createdAt
-        updatedAt
-        __typename
-      }
       statement
       resumeKey
       transcriptLink
@@ -307,36 +157,14 @@ export const getApplication = /* GraphQL */ `
       statusDetail
       facultyNotes
       coordinatorNotes
-      withdrawReason
       rejectionReason
       acceptanceReason
+      withdrawReason
       isSelected
       selectedAt
-      submittedToFacultyAt
-      submittedToDepartmentAt
-      submittedToAdminAt
-      approvedAt
-      returnedAt
-      rejectedAt
-      cancelledAt
       createdAt
       updatedAt
-      learningContract {
-        id
-        applicationID
-        researchSchedule
-        researchRequirements
-        learningObjectives
-        evaluationCriteria
-        mentorApproved
-        studentConfirmed
-        submittedAt
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      applicationLearningContractId
+      owner
       __typename
     }
   }
@@ -360,70 +188,14 @@ export const listApplications = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        withdrawReason
         rejectionReason
         acceptanceReason
-        isSelected
-        selectedAt
-        submittedToFacultyAt
-        submittedToDepartmentAt
-        submittedToAdminAt
-        approvedAt
-        returnedAt
-        rejectedAt
-        cancelledAt
-        createdAt
-        updatedAt
-        applicationLearningContractId
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const applicationsByStudentID = /* GraphQL */ `
-  query ApplicationsByStudentID(
-    $studentID: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelApplicationFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    applicationsByStudentID(
-      studentID: $studentID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        studentID
-        projectID
-        statement
-        resumeKey
-        transcriptLink
-        documentKey
-        status
-        statusDetail
-        facultyNotes
-        coordinatorNotes
         withdrawReason
-        rejectionReason
-        acceptanceReason
         isSelected
         selectedAt
-        submittedToFacultyAt
-        submittedToDepartmentAt
-        submittedToAdminAt
-        approvedAt
-        returnedAt
-        rejectedAt
-        cancelledAt
         createdAt
         updatedAt
-        applicationLearningContractId
+        owner
         __typename
       }
       nextToken
@@ -458,21 +230,14 @@ export const applicationsByProjectID = /* GraphQL */ `
         statusDetail
         facultyNotes
         coordinatorNotes
-        withdrawReason
         rejectionReason
         acceptanceReason
+        withdrawReason
         isSelected
         selectedAt
-        submittedToFacultyAt
-        submittedToDepartmentAt
-        submittedToAdminAt
-        approvedAt
-        returnedAt
-        rejectedAt
-        cancelledAt
         createdAt
         updatedAt
-        applicationLearningContractId
+        owner
         __typename
       }
       nextToken
@@ -480,47 +245,15 @@ export const applicationsByProjectID = /* GraphQL */ `
     }
   }
 `;
-export const getLearningContract = /* GraphQL */ `
-  query GetLearningContract($id: ID!) {
-    getLearningContract(id: $id) {
+export const getStudentPost = /* GraphQL */ `
+  query GetStudentPost($id: ID!) {
+    getStudentPost(id: $id) {
       id
-      applicationID
-      application {
-        id
-        studentID
-        projectID
-        statement
-        resumeKey
-        transcriptLink
-        documentKey
-        status
-        statusDetail
-        facultyNotes
-        coordinatorNotes
-        withdrawReason
-        rejectionReason
-        acceptanceReason
-        isSelected
-        selectedAt
-        submittedToFacultyAt
-        submittedToDepartmentAt
-        submittedToAdminAt
-        approvedAt
-        returnedAt
-        rejectedAt
-        cancelledAt
-        createdAt
-        updatedAt
-        applicationLearningContractId
-        __typename
-      }
-      researchSchedule
-      researchRequirements
-      learningObjectives
-      evaluationCriteria
-      mentorApproved
-      studentConfirmed
-      submittedAt
+      title
+      content
+      authorID
+      isAnonymous
+      tags
       createdAt
       updatedAt
       owner
@@ -528,213 +261,23 @@ export const getLearningContract = /* GraphQL */ `
     }
   }
 `;
-export const listLearningContracts = /* GraphQL */ `
-  query ListLearningContracts(
-    $filter: ModelLearningContractFilterInput
+export const listStudentPosts = /* GraphQL */ `
+  query ListStudentPosts(
+    $filter: ModelStudentPostFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    listLearningContracts(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
+    listStudentPosts(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
-        id
-        applicationID
-        researchSchedule
-        researchRequirements
-        learningObjectives
-        evaluationCriteria
-        mentorApproved
-        studentConfirmed
-        submittedAt
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const learningContractsByApplicationID = /* GraphQL */ `
-  query LearningContractsByApplicationID(
-    $applicationID: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelLearningContractFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    learningContractsByApplicationID(
-      applicationID: $applicationID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        applicationID
-        researchSchedule
-        researchRequirements
-        learningObjectives
-        evaluationCriteria
-        mentorApproved
-        studentConfirmed
-        submittedAt
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const getMessageBoard = /* GraphQL */ `
-  query GetMessageBoard($id: ID!) {
-    getMessageBoard(id: $id) {
-      id
-      facultyID
-      faculty {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      projectID
-      project {
         id
         title
-        description
-        department
-        skillsRequired
+        content
+        authorID
+        isAnonymous
         tags
-        qualifications
-        duration
-        applicationDeadline
-        facultyID
-        isActive
-        requiresTranscript
-        projectStatus
-        coordinatorNotes
-        rejectionReason
-        selectedStudentID
-        filledAt
         createdAt
         updatedAt
-        __typename
-      }
-      title
-      content
-      isPublic
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const listMessageBoards = /* GraphQL */ `
-  query ListMessageBoards(
-    $filter: ModelMessageBoardFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listMessageBoards(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        facultyID
-        projectID
-        title
-        content
-        isPublic
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const messageBoardsByFacultyID = /* GraphQL */ `
-  query MessageBoardsByFacultyID(
-    $facultyID: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelMessageBoardFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    messageBoardsByFacultyID(
-      facultyID: $facultyID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        facultyID
-        projectID
-        title
-        content
-        isPublic
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const messageBoardsByProjectID = /* GraphQL */ `
-  query MessageBoardsByProjectID(
-    $projectID: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelMessageBoardFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    messageBoardsByProjectID(
-      projectID: $projectID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        facultyID
-        projectID
-        title
-        content
-        isPublic
-        createdAt
-        updatedAt
+        owner
         __typename
       }
       nextToken
@@ -747,90 +290,11 @@ export const getMessage = /* GraphQL */ `
     getMessage(id: $id) {
       id
       senderID
-      sender {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       receiverID
-      receiver {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       subject
       body
       isRead
       sentAt
-      readAt
-      threadID
-      projectID
-      messageType
-      parentMessageID
-      parentMessage {
-        id
-        senderID
-        receiverID
-        subject
-        body
-        isRead
-        sentAt
-        readAt
-        threadID
-        projectID
-        messageType
-        parentMessageID
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      replies {
-        nextToken
-        __typename
-      }
       createdAt
       updatedAt
       owner
@@ -853,163 +317,6 @@ export const listMessages = /* GraphQL */ `
         body
         isRead
         sentAt
-        readAt
-        threadID
-        projectID
-        messageType
-        parentMessageID
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const messagesBySenderID = /* GraphQL */ `
-  query MessagesBySenderID(
-    $senderID: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelMessageFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    messagesBySenderID(
-      senderID: $senderID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        senderID
-        receiverID
-        subject
-        body
-        isRead
-        sentAt
-        readAt
-        threadID
-        projectID
-        messageType
-        parentMessageID
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const messagesByReceiverID = /* GraphQL */ `
-  query MessagesByReceiverID(
-    $receiverID: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelMessageFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    messagesByReceiverID(
-      receiverID: $receiverID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        senderID
-        receiverID
-        subject
-        body
-        isRead
-        sentAt
-        readAt
-        threadID
-        projectID
-        messageType
-        parentMessageID
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const messagesByThreadID = /* GraphQL */ `
-  query MessagesByThreadID(
-    $threadID: String!
-    $sortDirection: ModelSortDirection
-    $filter: ModelMessageFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    messagesByThreadID(
-      threadID: $threadID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        senderID
-        receiverID
-        subject
-        body
-        isRead
-        sentAt
-        readAt
-        threadID
-        projectID
-        messageType
-        parentMessageID
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const messagesByParentMessageID = /* GraphQL */ `
-  query MessagesByParentMessageID(
-    $parentMessageID: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelMessageFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    messagesByParentMessageID(
-      parentMessageID: $parentMessageID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        senderID
-        receiverID
-        subject
-        body
-        isRead
-        sentAt
-        readAt
-        threadID
-        projectID
-        messageType
-        parentMessageID
         createdAt
         updatedAt
         owner
@@ -1025,35 +332,12 @@ export const getNotification = /* GraphQL */ `
     getNotification(id: $id) {
       id
       userID
-      user {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
       type
+      title
       message
       isRead
+      relatedItemID
+      relatedItemType
       createdAt
       updatedAt
       owner
@@ -1072,250 +356,11 @@ export const listNotifications = /* GraphQL */ `
         id
         userID
         type
+        title
         message
         isRead
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const notificationsByUserID = /* GraphQL */ `
-  query NotificationsByUserID(
-    $userID: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelNotificationFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    notificationsByUserID(
-      userID: $userID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        userID
-        type
-        message
-        isRead
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const getActivityLog = /* GraphQL */ `
-  query GetActivityLog($id: ID!) {
-    getActivityLog(id: $id) {
-      id
-      userID
-      user {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      action
-      resourceType
-      resourceID
-      detail
-      timestamp
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const listActivityLogs = /* GraphQL */ `
-  query ListActivityLogs(
-    $filter: ModelActivityLogFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listActivityLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        userID
-        action
-        resourceType
-        resourceID
-        detail
-        timestamp
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const activityLogsByUserID = /* GraphQL */ `
-  query ActivityLogsByUserID(
-    $userID: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelActivityLogFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    activityLogsByUserID(
-      userID: $userID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        userID
-        action
-        resourceType
-        resourceID
-        detail
-        timestamp
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const getStudentPost = /* GraphQL */ `
-  query GetStudentPost($id: ID!) {
-    getStudentPost(id: $id) {
-      id
-      studentID
-      student {
-        id
-        name
-        email
-        role
-        department
-        major
-        academicYear
-        gpa
-        skills
-        researchInterests
-        careerInterests
-        resumeKey
-        affiliation
-        profileComplete
-        status
-        applicationCount
-        expectedGraduation
-        availability
-        personalStatement
-        certificates
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      type
-      title
-      description
-      department
-      researchAreas
-      skillsOffered
-      skillsNeeded
-      timeCommitment
-      isActive
-      createdAt
-      updatedAt
-      owner
-      __typename
-    }
-  }
-`;
-export const listStudentPosts = /* GraphQL */ `
-  query ListStudentPosts(
-    $filter: ModelStudentPostFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listStudentPosts(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        studentID
-        type
-        title
-        description
-        department
-        researchAreas
-        skillsOffered
-        skillsNeeded
-        timeCommitment
-        isActive
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const studentPostsByStudentID = /* GraphQL */ `
-  query StudentPostsByStudentID(
-    $studentID: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelStudentPostFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    studentPostsByStudentID(
-      studentID: $studentID
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        studentID
-        type
-        title
-        description
-        department
-        researchAreas
-        skillsOffered
-        skillsNeeded
-        timeCommitment
-        isActive
+        relatedItemID
+        relatedItemType
         createdAt
         updatedAt
         owner
@@ -1331,12 +376,10 @@ export const getDeletedUser = /* GraphQL */ `
     getDeletedUser(id: $id) {
       id
       originalUserID
-      name
-      email
-      role
-      deletionScheduledAt
-      deletionExecutedAt
-      isTestMode
+      deletedAt
+      scheduledCleanupAt
+      userData
+      status
       createdAt
       updatedAt
       __typename
@@ -1353,164 +396,10 @@ export const listDeletedUsers = /* GraphQL */ `
       items {
         id
         originalUserID
-        name
-        email
-        role
-        deletionScheduledAt
-        deletionExecutedAt
-        isTestMode
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const getSystemConfig = /* GraphQL */ `
-  query GetSystemConfig($id: ID!) {
-    getSystemConfig(id: $id) {
-      id
-      configKey
-      configValue
-      description
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const listSystemConfigs = /* GraphQL */ `
-  query ListSystemConfigs(
-    $filter: ModelSystemConfigFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listSystemConfigs(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        configKey
-        configValue
-        description
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const getAuditLog = /* GraphQL */ `
-  query GetAuditLog($id: ID!) {
-    getAuditLog(id: $id) {
-      id
-      userId
-      userName
-      userEmail
-      action
-      resource
-      details
-      timestamp
-      ipAddress
-      userAgent
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const listAuditLogs = /* GraphQL */ `
-  query ListAuditLogs(
-    $filter: ModelAuditLogFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listAuditLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        userId
-        userName
-        userEmail
-        action
-        resource
-        details
-        timestamp
-        ipAddress
-        userAgent
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const auditLogsByActionAndTimestamp = /* GraphQL */ `
-  query AuditLogsByActionAndTimestamp(
-    $action: String!
-    $timestamp: ModelStringKeyConditionInput
-    $sortDirection: ModelSortDirection
-    $filter: ModelAuditLogFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    auditLogsByActionAndTimestamp(
-      action: $action
-      timestamp: $timestamp
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        userId
-        userName
-        userEmail
-        action
-        resource
-        details
-        timestamp
-        ipAddress
-        userAgent
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const auditLogsByTimestamp = /* GraphQL */ `
-  query AuditLogsByTimestamp(
-    $timestamp: AWSDateTime!
-    $sortDirection: ModelSortDirection
-    $filter: ModelAuditLogFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    auditLogsByTimestamp(
-      timestamp: $timestamp
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        userId
-        userName
-        userEmail
-        action
-        resource
-        details
-        timestamp
-        ipAddress
-        userAgent
+        deletedAt
+        scheduledCleanupAt
+        userData
+        status
         createdAt
         updatedAt
         __typename
