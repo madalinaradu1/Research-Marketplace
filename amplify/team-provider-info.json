@@ -17,6 +17,9 @@
           "appId": "d12p7fg02coi07",
           "type": "cicd"
         }
+      },
+      "auth": {
+        "researchmarketplaceb28a23c6": {}
       }
     }
   }
