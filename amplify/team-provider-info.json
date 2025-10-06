@@ -9,18 +9,14 @@
       "UnauthRoleName": "amplify-researchmarketplace-dev-89a34-unauthRole",
       "StackName": "amplify-researchmarketplace-dev-89a34",
       "StackId": "arn:aws:cloudformation:us-west-2:785000992257:stack/amplify-researchmarketplace-dev-89a34/6f4c8b60-a2f5-11f0-a20c-0aaee02dfd45",
-      "AmplifyAppId": "d12p7fg02coi07"
+      "AmplifyAppId": "d3nloevnvxolun"
     },
     "categories": {
       "hosting": {
         "amplifyhosting": {
-          "appId": "d12p7fg02coi07",
+          "appId": "d3nloevnvxolun",
           "type": "cicd"
         }
-      },
-      "auth": {
-        "researchmarketplaceb28a23c6": {},
-        "researchmarketplace": {}
       }
     }
   }
