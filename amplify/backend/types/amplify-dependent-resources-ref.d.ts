@@ -1,8 +1,1 @@
-export type AmplifyDependentResourcesAttributes = {
-  "api": {
-    "researchmarketplace": {
-      "GraphQLAPIEndpointOutput": "string",
-      "GraphQLAPIIdOutput": "string"
-    }
-  }
-}
+export type AmplifyDependentResourcesAttributes = {}
