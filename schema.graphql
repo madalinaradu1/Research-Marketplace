@@ -22,6 +22,10 @@ type User @model @auth(rules: [
   personalStatement: String
   certificates: [String]
   applicationCount: Int
+  projects: [Project] @hasMany(indexName: "byFaculty", fields: ["id"])
+  applications: [Application] @hasMany(indexName: "byStudent", fields: ["id"])
+  posts: [StudentPost] @hasMany(indexName: "byAuthor", fields: ["id"])
+  notifications: [Notification] @hasMany(indexName: "byUser", fields: ["id"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -41,8 +45,7 @@ type Project @model @auth(rules: [
   qualifications: String
   duration: String
   applicationDeadline: AWSDateTime
-  facultyID: ID!
-  faculty: User @belongsTo(fields: ["facultyID"])
+  facultyID: ID! @index(name: "byFaculty")
   isActive: Boolean!
   requiresTranscript: Boolean
   projectStatus: String
@@ -61,10 +64,8 @@ type Application @model @auth(rules: [
   { allow: groups, groups: ["Admin"], operations: [read, update] }
 ]) {
   id: ID!
-  studentID: ID!
-  student: User @belongsTo(fields: ["studentID"])
+  studentID: ID! @index(name: "byStudent")
   projectID: ID! @index(name: "byProject")
-  project: Project @belongsTo(fields: ["projectID"])
   statement: String!
   resumeKey: String
   transcriptLink: String
@@ -98,8 +99,7 @@ type StudentPost @model @auth(rules: [
   id: ID!
   title: String!
   content: String!
-  authorID: ID!
-  author: User @belongsTo(fields: ["authorID"])
+  authorID: ID! @index(name: "byAuthor")
   isAnonymous: Boolean!
   tags: [String]
   createdAt: AWSDateTime!
@@ -126,8 +126,7 @@ type Notification @model @auth(rules: [
   { allow: groups, groups: ["Admin"], operations: [create] }
 ]) {
   id: ID!
-  userID: ID!
-  user: User @belongsTo(fields: ["userID"])
+  userID: ID! @index(name: "byUser")
   type: String!
   title: String!
   message: String!
