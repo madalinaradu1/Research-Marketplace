@@ -4,6 +4,5 @@
  * Any changes to this file will be overwritten when running amplify pull. *
  **************************************************************************/
 
-export { default as TodoCreateForm } from "./TodoCreateForm";
-export { default as TodoUpdateForm } from "./TodoUpdateForm";
-export { default as studioTheme } from "./studioTheme";
+declare const _default: any;
+export default _default;

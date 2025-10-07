@@ -5,12 +5,5 @@
  **************************************************************************/
 
 /* eslint-disable */
-import { createTheme } from "@aws-amplify/ui-react";
-import { theme } from "../theme";
-
-const studioTheme = createTheme({
-  name: "studio-theme",
-  tokens: theme.tokens
-});
-
-export default studioTheme;
+import { createTheme, defaultTheme } from "@aws-amplify/ui-react";
+export default createTheme(defaultTheme);
