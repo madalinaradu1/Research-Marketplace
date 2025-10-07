@@ -30,7 +30,8 @@
       "UnauthRoleName": "amplify-researchmarketplace-prod-dd057-unauthRole",
       "StackName": "amplify-researchmarketplace-prod-dd057",
       "StackId": "arn:aws:cloudformation:us-west-2:785000992257:stack/amplify-researchmarketplace-prod-dd057/f42f8d50-a39f-11f0-84d4-0648ec6de921",
-      "AmplifyAppId": "d12p7fg02coi07"
+      "AmplifyAppId": "d12p7fg02coi07",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-prod-dd057-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
     },
     "categories": {
       "hosting": {
@@ -47,6 +48,16 @@
       },
       "storage": {
         "researchFiles": {}
+      },
+      "function": {
+        "researchmarketplace2a916c6aPostConfirmation": {
+          "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+          "s3Key": "amplify-builds/researchmarketplace2a916c6aPostConfirmation-74756f7746466c474243-build.zip"
+        },
+        "createUserRecord": {
+          "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+          "s3Key": "amplify-builds/createUserRecord-6c6f3572706b556f6148-build.zip"
+        }
       }
     }
   }
