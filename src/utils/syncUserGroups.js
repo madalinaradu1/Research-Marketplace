@@ -10,7 +10,7 @@ export async function syncUserGroupsToRole(userId = null) {
   try {
     // Get current user if userId not provided
     const currentUser = await Auth.currentAuthenticatedUser();
-    const targetUserId = userId || currentUser.attributes.email; // Use email as ID
+    const targetUserId = userId || currentUser.username; // Use UUID as ID
     
     // Get user's Cognito groups
     const groups = currentUser.signInUserSession.accessToken.payload['cognito:groups'] || [];
