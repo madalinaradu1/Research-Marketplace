@@ -15,7 +15,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy:dev": "git add . && git commit -m 'Deploy to dev' && git push origin dev",
+    "deploy:master": "git add . && git commit -m 'Deploy to master' && git push origin master"
   },
   "eslintConfig": {
     "extends": [
