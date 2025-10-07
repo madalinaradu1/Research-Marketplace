@@ -1,5 +1,19 @@
 {
   "api": {
+    "emailapi": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "emailApiHandler"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    },
     "researchmarketplace": {
       "dependsOn": [
         {
@@ -108,6 +122,11 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "emailApiHandler": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "researchmarketplace2a916c6aPostConfirmation": {
       "build": true,
       "providerPlugin": "awscloudformation",
@@ -118,80 +137,6 @@
     "amplifyhosting": {
       "service": "amplifyhosting",
       "type": "cicd"
-    }
-  },
-  "parameters": {
-    "AMPLIFY_function_adminDeleteUser_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "adminDeleteUser"
-        }
-      ]
-    },
-    "AMPLIFY_function_adminDeleteUser_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "adminDeleteUser"
-        }
-      ]
-    },
-    "AMPLIFY_function_adminDeleteUser_userPoolId": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "adminDeleteUser"
-        }
-      ]
-    },
-    "AMPLIFY_function_createUserRecord_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "createUserRecord"
-        }
-      ]
-    },
-    "AMPLIFY_function_createUserRecord_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "createUserRecord"
-        }
-      ]
-    },
-    "AMPLIFY_function_researchmarketplace2a916c6aPostConfirmation_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "researchmarketplace2a916c6aPostConfirmation"
-        }
-      ]
-    },
-    "AMPLIFY_function_researchmarketplace2a916c6aPostConfirmation_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "researchmarketplace2a916c6aPostConfirmation"
-        }
-      ]
-    },
-    "AMPLIFY_hosting_amplifyhosting_appId": {
-      "usedBy": [
-        {
-          "category": "hosting",
-          "resourceName": "amplifyhosting"
-        }
-      ]
-    },
-    "AMPLIFY_hosting_amplifyhosting_type": {
-      "usedBy": [
-        {
-          "category": "hosting",
-          "resourceName": "amplifyhosting"
-        }
-      ]
     }
   },
   "storage": {

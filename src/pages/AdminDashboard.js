@@ -499,28 +499,13 @@ const AdminDashboard = ({ user }) => {
           ...projects.map(p => {
             let facultyName = '';
             
-            // Try multiple ways to get faculty name
-            if (p.facultyName) {
-              facultyName = p.facultyName;
-            } else if (p.faculty) {
-              if (typeof p.faculty === 'string') {
-                facultyName = p.faculty;
-              } else if (p.faculty.name) {
-                facultyName = p.faculty.name;
-              } else if (p.faculty.id) {
-                // Look up faculty by ID in users array
-                const facultyUser = users.find(u => u.id === p.faculty.id);
-                facultyName = facultyUser ? facultyUser.name : '';
-              }
-            } else if (p.facultyId) {
-              // Look up faculty by facultyId
-              const facultyUser = users.find(u => u.id === p.facultyId);
-              facultyName = facultyUser ? facultyUser.name : '';
-            }
-            
-            // If still no name found, try to extract from any object
-            if (!facultyName && p.faculty && typeof p.faculty === 'object') {
-              facultyName = p.faculty.email || p.faculty.username || 'Unknown Faculty';
+            // Faculty is now a simple string field
+            if (p.faculty && typeof p.faculty === 'string') {
+              facultyName = p.faculty;
+            } else if (p.facultyID) {
+              // Look up faculty by facultyID
+              const facultyUser = users.find(u => u.id === p.facultyID);
+              facultyName = facultyUser ? facultyUser.name : 'Unknown Faculty';
             }
             
             return [

@@ -62,7 +62,8 @@
           "userPoolId": "us-west-2_P6EqP2tph",
           "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
           "s3Key": "amplify-builds/adminDeleteUser-4d564a50616a4d565034-build.zip"
-        }
+        },
+        "emailApiHandler": {}
       }
     }
   }
