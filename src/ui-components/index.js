@@ -4,6 +4,10 @@
  * Any changes to this file will be overwritten when running amplify pull. *
  **************************************************************************/
 
-export { default as TodoCreateForm } from "./TodoCreateForm";
-export { default as TodoUpdateForm } from "./TodoUpdateForm";
+export { default as DeletedUserCreateForm } from "./DeletedUserCreateForm";
+export { default as DeletedUserUpdateForm } from "./DeletedUserUpdateForm";
+export { default as MessageCreateForm } from "./MessageCreateForm";
+export { default as MessageUpdateForm } from "./MessageUpdateForm";
+export { default as UserCreateForm } from "./UserCreateForm";
+export { default as UserUpdateForm } from "./UserUpdateForm";
 export { default as studioTheme } from "./studioTheme";
