@@ -40,6 +40,7 @@ type Project @model @auth(rules: [
   title: String!
   description: String!
   department: String!
+  faculty: String
   skillsRequired: [String]
   tags: [String]
   qualifications: String
@@ -116,6 +117,7 @@ type Message @model @auth(rules: [
   subject: String!
   body: String!
   isRead: Boolean!
+  readAt: AWSDateTime
   sentAt: AWSDateTime!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
@@ -142,8 +144,12 @@ type DeletedUser @model @auth(rules: [
 ]) {
   id: ID!
   originalUserID: ID!
-  deletedAt: AWSDateTime!
-  scheduledCleanupAt: AWSDateTime!
+  name: String!
+  email: String!
+  role: String!
+  deletionScheduledAt: AWSDateTime!
+  deletionExecutedAt: AWSDateTime
+  isTestMode: Boolean!
   userData: AWSJSON!
   status: String!
   createdAt: AWSDateTime!

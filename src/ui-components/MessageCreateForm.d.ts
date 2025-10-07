@@ -27,6 +27,7 @@ export declare type MessageCreateFormInputValues = {
     subject?: string;
     body?: string;
     isRead?: boolean;
+    readAt?: string;
     sentAt?: string;
     createdAt?: string;
     updatedAt?: string;
@@ -37,6 +38,7 @@ export declare type MessageCreateFormValidationValues = {
     subject?: ValidationFunction<string>;
     body?: ValidationFunction<string>;
     isRead?: ValidationFunction<boolean>;
+    readAt?: ValidationFunction<string>;
     sentAt?: ValidationFunction<string>;
     createdAt?: ValidationFunction<string>;
     updatedAt?: ValidationFunction<string>;
@@ -49,6 +51,7 @@ export declare type MessageCreateFormOverridesProps = {
     subject?: PrimitiveOverrideProps<TextFieldProps>;
     body?: PrimitiveOverrideProps<TextFieldProps>;
     isRead?: PrimitiveOverrideProps<SwitchFieldProps>;
+    readAt?: PrimitiveOverrideProps<TextFieldProps>;
     sentAt?: PrimitiveOverrideProps<TextFieldProps>;
     createdAt?: PrimitiveOverrideProps<TextFieldProps>;
     updatedAt?: PrimitiveOverrideProps<TextFieldProps>;

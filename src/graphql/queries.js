@@ -92,6 +92,7 @@ export const getProject = /* GraphQL */ `
       title
       description
       department
+      faculty
       skillsRequired
       tags
       qualifications
@@ -128,6 +129,7 @@ export const listProjects = /* GraphQL */ `
         title
         description
         department
+        faculty
         skillsRequired
         tags
         qualifications
@@ -268,6 +270,7 @@ export const getMessage = /* GraphQL */ `
       subject
       body
       isRead
+      readAt
       sentAt
       createdAt
       updatedAt
@@ -290,6 +293,7 @@ export const listMessages = /* GraphQL */ `
         subject
         body
         isRead
+        readAt
         sentAt
         createdAt
         updatedAt
@@ -350,8 +354,12 @@ export const getDeletedUser = /* GraphQL */ `
     getDeletedUser(id: $id) {
       id
       originalUserID
-      deletedAt
-      scheduledCleanupAt
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
       userData
       status
       createdAt
@@ -370,8 +378,12 @@ export const listDeletedUsers = /* GraphQL */ `
       items {
         id
         originalUserID
-        deletedAt
-        scheduledCleanupAt
+        name
+        email
+        role
+        deletionScheduledAt
+        deletionExecutedAt
+        isTestMode
         userData
         status
         createdAt
@@ -403,6 +415,7 @@ export const projectsByFacultyID = /* GraphQL */ `
         title
         description
         department
+        faculty
         skillsRequired
         tags
         qualifications

@@ -10,6 +10,7 @@ import {
   Button,
   Flex,
   Grid,
+  SwitchField,
   TextAreaField,
   TextField,
 } from "@aws-amplify/ui-react";
@@ -31,8 +32,12 @@ export default function DeletedUserUpdateForm(props) {
   } = props;
   const initialValues = {
     originalUserID: "",
-    deletedAt: "",
-    scheduledCleanupAt: "",
+    name: "",
+    email: "",
+    role: "",
+    deletionScheduledAt: "",
+    deletionExecutedAt: "",
+    isTestMode: false,
     userData: "",
     status: "",
     createdAt: "",
@@ -41,10 +46,16 @@ export default function DeletedUserUpdateForm(props) {
   const [originalUserID, setOriginalUserID] = React.useState(
     initialValues.originalUserID
   );
-  const [deletedAt, setDeletedAt] = React.useState(initialValues.deletedAt);
-  const [scheduledCleanupAt, setScheduledCleanupAt] = React.useState(
-    initialValues.scheduledCleanupAt
+  const [name, setName] = React.useState(initialValues.name);
+  const [email, setEmail] = React.useState(initialValues.email);
+  const [role, setRole] = React.useState(initialValues.role);
+  const [deletionScheduledAt, setDeletionScheduledAt] = React.useState(
+    initialValues.deletionScheduledAt
   );
+  const [deletionExecutedAt, setDeletionExecutedAt] = React.useState(
+    initialValues.deletionExecutedAt
+  );
+  const [isTestMode, setIsTestMode] = React.useState(initialValues.isTestMode);
   const [userData, setUserData] = React.useState(initialValues.userData);
   const [status, setStatus] = React.useState(initialValues.status);
   const [createdAt, setCreatedAt] = React.useState(initialValues.createdAt);
@@ -55,8 +66,12 @@ export default function DeletedUserUpdateForm(props) {
       ? { ...initialValues, ...deletedUserRecord }
       : initialValues;
     setOriginalUserID(cleanValues.originalUserID);
-    setDeletedAt(cleanValues.deletedAt);
-    setScheduledCleanupAt(cleanValues.scheduledCleanupAt);
+    setName(cleanValues.name);
+    setEmail(cleanValues.email);
+    setRole(cleanValues.role);
+    setDeletionScheduledAt(cleanValues.deletionScheduledAt);
+    setDeletionExecutedAt(cleanValues.deletionExecutedAt);
+    setIsTestMode(cleanValues.isTestMode);
     setUserData(
       typeof cleanValues.userData === "string" || cleanValues.userData === null
         ? cleanValues.userData
@@ -86,8 +101,12 @@ export default function DeletedUserUpdateForm(props) {
   React.useEffect(resetStateValues, [deletedUserRecord]);
   const validations = {
     originalUserID: [{ type: "Required" }],
-    deletedAt: [{ type: "Required" }],
-    scheduledCleanupAt: [{ type: "Required" }],
+    name: [{ type: "Required" }],
+    email: [{ type: "Required" }],
+    role: [{ type: "Required" }],
+    deletionScheduledAt: [{ type: "Required" }],
+    deletionExecutedAt: [],
+    isTestMode: [{ type: "Required" }],
     userData: [{ type: "Required" }, { type: "JSON" }],
     status: [{ type: "Required" }],
     createdAt: [{ type: "Required" }],
@@ -137,8 +156,12 @@ export default function DeletedUserUpdateForm(props) {
         event.preventDefault();
         let modelFields = {
           originalUserID,
-          deletedAt,
-          scheduledCleanupAt,
+          name,
+          email,
+          role,
+          deletionScheduledAt,
+          deletionExecutedAt: deletionExecutedAt ?? null,
+          isTestMode,
           userData,
           status,
           createdAt,
@@ -204,8 +227,12 @@ export default function DeletedUserUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               originalUserID: value,
-              deletedAt,
-              scheduledCleanupAt,
+              name,
+              email,
+              role,
+              deletionScheduledAt,
+              deletionExecutedAt,
+              isTestMode,
               userData,
               status,
               createdAt,
@@ -225,44 +252,114 @@ export default function DeletedUserUpdateForm(props) {
         {...getOverrideProps(overrides, "originalUserID")}
       ></TextField>
       <TextField
-        label="Deleted at"
+        label="Name"
         isRequired={true}
         isReadOnly={false}
-        type="datetime-local"
-        value={deletedAt && convertToLocal(new Date(deletedAt))}
+        value={name}
         onChange={(e) => {
-          let value =
-            e.target.value === "" ? "" : new Date(e.target.value).toISOString();
+          let { value } = e.target;
           if (onChange) {
             const modelFields = {
               originalUserID,
-              deletedAt: value,
-              scheduledCleanupAt,
+              name: value,
+              email,
+              role,
+              deletionScheduledAt,
+              deletionExecutedAt,
+              isTestMode,
               userData,
               status,
               createdAt,
               updatedAt,
             };
             const result = onChange(modelFields);
-            value = result?.deletedAt ?? value;
+            value = result?.name ?? value;
           }
-          if (errors.deletedAt?.hasError) {
-            runValidationTasks("deletedAt", value);
+          if (errors.name?.hasError) {
+            runValidationTasks("name", value);
           }
-          setDeletedAt(value);
+          setName(value);
         }}
-        onBlur={() => runValidationTasks("deletedAt", deletedAt)}
-        errorMessage={errors.deletedAt?.errorMessage}
-        hasError={errors.deletedAt?.hasError}
-        {...getOverrideProps(overrides, "deletedAt")}
+        onBlur={() => runValidationTasks("name", name)}
+        errorMessage={errors.name?.errorMessage}
+        hasError={errors.name?.hasError}
+        {...getOverrideProps(overrides, "name")}
       ></TextField>
       <TextField
-        label="Scheduled cleanup at"
+        label="Email"
+        isRequired={true}
+        isReadOnly={false}
+        value={email}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              originalUserID,
+              name,
+              email: value,
+              role,
+              deletionScheduledAt,
+              deletionExecutedAt,
+              isTestMode,
+              userData,
+              status,
+              createdAt,
+              updatedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.email ?? value;
+          }
+          if (errors.email?.hasError) {
+            runValidationTasks("email", value);
+          }
+          setEmail(value);
+        }}
+        onBlur={() => runValidationTasks("email", email)}
+        errorMessage={errors.email?.errorMessage}
+        hasError={errors.email?.hasError}
+        {...getOverrideProps(overrides, "email")}
+      ></TextField>
+      <TextField
+        label="Role"
+        isRequired={true}
+        isReadOnly={false}
+        value={role}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              originalUserID,
+              name,
+              email,
+              role: value,
+              deletionScheduledAt,
+              deletionExecutedAt,
+              isTestMode,
+              userData,
+              status,
+              createdAt,
+              updatedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.role ?? value;
+          }
+          if (errors.role?.hasError) {
+            runValidationTasks("role", value);
+          }
+          setRole(value);
+        }}
+        onBlur={() => runValidationTasks("role", role)}
+        errorMessage={errors.role?.errorMessage}
+        hasError={errors.role?.hasError}
+        {...getOverrideProps(overrides, "role")}
+      ></TextField>
+      <TextField
+        label="Deletion scheduled at"
         isRequired={true}
         isReadOnly={false}
         type="datetime-local"
         value={
-          scheduledCleanupAt && convertToLocal(new Date(scheduledCleanupAt))
+          deletionScheduledAt && convertToLocal(new Date(deletionScheduledAt))
         }
         onChange={(e) => {
           let value =
@@ -270,28 +367,106 @@ export default function DeletedUserUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               originalUserID,
-              deletedAt,
-              scheduledCleanupAt: value,
+              name,
+              email,
+              role,
+              deletionScheduledAt: value,
+              deletionExecutedAt,
+              isTestMode,
               userData,
               status,
               createdAt,
               updatedAt,
             };
             const result = onChange(modelFields);
-            value = result?.scheduledCleanupAt ?? value;
+            value = result?.deletionScheduledAt ?? value;
           }
-          if (errors.scheduledCleanupAt?.hasError) {
-            runValidationTasks("scheduledCleanupAt", value);
+          if (errors.deletionScheduledAt?.hasError) {
+            runValidationTasks("deletionScheduledAt", value);
           }
-          setScheduledCleanupAt(value);
+          setDeletionScheduledAt(value);
         }}
         onBlur={() =>
-          runValidationTasks("scheduledCleanupAt", scheduledCleanupAt)
+          runValidationTasks("deletionScheduledAt", deletionScheduledAt)
         }
-        errorMessage={errors.scheduledCleanupAt?.errorMessage}
-        hasError={errors.scheduledCleanupAt?.hasError}
-        {...getOverrideProps(overrides, "scheduledCleanupAt")}
+        errorMessage={errors.deletionScheduledAt?.errorMessage}
+        hasError={errors.deletionScheduledAt?.hasError}
+        {...getOverrideProps(overrides, "deletionScheduledAt")}
       ></TextField>
+      <TextField
+        label="Deletion executed at"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={
+          deletionExecutedAt && convertToLocal(new Date(deletionExecutedAt))
+        }
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : new Date(e.target.value).toISOString();
+          if (onChange) {
+            const modelFields = {
+              originalUserID,
+              name,
+              email,
+              role,
+              deletionScheduledAt,
+              deletionExecutedAt: value,
+              isTestMode,
+              userData,
+              status,
+              createdAt,
+              updatedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.deletionExecutedAt ?? value;
+          }
+          if (errors.deletionExecutedAt?.hasError) {
+            runValidationTasks("deletionExecutedAt", value);
+          }
+          setDeletionExecutedAt(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("deletionExecutedAt", deletionExecutedAt)
+        }
+        errorMessage={errors.deletionExecutedAt?.errorMessage}
+        hasError={errors.deletionExecutedAt?.hasError}
+        {...getOverrideProps(overrides, "deletionExecutedAt")}
+      ></TextField>
+      <SwitchField
+        label="Is test mode"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={isTestMode}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              originalUserID,
+              name,
+              email,
+              role,
+              deletionScheduledAt,
+              deletionExecutedAt,
+              isTestMode: value,
+              userData,
+              status,
+              createdAt,
+              updatedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.isTestMode ?? value;
+          }
+          if (errors.isTestMode?.hasError) {
+            runValidationTasks("isTestMode", value);
+          }
+          setIsTestMode(value);
+        }}
+        onBlur={() => runValidationTasks("isTestMode", isTestMode)}
+        errorMessage={errors.isTestMode?.errorMessage}
+        hasError={errors.isTestMode?.hasError}
+        {...getOverrideProps(overrides, "isTestMode")}
+      ></SwitchField>
       <TextAreaField
         label="User data"
         isRequired={true}
@@ -302,8 +477,12 @@ export default function DeletedUserUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               originalUserID,
-              deletedAt,
-              scheduledCleanupAt,
+              name,
+              email,
+              role,
+              deletionScheduledAt,
+              deletionExecutedAt,
+              isTestMode,
               userData: value,
               status,
               createdAt,
@@ -332,8 +511,12 @@ export default function DeletedUserUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               originalUserID,
-              deletedAt,
-              scheduledCleanupAt,
+              name,
+              email,
+              role,
+              deletionScheduledAt,
+              deletionExecutedAt,
+              isTestMode,
               userData,
               status: value,
               createdAt,
@@ -364,8 +547,12 @@ export default function DeletedUserUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               originalUserID,
-              deletedAt,
-              scheduledCleanupAt,
+              name,
+              email,
+              role,
+              deletionScheduledAt,
+              deletionExecutedAt,
+              isTestMode,
               userData,
               status,
               createdAt: value,
@@ -396,8 +583,12 @@ export default function DeletedUserUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               originalUserID,
-              deletedAt,
-              scheduledCleanupAt,
+              name,
+              email,
+              role,
+              deletionScheduledAt,
+              deletionExecutedAt,
+              isTestMode,
               userData,
               status,
               createdAt,

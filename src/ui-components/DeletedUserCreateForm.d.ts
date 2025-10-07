@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, TextAreaFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { GridProps, SwitchFieldProps, TextAreaFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
 } | null;
@@ -23,8 +23,12 @@ export declare type ValidationResponse = {
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type DeletedUserCreateFormInputValues = {
     originalUserID?: string;
-    deletedAt?: string;
-    scheduledCleanupAt?: string;
+    name?: string;
+    email?: string;
+    role?: string;
+    deletionScheduledAt?: string;
+    deletionExecutedAt?: string;
+    isTestMode?: boolean;
     userData?: string;
     status?: string;
     createdAt?: string;
@@ -32,8 +36,12 @@ export declare type DeletedUserCreateFormInputValues = {
 };
 export declare type DeletedUserCreateFormValidationValues = {
     originalUserID?: ValidationFunction<string>;
-    deletedAt?: ValidationFunction<string>;
-    scheduledCleanupAt?: ValidationFunction<string>;
+    name?: ValidationFunction<string>;
+    email?: ValidationFunction<string>;
+    role?: ValidationFunction<string>;
+    deletionScheduledAt?: ValidationFunction<string>;
+    deletionExecutedAt?: ValidationFunction<string>;
+    isTestMode?: ValidationFunction<boolean>;
     userData?: ValidationFunction<string>;
     status?: ValidationFunction<string>;
     createdAt?: ValidationFunction<string>;
@@ -43,8 +51,12 @@ export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes
 export declare type DeletedUserCreateFormOverridesProps = {
     DeletedUserCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
     originalUserID?: PrimitiveOverrideProps<TextFieldProps>;
-    deletedAt?: PrimitiveOverrideProps<TextFieldProps>;
-    scheduledCleanupAt?: PrimitiveOverrideProps<TextFieldProps>;
+    name?: PrimitiveOverrideProps<TextFieldProps>;
+    email?: PrimitiveOverrideProps<TextFieldProps>;
+    role?: PrimitiveOverrideProps<TextFieldProps>;
+    deletionScheduledAt?: PrimitiveOverrideProps<TextFieldProps>;
+    deletionExecutedAt?: PrimitiveOverrideProps<TextFieldProps>;
+    isTestMode?: PrimitiveOverrideProps<SwitchFieldProps>;
     userData?: PrimitiveOverrideProps<TextAreaFieldProps>;
     status?: PrimitiveOverrideProps<TextFieldProps>;
     createdAt?: PrimitiveOverrideProps<TextFieldProps>;

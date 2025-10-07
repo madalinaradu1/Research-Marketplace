@@ -158,6 +158,7 @@ export const onCreateProject = /* GraphQL */ `
       title
       description
       department
+      faculty
       skillsRequired
       tags
       qualifications
@@ -192,6 +193,7 @@ export const onUpdateProject = /* GraphQL */ `
       title
       description
       department
+      faculty
       skillsRequired
       tags
       qualifications
@@ -226,6 +228,7 @@ export const onDeleteProject = /* GraphQL */ `
       title
       description
       department
+      faculty
       skillsRequired
       tags
       qualifications
@@ -430,6 +433,7 @@ export const onCreateMessage = /* GraphQL */ `
       subject
       body
       isRead
+      readAt
       sentAt
       createdAt
       updatedAt
@@ -450,6 +454,7 @@ export const onUpdateMessage = /* GraphQL */ `
       subject
       body
       isRead
+      readAt
       sentAt
       createdAt
       updatedAt
@@ -470,6 +475,7 @@ export const onDeleteMessage = /* GraphQL */ `
       subject
       body
       isRead
+      readAt
       sentAt
       createdAt
       updatedAt
@@ -548,8 +554,12 @@ export const onCreateDeletedUser = /* GraphQL */ `
     onCreateDeletedUser(filter: $filter) {
       id
       originalUserID
-      deletedAt
-      scheduledCleanupAt
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
       userData
       status
       createdAt
@@ -565,8 +575,12 @@ export const onUpdateDeletedUser = /* GraphQL */ `
     onUpdateDeletedUser(filter: $filter) {
       id
       originalUserID
-      deletedAt
-      scheduledCleanupAt
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
       userData
       status
       createdAt
@@ -582,8 +596,12 @@ export const onDeleteDeletedUser = /* GraphQL */ `
     onDeleteDeletedUser(filter: $filter) {
       id
       originalUserID
-      deletedAt
-      scheduledCleanupAt
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
       userData
       status
       createdAt

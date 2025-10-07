@@ -35,6 +35,7 @@ export default function MessageUpdateForm(props) {
     subject: "",
     body: "",
     isRead: false,
+    readAt: "",
     sentAt: "",
     createdAt: "",
     updatedAt: "",
@@ -44,6 +45,7 @@ export default function MessageUpdateForm(props) {
   const [subject, setSubject] = React.useState(initialValues.subject);
   const [body, setBody] = React.useState(initialValues.body);
   const [isRead, setIsRead] = React.useState(initialValues.isRead);
+  const [readAt, setReadAt] = React.useState(initialValues.readAt);
   const [sentAt, setSentAt] = React.useState(initialValues.sentAt);
   const [createdAt, setCreatedAt] = React.useState(initialValues.createdAt);
   const [updatedAt, setUpdatedAt] = React.useState(initialValues.updatedAt);
@@ -57,6 +59,7 @@ export default function MessageUpdateForm(props) {
     setSubject(cleanValues.subject);
     setBody(cleanValues.body);
     setIsRead(cleanValues.isRead);
+    setReadAt(cleanValues.readAt);
     setSentAt(cleanValues.sentAt);
     setCreatedAt(cleanValues.createdAt);
     setUpdatedAt(cleanValues.updatedAt);
@@ -84,6 +87,7 @@ export default function MessageUpdateForm(props) {
     subject: [{ type: "Required" }],
     body: [{ type: "Required" }],
     isRead: [{ type: "Required" }],
+    readAt: [],
     sentAt: [{ type: "Required" }],
     createdAt: [{ type: "Required" }],
     updatedAt: [{ type: "Required" }],
@@ -136,6 +140,7 @@ export default function MessageUpdateForm(props) {
           subject,
           body,
           isRead,
+          readAt: readAt ?? null,
           sentAt,
           createdAt,
           updatedAt,
@@ -204,6 +209,7 @@ export default function MessageUpdateForm(props) {
               subject,
               body,
               isRead,
+              readAt,
               sentAt,
               createdAt,
               updatedAt,
@@ -235,6 +241,7 @@ export default function MessageUpdateForm(props) {
               subject,
               body,
               isRead,
+              readAt,
               sentAt,
               createdAt,
               updatedAt,
@@ -266,6 +273,7 @@ export default function MessageUpdateForm(props) {
               subject: value,
               body,
               isRead,
+              readAt,
               sentAt,
               createdAt,
               updatedAt,
@@ -297,6 +305,7 @@ export default function MessageUpdateForm(props) {
               subject,
               body: value,
               isRead,
+              readAt,
               sentAt,
               createdAt,
               updatedAt,
@@ -328,6 +337,7 @@ export default function MessageUpdateForm(props) {
               subject,
               body,
               isRead: value,
+              readAt,
               sentAt,
               createdAt,
               updatedAt,
@@ -346,6 +356,40 @@ export default function MessageUpdateForm(props) {
         {...getOverrideProps(overrides, "isRead")}
       ></SwitchField>
       <TextField
+        label="Read at"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={readAt && convertToLocal(new Date(readAt))}
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : new Date(e.target.value).toISOString();
+          if (onChange) {
+            const modelFields = {
+              senderID,
+              receiverID,
+              subject,
+              body,
+              isRead,
+              readAt: value,
+              sentAt,
+              createdAt,
+              updatedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.readAt ?? value;
+          }
+          if (errors.readAt?.hasError) {
+            runValidationTasks("readAt", value);
+          }
+          setReadAt(value);
+        }}
+        onBlur={() => runValidationTasks("readAt", readAt)}
+        errorMessage={errors.readAt?.errorMessage}
+        hasError={errors.readAt?.hasError}
+        {...getOverrideProps(overrides, "readAt")}
+      ></TextField>
+      <TextField
         label="Sent at"
         isRequired={true}
         isReadOnly={false}
@@ -361,6 +405,7 @@ export default function MessageUpdateForm(props) {
               subject,
               body,
               isRead,
+              readAt,
               sentAt: value,
               createdAt,
               updatedAt,
@@ -394,6 +439,7 @@ export default function MessageUpdateForm(props) {
               subject,
               body,
               isRead,
+              readAt,
               sentAt,
               createdAt: value,
               updatedAt,
@@ -427,6 +473,7 @@ export default function MessageUpdateForm(props) {
               subject,
               body,
               isRead,
+              readAt,
               sentAt,
               createdAt,
               updatedAt: value,

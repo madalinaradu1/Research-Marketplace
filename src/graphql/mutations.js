@@ -158,6 +158,7 @@ export const createProject = /* GraphQL */ `
       title
       description
       department
+      faculty
       skillsRequired
       tags
       qualifications
@@ -192,6 +193,7 @@ export const updateProject = /* GraphQL */ `
       title
       description
       department
+      faculty
       skillsRequired
       tags
       qualifications
@@ -226,6 +228,7 @@ export const deleteProject = /* GraphQL */ `
       title
       description
       department
+      faculty
       skillsRequired
       tags
       qualifications
@@ -430,6 +433,7 @@ export const createMessage = /* GraphQL */ `
       subject
       body
       isRead
+      readAt
       sentAt
       createdAt
       updatedAt
@@ -450,6 +454,7 @@ export const updateMessage = /* GraphQL */ `
       subject
       body
       isRead
+      readAt
       sentAt
       createdAt
       updatedAt
@@ -470,6 +475,7 @@ export const deleteMessage = /* GraphQL */ `
       subject
       body
       isRead
+      readAt
       sentAt
       createdAt
       updatedAt
@@ -549,8 +555,12 @@ export const createDeletedUser = /* GraphQL */ `
     createDeletedUser(input: $input, condition: $condition) {
       id
       originalUserID
-      deletedAt
-      scheduledCleanupAt
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
       userData
       status
       createdAt
@@ -567,8 +577,12 @@ export const updateDeletedUser = /* GraphQL */ `
     updateDeletedUser(input: $input, condition: $condition) {
       id
       originalUserID
-      deletedAt
-      scheduledCleanupAt
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
       userData
       status
       createdAt
@@ -585,8 +599,12 @@ export const deleteDeletedUser = /* GraphQL */ `
     deleteDeletedUser(input: $input, condition: $condition) {
       id
       originalUserID
-      deletedAt
-      scheduledCleanupAt
+      name
+      email
+      role
+      deletionScheduledAt
+      deletionExecutedAt
+      isTestMode
       userData
       status
       createdAt
