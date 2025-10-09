@@ -499,8 +499,8 @@ const AdminDashboard = ({ user }) => {
           ...projects.map(p => {
             let facultyName = '';
             
-            // Faculty is now a simple string field
-            if (p.faculty && typeof p.faculty === 'string') {
+            // Faculty is a simple string field in the schema
+            if (p.faculty) {
               facultyName = p.faculty;
             } else if (p.facultyID) {
               // Look up faculty by facultyID
