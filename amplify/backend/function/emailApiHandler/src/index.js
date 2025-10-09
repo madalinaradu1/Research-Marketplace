@@ -13,7 +13,8 @@ exports.handler = async (event) => {
     }
 
     try {
-        const path = event.path;
+        console.log('Event:', JSON.stringify(event, null, 2));
+        const path = event.path || event.rawPath;
         const body = event.body ? JSON.parse(event.body) : {};
         
         switch (path) {

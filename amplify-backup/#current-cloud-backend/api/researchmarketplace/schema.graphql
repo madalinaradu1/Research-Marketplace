@@ -1,0 +1,157 @@
+type User @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: groups, groups: ["Admin"], operations: [read, update] }
+]) {
+  id: ID!
+  name: String!
+  email: String!
+  role: String!
+  department: String
+  major: String
+  academicYear: String
+  gpa: Float
+  skills: [String]
+  researchInterests: [String]
+  careerInterests: [String]
+  resumeKey: String
+  affiliation: String
+  profileComplete: Boolean
+  status: String
+  expectedGraduation: String
+  availability: String
+  personalStatement: String
+  certificates: [String]
+  applicationCount: Int
+  projects: [Project] @hasMany(indexName: "byFaculty", fields: ["id"])
+  applications: [Application] @hasMany(indexName: "byStudent", fields: ["id"])
+  posts: [StudentPost] @hasMany(indexName: "byAuthor", fields: ["id"])
+  notifications: [Notification] @hasMany(indexName: "byUser", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Project @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: private, operations: [read] },
+  { allow: groups, groups: ["Admin"], operations: [read, update] },
+  { allow: groups, groups: ["Faculty"], operations: [create, read, update] }
+]) {
+  id: ID!
+  title: String!
+  description: String!
+  department: String!
+  faculty: String
+  skillsRequired: [String]
+  tags: [String]
+  qualifications: String
+  duration: String
+  applicationDeadline: AWSDateTime
+  facultyID: ID! @index(name: "byFaculty")
+  isActive: Boolean!
+  requiresTranscript: Boolean
+  projectStatus: String
+  coordinatorNotes: String
+  rejectionReason: String
+  selectedStudentID: ID
+  filledAt: AWSDateTime
+  applications: [Application] @hasMany(indexName: "byProject", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Application @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: private, operations: [read] },
+  { allow: groups, groups: ["Admin"], operations: [read, update] }
+]) {
+  id: ID!
+  studentID: ID! @index(name: "byStudent")
+  projectID: ID! @index(name: "byProject")
+  statement: String!
+  resumeKey: String
+  transcriptLink: String
+  documentKey: String
+  relevantCourses: [RelevantCourse]
+  status: String!
+  statusDetail: String
+  facultyNotes: String
+  coordinatorNotes: String
+  rejectionReason: String
+  acceptanceReason: String
+  withdrawReason: String
+  isSelected: Boolean
+  selectedAt: AWSDateTime
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type RelevantCourse {
+  courseName: String!
+  courseNumber: String!
+  grade: String!
+  semester: String!
+  year: String!
+}
+
+type StudentPost @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: private, operations: [read] }
+]) {
+  id: ID!
+  title: String!
+  content: String!
+  authorID: ID! @index(name: "byAuthor")
+  isAnonymous: Boolean!
+  tags: [String]
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Message @model @auth(rules: [
+  { allow: owner, operations: [create, read, update, delete] },
+  { allow: private, operations: [read] }
+]) {
+  id: ID!
+  senderID: ID!
+  receiverID: ID!
+  subject: String!
+  body: String!
+  isRead: Boolean!
+  readAt: AWSDateTime
+  sentAt: AWSDateTime!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Notification @model @auth(rules: [
+  { allow: owner, operations: [read, update, delete] },
+  { allow: groups, groups: ["Admin"], operations: [create] }
+]) {
+  id: ID!
+  userID: ID! @index(name: "byUser")
+  type: String!
+  title: String!
+  message: String!
+  isRead: Boolean!
+  relatedItemID: ID
+  relatedItemType: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type DeletedUser @model @auth(rules: [
+  { allow: groups, groups: ["Admin"], operations: [create, read, update, delete] }
+]) {
+  id: ID!
+  originalUserID: ID!
+  name: String!
+  email: String!
+  role: String!
+  deletionScheduledAt: AWSDateTime!
+  deletionExecutedAt: AWSDateTime
+  isTestMode: Boolean!
+  userData: AWSJSON!
+  status: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}

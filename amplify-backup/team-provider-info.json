@@ -1,0 +1,70 @@
+{
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-researchmarketplace-staging-authRole",
+      "UnauthRoleArn": "arn:aws:iam::785000992257:role/amplify-researchmarketplace-staging-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::785000992257:role/amplify-researchmarketplace-staging-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-researchmarketplace-staging-deployment",
+      "UnauthRoleName": "amplify-researchmarketplace-staging-unauthRole",
+      "StackName": "amplify-researchmarketplace-staging",
+      "StackId": "arn:aws:cloudformation:us-west-2:785000992257:stack/amplify-researchmarketplace-staging/new-stack-id",
+      "AmplifyAppId": "d12p7fg02coi07"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d12p7fg02coi07",
+          "type": "cicd"
+        }
+      }
+    }
+  },
+  "prod": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-researchmarketplace-prod-dd057-authRole",
+      "UnauthRoleArn": "arn:aws:iam::785000992257:role/amplify-researchmarketplace-prod-dd057-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::785000992257:role/amplify-researchmarketplace-prod-dd057-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+      "UnauthRoleName": "amplify-researchmarketplace-prod-dd057-unauthRole",
+      "StackName": "amplify-researchmarketplace-prod-dd057",
+      "StackId": "arn:aws:cloudformation:us-west-2:785000992257:stack/amplify-researchmarketplace-prod-dd057/f42f8d50-a39f-11f0-84d4-0648ec6de921",
+      "AmplifyAppId": "d12p7fg02coi07",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-prod-dd057-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d12p7fg02coi07",
+          "type": "cicd"
+        }
+      },
+      "auth": {
+        "researchmarketplace2a916c6a": {}
+      },
+      "api": {
+        "researchmarketplace": {}
+      },
+      "storage": {
+        "researchFiles": {}
+      },
+      "function": {
+        "researchmarketplace2a916c6aPostConfirmation": {
+          "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+          "s3Key": "amplify-builds/researchmarketplace2a916c6aPostConfirmation-74756f7746466c474243-build.zip"
+        },
+        "createUserRecord": {
+          "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+          "s3Key": "amplify-builds/createUserRecord-6c6f3572706b556f6148-build.zip"
+        },
+        "adminDeleteUser": {
+          "userPoolId": "us-west-2_P6EqP2tph",
+          "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+          "s3Key": "amplify-builds/adminDeleteUser-4d564a50616a4d565034-build.zip"
+        },
+        "emailApiHandler": {}
+      }
+    }
+  }
+}

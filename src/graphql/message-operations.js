@@ -1,24 +1,6 @@
-/* eslint-disable */
-// Message operations using existing Message schema
+import { graphqlOperation } from 'aws-amplify';
 
-export const createMessage = /* GraphQL */ `
-  mutation CreateMessage(
-    $input: CreateMessageInput!
-    $condition: ModelMessageConditionInput
-  ) {
-    createMessage(input: $input, condition: $condition) {
-      id
-      senderID
-      receiverID
-      subject
-      body
-      isRead
-      sentAt
-      readAt
-    }
-  }
-`;
-
+// Message queries
 export const listMessages = /* GraphQL */ `
   query ListMessages(
     $filter: ModelMessageFilterInput
@@ -33,12 +15,46 @@ export const listMessages = /* GraphQL */ `
         subject
         body
         isRead
-        sentAt
         readAt
+        sentAt
         createdAt
         updatedAt
       }
       nextToken
+    }
+  }
+`;
+
+export const getMessage = /* GraphQL */ `
+  query GetMessage($id: ID!) {
+    getMessage(id: $id) {
+      id
+      content
+      sender
+      recipient
+      timestamp
+      isRead
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// Message mutations
+export const createMessage = /* GraphQL */ `
+  mutation CreateMessage(
+    $input: CreateMessageInput!
+    $condition: ModelMessageConditionInput
+  ) {
+    createMessage(input: $input, condition: $condition) {
+      id
+      content
+      sender
+      recipient
+      timestamp
+      isRead
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -50,46 +66,24 @@ export const updateMessage = /* GraphQL */ `
   ) {
     updateMessage(input: $input, condition: $condition) {
       id
-      senderID
-      receiverID
-      subject
-      body
+      content
+      sender
+      recipient
+      timestamp
       isRead
-      sentAt
-      readAt
-      threadID
-      projectID
-      messageType
+      createdAt
+      updatedAt
     }
   }
 `;
 
-export const getMessageThread = /* GraphQL */ `
-  query GetMessageThread($threadID: String!) {
-    listMessages(filter: {threadID: {eq: $threadID}}) {
-      items {
-        id
-        senderID
-        receiverID
-        subject
-        body
-        isRead
-        sentAt
-        readAt
-        threadID
-        messageType
-        parentMessageID
-        sender {
-          id
-          name
-          email
-        }
-        receiver {
-          id
-          name
-          email
-        }
-      }
+export const deleteMessage = /* GraphQL */ `
+  mutation DeleteMessage(
+    $input: DeleteMessageInput!
+    $condition: ModelMessageConditionInput
+  ) {
+    deleteMessage(input: $input, condition: $condition) {
+      id
     }
   }
 `;
@@ -101,11 +95,37 @@ export const createNotification = /* GraphQL */ `
   ) {
     createNotification(input: $input, condition: $condition) {
       id
-      userID
       type
+      title
       message
+      userId
       isRead
       createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const getMessageThread = /* GraphQL */ `
+  query GetMessageThread($userId1: String!, $userId2: String!) {
+    listMessages(
+      filter: {
+        or: [
+          { and: [{ sender: { eq: $userId1 } }, { recipient: { eq: $userId2 } }] }
+          { and: [{ sender: { eq: $userId2 } }, { recipient: { eq: $userId1 } }] }
+        ]
+      }
+    ) {
+      items {
+        id
+        content
+        sender
+        recipient
+        timestamp
+        isRead
+        createdAt
+        updatedAt
+      }
     }
   }
 `;

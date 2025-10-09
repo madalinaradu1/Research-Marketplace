@@ -44,7 +44,8 @@
         "researchmarketplace2a916c6a": {}
       },
       "api": {
-        "researchmarketplace": {}
+        "researchmarketplace": {},
+        "emailapi": {}
       },
       "storage": {
         "researchFiles": {}
@@ -63,7 +64,10 @@
           "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
           "s3Key": "amplify-builds/adminDeleteUser-4d564a50616a4d565034-build.zip"
         },
-        "emailApiHandler": {}
+        "emailApiHandler": {
+          "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+          "s3Key": "amplify-builds/emailApiHandler-56544f52476c31324e4a-build.zip"
+        }
       }
     }
   }

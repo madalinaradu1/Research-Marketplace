@@ -1,0 +1,291 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-researchmarketplace-prod-dd057-authRole",
+      "UnauthRoleArn": "arn:aws:iam::785000992257:role/amplify-researchmarketplace-prod-dd057-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::785000992257:role/amplify-researchmarketplace-prod-dd057-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+      "UnauthRoleName": "amplify-researchmarketplace-prod-dd057-unauthRole",
+      "StackName": "amplify-researchmarketplace-prod-dd057",
+      "StackId": "arn:aws:cloudformation:us-west-2:785000992257:stack/amplify-researchmarketplace-prod-dd057/f42f8d50-a39f-11f0-84d4-0648ec6de921",
+      "AmplifyAppId": "d12p7fg02coi07",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-prod-dd057-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
+    }
+  },
+  "api": {
+    "researchmarketplace": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "researchmarketplace2a916c6a"
+        }
+      ],
+      "output": {
+        "authConfig": {
+          "additionalAuthenticationProviders": [],
+          "defaultAuthentication": {
+            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+            "userPoolConfig": {
+              "userPoolId": "authresearchmarketplace2a916c6a"
+            }
+          }
+        },
+        "GraphQLAPIIdOutput": "epmqdqt62vbchdwxc527edinom",
+        "GraphQLAPIEndpointOutput": "https://dlfcy52kzrgovhufhga725533y.appsync-api.us-west-2.amazonaws.com/graphql"
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "AppSync",
+      "lastPushTimeStamp": "2025-10-07T22:48:56.131Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-prod-dd057-deployment/amplify-cfn-templates/api/cloudformation-template.json",
+        "logicalId": "apiresearchmarketplace"
+      },
+      "lastPushDirHash": "T5Gl0sWc1qxTtPEt9r9XkCnR8a0="
+    },
+    "emailapi": {
+      "service": "API Gateway",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [
+        {
+          "category": "function",
+          "resourceName": "emailApiHandler",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        }
+      ],
+      "lastPushTimeStamp": "2025-10-07T22:48:56.702Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-prod-dd057-deployment/amplify-cfn-templates/api/emailapi-cloudformation-template.json",
+        "logicalId": "apiemailapi"
+      },
+      "output": {
+        "ApiName": "emailapi",
+        "RootUrl": "https://b5opegkeql.execute-api.us-west-2.amazonaws.com/prod",
+        "ApiId": "b5opegkeql"
+      },
+      "lastPushDirHash": "0JmYhqmf+T1jAm3XML+sRU75nOQ="
+    }
+  },
+  "auth": {
+    "researchmarketplace2a916c6a": {
+      "customAuth": false,
+      "dependsOn": [
+        {
+          "category": "function",
+          "resourceName": "researchmarketplace2a916c6aPostConfirmation",
+          "triggerProvider": "Cognito",
+          "attributes": [
+            "Arn",
+            "Name"
+          ]
+        }
+      ],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [
+          "EMAIL"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito",
+      "output": {
+        "UserPoolId": "us-west-2_P6EqP2tph",
+        "AppClientIDWeb": "19dv62k52ts8s5tk5867oqon7n",
+        "AppClientID": "3807vp1bkbr8ldfvqeu8rkd5ho",
+        "IdentityPoolId": "us-west-2:e803a285-2f3d-4286-b2c1-589f73b4e071",
+        "UserPoolArn": "arn:aws:cognito-idp:us-west-2:785000992257:userpool/us-west-2_P6EqP2tph",
+        "IdentityPoolName": "researchmarketplace2a916c6a_identitypool_2a916c6a__prod",
+        "UserPoolName": "researchmarketplace2a916c6a_userpool_2a916c6a"
+      },
+      "lastPushTimeStamp": "2025-10-07T22:48:56.135Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-prod-dd057-deployment/amplify-cfn-templates/auth/researchmarketplace2a916c6a-cloudformation-template.json",
+        "logicalId": "authresearchmarketplace2a916c6a"
+      },
+      "lastPushDirHash": "fvbkdXXqLiGxPQxgf7JnCVy8c9g="
+    }
+  },
+  "hosting": {
+    "amplifyhosting": {
+      "service": "amplifyhosting",
+      "type": "cicd"
+    }
+  },
+  "storage": {
+    "researchFiles": {
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "S3",
+      "output": {
+        "BucketName": "researchmarketplace271964ce15f84e66ba7233fe6f91dd057-prod",
+        "Region": "us-west-2"
+      },
+      "lastPushTimeStamp": "2025-10-07T22:48:56.137Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-prod-dd057-deployment/amplify-cfn-templates/storage/cloudformation-template.json",
+        "logicalId": "storageresearchFiles"
+      },
+      "lastPushDirHash": "5silwED+aO9E/9u2VT72UO6Hz7Q="
+    }
+  },
+  "function": {
+    "createUserRecord": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "dependsOn": [
+        {
+          "category": "api",
+          "resourceName": "researchmarketplace",
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ]
+        },
+        {
+          "category": "auth",
+          "resourceName": "researchmarketplace2a916c6a",
+          "attributes": [
+            "UserPoolId"
+          ]
+        }
+      ],
+      "lastBuildTimeStamp": "2025-10-07T21:52:38.421Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2025-10-07T21:52:38.459Z",
+      "distZipFilename": "createUserRecord-6c6f3572706b556f6148-build.zip",
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+        "s3Key": "amplify-builds/createUserRecord-6c6f3572706b556f6148-build.zip"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-prod-dd057-deployment/amplify-cfn-templates/function/createUserRecord-cloudformation-template.json",
+        "logicalId": "functioncreateUserRecord"
+      },
+      "lastPushTimeStamp": "2025-10-07T22:48:56.139Z",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::785000992257:role/researchmarketplaceLambdaRole572399bc-prod",
+        "Region": "us-west-2",
+        "Arn": "arn:aws:lambda:us-west-2:785000992257:function:createUserRecord-prod",
+        "Name": "createUserRecord-prod",
+        "LambdaExecutionRole": "researchmarketplaceLambdaRole572399bc-prod"
+      },
+      "lastPushDirHash": "dWxbl77xlT5Mgb5c7uMvmshxaTw="
+    },
+    "researchmarketplace2a916c6aPostConfirmation": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "lastBuildTimeStamp": "2025-10-07T21:52:39.550Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2025-10-07T21:52:39.904Z",
+      "distZipFilename": "researchmarketplace2a916c6aPostConfirmation-74756f7746466c474243-build.zip",
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+        "s3Key": "amplify-builds/researchmarketplace2a916c6aPostConfirmation-74756f7746466c474243-build.zip"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-prod-dd057-deployment/amplify-cfn-templates/function/researchmarketplace2a916c6aPostConfirmation-cloudformation-template.json",
+        "logicalId": "functionresearchmarketplace2a916c6aPostConfirmation"
+      },
+      "lastPushTimeStamp": "2025-10-07T22:48:56.140Z",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::785000992257:role/researchmarketplace2a916c6aPostConfirmation-prod",
+        "Region": "us-west-2",
+        "Arn": "arn:aws:lambda:us-west-2:785000992257:function:researchmarketplace2a916c6aPostConfirmation-prod",
+        "Name": "researchmarketplace2a916c6aPostConfirmation-prod",
+        "LambdaExecutionRole": "researchmarketplace2a916c6aPostConfirmation-prod"
+      },
+      "lastPushDirHash": "pN8xTeKUuYHP3z1ba5oeViJEDds="
+    },
+    "adminDeleteUser": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "dependsOn": [
+        {
+          "category": "api",
+          "resourceName": "researchmarketplace",
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ]
+        },
+        {
+          "category": "auth",
+          "resourceName": "researchmarketplace2a916c6a",
+          "attributes": [
+            "UserPoolId"
+          ]
+        }
+      ],
+      "lastBuildTimeStamp": "2025-10-07T22:03:39.942Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2025-10-07T22:03:39.981Z",
+      "distZipFilename": "adminDeleteUser-4d564a50616a4d565034-build.zip",
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+        "s3Key": "amplify-builds/adminDeleteUser-4d564a50616a4d565034-build.zip"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-prod-dd057-deployment/amplify-cfn-templates/function/adminDeleteUser-cloudformation-template.json",
+        "logicalId": "functionadminDeleteUser"
+      },
+      "lastPushTimeStamp": "2025-10-07T22:48:56.143Z",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::785000992257:role/researchmarketplaceLambdaRole122ee997-prod",
+        "Region": "us-west-2",
+        "Arn": "arn:aws:lambda:us-west-2:785000992257:function:adminDeleteUser-prod",
+        "Name": "adminDeleteUser-prod",
+        "LambdaExecutionRole": "researchmarketplaceLambdaRole122ee997-prod"
+      },
+      "lastPushDirHash": "QPCr3xil8isMhM9fOBVIzxbBswY="
+    },
+    "emailApiHandler": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "lastBuildTimeStamp": "2025-10-07T22:45:51.040Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2025-10-07T22:45:51.082Z",
+      "distZipFilename": "emailApiHandler-61357565594b6467564b-build.zip",
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
+        "s3Key": "amplify-builds/emailApiHandler-61357565594b6467564b-build.zip"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-prod-dd057-deployment/amplify-cfn-templates/function/emailApiHandler-cloudformation-template.json",
+        "logicalId": "functionemailApiHandler"
+      },
+      "lastPushTimeStamp": "2025-10-07T22:48:56.702Z",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::785000992257:role/researchmarketplaceLambdaRoleef92343b-prod",
+        "Region": "us-west-2",
+        "Arn": "arn:aws:lambda:us-west-2:785000992257:function:emailApiHandler-prod",
+        "Name": "emailApiHandler-prod",
+        "LambdaExecutionRole": "researchmarketplaceLambdaRoleef92343b-prod"
+      },
+      "lastPushDirHash": "pJgVhrdDT3F2DWbMw6lynomLpmk="
+    }
+  }
+}

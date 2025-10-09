@@ -155,3 +155,20 @@ type DeletedUser @model @auth(rules: [
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
+
+type AuditLog @model @auth(rules: [
+  { allow: groups, groups: ["Admin"], operations: [create, read, update, delete] }
+]) {
+  id: ID!
+  userId: String!
+  userName: String!
+  userEmail: String!
+  action: String!
+  resource: String!
+  details: String!
+  timestamp: AWSDateTime!
+  ipAddress: String
+  userAgent: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
