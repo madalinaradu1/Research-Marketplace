@@ -1,5 +1,6 @@
-const AWS = require('aws-sdk');
-const cognito = new AWS.CognitoIdentityServiceProvider();
+// AWS SDK v3 is available in Node.js 22 runtime
+// For now, we'll remove the unused cognito import since this function doesn't use it
+// const { CognitoIdentityProviderClient } = require('@aws-sdk/client-cognito-identity-provider');
 
 exports.handler = async (event) => {
     const headers = {
