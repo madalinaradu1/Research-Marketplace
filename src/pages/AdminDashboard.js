@@ -359,46 +359,37 @@ const AdminDashboard = ({ user }) => {
     }
     
     try {
-      // Step 1: Create user in Cognito first to get the actual Cognito UUID
-      let cognitoSuccess = false;
-      let actualCognitoUserId = null;
+      // Create user in Cognito first to get actual UUID
+      const cognitoResponse = await API.post('emailapi', '/create-user', {
+        body: {
+          email: newUser.email,
+          name: newUser.name,
+          role: newUser.role,
+          department: newUser.department
+        }
+      });
       
-      try {
-        const cognitoResponse = await API.post('emailapi', '/create-user', {
-          body: {
-            email: newUser.email,
-            name: newUser.name,
-            role: newUser.role,
-            department: newUser.department
-          }
-        });
-        console.log('Cognito creation successful:', cognitoResponse);
-        actualCognitoUserId = cognitoResponse.userId; // Use Cognito's actual UUID
-        cognitoSuccess = true;
-      } catch (cognitoError) {
-        console.error('Cognito creation failed:', cognitoError);
-        cognitoSuccess = false;
-        // Fallback to generated UUID if Cognito fails
-        actualCognitoUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      console.log('User creation API response:', cognitoResponse);
+      
+      // Only create database record if Cognito creation was successful
+      if (cognitoResponse.success && cognitoResponse.cognitoUserId) {
+        const userInput = {
+          id: cognitoResponse.cognitoUserId, // Use actual Cognito UUID
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+          department: newUser.department || null,
+          profileComplete: newUser.role !== 'Student'
+        };
+        
+        const dbResult = await API.graphql(graphqlOperation(createUser, { input: userInput }));
+        console.log('Database user created:', dbResult.data.createUser);
+      } else {
+        throw new Error('Cognito user creation failed - cannot create database record');
       }
       
-      // Step 2: Create user profile in database using actual Cognito UUID
-      const userInput = {
-        id: actualCognitoUserId, // Use actual Cognito UUID
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        department: newUser.department || null,
-        profileComplete: newUser.role !== 'Student' // Students must complete profile
-      };
-      
-      await API.graphql(graphqlOperation(createUser, { input: userInput }));
-      
       logAuditAction('User Created', `User: ${newUser.email}`, `Role: ${newUser.role}${newUser.department ? `, Department: ${newUser.department}` : ''}`);
-      setMessage(cognitoSuccess ? 
-        `User created successfully! Welcome email sent to ${newUser.email}` :
-        `User profile created in database. Cognito creation failed - user can still sign up normally with email: ${newUser.email}`
-      );
+      setMessage(cognitoResponse.message || 'User created successfully!');
       setNewUser({ name: '', email: '', role: '', department: '' });
       fetchData();
     } catch (err) {

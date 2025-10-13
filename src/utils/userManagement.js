@@ -10,73 +10,86 @@ export async function createUserAfterSignUp(userData) {
   const { username, attributes } = userData;
   
   try {
-    // Determine role based on email domain
-    const email = attributes.email;
-    let role = 'Student'; // Default role
-    if (email.endsWith('@gcu.edu')) {
-      role = 'Faculty';
-    } else if (email.endsWith('@my.gcu.edu')) {
-      role = 'Student';
+    const email = attributes.email.toLowerCase().trim();
+    console.log('Processing user signup for email:', email);
+    console.log('Cognito UUID:', username);
+    
+    // FIRST: Check if user already exists by UUID
+    try {
+      const result = await API.graphql(graphqlOperation(getUser, { id: username }));
+      if (result.data.getUser) {
+        console.log('User found by UUID, returning existing user:', result.data.getUser);
+        return result.data.getUser;
+      }
+    } catch (uuidError) {
+      console.log('No user found by UUID, checking by email');
     }
     
-    const userInput = {
-      id: username, // Use UUID as primary key
-      name: `${attributes.given_name || ''} ${attributes.family_name || ''}`.trim() || attributes.name || '',
-      email: attributes.email,
-      role: role,
-      profileComplete: role !== 'Student' // All Students must complete profile
-    };
+    // SECOND: Check if user already exists by email (admin-created users)
+    console.log('Searching for existing user with email:', email);
+    console.log('Email to search for (normalized):', email.toLowerCase().trim());
     
-    console.log('Creating user with attributes:', attributes);
-    console.log('User input:', userInput);
-    
-    // Check if user already exists by email (for admin-created users)
     try {
-      const emailFilter = {
-        email: {
-          eq: attributes.email
-        }
-      };
-      console.log('Searching for user with email:', attributes.email);
-      console.log('Using filter:', emailFilter);
-      const existingUsersByEmail = await API.graphql(graphqlOperation(listUsers, { 
-        filter: emailFilter,
-        limit: 1
-      }));
+      const allUsers = await API.graphql(graphqlOperation(listUsers, { limit: 1000 }));
+      console.log('Total users found:', allUsers.data.listUsers.items.length);
       
-      console.log('Email search result:', existingUsersByEmail.data.listUsers.items);
-      if (existingUsersByEmail.data.listUsers.items.length > 0) {
-        console.log('User already exists by email, preserving existing profile:', existingUsersByEmail.data.listUsers.items[0]);
-        return existingUsersByEmail.data.listUsers.items[0];
-      }
+      // Test specific email
+      const testEmail = 'matthew.craig@gcu.edu';
+      console.log('Testing search for specific email:', testEmail);
+      const testUser = allUsers.data.listUsers.items.find(u => u.email === testEmail);
+      console.log('Test result for matthew.craig@gcu.edu:', testUser);
       
-      // Fallback: fetch all users and filter client-side
-      console.log('GraphQL filter failed, trying client-side search');
-      const allUsers = await API.graphql(graphqlOperation(listUsers, { limit: 100 }));
-      const userByEmail = allUsers.data.listUsers.items.find(user => user.email === attributes.email);
+      // Log all users for debugging
+      allUsers.data.listUsers.items.forEach(user => {
+        console.log('User in DB:', user.email, 'ID:', user.id, 'Role:', user.role);
+      });
+      
+      const userByEmail = allUsers.data.listUsers.items.find(user => {
+        if (!user.email) return false;
+        const userEmail = user.email.toLowerCase().trim();
+        const searchEmail = email.toLowerCase().trim();
+        console.log('Comparing:', userEmail, '===', searchEmail, '?', userEmail === searchEmail);
+        return userEmail === searchEmail;
+      });
       
       if (userByEmail) {
-        console.log('Found user by client-side email search:', userByEmail);
-        console.log('User role from database:', userByEmail.role);
+        console.log('FOUND EXISTING USER BY EMAIL - RETURNING:', userByEmail);
+        console.log('Existing user role:', userByEmail.role);
+        console.log('Existing user ID:', userByEmail.id);
         return userByEmail;
+      } else {
+        console.log('NO EXISTING USER FOUND BY EMAIL in listUsers');
+        console.log('Searched for:', email);
+        
+        // Try GraphQL filter as fallback
+        try {
+          console.log('Trying GraphQL email filter as fallback');
+          const emailFilter = { email: { eq: email } };
+          const filterResult = await API.graphql(graphqlOperation(listUsers, { 
+            filter: emailFilter,
+            limit: 10
+          }));
+          
+          console.log('GraphQL filter result:', filterResult.data.listUsers.items);
+          
+          if (filterResult.data.listUsers.items.length > 0) {
+            const foundUser = filterResult.data.listUsers.items[0];
+            console.log('FOUND USER WITH GRAPHQL FILTER:', foundUser);
+            return foundUser;
+          }
+        } catch (filterError) {
+          console.error('GraphQL filter also failed:', filterError);
+        }
       }
-      console.log('No existing user found by email, creating new user');
-      
-      // If no existing user found, create new one with default role
-      const result = await API.graphql(graphqlOperation(createUser, { input: userInput }));
-      console.log('User record created successfully:', result.data.createUser);
-      return result.data.createUser;
-    } catch (graphQLError) {
-      // If there's a conflict (user already exists), don't throw an error
-      if (graphQLError.errors && graphQLError.errors[0].errorType === 'DynamoDB:ConditionalCheckFailedException') {
-        console.log('User already exists (conditional check failed)');
-        return null;
-      }
-      throw graphQLError;
+    } catch (error) {
+      console.error('Error checking existing user by email:', error);
     }
+    
+    // STOP HERE - DO NOT CREATE NEW USERS AUTOMATICALLY
+    console.log('No existing user found. User must be created by admin first.');
+    return null;
   } catch (error) {
-    console.error('Error creating user record:', error);
-    // Don't throw the error, just return null to prevent app crashes
+    console.error('Error in createUserAfterSignUp:', error);
     return null;
   }
 }

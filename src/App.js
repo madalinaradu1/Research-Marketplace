@@ -169,36 +169,25 @@ function App({ signOut, user }) {
         console.log('User profile role:', userProfile?.role);
         console.log('Is admin check:', isUserAdmin(user, userProfile));
         
-        // If user doesn't exist or doesn't have a role, set default role
-        if (!userProfile || !userProfile.role) {
-          console.log('User profile missing or no role, creating/updating with Student role');
-          const createdUser = await createUserAfterSignUp(userData);
-          console.log('createUserAfterSignUp returned:', createdUser);
+        // If user doesn't exist, try to find existing user by email
+        if (!userProfile) {
+          console.log('User profile missing, searching by email');
+          const foundUser = await createUserAfterSignUp(userData);
+          console.log('createUserAfterSignUp returned:', foundUser);
           
-          if (createdUser) {
-            setUserProfile(createdUser);
+          if (foundUser) {
+            setUserProfile(foundUser);
           } else {
-            // Fallback: retry fetching the user by email
-            const emailFilter = { email: { eq: userData.attributes.email } };
-            const retryResult = await API.graphql(graphqlOperation(listUsers, { filter: emailFilter, limit: 1 }));
-            if (retryResult.data.listUsers.items.length > 0) {
-              setUserProfile(retryResult.data.listUsers.items[0]);
-            }
+            console.log('No user found - user must be created by admin first');
+            // Don't create user automatically - redirect to error or contact admin
+            setUserProfile(null);
           }
         } else {
           setUserProfile(userProfile);
         }
       } catch (error) {
         console.error('Error fetching user profile:', error);
-        // If user doesn't exist, create them
-        try {
-          const userData = await Auth.currentAuthenticatedUser();
-          await createUserAfterSignUp(userData);
-          const result = await API.graphql(graphqlOperation(getUser, { id: userData.username }));
-          setUserProfile(result.data.getUser);
-        } catch (createError) {
-          console.error('Error creating user:', createError);
-        }
+        setUserProfile(null);
       } finally {
         setLoading(false);
       }
@@ -229,6 +218,17 @@ function App({ signOut, user }) {
   
   if (loading) {
     return <div>Loading...</div>;
+  }
+  
+  if (!userProfile) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <h2>Account Not Found</h2>
+        <p>Your account has not been set up yet. Please contact an administrator to create your account.</p>
+        <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '1rem' }}>Debug: Check browser console for detailed logs</p>
+        <button onClick={signOut} style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>Sign Out</button>
+      </div>
+    );
   }
 
   // MFA disabled due to auth deployment issues

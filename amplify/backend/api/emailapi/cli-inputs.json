@@ -35,6 +35,13 @@
       "permissions": {
         "setting": "open"
       }
+    },
+    "/delete-user": {
+      "name": "/delete-user",
+      "lambdaFunction": "emailApiHandler",
+      "permissions": {
+        "setting": "open"
+      }
     }
   }
 }

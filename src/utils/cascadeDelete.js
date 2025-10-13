@@ -25,7 +25,9 @@ export const scheduleUserDeletion = async (userToDelete, testMode = false) => {
         email: userToDelete.email,
         role: userToDelete.role,
         deletionScheduledAt: cleanupDate.toISOString(),
-        isTestMode: false
+        isTestMode: testMode,
+        userData: JSON.stringify(userToDelete),
+        status: 'SCHEDULED'
       }
     }));
     

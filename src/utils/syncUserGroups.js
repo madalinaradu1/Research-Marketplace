@@ -16,6 +16,12 @@ export async function syncUserGroupsToRole(userId = null) {
     const groups = currentUser.signInUserSession.accessToken.payload['cognito:groups'] || [];
     console.log('User groups:', groups);
     
+    // Only sync if user has Cognito groups (don't override existing roles)
+    if (groups.length === 0) {
+      console.log('No Cognito groups found, skipping role sync to preserve existing role');
+      return null;
+    }
+    
     // Determine role based on highest privilege group
     let role = 'Student'; // Default role
     

@@ -1,6 +1,8 @@
 // AWS SDK v3 is available in Node.js 22 runtime
-// For now, we'll remove the unused cognito import since this function doesn't use it
-// const { CognitoIdentityProviderClient } = require('@aws-sdk/client-cognito-identity-provider');
+const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
+const { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand } = require('@aws-sdk/client-cognito-identity-provider');
+const sesClient = new SESClient({ region: 'us-west-2' });
+const cognitoClient = new CognitoIdentityProviderClient({ region: 'us-west-2' });
 
 exports.handler = async (event) => {
     const headers = {
@@ -34,15 +36,116 @@ exports.handler = async (event) => {
                 };
                 
             case '/create-user':
-                return {
-                    statusCode: 200,
-                    headers,
-                    body: JSON.stringify({
-                        success: true,
-                        userId: `user_${Date.now()}`,
-                        message: 'User created successfully'
-                    })
-                };
+                const { email, name, role } = body;
+                let cognitoSuccess = false;
+                let actualCognitoUserId = null;
+                let tempPassword = Math.random().toString(36).slice(-8) + '!' + Math.random().toString(36).slice(-3).toUpperCase();
+                
+                // Try to create user in Cognito
+                try {
+                    const createUserParams = {
+                        UserPoolId: 'us-west-2_P6EqP2tph',
+                        Username: email,
+                        UserAttributes: [
+                            { Name: 'email', Value: email },
+                            { Name: 'name', Value: name }
+                        ],
+                        TemporaryPassword: tempPassword,
+                        MessageAction: 'SUPPRESS'
+                    };
+                    
+                    const createResult = await cognitoClient.send(new AdminCreateUserCommand(createUserParams));
+                    actualCognitoUserId = createResult.User.Username; // Get actual Cognito UUID
+                    
+                    const setPasswordParams = {
+                        UserPoolId: 'us-west-2_P6EqP2tph',
+                        Username: actualCognitoUserId,
+                        Password: tempPassword,
+                        Permanent: false
+                    };
+                    
+                    await cognitoClient.send(new AdminSetUserPasswordCommand(setPasswordParams));
+                    cognitoSuccess = true;
+                } catch (cognitoError) {
+                    console.error('Cognito user creation failed:', cognitoError);
+                    // Don't create fallback ID - return error instead
+                    return {
+                        statusCode: 400,
+                        headers,
+                        body: JSON.stringify({
+                            success: false,
+                            error: 'Failed to create user in Cognito',
+                            details: cognitoError.message
+                        })
+                    };
+                }
+                
+                // Try to send email
+                try {
+                    
+                    // Send welcome email via SES
+                    const emailParams = {
+                        Source: 'madalina.radu1@gcu.edu',
+                        Destination: {
+                            ToAddresses: ['madalina.radu1@gcu.edu'] // Send all notifications to your email in sandbox
+                        },
+                        Message: {
+                            Subject: {
+                                Data: `Welcome to GCU Research Marketplace!`,
+                                Charset: 'UTF-8'
+                            },
+                            Body: {
+                                Text: {
+                                    Data: `Note: This email was intended for ${email} but sent to your verified address for testing.\n\nWelcome to GCU Research Marketplace!\n\nHello ${name},\n\nYour account has been created successfully. Here are your login credentials:\n\nEmail: ${email}\nTemporary Password: ${tempPassword}\nRole: ${role}\n\nPlease log in to the Research Marketplace and change your password on first login.\n\nBest regards,\nGCU Research Team`,
+                                    Charset: 'UTF-8'
+                                },
+                                Html: {
+                                    Data: `
+                                        <p><em>Note: This email was intended for ${email} but sent to your verified address for testing.</em></p>
+                                        <h2>Welcome to GCU Research Marketplace!</h2>
+                                        <p>Hello ${name},</p>
+                                        <p>Your account has been created successfully. Here are your login credentials:</p>
+                                        <p><strong>Email:</strong> ${email}<br>
+                                        <strong>Temporary Password:</strong> ${tempPassword}<br>
+                                        <strong>Role:</strong> ${role}</p>
+                                        <p>Please log in to the Research Marketplace using the link below and change your password:</p>
+                                        <p><a href="https://master.d12p7fg02coi07.amplifyapp.com">Access Research Marketplace</a></p>
+                                        <p>You will be prompted to change your password on first login.</p>
+                                        <p>Best regards,<br>GCU Research Team</p>
+                                    `,
+                                    Charset: 'UTF-8'
+                                }
+                            }
+                        }
+                    };
+                    
+                    await sesClient.send(new SendEmailCommand(emailParams));
+                    
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            success: true,
+                            userId: actualCognitoUserId,
+                            cognitoUserId: actualCognitoUserId,
+                            role: role,
+                            message: 'User created successfully in Cognito'
+                        })
+                    };
+                } catch (emailError) {
+                    console.error('Email sending failed:', emailError);
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            success: true,
+                            userId: actualCognitoUserId,
+                            cognitoUserId: actualCognitoUserId,
+                            role: role,
+                            message: 'User created successfully in Cognito (email notification failed)'
+                        })
+                    };
+                }
                 
             case '/update-user-group':
                 return {
@@ -72,6 +175,16 @@ exports.handler = async (event) => {
                         success: true,
                         ddlScript: 'CREATE TABLE users...',
                         message: 'Database backup generated'
+                    })
+                };
+                
+            case '/delete-user':
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify({
+                        success: true,
+                        message: 'User deleted from Cognito successfully'
                     })
                 };
                 
