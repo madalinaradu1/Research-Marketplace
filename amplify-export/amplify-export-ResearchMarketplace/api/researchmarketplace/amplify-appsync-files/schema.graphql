@@ -1,0 +1,1219 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  role: String!
+  department: String
+  major: String
+  academicYear: String
+  gpa: Float
+  skills: [String]
+  researchInterests: [String]
+  careerInterests: [String]
+  resumeKey: String
+  affiliation: String
+  profileComplete: Boolean
+  status: String
+  expectedGraduation: String
+  availability: String
+  personalStatement: String
+  certificates: [String]
+  applicationCount: Int
+  projects(filter: ModelProjectFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelProjectConnection
+  applications(filter: ModelApplicationFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelApplicationConnection
+  posts(filter: ModelStudentPostFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelStudentPostConnection
+  notifications(filter: ModelNotificationFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelNotificationConnection
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Project {
+  id: ID!
+  title: String!
+  description: String!
+  department: String!
+  faculty: String
+  skillsRequired: [String]
+  tags: [String]
+  qualifications: String
+  duration: String
+  applicationDeadline: AWSDateTime
+  facultyID: ID!
+  isActive: Boolean!
+  requiresTranscript: Boolean
+  projectStatus: String
+  coordinatorNotes: String
+  rejectionReason: String
+  selectedStudentID: ID
+  filledAt: AWSDateTime
+  applications(filter: ModelApplicationFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelApplicationConnection
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Application {
+  id: ID!
+  studentID: ID!
+  projectID: ID!
+  statement: String!
+  resumeKey: String
+  transcriptLink: String
+  documentKey: String
+  relevantCourses: [RelevantCourse]
+  status: String!
+  statusDetail: String
+  facultyNotes: String
+  coordinatorNotes: String
+  rejectionReason: String
+  acceptanceReason: String
+  withdrawReason: String
+  isSelected: Boolean
+  selectedAt: AWSDateTime
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type RelevantCourse {
+  courseName: String!
+  courseNumber: String!
+  grade: String!
+  semester: String!
+  year: String!
+}
+
+type StudentPost {
+  id: ID!
+  title: String!
+  content: String!
+  authorID: ID!
+  isAnonymous: Boolean!
+  tags: [String]
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Message {
+  id: ID!
+  senderID: ID!
+  receiverID: ID!
+  subject: String!
+  body: String!
+  isRead: Boolean!
+  readAt: AWSDateTime
+  sentAt: AWSDateTime!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type Notification {
+  id: ID!
+  userID: ID!
+  type: String!
+  title: String!
+  message: String!
+  isRead: Boolean!
+  relatedItemID: ID
+  relatedItemType: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  owner: String
+}
+
+type DeletedUser {
+  id: ID!
+  originalUserID: ID!
+  name: String!
+  email: String!
+  role: String!
+  deletionScheduledAt: AWSDateTime!
+  deletionExecutedAt: AWSDateTime
+  isTestMode: Boolean!
+  userData: AWSJSON!
+  status: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type AuditLog {
+  id: ID!
+  userId: String!
+  userName: String!
+  userEmail: String!
+  action: String!
+  resource: String!
+  details: String!
+  timestamp: AWSDateTime!
+  ipAddress: String
+  userAgent: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+input ModelStringInput {
+  ne: String
+  eq: String
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  contains: String
+  notContains: String
+  between: [String]
+  beginsWith: String
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+  size: ModelSizeInput
+}
+
+input ModelIntInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelFloatInput {
+  ne: Float
+  eq: Float
+  le: Float
+  lt: Float
+  ge: Float
+  gt: Float
+  between: [Float]
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelBooleanInput {
+  ne: Boolean
+  eq: Boolean
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelIDInput {
+  ne: ID
+  eq: ID
+  le: ID
+  lt: ID
+  ge: ID
+  gt: ID
+  contains: ID
+  notContains: ID
+  between: [ID]
+  beginsWith: ID
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+  size: ModelSizeInput
+}
+
+input ModelSubscriptionStringInput {
+  ne: String
+  eq: String
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  contains: String
+  notContains: String
+  between: [String]
+  beginsWith: String
+  in: [String]
+  notIn: [String]
+}
+
+input ModelSubscriptionIntInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+  in: [Int]
+  notIn: [Int]
+}
+
+input ModelSubscriptionFloatInput {
+  ne: Float
+  eq: Float
+  le: Float
+  lt: Float
+  ge: Float
+  gt: Float
+  between: [Float]
+  in: [Float]
+  notIn: [Float]
+}
+
+input ModelSubscriptionBooleanInput {
+  ne: Boolean
+  eq: Boolean
+}
+
+input ModelSubscriptionIDInput {
+  ne: ID
+  eq: ID
+  le: ID
+  lt: ID
+  ge: ID
+  gt: ID
+  contains: ID
+  notContains: ID
+  between: [ID]
+  beginsWith: ID
+  in: [ID]
+  notIn: [ID]
+}
+
+enum ModelAttributeTypes {
+  binary
+  binarySet
+  bool
+  list
+  map
+  number
+  numberSet
+  string
+  stringSet
+  _null
+}
+
+input ModelSizeInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+}
+
+enum ModelSortDirection {
+  ASC
+  DESC
+}
+
+type ModelUserConnection {
+  items: [User]!
+  nextToken: String
+}
+
+input ModelUserFilterInput {
+  id: ModelIDInput
+  name: ModelStringInput
+  email: ModelStringInput
+  role: ModelStringInput
+  department: ModelStringInput
+  major: ModelStringInput
+  academicYear: ModelStringInput
+  gpa: ModelFloatInput
+  skills: ModelStringInput
+  researchInterests: ModelStringInput
+  careerInterests: ModelStringInput
+  resumeKey: ModelStringInput
+  affiliation: ModelStringInput
+  profileComplete: ModelBooleanInput
+  status: ModelStringInput
+  expectedGraduation: ModelStringInput
+  availability: ModelStringInput
+  personalStatement: ModelStringInput
+  certificates: ModelStringInput
+  applicationCount: ModelIntInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelUserFilterInput]
+  or: [ModelUserFilterInput]
+  not: ModelUserFilterInput
+  owner: ModelStringInput
+}
+
+type Query {
+  getUser(id: ID!): User
+  listUsers(filter: ModelUserFilterInput, limit: Int, nextToken: String): ModelUserConnection
+  getProject(id: ID!): Project
+  listProjects(filter: ModelProjectFilterInput, limit: Int, nextToken: String): ModelProjectConnection
+  getApplication(id: ID!): Application
+  listApplications(filter: ModelApplicationFilterInput, limit: Int, nextToken: String): ModelApplicationConnection
+  getStudentPost(id: ID!): StudentPost
+  listStudentPosts(filter: ModelStudentPostFilterInput, limit: Int, nextToken: String): ModelStudentPostConnection
+  getMessage(id: ID!): Message
+  listMessages(filter: ModelMessageFilterInput, limit: Int, nextToken: String): ModelMessageConnection
+  getNotification(id: ID!): Notification
+  listNotifications(filter: ModelNotificationFilterInput, limit: Int, nextToken: String): ModelNotificationConnection
+  getDeletedUser(id: ID!): DeletedUser
+  listDeletedUsers(filter: ModelDeletedUserFilterInput, limit: Int, nextToken: String): ModelDeletedUserConnection
+  getAuditLog(id: ID!): AuditLog
+  listAuditLogs(filter: ModelAuditLogFilterInput, limit: Int, nextToken: String): ModelAuditLogConnection
+  projectsByFacultyID(facultyID: ID!, sortDirection: ModelSortDirection, filter: ModelProjectFilterInput, limit: Int, nextToken: String): ModelProjectConnection
+  applicationsByStudentID(studentID: ID!, sortDirection: ModelSortDirection, filter: ModelApplicationFilterInput, limit: Int, nextToken: String): ModelApplicationConnection
+  applicationsByProjectID(projectID: ID!, sortDirection: ModelSortDirection, filter: ModelApplicationFilterInput, limit: Int, nextToken: String): ModelApplicationConnection
+  studentPostsByAuthorID(authorID: ID!, sortDirection: ModelSortDirection, filter: ModelStudentPostFilterInput, limit: Int, nextToken: String): ModelStudentPostConnection
+  notificationsByUserID(userID: ID!, sortDirection: ModelSortDirection, filter: ModelNotificationFilterInput, limit: Int, nextToken: String): ModelNotificationConnection
+}
+
+input ModelUserConditionInput {
+  name: ModelStringInput
+  email: ModelStringInput
+  role: ModelStringInput
+  department: ModelStringInput
+  major: ModelStringInput
+  academicYear: ModelStringInput
+  gpa: ModelFloatInput
+  skills: ModelStringInput
+  researchInterests: ModelStringInput
+  careerInterests: ModelStringInput
+  resumeKey: ModelStringInput
+  affiliation: ModelStringInput
+  profileComplete: ModelBooleanInput
+  status: ModelStringInput
+  expectedGraduation: ModelStringInput
+  availability: ModelStringInput
+  personalStatement: ModelStringInput
+  certificates: ModelStringInput
+  applicationCount: ModelIntInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelUserConditionInput]
+  or: [ModelUserConditionInput]
+  not: ModelUserConditionInput
+  owner: ModelStringInput
+}
+
+input CreateUserInput {
+  id: ID
+  name: String!
+  email: String!
+  role: String!
+  department: String
+  major: String
+  academicYear: String
+  gpa: Float
+  skills: [String]
+  researchInterests: [String]
+  careerInterests: [String]
+  resumeKey: String
+  affiliation: String
+  profileComplete: Boolean
+  status: String
+  expectedGraduation: String
+  availability: String
+  personalStatement: String
+  certificates: [String]
+  applicationCount: Int
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input UpdateUserInput {
+  id: ID!
+  name: String
+  email: String
+  role: String
+  department: String
+  major: String
+  academicYear: String
+  gpa: Float
+  skills: [String]
+  researchInterests: [String]
+  careerInterests: [String]
+  resumeKey: String
+  affiliation: String
+  profileComplete: Boolean
+  status: String
+  expectedGraduation: String
+  availability: String
+  personalStatement: String
+  certificates: [String]
+  applicationCount: Int
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input DeleteUserInput {
+  id: ID!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!, condition: ModelUserConditionInput): User
+  updateUser(input: UpdateUserInput!, condition: ModelUserConditionInput): User
+  deleteUser(input: DeleteUserInput!, condition: ModelUserConditionInput): User
+  createProject(input: CreateProjectInput!, condition: ModelProjectConditionInput): Project
+  updateProject(input: UpdateProjectInput!, condition: ModelProjectConditionInput): Project
+  deleteProject(input: DeleteProjectInput!, condition: ModelProjectConditionInput): Project
+  createApplication(input: CreateApplicationInput!, condition: ModelApplicationConditionInput): Application
+  updateApplication(input: UpdateApplicationInput!, condition: ModelApplicationConditionInput): Application
+  deleteApplication(input: DeleteApplicationInput!, condition: ModelApplicationConditionInput): Application
+  createStudentPost(input: CreateStudentPostInput!, condition: ModelStudentPostConditionInput): StudentPost
+  updateStudentPost(input: UpdateStudentPostInput!, condition: ModelStudentPostConditionInput): StudentPost
+  deleteStudentPost(input: DeleteStudentPostInput!, condition: ModelStudentPostConditionInput): StudentPost
+  createMessage(input: CreateMessageInput!, condition: ModelMessageConditionInput): Message
+  updateMessage(input: UpdateMessageInput!, condition: ModelMessageConditionInput): Message
+  deleteMessage(input: DeleteMessageInput!, condition: ModelMessageConditionInput): Message
+  createNotification(input: CreateNotificationInput!, condition: ModelNotificationConditionInput): Notification
+  updateNotification(input: UpdateNotificationInput!, condition: ModelNotificationConditionInput): Notification
+  deleteNotification(input: DeleteNotificationInput!, condition: ModelNotificationConditionInput): Notification
+  createDeletedUser(input: CreateDeletedUserInput!, condition: ModelDeletedUserConditionInput): DeletedUser
+  updateDeletedUser(input: UpdateDeletedUserInput!, condition: ModelDeletedUserConditionInput): DeletedUser
+  deleteDeletedUser(input: DeleteDeletedUserInput!, condition: ModelDeletedUserConditionInput): DeletedUser
+  createAuditLog(input: CreateAuditLogInput!, condition: ModelAuditLogConditionInput): AuditLog
+  updateAuditLog(input: UpdateAuditLogInput!, condition: ModelAuditLogConditionInput): AuditLog
+  deleteAuditLog(input: DeleteAuditLogInput!, condition: ModelAuditLogConditionInput): AuditLog
+}
+
+input ModelSubscriptionUserFilterInput {
+  id: ModelSubscriptionIDInput
+  name: ModelSubscriptionStringInput
+  email: ModelSubscriptionStringInput
+  role: ModelSubscriptionStringInput
+  department: ModelSubscriptionStringInput
+  major: ModelSubscriptionStringInput
+  academicYear: ModelSubscriptionStringInput
+  gpa: ModelSubscriptionFloatInput
+  skills: ModelSubscriptionStringInput
+  researchInterests: ModelSubscriptionStringInput
+  careerInterests: ModelSubscriptionStringInput
+  resumeKey: ModelSubscriptionStringInput
+  affiliation: ModelSubscriptionStringInput
+  profileComplete: ModelSubscriptionBooleanInput
+  status: ModelSubscriptionStringInput
+  expectedGraduation: ModelSubscriptionStringInput
+  availability: ModelSubscriptionStringInput
+  personalStatement: ModelSubscriptionStringInput
+  certificates: ModelSubscriptionStringInput
+  applicationCount: ModelSubscriptionIntInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionUserFilterInput]
+  or: [ModelSubscriptionUserFilterInput]
+  owner: ModelStringInput
+}
+
+type Subscription {
+  onCreateUser(filter: ModelSubscriptionUserFilterInput, owner: String): User @aws_subscribe(mutations: ["createUser"])
+  onUpdateUser(filter: ModelSubscriptionUserFilterInput, owner: String): User @aws_subscribe(mutations: ["updateUser"])
+  onDeleteUser(filter: ModelSubscriptionUserFilterInput, owner: String): User @aws_subscribe(mutations: ["deleteUser"])
+  onCreateProject(filter: ModelSubscriptionProjectFilterInput, owner: String): Project @aws_subscribe(mutations: ["createProject"])
+  onUpdateProject(filter: ModelSubscriptionProjectFilterInput, owner: String): Project @aws_subscribe(mutations: ["updateProject"])
+  onDeleteProject(filter: ModelSubscriptionProjectFilterInput, owner: String): Project @aws_subscribe(mutations: ["deleteProject"])
+  onCreateApplication(filter: ModelSubscriptionApplicationFilterInput, owner: String): Application @aws_subscribe(mutations: ["createApplication"])
+  onUpdateApplication(filter: ModelSubscriptionApplicationFilterInput, owner: String): Application @aws_subscribe(mutations: ["updateApplication"])
+  onDeleteApplication(filter: ModelSubscriptionApplicationFilterInput, owner: String): Application @aws_subscribe(mutations: ["deleteApplication"])
+  onCreateStudentPost(filter: ModelSubscriptionStudentPostFilterInput, owner: String): StudentPost @aws_subscribe(mutations: ["createStudentPost"])
+  onUpdateStudentPost(filter: ModelSubscriptionStudentPostFilterInput, owner: String): StudentPost @aws_subscribe(mutations: ["updateStudentPost"])
+  onDeleteStudentPost(filter: ModelSubscriptionStudentPostFilterInput, owner: String): StudentPost @aws_subscribe(mutations: ["deleteStudentPost"])
+  onCreateMessage(filter: ModelSubscriptionMessageFilterInput, owner: String): Message @aws_subscribe(mutations: ["createMessage"])
+  onUpdateMessage(filter: ModelSubscriptionMessageFilterInput, owner: String): Message @aws_subscribe(mutations: ["updateMessage"])
+  onDeleteMessage(filter: ModelSubscriptionMessageFilterInput, owner: String): Message @aws_subscribe(mutations: ["deleteMessage"])
+  onCreateNotification(filter: ModelSubscriptionNotificationFilterInput, owner: String): Notification @aws_subscribe(mutations: ["createNotification"])
+  onUpdateNotification(filter: ModelSubscriptionNotificationFilterInput, owner: String): Notification @aws_subscribe(mutations: ["updateNotification"])
+  onDeleteNotification(filter: ModelSubscriptionNotificationFilterInput, owner: String): Notification @aws_subscribe(mutations: ["deleteNotification"])
+  onCreateDeletedUser(filter: ModelSubscriptionDeletedUserFilterInput): DeletedUser @aws_subscribe(mutations: ["createDeletedUser"])
+  onUpdateDeletedUser(filter: ModelSubscriptionDeletedUserFilterInput): DeletedUser @aws_subscribe(mutations: ["updateDeletedUser"])
+  onDeleteDeletedUser(filter: ModelSubscriptionDeletedUserFilterInput): DeletedUser @aws_subscribe(mutations: ["deleteDeletedUser"])
+  onCreateAuditLog(filter: ModelSubscriptionAuditLogFilterInput): AuditLog @aws_subscribe(mutations: ["createAuditLog"])
+  onUpdateAuditLog(filter: ModelSubscriptionAuditLogFilterInput): AuditLog @aws_subscribe(mutations: ["updateAuditLog"])
+  onDeleteAuditLog(filter: ModelSubscriptionAuditLogFilterInput): AuditLog @aws_subscribe(mutations: ["deleteAuditLog"])
+}
+
+type ModelProjectConnection {
+  items: [Project]!
+  nextToken: String
+}
+
+input ModelProjectFilterInput {
+  id: ModelIDInput
+  title: ModelStringInput
+  description: ModelStringInput
+  department: ModelStringInput
+  faculty: ModelStringInput
+  skillsRequired: ModelStringInput
+  tags: ModelStringInput
+  qualifications: ModelStringInput
+  duration: ModelStringInput
+  applicationDeadline: ModelStringInput
+  facultyID: ModelIDInput
+  isActive: ModelBooleanInput
+  requiresTranscript: ModelBooleanInput
+  projectStatus: ModelStringInput
+  coordinatorNotes: ModelStringInput
+  rejectionReason: ModelStringInput
+  selectedStudentID: ModelIDInput
+  filledAt: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelProjectFilterInput]
+  or: [ModelProjectFilterInput]
+  not: ModelProjectFilterInput
+  owner: ModelStringInput
+}
+
+input ModelProjectConditionInput {
+  title: ModelStringInput
+  description: ModelStringInput
+  department: ModelStringInput
+  faculty: ModelStringInput
+  skillsRequired: ModelStringInput
+  tags: ModelStringInput
+  qualifications: ModelStringInput
+  duration: ModelStringInput
+  applicationDeadline: ModelStringInput
+  facultyID: ModelIDInput
+  isActive: ModelBooleanInput
+  requiresTranscript: ModelBooleanInput
+  projectStatus: ModelStringInput
+  coordinatorNotes: ModelStringInput
+  rejectionReason: ModelStringInput
+  selectedStudentID: ModelIDInput
+  filledAt: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelProjectConditionInput]
+  or: [ModelProjectConditionInput]
+  not: ModelProjectConditionInput
+  owner: ModelStringInput
+}
+
+input CreateProjectInput {
+  id: ID
+  title: String!
+  description: String!
+  department: String!
+  faculty: String
+  skillsRequired: [String]
+  tags: [String]
+  qualifications: String
+  duration: String
+  applicationDeadline: AWSDateTime
+  facultyID: ID!
+  isActive: Boolean!
+  requiresTranscript: Boolean
+  projectStatus: String
+  coordinatorNotes: String
+  rejectionReason: String
+  selectedStudentID: ID
+  filledAt: AWSDateTime
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input UpdateProjectInput {
+  id: ID!
+  title: String
+  description: String
+  department: String
+  faculty: String
+  skillsRequired: [String]
+  tags: [String]
+  qualifications: String
+  duration: String
+  applicationDeadline: AWSDateTime
+  facultyID: ID
+  isActive: Boolean
+  requiresTranscript: Boolean
+  projectStatus: String
+  coordinatorNotes: String
+  rejectionReason: String
+  selectedStudentID: ID
+  filledAt: AWSDateTime
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input DeleteProjectInput {
+  id: ID!
+}
+
+input ModelSubscriptionProjectFilterInput {
+  id: ModelSubscriptionIDInput
+  title: ModelSubscriptionStringInput
+  description: ModelSubscriptionStringInput
+  department: ModelSubscriptionStringInput
+  faculty: ModelSubscriptionStringInput
+  skillsRequired: ModelSubscriptionStringInput
+  tags: ModelSubscriptionStringInput
+  qualifications: ModelSubscriptionStringInput
+  duration: ModelSubscriptionStringInput
+  applicationDeadline: ModelSubscriptionStringInput
+  facultyID: ModelSubscriptionIDInput
+  isActive: ModelSubscriptionBooleanInput
+  requiresTranscript: ModelSubscriptionBooleanInput
+  projectStatus: ModelSubscriptionStringInput
+  coordinatorNotes: ModelSubscriptionStringInput
+  rejectionReason: ModelSubscriptionStringInput
+  selectedStudentID: ModelSubscriptionIDInput
+  filledAt: ModelSubscriptionStringInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionProjectFilterInput]
+  or: [ModelSubscriptionProjectFilterInput]
+  owner: ModelStringInput
+}
+
+input RelevantCourseInput {
+  courseName: String!
+  courseNumber: String!
+  grade: String!
+  semester: String!
+  year: String!
+}
+
+type ModelApplicationConnection {
+  items: [Application]!
+  nextToken: String
+}
+
+input ModelApplicationFilterInput {
+  id: ModelIDInput
+  studentID: ModelIDInput
+  projectID: ModelIDInput
+  statement: ModelStringInput
+  resumeKey: ModelStringInput
+  transcriptLink: ModelStringInput
+  documentKey: ModelStringInput
+  status: ModelStringInput
+  statusDetail: ModelStringInput
+  facultyNotes: ModelStringInput
+  coordinatorNotes: ModelStringInput
+  rejectionReason: ModelStringInput
+  acceptanceReason: ModelStringInput
+  withdrawReason: ModelStringInput
+  isSelected: ModelBooleanInput
+  selectedAt: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelApplicationFilterInput]
+  or: [ModelApplicationFilterInput]
+  not: ModelApplicationFilterInput
+  owner: ModelStringInput
+}
+
+input ModelApplicationConditionInput {
+  studentID: ModelIDInput
+  projectID: ModelIDInput
+  statement: ModelStringInput
+  resumeKey: ModelStringInput
+  transcriptLink: ModelStringInput
+  documentKey: ModelStringInput
+  status: ModelStringInput
+  statusDetail: ModelStringInput
+  facultyNotes: ModelStringInput
+  coordinatorNotes: ModelStringInput
+  rejectionReason: ModelStringInput
+  acceptanceReason: ModelStringInput
+  withdrawReason: ModelStringInput
+  isSelected: ModelBooleanInput
+  selectedAt: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelApplicationConditionInput]
+  or: [ModelApplicationConditionInput]
+  not: ModelApplicationConditionInput
+  owner: ModelStringInput
+}
+
+input CreateApplicationInput {
+  id: ID
+  studentID: ID!
+  projectID: ID!
+  statement: String!
+  resumeKey: String
+  transcriptLink: String
+  documentKey: String
+  relevantCourses: [RelevantCourseInput]
+  status: String!
+  statusDetail: String
+  facultyNotes: String
+  coordinatorNotes: String
+  rejectionReason: String
+  acceptanceReason: String
+  withdrawReason: String
+  isSelected: Boolean
+  selectedAt: AWSDateTime
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input UpdateApplicationInput {
+  id: ID!
+  studentID: ID
+  projectID: ID
+  statement: String
+  resumeKey: String
+  transcriptLink: String
+  documentKey: String
+  relevantCourses: [RelevantCourseInput]
+  status: String
+  statusDetail: String
+  facultyNotes: String
+  coordinatorNotes: String
+  rejectionReason: String
+  acceptanceReason: String
+  withdrawReason: String
+  isSelected: Boolean
+  selectedAt: AWSDateTime
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input DeleteApplicationInput {
+  id: ID!
+}
+
+input ModelSubscriptionApplicationFilterInput {
+  id: ModelSubscriptionIDInput
+  studentID: ModelSubscriptionIDInput
+  projectID: ModelSubscriptionIDInput
+  statement: ModelSubscriptionStringInput
+  resumeKey: ModelSubscriptionStringInput
+  transcriptLink: ModelSubscriptionStringInput
+  documentKey: ModelSubscriptionStringInput
+  status: ModelSubscriptionStringInput
+  statusDetail: ModelSubscriptionStringInput
+  facultyNotes: ModelSubscriptionStringInput
+  coordinatorNotes: ModelSubscriptionStringInput
+  rejectionReason: ModelSubscriptionStringInput
+  acceptanceReason: ModelSubscriptionStringInput
+  withdrawReason: ModelSubscriptionStringInput
+  isSelected: ModelSubscriptionBooleanInput
+  selectedAt: ModelSubscriptionStringInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionApplicationFilterInput]
+  or: [ModelSubscriptionApplicationFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelStudentPostConnection {
+  items: [StudentPost]!
+  nextToken: String
+}
+
+input ModelStudentPostFilterInput {
+  id: ModelIDInput
+  title: ModelStringInput
+  content: ModelStringInput
+  authorID: ModelIDInput
+  isAnonymous: ModelBooleanInput
+  tags: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelStudentPostFilterInput]
+  or: [ModelStudentPostFilterInput]
+  not: ModelStudentPostFilterInput
+  owner: ModelStringInput
+}
+
+input ModelStudentPostConditionInput {
+  title: ModelStringInput
+  content: ModelStringInput
+  authorID: ModelIDInput
+  isAnonymous: ModelBooleanInput
+  tags: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelStudentPostConditionInput]
+  or: [ModelStudentPostConditionInput]
+  not: ModelStudentPostConditionInput
+  owner: ModelStringInput
+}
+
+input CreateStudentPostInput {
+  id: ID
+  title: String!
+  content: String!
+  authorID: ID!
+  isAnonymous: Boolean!
+  tags: [String]
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input UpdateStudentPostInput {
+  id: ID!
+  title: String
+  content: String
+  authorID: ID
+  isAnonymous: Boolean
+  tags: [String]
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input DeleteStudentPostInput {
+  id: ID!
+}
+
+input ModelSubscriptionStudentPostFilterInput {
+  id: ModelSubscriptionIDInput
+  title: ModelSubscriptionStringInput
+  content: ModelSubscriptionStringInput
+  authorID: ModelSubscriptionIDInput
+  isAnonymous: ModelSubscriptionBooleanInput
+  tags: ModelSubscriptionStringInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionStudentPostFilterInput]
+  or: [ModelSubscriptionStudentPostFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelMessageConnection {
+  items: [Message]!
+  nextToken: String
+}
+
+input ModelMessageFilterInput {
+  id: ModelIDInput
+  senderID: ModelIDInput
+  receiverID: ModelIDInput
+  subject: ModelStringInput
+  body: ModelStringInput
+  isRead: ModelBooleanInput
+  readAt: ModelStringInput
+  sentAt: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelMessageFilterInput]
+  or: [ModelMessageFilterInput]
+  not: ModelMessageFilterInput
+  owner: ModelStringInput
+}
+
+input ModelMessageConditionInput {
+  senderID: ModelIDInput
+  receiverID: ModelIDInput
+  subject: ModelStringInput
+  body: ModelStringInput
+  isRead: ModelBooleanInput
+  readAt: ModelStringInput
+  sentAt: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelMessageConditionInput]
+  or: [ModelMessageConditionInput]
+  not: ModelMessageConditionInput
+  owner: ModelStringInput
+}
+
+input CreateMessageInput {
+  id: ID
+  senderID: ID!
+  receiverID: ID!
+  subject: String!
+  body: String!
+  isRead: Boolean!
+  readAt: AWSDateTime
+  sentAt: AWSDateTime!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input UpdateMessageInput {
+  id: ID!
+  senderID: ID
+  receiverID: ID
+  subject: String
+  body: String
+  isRead: Boolean
+  readAt: AWSDateTime
+  sentAt: AWSDateTime
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input DeleteMessageInput {
+  id: ID!
+}
+
+input ModelSubscriptionMessageFilterInput {
+  id: ModelSubscriptionIDInput
+  senderID: ModelSubscriptionIDInput
+  receiverID: ModelSubscriptionIDInput
+  subject: ModelSubscriptionStringInput
+  body: ModelSubscriptionStringInput
+  isRead: ModelSubscriptionBooleanInput
+  readAt: ModelSubscriptionStringInput
+  sentAt: ModelSubscriptionStringInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionMessageFilterInput]
+  or: [ModelSubscriptionMessageFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelNotificationConnection {
+  items: [Notification]!
+  nextToken: String
+}
+
+input ModelNotificationFilterInput {
+  id: ModelIDInput
+  userID: ModelIDInput
+  type: ModelStringInput
+  title: ModelStringInput
+  message: ModelStringInput
+  isRead: ModelBooleanInput
+  relatedItemID: ModelIDInput
+  relatedItemType: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelNotificationFilterInput]
+  or: [ModelNotificationFilterInput]
+  not: ModelNotificationFilterInput
+  owner: ModelStringInput
+}
+
+input ModelNotificationConditionInput {
+  userID: ModelIDInput
+  type: ModelStringInput
+  title: ModelStringInput
+  message: ModelStringInput
+  isRead: ModelBooleanInput
+  relatedItemID: ModelIDInput
+  relatedItemType: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelNotificationConditionInput]
+  or: [ModelNotificationConditionInput]
+  not: ModelNotificationConditionInput
+  owner: ModelStringInput
+}
+
+input CreateNotificationInput {
+  id: ID
+  userID: ID!
+  type: String!
+  title: String!
+  message: String!
+  isRead: Boolean!
+  relatedItemID: ID
+  relatedItemType: String
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input UpdateNotificationInput {
+  id: ID!
+  userID: ID
+  type: String
+  title: String
+  message: String
+  isRead: Boolean
+  relatedItemID: ID
+  relatedItemType: String
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input DeleteNotificationInput {
+  id: ID!
+}
+
+input ModelSubscriptionNotificationFilterInput {
+  id: ModelSubscriptionIDInput
+  userID: ModelSubscriptionIDInput
+  type: ModelSubscriptionStringInput
+  title: ModelSubscriptionStringInput
+  message: ModelSubscriptionStringInput
+  isRead: ModelSubscriptionBooleanInput
+  relatedItemID: ModelSubscriptionIDInput
+  relatedItemType: ModelSubscriptionStringInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionNotificationFilterInput]
+  or: [ModelSubscriptionNotificationFilterInput]
+  owner: ModelStringInput
+}
+
+type ModelDeletedUserConnection {
+  items: [DeletedUser]!
+  nextToken: String
+}
+
+input ModelDeletedUserFilterInput {
+  id: ModelIDInput
+  originalUserID: ModelIDInput
+  name: ModelStringInput
+  email: ModelStringInput
+  role: ModelStringInput
+  deletionScheduledAt: ModelStringInput
+  deletionExecutedAt: ModelStringInput
+  isTestMode: ModelBooleanInput
+  userData: ModelStringInput
+  status: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelDeletedUserFilterInput]
+  or: [ModelDeletedUserFilterInput]
+  not: ModelDeletedUserFilterInput
+}
+
+input ModelDeletedUserConditionInput {
+  originalUserID: ModelIDInput
+  name: ModelStringInput
+  email: ModelStringInput
+  role: ModelStringInput
+  deletionScheduledAt: ModelStringInput
+  deletionExecutedAt: ModelStringInput
+  isTestMode: ModelBooleanInput
+  userData: ModelStringInput
+  status: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelDeletedUserConditionInput]
+  or: [ModelDeletedUserConditionInput]
+  not: ModelDeletedUserConditionInput
+}
+
+input CreateDeletedUserInput {
+  id: ID
+  originalUserID: ID!
+  name: String!
+  email: String!
+  role: String!
+  deletionScheduledAt: AWSDateTime!
+  deletionExecutedAt: AWSDateTime
+  isTestMode: Boolean!
+  userData: AWSJSON!
+  status: String!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input UpdateDeletedUserInput {
+  id: ID!
+  originalUserID: ID
+  name: String
+  email: String
+  role: String
+  deletionScheduledAt: AWSDateTime
+  deletionExecutedAt: AWSDateTime
+  isTestMode: Boolean
+  userData: AWSJSON
+  status: String
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input DeleteDeletedUserInput {
+  id: ID!
+}
+
+input ModelSubscriptionDeletedUserFilterInput {
+  id: ModelSubscriptionIDInput
+  originalUserID: ModelSubscriptionIDInput
+  name: ModelSubscriptionStringInput
+  email: ModelSubscriptionStringInput
+  role: ModelSubscriptionStringInput
+  deletionScheduledAt: ModelSubscriptionStringInput
+  deletionExecutedAt: ModelSubscriptionStringInput
+  isTestMode: ModelSubscriptionBooleanInput
+  userData: ModelSubscriptionStringInput
+  status: ModelSubscriptionStringInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionDeletedUserFilterInput]
+  or: [ModelSubscriptionDeletedUserFilterInput]
+}
+
+type ModelAuditLogConnection {
+  items: [AuditLog]!
+  nextToken: String
+}
+
+input ModelAuditLogFilterInput {
+  id: ModelIDInput
+  userId: ModelStringInput
+  userName: ModelStringInput
+  userEmail: ModelStringInput
+  action: ModelStringInput
+  resource: ModelStringInput
+  details: ModelStringInput
+  timestamp: ModelStringInput
+  ipAddress: ModelStringInput
+  userAgent: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelAuditLogFilterInput]
+  or: [ModelAuditLogFilterInput]
+  not: ModelAuditLogFilterInput
+}
+
+input ModelAuditLogConditionInput {
+  userId: ModelStringInput
+  userName: ModelStringInput
+  userEmail: ModelStringInput
+  action: ModelStringInput
+  resource: ModelStringInput
+  details: ModelStringInput
+  timestamp: ModelStringInput
+  ipAddress: ModelStringInput
+  userAgent: ModelStringInput
+  createdAt: ModelStringInput
+  updatedAt: ModelStringInput
+  and: [ModelAuditLogConditionInput]
+  or: [ModelAuditLogConditionInput]
+  not: ModelAuditLogConditionInput
+}
+
+input CreateAuditLogInput {
+  id: ID
+  userId: String!
+  userName: String!
+  userEmail: String!
+  action: String!
+  resource: String!
+  details: String!
+  timestamp: AWSDateTime!
+  ipAddress: String
+  userAgent: String
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input UpdateAuditLogInput {
+  id: ID!
+  userId: String
+  userName: String
+  userEmail: String
+  action: String
+  resource: String
+  details: String
+  timestamp: AWSDateTime
+  ipAddress: String
+  userAgent: String
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input DeleteAuditLogInput {
+  id: ID!
+}
+
+input ModelSubscriptionAuditLogFilterInput {
+  id: ModelSubscriptionIDInput
+  userId: ModelSubscriptionStringInput
+  userName: ModelSubscriptionStringInput
+  userEmail: ModelSubscriptionStringInput
+  action: ModelSubscriptionStringInput
+  resource: ModelSubscriptionStringInput
+  details: ModelSubscriptionStringInput
+  timestamp: ModelSubscriptionStringInput
+  ipAddress: ModelSubscriptionStringInput
+  userAgent: ModelSubscriptionStringInput
+  createdAt: ModelSubscriptionStringInput
+  updatedAt: ModelSubscriptionStringInput
+  and: [ModelSubscriptionAuditLogFilterInput]
+  or: [ModelSubscriptionAuditLogFilterInput]
+}

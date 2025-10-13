@@ -1,0 +1,607 @@
+{
+  "Resources": {
+    "Userprojectsauth0FunctionUserprojectsauth0FunctionAppSyncFunctionECB1CAA1": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "Userprojectsauth0Function",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.projects.auth.1.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson({})"
+      }
+    },
+    "UserProjectsDataResolverFnUserProjectsDataResolverFnAppSyncFunctionB17AC883": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Ref": "referencetotransformerrootstackProjectNestedStackProjectNestedStackResourceD9389F63OutputstransformerrootstackProjectProjectDataSourceB3DF404CName"
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "UserProjectsDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.projects.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.projects.res.vtl"
+            ]
+          ]
+        }
+      }
+    },
+    "UserprojectsResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "projects",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Fn::GetAtt": [
+                "Userprojectsauth0FunctionUserprojectsauth0FunctionAppSyncFunctionECB1CAA1",
+                "FunctionId"
+              ]
+            },
+            {
+              "Fn::GetAtt": [
+                "UserProjectsDataResolverFnUserProjectsDataResolverFnAppSyncFunctionB17AC883",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"User\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"projects\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "referencetotransformerrootstackProjectNestedStackProjectNestedStackResourceD9389F63OutputstransformerrootstackProjectProjectTable4D02AC79Ref"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"us-west-2:e803a285-2f3d-4286-b2c1-589f73b4e071\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"us-west-2_A4mkaBlm3_Full-access/CognitoIdentityCredentials\",\"us-west-2_A4mkaBlm3_Manage-only/CognitoIdentityCredentials\",\"adminDeleteUser-prod\",\"createUserRecord-prod\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "User"
+      }
+    },
+    "Userapplicationsauth0FunctionUserapplicationsauth0FunctionAppSyncFunction24D00027": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "Userapplicationsauth0Function",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.applications.auth.1.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson({})"
+      }
+    },
+    "UserApplicationsDataResolverFnUserApplicationsDataResolverFnAppSyncFunction3827D2A0": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Ref": "referencetotransformerrootstackApplicationNestedStackApplicationNestedStackResourceDAEA1E78OutputstransformerrootstackApplicationApplicationDataSourceCC151A9FName"
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "UserApplicationsDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.applications.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.applications.res.vtl"
+            ]
+          ]
+        }
+      }
+    },
+    "UserapplicationsResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "applications",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Fn::GetAtt": [
+                "Userapplicationsauth0FunctionUserapplicationsauth0FunctionAppSyncFunction24D00027",
+                "FunctionId"
+              ]
+            },
+            {
+              "Fn::GetAtt": [
+                "UserApplicationsDataResolverFnUserApplicationsDataResolverFnAppSyncFunction3827D2A0",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"User\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"applications\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "referencetotransformerrootstackApplicationNestedStackApplicationNestedStackResourceDAEA1E78OutputstransformerrootstackApplicationApplicationTable4C5480A7Ref"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"us-west-2:e803a285-2f3d-4286-b2c1-589f73b4e071\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"us-west-2_A4mkaBlm3_Full-access/CognitoIdentityCredentials\",\"us-west-2_A4mkaBlm3_Manage-only/CognitoIdentityCredentials\",\"adminDeleteUser-prod\",\"createUserRecord-prod\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "User"
+      }
+    },
+    "Userpostsauth0FunctionUserpostsauth0FunctionAppSyncFunctionCDA67E78": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "Userpostsauth0Function",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.posts.auth.1.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson({})"
+      }
+    },
+    "UserPostsDataResolverFnUserPostsDataResolverFnAppSyncFunction22E3870F": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Ref": "referencetotransformerrootstackStudentPostNestedStackStudentPostNestedStackResource41A69B86OutputstransformerrootstackStudentPostStudentPostDataSourceDACE4147Name"
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "UserPostsDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.posts.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.posts.res.vtl"
+            ]
+          ]
+        }
+      }
+    },
+    "UserpostsResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "posts",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Fn::GetAtt": [
+                "Userpostsauth0FunctionUserpostsauth0FunctionAppSyncFunctionCDA67E78",
+                "FunctionId"
+              ]
+            },
+            {
+              "Fn::GetAtt": [
+                "UserPostsDataResolverFnUserPostsDataResolverFnAppSyncFunction22E3870F",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"User\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"posts\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "referencetotransformerrootstackStudentPostNestedStackStudentPostNestedStackResource41A69B86OutputstransformerrootstackStudentPostStudentPostTable2FEB0D6FRef"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"us-west-2:e803a285-2f3d-4286-b2c1-589f73b4e071\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"us-west-2_A4mkaBlm3_Full-access/CognitoIdentityCredentials\",\"us-west-2_A4mkaBlm3_Manage-only/CognitoIdentityCredentials\",\"adminDeleteUser-prod\",\"createUserRecord-prod\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "User"
+      }
+    },
+    "Usernotificationsauth0FunctionUsernotificationsauth0FunctionAppSyncFunction423BFA06": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "Usernotificationsauth0Function",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.notifications.auth.1.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson({})"
+      }
+    },
+    "UserNotificationsDataResolverFnUserNotificationsDataResolverFnAppSyncFunctionAF2B5438": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Ref": "referencetotransformerrootstackNotificationNestedStackNotificationNestedStackResourceB234F94DOutputstransformerrootstackNotificationNotificationDataSourceA7FD59BCName"
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "UserNotificationsDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.notifications.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/User.notifications.res.vtl"
+            ]
+          ]
+        }
+      }
+    },
+    "UsernotificationsResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "notifications",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Fn::GetAtt": [
+                "Usernotificationsauth0FunctionUsernotificationsauth0FunctionAppSyncFunction423BFA06",
+                "FunctionId"
+              ]
+            },
+            {
+              "Fn::GetAtt": [
+                "UserNotificationsDataResolverFnUserNotificationsDataResolverFnAppSyncFunctionAF2B5438",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"User\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"notifications\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "referencetotransformerrootstackNotificationNestedStackNotificationNestedStackResourceB234F94DOutputstransformerrootstackNotificationNotificationTable5B6F14BERef"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"us-west-2:e803a285-2f3d-4286-b2c1-589f73b4e071\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"us-west-2_A4mkaBlm3_Full-access/CognitoIdentityCredentials\",\"us-west-2_A4mkaBlm3_Manage-only/CognitoIdentityCredentials\",\"adminDeleteUser-prod\",\"createUserRecord-prod\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "User"
+      }
+    },
+    "ProjectApplicationsDataResolverFnProjectApplicationsDataResolverFnAppSyncFunction136B3CC1": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Ref": "referencetotransformerrootstackApplicationNestedStackApplicationNestedStackResourceDAEA1E78OutputstransformerrootstackApplicationApplicationDataSourceCC151A9FName"
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "ProjectApplicationsDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Project.applications.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Project.applications.res.vtl"
+            ]
+          ]
+        }
+      }
+    },
+    "ProjectapplicationsResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "applications",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Fn::GetAtt": [
+                "Userapplicationsauth0FunctionUserapplicationsauth0FunctionAppSyncFunction24D00027",
+                "FunctionId"
+              ]
+            },
+            {
+              "Fn::GetAtt": [
+                "ProjectApplicationsDataResolverFnProjectApplicationsDataResolverFnAppSyncFunction136B3CC1",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"Project\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"applications\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "referencetotransformerrootstackApplicationNestedStackApplicationNestedStackResourceDAEA1E78OutputstransformerrootstackApplicationApplicationTable4C5480A7Ref"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"us-west-2:e803a285-2f3d-4286-b2c1-589f73b4e071\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"us-west-2_A4mkaBlm3_Full-access/CognitoIdentityCredentials\",\"us-west-2_A4mkaBlm3_Manage-only/CognitoIdentityCredentials\",\"adminDeleteUser-prod\",\"createUserRecord-prod\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "Project"
+      }
+    }
+  },
+  "Parameters": {
+    "referencetotransformerrootstackGraphQLAPI20497F53ApiId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackS3DeploymentBucket7592718ARef": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackProjectNestedStackProjectNestedStackResourceD9389F63OutputstransformerrootstackProjectProjectDataSourceB3DF404CName": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackProjectNestedStackProjectNestedStackResourceD9389F63OutputstransformerrootstackProjectProjectTable4D02AC79Ref": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackApplicationNestedStackApplicationNestedStackResourceDAEA1E78OutputstransformerrootstackApplicationApplicationDataSourceCC151A9FName": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackApplicationNestedStackApplicationNestedStackResourceDAEA1E78OutputstransformerrootstackApplicationApplicationTable4C5480A7Ref": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackStudentPostNestedStackStudentPostNestedStackResource41A69B86OutputstransformerrootstackStudentPostStudentPostDataSourceDACE4147Name": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackStudentPostNestedStackStudentPostNestedStackResource41A69B86OutputstransformerrootstackStudentPostStudentPostTable2FEB0D6FRef": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackNotificationNestedStackNotificationNestedStackResourceB234F94DOutputstransformerrootstackNotificationNotificationDataSourceA7FD59BCName": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackNotificationNestedStackNotificationNestedStackResourceB234F94DOutputstransformerrootstackNotificationNotificationTable5B6F14BERef": {
+      "Type": "String"
+    }
+  }
+}

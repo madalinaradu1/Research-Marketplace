@@ -1,0 +1,42 @@
+[
+  {
+    "category": "api",
+    "resourceName": "emailapi",
+    "service": "API Gateway"
+  },
+  {
+    "category": "api",
+    "resourceName": "researchmarketplace",
+    "service": "AppSync"
+  },
+  {
+    "category": "auth",
+    "resourceName": "researchmarketplace2a916c6a",
+    "service": "Cognito"
+  },
+  {
+    "category": "function",
+    "resourceName": "adminDeleteUser",
+    "service": "Lambda"
+  },
+  {
+    "category": "function",
+    "resourceName": "createUserRecord",
+    "service": "Lambda"
+  },
+  {
+    "category": "function",
+    "resourceName": "emailApiHandler",
+    "service": "Lambda"
+  },
+  {
+    "category": "function",
+    "resourceName": "researchmarketplace2a916c6aPostConfirmation",
+    "service": "Lambda"
+  },
+  {
+    "category": "storage",
+    "resourceName": "researchFiles",
+    "service": "S3"
+  }
+]

@@ -67,7 +67,62 @@
         "emailApiHandler": {
           "deploymentBucketName": "amplify-researchmarketplace-prod-dd057-deployment",
           "s3Key": "amplify-builds/emailApiHandler-455151643865676d4e59-build.zip"
+        },
+        "researchmarketplace": {},
+        "researchmarketplace2a916c6a": {}
+      }
+    }
+  },
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-researchmarketplace-dev-6bfc7-authRole",
+      "UnauthRoleArn": "arn:aws:iam::426899240401:role/amplify-researchmarketplace-dev-6bfc7-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::426899240401:role/amplify-researchmarketplace-dev-6bfc7-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-researchmarketplace-dev-6bfc7-deployment",
+      "UnauthRoleName": "amplify-researchmarketplace-dev-6bfc7-unauthRole",
+      "StackName": "amplify-researchmarketplace-dev-6bfc7",
+      "StackId": "arn:aws:cloudformation:us-west-2:426899240401:stack/amplify-researchmarketplace-dev-6bfc7/51157ef0-a862-11f0-b423-0aef1be8805d",
+      "AmplifyAppId": "d2ab4l779whdq",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-researchmarketplace-dev-6bfc7-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
+    },
+    "categories": {
+      "auth": {
+        "researchmarketplace2a916c6a": {}
+      },
+      "function": {
+        "adminDeleteUser": {
+          "userPoolId": "us-west-2_P6EqP2tph",
+          "deploymentBucketName": "amplify-researchmarketplace-dev-6bfc7-deployment",
+          "s3Key": "amplify-builds/adminDeleteUser-4d564a50616a4d565034-build.zip"
+        },
+        "createUserRecord": {
+          "deploymentBucketName": "amplify-researchmarketplace-dev-6bfc7-deployment",
+          "s3Key": "amplify-builds/createUserRecord-6c6f3572706b556f6148-build.zip"
+        },
+        "emailApiHandler": {
+          "deploymentBucketName": "amplify-researchmarketplace-dev-6bfc7-deployment",
+          "s3Key": "amplify-builds/emailApiHandler-32656c48757062494535-build.zip"
+        },
+        "researchmarketplace2a916c6aPostConfirmation": {
+          "deploymentBucketName": "amplify-researchmarketplace-dev-6bfc7-deployment",
+          "s3Key": "amplify-builds/researchmarketplace2a916c6aPostConfirmation-74756f7746466c474243-build.zip"
+        },
+        "researchmarketplace": {},
+        "researchmarketplace2a916c6a": {}
+      },
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d2ab4l779whdq",
+          "type": "cicd"
         }
+      },
+      "api": {
+        "emailapi": {},
+        "researchmarketplace": {}
+      },
+      "storage": {
+        "researchFiles": {}
       }
     }
   }
