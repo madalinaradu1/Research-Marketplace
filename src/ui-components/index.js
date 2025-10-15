@@ -4,6 +4,8 @@
  * Any changes to this file will be overwritten when running amplify pull. *
  **************************************************************************/
 
+export { default as AuditLogCreateForm } from "./AuditLogCreateForm";
+export { default as AuditLogUpdateForm } from "./AuditLogUpdateForm";
 export { default as DeletedUserCreateForm } from "./DeletedUserCreateForm";
 export { default as DeletedUserUpdateForm } from "./DeletedUserUpdateForm";
 export { default as MessageCreateForm } from "./MessageCreateForm";

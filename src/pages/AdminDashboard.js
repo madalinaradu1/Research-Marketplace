@@ -384,17 +384,21 @@ const AdminDashboard = ({ user }) => {
         
         const dbResult = await API.graphql(graphqlOperation(createUser, { input: userInput }));
         console.log('Database user created:', dbResult.data.createUser);
+        
+        logAuditAction('User Created', `User: ${newUser.email}`, `Role: ${newUser.role}${newUser.department ? `, Department: ${newUser.department}` : ''}`);
+        setMessage('User created successfully in both Cognito and database!');
+        setNewUser({ name: '', email: '', role: '', department: '' });
+        fetchData();
       } else {
-        throw new Error('Cognito user creation failed - cannot create database record');
+        setError('Failed to create user in Cognito. Database record not created.');
       }
-      
-      logAuditAction('User Created', `User: ${newUser.email}`, `Role: ${newUser.role}${newUser.department ? `, Department: ${newUser.department}` : ''}`);
-      setMessage(cognitoResponse.message || 'User created successfully!');
-      setNewUser({ name: '', email: '', role: '', department: '' });
-      fetchData();
     } catch (err) {
       console.error('Error creating user:', err);
-      setError('Failed to create user. Please try again.');
+      if (err.message && err.message.includes('Cognito')) {
+        setError('Failed to create user in Cognito. Please try again.');
+      } else {
+        setError('User created in Cognito but failed to create database record. Please contact support.');
+      }
     }
   };
   
