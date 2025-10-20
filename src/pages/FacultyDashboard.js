@@ -22,7 +22,7 @@ import {
   Image,
   useTheme
 } from '@aws-amplify/ui-react';
-import { listProjects, listApplications, createProject, updateProject, getUser, listUsers } from '../graphql/operations';
+import { listProjects, listApplications, createProject, updateProject, deleteProject, getUser, listUsers } from '../graphql/operations';
 import { createMessage, createNotification } from '../graphql/message-operations';
 import { sendEmailNotification, sendNewItemNotification } from '../utils/emailNotifications';
 import ApplicationReview from '../components/ApplicationReview';
@@ -91,6 +91,7 @@ const FacultyDashboard = ({ user }) => {
   const [pendingPage, setPendingPage] = useState(1);
   const itemsPerPage = 10;
   const [openKebabMenu, setOpenKebabMenu] = useState(null);
+  const [deletingProject, setDeletingProject] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [applicationSearchTerm, setApplicationSearchTerm] = useState('');
   const [viewingProject, setViewingProject] = useState(null);
@@ -467,6 +468,30 @@ const FacultyDashboard = ({ user }) => {
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  const handleDeleteProject = async (project) => {
+    if (!window.confirm(`Are you sure you want to delete "${project.title}"? This action cannot be undone.`)) {
+      return;
+    }
+    
+    setDeletingProject(project.id);
+    setError(null);
+    
+    try {
+      await API.graphql(graphqlOperation(deleteProject, { 
+        input: { id: project.id } 
+      }));
+      
+      setSuccessMessage('Project deleted successfully!');
+      fetchData(); // Refresh the data
+    } catch (err) {
+      console.error('Error deleting project:', err);
+      setError('Failed to delete project. Please try again.');
+    } finally {
+      setDeletingProject(null);
+      setOpenKebabMenu(null);
     }
   };
   
@@ -869,7 +894,11 @@ const FacultyDashboard = ({ user }) => {
                     }}>
                       <Flex direction="column" gap="0.5rem">
                         <Flex justifyContent="space-between" alignItems="flex-start">
-                          <Text fontWeight="bold">{project.title}</Text>
+                          <Flex direction="column" gap="0.25rem" flex="1">
+                            <Text fontWeight="bold" fontSize="1.1rem">{project.title}</Text>
+                            <Text fontSize="0.9rem" color="#666">{project.department}</Text>
+                            <Text fontSize="0.9rem" color="#666">Faculty: {user?.name}</Text>
+                          </Flex>
                           <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
                             <Badge 
                               backgroundColor={
@@ -907,6 +936,14 @@ const FacultyDashboard = ({ user }) => {
                                     >
                                       {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : 'Edit'}
                                     </button>
+                                    <button
+                                      className="meatball-dropdown-item"
+                                      onClick={() => handleDeleteProject(project)}
+                                      style={{ color: '#e53e3e' }}
+                                      disabled={deletingProject === project.id}
+                                    >
+                                      {deletingProject === project.id ? 'Deleting...' : 'Delete'}
+                                    </button>
                                     {project.projectStatus === 'Returned' && (
                                       <button
                                         className="meatball-dropdown-item"
@@ -927,7 +964,7 @@ const FacultyDashboard = ({ user }) => {
                           </Flex>
                         </Flex>
                         <Flex justifyContent="space-between" alignItems="center">
-                          <Text fontSize="0.9rem">{project.department} • Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not set'}</Text>
+                          <Text fontSize="0.9rem" color="#666">Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not set'}</Text>
                         </Flex>
                       </Flex>
                     </Card>

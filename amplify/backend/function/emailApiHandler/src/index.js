@@ -1,8 +1,11 @@
 // AWS SDK v3 is available in Node.js 22 runtime
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
-const { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand } = require('@aws-sdk/client-cognito-identity-provider');
+const { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand, AdminDeleteUserCommand } = require('@aws-sdk/client-cognito-identity-provider');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
 const sesClient = new SESClient({ region: 'us-west-2' });
 const cognitoClient = new CognitoIdentityProviderClient({ region: 'us-west-2' });
+const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient({ region: 'us-west-2' }));
 
 exports.handler = async (event) => {
     const headers = {
@@ -48,6 +51,7 @@ exports.handler = async (event) => {
                         Username: email,
                         UserAttributes: [
                             { Name: 'email', Value: email },
+                            { Name: 'email_verified', Value: 'true' },
                             { Name: 'name', Value: name }
                         ],
                         TemporaryPassword: tempPassword,
@@ -66,6 +70,31 @@ exports.handler = async (event) => {
                     
                     await cognitoClient.send(new AdminSetUserPasswordCommand(setPasswordParams));
                     cognitoSuccess = true;
+                    
+                    // Create user record in DynamoDB
+                    try {
+                        const userRecord = {
+                            id: actualCognitoUserId,
+                            email: email,
+                            name: name,
+                            role: role,
+                            department: body.department || 'Not Specified',
+                            profileComplete: false,
+                            owner: actualCognitoUserId,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        };
+                        
+                        await dynamoClient.send(new PutCommand({
+                            TableName: `User-${process.env.ENV || 'dev'}`,
+                            Item: userRecord
+                        }));
+                        
+                        console.log('User created in database:', actualCognitoUserId);
+                    } catch (dbError) {
+                        console.error('Failed to create user in database:', dbError);
+                        // Don't fail the entire operation if DB creation fails
+                    }
                 } catch (cognitoError) {
                     console.error('Cognito user creation failed:', cognitoError);
                     // Don't create fallback ID - return error instead
@@ -178,15 +207,105 @@ exports.handler = async (event) => {
                     })
                 };
                 
+            case '/send-email':
+                const { to, subject, message, type } = body;
+                
+                try {
+                    const emailParams = {
+                        Source: 'madalina.radu1@gcu.edu',
+                        Destination: {
+                            ToAddresses: ['madalina.radu1@gcu.edu']
+                        },
+                        Message: {
+                            Subject: {
+                                Data: subject || 'Research Marketplace Notification',
+                                Charset: 'UTF-8'
+                            },
+                            Body: {
+                                Text: {
+                                    Data: `Note: This email was intended for ${to} but sent to your verified address for testing.\n\n${message}`,
+                                    Charset: 'UTF-8'
+                                }
+                            }
+                        }
+                    };
+                    
+                    await sesClient.send(new SendEmailCommand(emailParams));
+                    
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            success: true,
+                            message: 'Email sent successfully'
+                        })
+                    };
+                } catch (error) {
+                    console.error('Email sending failed:', error);
+                    return {
+                        statusCode: 500,
+                        headers,
+                        body: JSON.stringify({
+                            success: false,
+                            error: 'Failed to send email',
+                            details: error.message
+                        })
+                    };
+                }
+                
             case '/delete-user':
-                return {
-                    statusCode: 200,
-                    headers,
-                    body: JSON.stringify({
-                        success: true,
-                        message: 'User deleted from Cognito successfully'
-                    })
-                };
+                const { userId, userEmail } = body;
+                console.log('Delete user request:', { userId, userEmail });
+                
+                if (!userId && !userEmail) {
+                    return {
+                        statusCode: 400,
+                        headers,
+                        body: JSON.stringify({
+                            success: false,
+                            error: 'Missing userId or userEmail'
+                        })
+                    };
+                }
+                
+                try {
+                    // Try with email first (Cognito username is usually email)
+                    const username = userEmail || userId;
+                    console.log('Attempting to delete Cognito user:', username);
+                    
+                    await cognitoClient.send(new AdminDeleteUserCommand({
+                        UserPoolId: 'us-west-2_KuizmjgYE',
+                        Username: username
+                    }));
+                    
+                    console.log('Successfully deleted user from Cognito:', username);
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            success: true,
+                            message: 'User deleted from Cognito successfully'
+                        })
+                    };
+                } catch (error) {
+                    console.error('Cognito user deletion failed:', error);
+                    console.error('Error details:', {
+                        code: error.name,
+                        message: error.message,
+                        userId,
+                        userEmail
+                    });
+                    return {
+                        statusCode: 400,
+                        headers,
+                        body: JSON.stringify({
+                            success: false,
+                            error: 'Failed to delete user from Cognito',
+                            details: error.message,
+                            code: error.name
+                        })
+                    };
+                }
                 
             default:
                 return {

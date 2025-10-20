@@ -407,7 +407,7 @@ const CoordinatorDashboard = ({ user }) => {
                 <Heading level={4} marginBottom="1rem">Projects ({projects.pending.length})</Heading>
                 <Collection items={getPaginatedItems(projects.pending, pendingPage)} type="list" gap="1rem">
                   {(project) => (
-                    <Card key={project.id} variation="outlined">
+                    <Card key={project.id} variation="outlined" style={{ cursor: 'pointer' }} onClick={() => setViewingProject(project)}>
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{project.title}</Text>
