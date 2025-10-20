@@ -1,6 +1,6 @@
 // AWS SDK v3 is available in Node.js 22 runtime
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
-const { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand, AdminDeleteUserCommand } = require('@aws-sdk/client-cognito-identity-provider');
+const { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand, AdminDeleteUserCommand, AdminAddUserToGroupCommand, AdminRemoveUserFromGroupCommand } = require('@aws-sdk/client-cognito-identity-provider');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
 const sesClient = new SESClient({ region: 'us-west-2' });
@@ -69,6 +69,22 @@ exports.handler = async (event) => {
                     };
                     
                     await cognitoClient.send(new AdminSetUserPasswordCommand(setPasswordParams));
+                    
+                    // Add user to appropriate Cognito group based on role
+                    if (role && ['Student', 'Faculty', 'Coordinator', 'Admin'].includes(role)) {
+                        try {
+                            await cognitoClient.send(new AdminAddUserToGroupCommand({
+                                UserPoolId: 'us-west-2_KuizmjgYE',
+                                Username: actualCognitoUserId,
+                                GroupName: role
+                            }));
+                            console.log(`User added to ${role} group:`, actualCognitoUserId);
+                        } catch (groupError) {
+                            console.error('Failed to add user to group:', groupError);
+                            // Don't fail the entire operation if group assignment fails
+                        }
+                    }
+                    
                     cognitoSuccess = true;
                     
                     // Create user record in DynamoDB
@@ -177,14 +193,62 @@ exports.handler = async (event) => {
                 }
                 
             case '/update-user-group':
-                return {
-                    statusCode: 200,
-                    headers,
-                    body: JSON.stringify({
-                        success: true,
-                        message: 'User group updated successfully'
-                    })
-                };
+                const { username, newRole, oldRole } = body;
+                
+                if (!username || !newRole) {
+                    return {
+                        statusCode: 400,
+                        headers,
+                        body: JSON.stringify({
+                            success: false,
+                            error: 'Missing username or newRole'
+                        })
+                    };
+                }
+                
+                try {
+                    // Remove from old group if specified
+                    if (oldRole && ['Student', 'Faculty', 'Coordinator', 'Admin'].includes(oldRole)) {
+                        try {
+                            await cognitoClient.send(new AdminRemoveUserFromGroupCommand({
+                                UserPoolId: 'us-west-2_KuizmjgYE',
+                                Username: username,
+                                GroupName: oldRole
+                            }));
+                        } catch (removeError) {
+                            console.log('User was not in old group or removal failed:', removeError.message);
+                        }
+                    }
+                    
+                    // Add to new group
+                    if (['Student', 'Faculty', 'Coordinator', 'Admin'].includes(newRole)) {
+                        await cognitoClient.send(new AdminAddUserToGroupCommand({
+                            UserPoolId: 'us-west-2_KuizmjgYE',
+                            Username: username,
+                            GroupName: newRole
+                        }));
+                    }
+                    
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            success: true,
+                            message: `User group updated to ${newRole} successfully`
+                        })
+                    };
+                } catch (error) {
+                    console.error('Group update failed:', error);
+                    return {
+                        statusCode: 400,
+                        headers,
+                        body: JSON.stringify({
+                            success: false,
+                            error: 'Failed to update user group',
+                            details: error.message
+                        })
+                    };
+                }
                 
             case '/clean-old-files':
                 return {
