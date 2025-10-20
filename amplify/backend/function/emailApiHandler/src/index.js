@@ -44,7 +44,7 @@ exports.handler = async (event) => {
                 // Try to create user in Cognito
                 try {
                     const createUserParams = {
-                        UserPoolId: 'us-west-2_P6EqP2tph',
+                        UserPoolId: 'us-west-2_KuizmjgYE',
                         Username: email,
                         UserAttributes: [
                             { Name: 'email', Value: email },
@@ -58,7 +58,7 @@ exports.handler = async (event) => {
                     actualCognitoUserId = createResult.User.Username; // Get actual Cognito UUID
                     
                     const setPasswordParams = {
-                        UserPoolId: 'us-west-2_P6EqP2tph',
+                        UserPoolId: 'us-west-2_KuizmjgYE',
                         Username: actualCognitoUserId,
                         Password: tempPassword,
                         Permanent: false
