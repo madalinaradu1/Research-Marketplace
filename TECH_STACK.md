@@ -45,6 +45,34 @@
 - Sends notification emails to users
 - Handles welcome emails and status change notifications
 
+## Project Structure
+
+```
+/
+├── amplify/                  # AWS Amplify configuration
+│   ├── backend/              # Backend resources
+│   │   ├── api/              # GraphQL API
+│   │   ├── auth/             # Authentication
+│   │   ├── function/         # Lambda functions
+│   │   └── storage/          # S3 storage
+│   └── .config/              # Amplify configuration
+├── public/                   # Public assets
+├── src/                      # Source code
+│   ├── components/           # React components
+│   ├── graphql/              # GraphQL queries and mutations
+│   ├── pages/                # Page components
+│   ├── ui-components/        # Amplify Studio components
+│   ├── utils/                # Utility functions
+│   ├── App.js                # Main application
+│   └── index.js              # Entry point
+├── ui-components/            # Amplify Studio component definitions
+├── schema.graphql            # GraphQL schema
+├── DEPLOYMENT.md             # Deployment instructions
+├── PROJECT_SUMMARY.md        # Detailed project summary
+├── TECH_STACK.md             # Technology stack documentation
+└── README.md                 # Project overview
+```
+
 ## Frontend Technologies
 
 ### **React.js**
@@ -119,9 +147,10 @@ This stack provides automatic scaling, high availability, and minimal operationa
 ### Setup Steps
 1. Clone the repository
 2. Run `npm install` to install dependencies
-3. Configure Amplify CLI with your AWS credentials
-4. Run `amplify pull` to sync backend resources
-5. Run `npm start` to start the development server
+3. Configure Amplify CLI with your AWS credentials: `amplify configure`
+4. Initialize Amplify in the project: `amplify init`
+5. Pull backend resources: `amplify pull`
+6. Run `npm start` to start the development server
 
 ### Development Workflow
 1. Make frontend changes in the `src/` directory
