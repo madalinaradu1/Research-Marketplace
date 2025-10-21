@@ -124,6 +124,8 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
 For a comprehensive overview of the project, see [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md).
 
+For detailed information about the technology stack and tools used, see [TECH_STACK.md](TECH_STACK.md).
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
