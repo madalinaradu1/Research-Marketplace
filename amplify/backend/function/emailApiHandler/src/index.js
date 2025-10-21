@@ -2,7 +2,7 @@
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
 const { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand, AdminDeleteUserCommand, AdminAddUserToGroupCommand, AdminRemoveUserFromGroupCommand } = require('@aws-sdk/client-cognito-identity-provider');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, PutCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const sesClient = new SESClient({ region: 'us-west-2' });
 const cognitoClient = new CognitoIdentityProviderClient({ region: 'us-west-2' });
 const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient({ region: 'us-west-2' }));
@@ -15,7 +15,14 @@ exports.handler = async (event) => {
     };
 
     if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 200, headers };
+        return { 
+            statusCode: 200, 
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+            }
+        };
     }
 
     try {
@@ -192,6 +199,58 @@ exports.handler = async (event) => {
                     };
                 }
                 
+            case '/assign-existing-users':
+                // Get users from DynamoDB and assign groups based on their roles
+                try {
+                    const { DynamoDBClient, ScanCommand } = require('@aws-sdk/client-dynamodb');
+                    const { unmarshall } = require('@aws-sdk/util-dynamodb');
+                    
+                    const scanParams = {
+                        TableName: `User-${process.env.ENV || 'dev'}`
+                    };
+                    
+                    const dynamoRawClient = new DynamoDBClient({ region: 'us-west-2' });
+                    const scanResult = await dynamoRawClient.send(new ScanCommand(scanParams));
+                    
+                    const assignmentResults = [];
+                    
+                    for (const item of scanResult.Items || []) {
+                        const user = unmarshall(item);
+                        if (user.role && user.id) {
+                            try {
+                                await cognitoClient.send(new AdminAddUserToGroupCommand({
+                                    UserPoolId: 'us-west-2_KuizmjgYE',
+                                    Username: user.id,
+                                    GroupName: user.role
+                                }));
+                                assignmentResults.push({ userId: user.id, role: user.role, success: true });
+                            } catch (error) {
+                                assignmentResults.push({ userId: user.id, role: user.role, success: false, error: error.message });
+                            }
+                        }
+                    }
+                    
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            success: true,
+                            assignmentResults,
+                            message: `Processed ${assignmentResults.length} existing users`
+                        })
+                    };
+                } catch (error) {
+                    return {
+                        statusCode: 500,
+                        headers,
+                        body: JSON.stringify({
+                            success: false,
+                            error: 'Failed to assign groups to existing users',
+                            details: error.message
+                        })
+                    };
+                }
+                
             case '/update-user-group':
                 const { username, newRole, oldRole } = body;
                 
@@ -229,12 +288,29 @@ exports.handler = async (event) => {
                         }));
                     }
                     
+                    // Update role in DynamoDB
+                    try {
+                        const { UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+                        await dynamoClient.send(new UpdateCommand({
+                            TableName: `User-${process.env.ENV || 'dev'}`,
+                            Key: { id: username },
+                            UpdateExpression: 'SET #role = :role, updatedAt = :updatedAt',
+                            ExpressionAttributeNames: { '#role': 'role' },
+                            ExpressionAttributeValues: {
+                                ':role': newRole,
+                                ':updatedAt': new Date().toISOString()
+                            }
+                        }));
+                    } catch (dbError) {
+                        console.error('Failed to update role in database:', dbError);
+                    }
+                    
                     return {
                         statusCode: 200,
                         headers,
                         body: JSON.stringify({
                             success: true,
-                            message: `User group updated to ${newRole} successfully`
+                            message: `User role updated to ${newRole} in both Cognito and database`
                         })
                     };
                 } catch (error) {
@@ -312,6 +388,68 @@ exports.handler = async (event) => {
                         body: JSON.stringify({
                             success: false,
                             error: 'Failed to send email',
+                            details: error.message
+                        })
+                    };
+                }
+                
+            case '/update-project':
+                const { projectId, coordinatorNotes, projectStatus, rejectionReason } = body;
+                
+                if (!projectId) {
+                    return {
+                        statusCode: 400,
+                        headers,
+                        body: JSON.stringify({
+                            success: false,
+                            error: 'Missing projectId'
+                        })
+                    };
+                }
+                
+                try {
+                    const updateParams = {
+                        TableName: `Project-${process.env.ENV || 'dev'}`,
+                        Key: { id: projectId },
+                        UpdateExpression: 'SET updatedAt = :updatedAt',
+                        ExpressionAttributeValues: {
+                            ':updatedAt': new Date().toISOString()
+                        }
+                    };
+                    
+                    if (coordinatorNotes) {
+                        updateParams.UpdateExpression += ', coordinatorNotes = :notes';
+                        updateParams.ExpressionAttributeValues[':notes'] = coordinatorNotes;
+                    }
+                    
+                    if (projectStatus) {
+                        updateParams.UpdateExpression += ', projectStatus = :status';
+                        updateParams.ExpressionAttributeValues[':status'] = projectStatus;
+                    }
+                    
+                    if (rejectionReason) {
+                        updateParams.UpdateExpression += ', rejectionReason = :reason';
+                        updateParams.ExpressionAttributeValues[':reason'] = rejectionReason;
+                    }
+                    
+                    await dynamoClient.send(new UpdateCommand(updateParams));
+                    
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            success: true,
+                            message: 'Project updated successfully'
+                        })
+                    };
+                } catch (error) {
+                    console.error('Project update failed:', error);
+                    return {
+                        statusCode: 500,
+                        headers,
+                        body: JSON.stringify({
+                            success: false,
+                            error: 'Failed to update project',
                             details: error.message
                         })
                     };

@@ -34,7 +34,8 @@ type Project @model @auth(rules: [
   { allow: owner, operations: [create, read, update, delete] },
   { allow: private, operations: [read] },
   { allow: groups, groups: ["Admin"], operations: [read, update] },
-  { allow: groups, groups: ["Faculty"], operations: [create, read, update] }
+  { allow: groups, groups: ["Faculty"], operations: [create, read, update] },
+  { allow: groups, groups: ["Coordinator"], operations: [read, update] }
 ]) {
   id: ID!
   title: String!

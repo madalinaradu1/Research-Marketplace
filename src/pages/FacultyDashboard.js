@@ -376,7 +376,7 @@ const FacultyDashboard = ({ user }) => {
         requiresTranscript: projectForm.requiresTranscript,
         facultyID: userId,
         isActive: projectForm.isActive === true || projectForm.isActive === 'true',
-        projectStatus: selectedProject && selectedProject.projectStatus === 'Returned' ? 'Coordinator Review' : (selectedProject ? selectedProject.projectStatus : 'Coordinator Review')
+        projectStatus: (selectedProject && selectedProject.projectStatus === 'Returned' && viewingReturnReason) ? 'Coordinator Review' : (selectedProject ? selectedProject.projectStatus : 'Coordinator Review')
       };
       
       console.log('Project input:', input);
