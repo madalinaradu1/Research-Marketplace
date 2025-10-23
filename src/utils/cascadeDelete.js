@@ -1,4 +1,4 @@
-import { API, graphqlOperation } from 'aws-amplify';
+import { API, graphqlOperation, Storage } from 'aws-amplify';
 import { 
   deleteUser, deleteProject, deleteApplication, deleteMessage, 
   deleteStudentPost, deleteNotification, createDeletedUser 
@@ -140,6 +140,9 @@ export const performCascadeDelete = async (originalUserID) => {
       await API.graphql(graphqlOperation(deleteNotification, { input: { id: notification.id } }));
     }
     
+    // Delete user files from S3
+    await deleteUserFiles(originalUserID);
+    
     return { success: true, deletedCount: {
       messages: userMessages.length,
       applications: userApplications.length,
@@ -149,6 +152,29 @@ export const performCascadeDelete = async (originalUserID) => {
     }};
   } catch (error) {
     console.error('Error performing cascade delete:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete all S3 files associated with a user
+ */
+export const deleteUserFiles = async (userId) => {
+  try {
+    // List all files with user ID prefix
+    const listResult = await Storage.list(`${userId}/`, { level: 'public' });
+    
+    // Delete each file
+    for (const file of listResult.results || []) {
+      await Storage.remove(file.key, { level: 'public' });
+      console.log(`Deleted file: ${file.key}`);
+    }
+    
+    console.log(`Deleted ${listResult.results?.length || 0} files for user ${userId}`);
+    return { success: true, deletedFiles: listResult.results?.length || 0 };
+    
+  } catch (error) {
+    console.error(`Error deleting files for user ${userId}:`, error);
     throw error;
   }
 };

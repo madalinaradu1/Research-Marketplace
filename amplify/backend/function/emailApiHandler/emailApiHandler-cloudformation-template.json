@@ -173,7 +173,10 @@
               "Effect": "Allow",
               "Action": [
                 "cognito-idp:AdminCreateUser",
-                "cognito-idp:AdminSetUserPassword"
+                "cognito-idp:AdminSetUserPassword",
+                "cognito-idp:AdminDeleteUser",
+                "cognito-idp:AdminAddUserToGroup",
+                "cognito-idp:AdminRemoveUserFromGroup"
               ],
               "Resource": "*"
             }

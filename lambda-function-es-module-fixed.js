@@ -4,6 +4,7 @@ import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPass
 import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
+
 const sesClient = new SESClient({ region: 'us-west-2' });
 const cognitoClient = new CognitoIdentityProviderClient({ region: 'us-west-2' });
 const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient({ region: 'us-west-2' }));
@@ -203,7 +204,6 @@ export const handler = async (event) => {
             case '/assign-existing-users':
                 // Get users from DynamoDB and assign groups based on their roles
                 try {
-                    
                     const scanParams = {
                         TableName: `User-${process.env.ENV || 'dev'}`
                     };
