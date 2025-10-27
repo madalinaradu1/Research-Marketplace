@@ -102,7 +102,7 @@
         },
         "emailApiHandler": {
           "deploymentBucketName": "amplify-researchmarketplace-dev-6bfc7-deployment",
-          "s3Key": "amplify-builds/emailApiHandler-32656c48757062494535-build.zip"
+          "s3Key": "amplify-builds/emailApiHandler-3852776c476c35746371-build.zip"
         },
         "researchmarketplace2a916c6aPostConfirmation": {
           "deploymentBucketName": "amplify-researchmarketplace-dev-6bfc7-deployment",
