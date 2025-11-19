@@ -55,7 +55,7 @@ export const handler = async (event) => {
                 // Try to create user in Cognito
                 try {
                     const createUserParams = {
-                        UserPoolId: 'us-west-2_KuizmjgYE',
+                        UserPoolId: 'us-west-2_UA7PlngqC',
                         Username: email,
                         UserAttributes: [
                             { Name: 'email', Value: email },
@@ -70,7 +70,7 @@ export const handler = async (event) => {
                     actualCognitoUserId = createResult.User.Username; // Get actual Cognito UUID
                     
                     const setPasswordParams = {
-                        UserPoolId: 'us-west-2_KuizmjgYE',
+                        UserPoolId: 'us-west-2_UA7PlngqC',
                         Username: actualCognitoUserId,
                         Password: tempPassword,
                         Permanent: false
@@ -82,7 +82,7 @@ export const handler = async (event) => {
                     if (role && ['Student', 'Faculty', 'Coordinator', 'Admin'].includes(role)) {
                         try {
                             await cognitoClient.send(new AdminAddUserToGroupCommand({
-                                UserPoolId: 'us-west-2_KuizmjgYE',
+                                UserPoolId: 'us-west-2_UA7PlngqC',
                                 Username: actualCognitoUserId,
                                 GroupName: role
                             }));
@@ -218,7 +218,7 @@ export const handler = async (event) => {
                         if (user.role && user.id) {
                             try {
                                 await cognitoClient.send(new AdminAddUserToGroupCommand({
-                                    UserPoolId: 'us-west-2_KuizmjgYE',
+                                    UserPoolId: 'us-west-2_UA7PlngqC',
                                     Username: user.id,
                                     GroupName: user.role
                                 }));
@@ -269,7 +269,7 @@ export const handler = async (event) => {
                     if (oldRole && ['Student', 'Faculty', 'Coordinator', 'Admin'].includes(oldRole)) {
                         try {
                             await cognitoClient.send(new AdminRemoveUserFromGroupCommand({
-                                UserPoolId: 'us-west-2_KuizmjgYE',
+                                UserPoolId: 'us-west-2_UA7PlngqC',
                                 Username: username,
                                 GroupName: oldRole
                             }));
@@ -281,7 +281,7 @@ export const handler = async (event) => {
                     // Add to new group
                     if (['Student', 'Faculty', 'Coordinator', 'Admin'].includes(newRole)) {
                         await cognitoClient.send(new AdminAddUserToGroupCommand({
-                            UserPoolId: 'us-west-2_KuizmjgYE',
+                            UserPoolId: 'us-west-2_UA7PlngqC',
                             Username: username,
                             GroupName: newRole
                         }));
@@ -474,7 +474,7 @@ export const handler = async (event) => {
                     console.log('Attempting to delete Cognito user:', username);
                     
                     await cognitoClient.send(new AdminDeleteUserCommand({
-                        UserPoolId: 'us-west-2_KuizmjgYE',
+                        UserPoolId: 'us-west-2_UA7PlngqC',
                         Username: username
                     }));
                     
