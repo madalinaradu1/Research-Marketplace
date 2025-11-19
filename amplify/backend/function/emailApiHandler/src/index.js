@@ -135,12 +135,25 @@ export const handler = async (event) => {
                 
                 // Try to send email
                 try {
+                    // List of verified SES identities
+                    const verifiedEmails = [
+                        'madalina.radu1@gcu.edu',
+                        'dlemus4@my.gcu.edu',
+                        'ldycus@my.gcu.edu', 
+                        'OFusco@my.gcu.edu',
+                        'bberger7@my.gcu.edu',
+                        'ABrajovic@my.gcu.edu'
+                    ];
+                    
+                    // Check if user's email is verified, otherwise send to admin
+                    const isVerified = verifiedEmails.includes(email);
+                    const recipientEmail = isVerified ? email : 'madalina.radu1@gcu.edu';
                     
                     // Send welcome email via SES
                     const emailParams = {
                         Source: 'madalina.radu1@gcu.edu',
                         Destination: {
-                            ToAddresses: ['madalina.radu1@gcu.edu'] // Send all notifications to your email in sandbox
+                            ToAddresses: [recipientEmail]
                         },
                         Message: {
                             Subject: {
@@ -149,13 +162,24 @@ export const handler = async (event) => {
                             },
                             Body: {
                                 Text: {
-                                    Data: `Note: This email was intended for ${email} but sent to your verified address for testing.\n\nWelcome to GCU Research Marketplace!\n\nHello ${name},\n\nYour account has been created successfully. Here are your login credentials:\n\nEmail: ${email}\nTemporary Password: ${tempPassword}\nRole: ${role}\n\nPlease log in to the Research Marketplace and change your password on first login.\n\nBest regards,\nGCU Research Team`,
+                                    Data: isVerified ? 
+                                        `Welcome to GCU Research Marketplace!\n\nHello ${name},\n\nYour account has been created successfully. Here are your login credentials:\n\nEmail: ${email}\nTemporary Password: ${tempPassword}\nRole: ${role}\n\nPlease log in to the Research Marketplace and change your password on first login.\n\nBest regards,\nGCU Research Team` :
+                                        `Note: This email was intended for ${email} but sent to your verified address for testing.\n\nWelcome to GCU Research Marketplace!\n\nHello ${name},\n\nYour account has been created successfully. Here are your login credentials:\n\nEmail: ${email}\nTemporary Password: ${tempPassword}\nRole: ${role}\n\nPlease log in to the Research Marketplace and change your password on first login.\n\nBest regards,\nGCU Research Team`,
                                     Charset: 'UTF-8'
                                 },
                                 Html: {
-                                    Data: `
-
-                                        <p><em>Note: This email was intended for ${email} but sent to your verified address for testing.</em></p>
+                                    Data: isVerified ?
+                                        `<h2>Welcome to GCU Research Marketplace!</h2>
+                                        <p>Hello ${name},</p>
+                                        <p>Your account has been created successfully. Here are your login credentials:</p>
+                                        <p><strong>Email:</strong> ${email}<br>
+                                        <strong>Temporary Password:</strong> ${tempPassword}<br>
+                                        <strong>Role:</strong> ${role}</p>
+                                        <p>Please log in to the Research Marketplace using the link below and change your password:</p>
+                                        <p><a href="https://master.d12p7fg02coi07.amplifyapp.com">Access Research Marketplace</a></p>
+                                        <p>You will be prompted to change your password on first login.</p>
+                                        <p>Best regards,<br>GCU Research Team</p>` :
+                                        `<p><em>Note: This email was intended for ${email} but sent to your verified address for testing.</em></p>
                                         <h2>Welcome to GCU Research Marketplace!</h2>
                                         <p>Hello ${name},</p>
                                         <p>Your account has been created successfully. Here are your login credentials:</p>
@@ -165,8 +189,7 @@ export const handler = async (event) => {
                                         <p>Please log in to the Research Marketplace using the link below and change your password:</p>
                                         <p><a href="https://master.d12p7fg02coi07.amplifyapp.com">Access Research Marketplace</a></p>
                                         <p>You will be prompted to change your password on first login.</p>
-                                        <p>Best regards,<br>GCU Research Team</p>
-                                    `,
+                                        <p>Best regards,<br>GCU Research Team</p>`,
                                     Charset: 'UTF-8'
                                 }
                             }
@@ -395,10 +418,24 @@ export const handler = async (event) => {
                 const { to, subject, message, type } = body;
                 
                 try {
+                    // List of verified SES identities
+                    const verifiedEmails = [
+                        'madalina.radu1@gcu.edu',
+                        'dlemus4@my.gcu.edu',
+                        'ldycus@my.gcu.edu', 
+                        'OFusco@my.gcu.edu',
+                        'bberger7@my.gcu.edu',
+                        'ABrajovic@my.gcu.edu'
+                    ];
+                    
+                    // Check if recipient's email is verified, otherwise send to admin
+                    const isVerified = verifiedEmails.includes(to);
+                    const recipientEmail = isVerified ? to : 'madalina.radu1@gcu.edu';
+                    
                     const emailParams = {
                         Source: 'madalina.radu1@gcu.edu',
                         Destination: {
-                            ToAddresses: ['madalina.radu1@gcu.edu']
+                            ToAddresses: [recipientEmail]
                         },
                         Message: {
                             Subject: {
@@ -407,7 +444,7 @@ export const handler = async (event) => {
                             },
                             Body: {
                                 Text: {
-                                    Data: `Note: This email was intended for ${to} but sent to your verified address for testing.\n\n${message}`,
+                                    Data: isVerified ? message : `Note: This email was intended for ${to} but sent to your verified address for testing.\n\n${message}`,
                                     Charset: 'UTF-8'
                                 }
                             }
