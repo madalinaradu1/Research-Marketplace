@@ -31,7 +31,6 @@ import { listApplications, listProjects, listUsers, deleteUser, updateUser, crea
 import { updateUserRole } from '../utils/updateUserRole';
 import { syncUserGroupsToRole } from '../utils/syncUserGroups';
 import { deleteUserCompletely, bulkDeleteUsers, canDeleteUser } from '../utils/adminUserManagement';
-import { scheduleUserDeletion } from '../utils/cascadeDelete';
 
 // GraphQL queries for audit logs
 const createAuditLogMutation = `
@@ -186,6 +185,10 @@ const AdminDashboard = ({ user }) => {
         allDeletedUsers = deletedUsersResult.data?.listDeletedUsers?.items || [];
       } catch (deletedError) {
         console.error('Error fetching deleted users:', deletedError);
+        // Check if user is in Admin group
+        if (deletedError.errors?.[0]?.errorType === 'Unauthorized') {
+          console.warn('User may not be in Admin Cognito group');
+        }
         allDeletedUsers = [];
       }
       
@@ -251,14 +254,13 @@ const AdminDashboard = ({ user }) => {
   
   const handleDeleteUser = async (userId) => {
     const targetUser = users.find(u => u.id === userId);
-    const deleteCheck = canDeleteUser(userId, user.id);
     
-    if (!deleteCheck.canDelete) {
-      setError(deleteCheck.reason);
+    if (userId === user.id) {
+      setError('Cannot delete your own account.');
       return;
     }
     
-    const confirmMessage = `Are you sure you want to delete ${targetUser?.name || 'this user'}?\n\nThis will:\n• Schedule user for deletion (90-day grace period)\n• Remove user from database immediately\n• Clean up related data after 90 days\n• Cannot be undone\n\nContinue?`;
+    const confirmMessage = `Are you sure you want to delete ${targetUser?.name || 'this user'}?\n\nThis will:\n• Remove user from Cognito\n• Remove user from database\n• Cannot be undone\n\nContinue?`;
     
     if (!window.confirm(confirmMessage)) {
       return;
@@ -266,9 +268,24 @@ const AdminDashboard = ({ user }) => {
     
     setIsDeleting(true);
     try {
-      await scheduleUserDeletion(targetUser, false); // false = production mode (90 days)
-      logAuditAction('User Deleted', `User: ${targetUser.email}`, `Scheduled for deletion (90-day grace period)`);
-      setMessage(`User successfully deleted!`);
+      // Try API endpoint first
+      await API.post('emailapi', '/delete-user', {
+        body: {
+          userId: targetUser.id,
+          userEmail: targetUser.email,
+          userData: targetUser
+        }
+      });
+      
+      // Also delete from database using GraphQL as fallback
+      try {
+        await API.graphql(graphqlOperation(deleteUser, { input: { id: targetUser.id } }));
+        console.log('User also deleted via GraphQL');
+      } catch (graphqlError) {
+        console.error('GraphQL deletion failed:', graphqlError);
+      }
+      
+      setMessage(`User ${targetUser.name} successfully deleted!`);
       fetchData();
     } catch (err) {
       console.error('Error deleting user:', err);
@@ -304,31 +321,73 @@ const AdminDashboard = ({ user }) => {
       
       for (const userToDelete of selectedUserObjects) {
         try {
-          await scheduleUserDeletion(userToDelete, false); // false = production mode (90 days)
+          await API.post('emailapi', '/delete-user', {
+            body: {
+              userId: userToDelete.id,
+              userEmail: userToDelete.email,
+              userData: userToDelete
+            }
+          });
           successful++;
-        } catch (err) {
-          console.error('Error deleting user:', userToDelete.id, err);
+        } catch (error) {
+          console.error(`Failed to delete user ${userToDelete.name}:`, error);
           failed++;
         }
       }
       
-      if (successful > 0) {
-        const deletedEmails = selectedUserObjects.slice(0, successful).map(u => `User: ${u.email}`).join(', ');
-        logAuditAction('User Deleted', deletedEmails, `${successful} user${successful > 1 ? 's' : ''} deleted${failed > 0 ? `, ${failed} failed` : ''}`);
-        setMessage(`${successful} user${successful > 1 ? 's were' : ' was'} successfully deleted! ${failed > 0 ? `${failed} failed.` : ''}`);
-      }
-      if (failed > 0) {
-        setError(`Failed to delete ${failed} users.`);
-      }
-      
       setSelectedUsers(new Set());
       setSelectAll(false);
-      fetchData();
+      
+      if (successful > 0) {
+        setMessage(`Successfully deleted ${successful} user(s).${failed > 0 ? ` ${failed} deletion(s) failed.` : ''}`);
+        fetchData();
+      } else {
+        setError('Failed to delete selected users.');
+      }
     } catch (err) {
-      console.error('Error deleting users:', err);
-      setError('Failed to delete selected users. Please try again.');
+      console.error('Error in bulk delete:', err);
+      setError('Failed to delete users. Please try again.');
     } finally {
       setIsDeleting(false);
+    }
+  };
+  
+  const handleSelectUser = (userId) => {
+    const newSelected = new Set(selectedUsers);
+    if (newSelected.has(userId)) {
+      newSelected.delete(userId);
+    } else {
+      newSelected.add(userId);
+    }
+    setSelectedUsers(newSelected);
+    setSelectAll(newSelected.size === users.length);
+  };
+  
+  const fetchCloudWatchMetrics = async () => {
+    try {
+      const response = await API.post('emailapi', '/cloudwatch-metrics', {
+        body: {
+          metricNames: ['SystemUptime', 'ResponseTime', 'StorageUsed', 'ErrorRate']
+        }
+      });
+      return response;
+    } catch (error) {
+      console.error('Error fetching CloudWatch metrics:', error);
+      return {
+        systemUptime: 'N/A',
+        avgResponseTime: 'N/A',
+        storageUsed: 'N/A',
+        errorRate: 'N/A'
+      };
+    }
+  };
+  
+  const loadAuditLogs = async () => {
+    try {
+      const result = await API.graphql(graphqlOperation(listAuditLogsQuery, { limit: 1000 }));
+      setAuditLogs(result.data?.listAuditLogs?.items || []);
+    } catch (error) {
+      console.error('Error loading audit logs:', error);
     }
   };
   
@@ -720,25 +779,6 @@ const AdminDashboard = ({ user }) => {
     }
   };
   
-  const fetchCloudWatchMetrics = async () => {
-    try {
-      const response = await API.post('emailapi', '/cloudwatch-metrics', {
-        body: {
-          metricNames: ['SystemUptime', 'ResponseTime', 'StorageUsed', 'ErrorRate']
-        }
-      });
-      return response.metrics;
-    } catch (error) {
-      console.error('Error fetching CloudWatch metrics:', error);
-      return {
-        systemUptime: '99.9%',
-        avgResponseTime: '245ms',
-        storageUsed: '2.3GB',
-        errorRate: '0.02%'
-      };
-    }
-  };
-  
   const exportAnalytics = async (format) => {
     try {
       const dateStr = new Date().toISOString().split('T')[0];
@@ -951,67 +991,10 @@ const AdminDashboard = ({ user }) => {
     // Update local state immediately
     setAuditLogs(prev => [newLog, ...prev]);
     
-    try {
-      // Store in DynamoDB via GraphQL API
-      await API.graphql(graphqlOperation(createAuditLogMutation, {
-        input: {
-          id: newLog.id,
-          userId: newLog.userId,
-          userName: newLog.userName,
-          userEmail: newLog.userEmail,
-          action: newLog.action,
-          resource: newLog.resource,
-          details: newLog.details,
-          timestamp: newLog.timestamp,
-          ipAddress: newLog.ipAddress,
-          userAgent: newLog.userAgent
-        }
-      }));
-    } catch (error) {
-      console.error('Failed to store audit log:', error);
-      // Keep local copy as fallback
-      const savedLogs = JSON.parse(localStorage.getItem('adminAuditLogs') || '[]');
-      const updatedLogs = [newLog, ...savedLogs.slice(0, 99)];
-      localStorage.setItem('adminAuditLogs', JSON.stringify(updatedLogs));
-    }
-  };
-  
-  const loadAuditLogs = async () => {
-    try {
-      // Fetch from DynamoDB via GraphQL API
-      const response = await API.graphql(graphqlOperation(listAuditLogsQuery, {
-        limit: 1000
-      }));
-      
-      if (response.data?.listAuditLogs?.items) {
-        const logs = response.data.listAuditLogs.items.map(item => ({
-          id: item.id,
-          userId: item.userId,
-          userName: item.userName,
-          userEmail: item.userEmail,
-          user: item.userName || item.userEmail || 'Unknown User',
-          action: item.action,
-          resource: item.resource,
-          details: item.details,
-          timestamp: item.timestamp,
-          ipAddress: item.ipAddress || 'N/A',
-          userAgent: item.userAgent || 'N/A'
-        }));
-        
-        // Sort by timestamp (newest first)
-        logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        setAuditLogs(logs);
-      } else {
-        // Fallback to localStorage
-        const savedLogs = JSON.parse(localStorage.getItem('adminAuditLogs') || '[]');
-        setAuditLogs(savedLogs);
-      }
-    } catch (error) {
-      console.error('Error loading audit logs:', error);
-      // Fallback to localStorage
-      const savedLogs = JSON.parse(localStorage.getItem('adminAuditLogs') || '[]');
-      setAuditLogs(savedLogs);
-    }
+    // Store in localStorage only
+    const savedLogs = JSON.parse(localStorage.getItem('adminAuditLogs') || '[]');
+    const updatedLogs = [newLog, ...savedLogs.slice(0, 99)];
+    localStorage.setItem('adminAuditLogs', JSON.stringify(updatedLogs));
   };
   
   // Helper function to get user display name for audit logs
@@ -1183,6 +1166,51 @@ const AdminDashboard = ({ user }) => {
             
             <Card>
               <Heading level={4} marginBottom="1rem">Create New User</Heading>
+              <Flex gap="1rem" marginBottom="1rem">
+                <Button size="small" onClick={() => {
+                  const csvContent = 'name,email,role,department\nJohn Doe,john@example.com,Student,Engineering\nJane Smith,jane@example.com,Faculty,Computer Science';
+                  const blob = new Blob([csvContent], { type: 'text/csv' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = 'bulk-users-template.csv';
+                  link.click();
+                  URL.revokeObjectURL(url);
+                }}>Download CSV Template</Button>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    const text = await file.text();
+                    const lines = text.split('\n').slice(1); // Skip header
+                    let created = 0;
+                    
+                    for (const line of lines) {
+                      if (!line.trim()) continue;
+                      const [name, email, role, department] = line.split(',');
+                      
+                      try {
+                        await API.post('emailapi', '/create-user', {
+                          body: { email: email.trim(), name: name.trim(), role: role.trim(), department: department?.trim() }
+                        });
+                        created++;
+                      } catch (err) {
+                        console.error('Failed to create user:', email, err);
+                      }
+                    }
+                    
+                    setMessage(`Created ${created} users from CSV!`);
+                    fetchData();
+                    e.target.value = '';
+                  }}
+                  style={{ display: 'none' }}
+                  id="csvUpload"
+                />
+                <Button size="small" onClick={() => document.getElementById('csvUpload').click()}>Upload CSV</Button>
+              </Flex>
               <Flex gap="1rem" wrap="wrap">
                 <TextField
                   label="Name"

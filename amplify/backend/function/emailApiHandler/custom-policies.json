@@ -1,6 +1,24 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "dynamodb:PutItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:GetItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:Query",
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/User-*",
+      "arn:aws:dynamodb:*:*:table/DeletedUser-*",
+      "arn:aws:dynamodb:*:*:table/AuditLog-*"
+    ]
+  },
+  {
+    "Action": [
+      "cloudwatch:PutMetricData",
+      "cloudwatch:GetMetricStatistics"
+    ],
+    "Resource": ["*"]
   }
 ]

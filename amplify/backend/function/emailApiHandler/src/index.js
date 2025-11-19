@@ -2,7 +2,7 @@
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand, AdminDeleteUserCommand, AdminAddUserToGroupCommand, AdminRemoveUserFromGroupCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, PutCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 const sesClient = new SESClient({ region: 'us-west-2' });
 const cognitoClient = new CognitoIdentityProviderClient({ region: 'us-west-2' });
@@ -154,6 +154,7 @@ export const handler = async (event) => {
                                 },
                                 Html: {
                                     Data: `
+
                                         <p><em>Note: This email was intended for ${email} but sent to your verified address for testing.</em></p>
                                         <h2>Welcome to GCU Research Marketplace!</h2>
                                         <p>Hello ${name},</p>
@@ -196,6 +197,51 @@ export const handler = async (event) => {
                             cognitoUserId: actualCognitoUserId,
                             role: role,
                             message: 'User created successfully in Cognito (email notification failed)'
+                        })
+                    };
+                }
+                
+            case '/fix-admin-group':
+                // Add current user to Admin group
+                const { adminUserId, adminEmail } = body;
+                
+                if (!adminUserId && !adminEmail) {
+                    return {
+                        statusCode: 400,
+                        headers,
+                        body: JSON.stringify({
+                            success: false,
+                            error: 'Missing adminUserId or adminEmail'
+                        })
+                    };
+                }
+                
+                try {
+                    const username = adminUserId || adminEmail;
+                    
+                    await cognitoClient.send(new AdminAddUserToGroupCommand({
+                        UserPoolId: 'us-west-2_UA7PlngqC',
+                        Username: username,
+                        GroupName: 'Admin'
+                    }));
+                    
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            success: true,
+                            message: 'User added to Admin group successfully'
+                        })
+                    };
+                } catch (error) {
+                    console.error('Failed to add user to Admin group:', error);
+                    return {
+                        statusCode: 400,
+                        headers,
+                        body: JSON.stringify({
+                            success: false,
+                            error: 'Failed to add user to Admin group',
+                            details: error.message
                         })
                     };
                 }
@@ -454,7 +500,7 @@ export const handler = async (event) => {
                 }
                 
             case '/delete-user':
-                const { userId, userEmail } = body;
+                const { userId, userEmail, userData } = body;
                 console.log('Delete user request:', { userId, userEmail });
                 
                 if (!userId && !userEmail) {
@@ -469,40 +515,82 @@ export const handler = async (event) => {
                 }
                 
                 try {
-                    // Try with email first (Cognito username is usually email)
                     const username = userEmail || userId;
-                    console.log('Attempting to delete Cognito user:', username);
+                    const userIdToDelete = userId || username;
+                    console.log('Attempting to delete user:', username);
                     
-                    await cognitoClient.send(new AdminDeleteUserCommand({
-                        UserPoolId: 'us-west-2_UA7PlngqC',
-                        Username: username
-                    }));
+                    // Create DeletedUser record first (before deletion)
+                    if (userData) {
+                        try {
+                            const deletedUserRecord = {
+                                id: `deleted_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                                originalUserID: userIdToDelete,
+                                name: userData.name || 'Unknown',
+                                email: userData.email || userEmail || 'unknown@example.com',
+                                role: userData.role || 'Unknown',
+                                deletionScheduledAt: new Date().toISOString(),
+                                isTestMode: false,
+                                userData: JSON.stringify(userData),
+                                status: 'DELETED',
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            };
+                            
+                            await dynamoClient.send(new PutCommand({
+                                TableName: `DeletedUser-${process.env.ENV || 'dev'}`,
+                                Item: deletedUserRecord
+                            }));
+                            console.log('Created DeletedUser record:', deletedUserRecord.id);
+                        } catch (deletedUserError) {
+                            console.error('Failed to create DeletedUser record:', deletedUserError);
+                        }
+                    }
                     
-                    console.log('Successfully deleted user from Cognito:', username);
+                    // Delete from Cognito
+                    try {
+                        await cognitoClient.send(new AdminDeleteUserCommand({
+                            UserPoolId: 'us-west-2_UA7PlngqC',
+                            Username: username
+                        }));
+                        console.log('Successfully deleted user from Cognito:', username);
+                    } catch (cognitoError) {
+                        console.error('Cognito deletion failed:', cognitoError);
+                    }
+                    
+                    // Delete from DynamoDB User table
+                    try {
+                        console.log('Attempting to delete from User table:', userIdToDelete);
+                        const deleteResult = await dynamoClient.send(new DeleteCommand({
+                            TableName: `User-${process.env.ENV || 'dev'}`,
+                            Key: { id: userIdToDelete }
+                        }));
+                        console.log('Successfully deleted user from database:', userIdToDelete, deleteResult);
+                    } catch (dbError) {
+                        console.error('Database deletion failed:', dbError);
+                        console.error('Delete error details:', {
+                            tableName: `User-${process.env.ENV || 'dev'}`,
+                            key: { id: userIdToDelete },
+                            error: dbError.message
+                        });
+                    }
+                    
                     return {
                         statusCode: 200,
                         headers,
                         body: JSON.stringify({
                             success: true,
-                            message: 'User deleted from Cognito successfully'
+                            message: 'User deleted from Cognito, database, and archived in DeletedUser table'
                         })
                     };
                 } catch (error) {
-                    console.error('Cognito user deletion failed:', error);
-                    console.error('Error details:', {
-                        code: error.name,
-                        message: error.message,
-                        userId,
-                        userEmail
-                    });
+                    console.error('User deletion failed:', error);
                     return {
                         statusCode: 400,
                         headers,
                         body: JSON.stringify({
                             success: false,
-                            error: 'Failed to delete user from Cognito',
-                            details: error.message,
-                            code: error.name
+                            error: 'Failed to delete user',
+                            details: error.message
                         })
                     };
                 }
