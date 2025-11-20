@@ -129,6 +129,16 @@
     },
     "researchmarketplace2a916c6aPostConfirmation": {
       "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "researchmarketplace"
+        }
+      ],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     }

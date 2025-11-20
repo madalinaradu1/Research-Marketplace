@@ -43,6 +43,14 @@
     },
     "s3Key": {
       "Type": "String"
+    },
+    "apiresearchmarketplaceGraphQLAPIIdOutput": {
+      "Type": "String",
+      "Default": "apiresearchmarketplaceGraphQLAPIIdOutput"
+    },
+    "apiresearchmarketplaceGraphQLAPIEndpointOutput": {
+      "Type": "String",
+      "Default": "apiresearchmarketplaceGraphQLAPIEndpointOutput"
     }
   },
   "Conditions": {
@@ -95,6 +103,12 @@
             },
             "GROUP": {
               "Ref": "GROUP"
+            },
+            "API_RESEARCHMARKETPLACE_GRAPHQLAPIIDOUTPUT": {
+              "Ref": "apiresearchmarketplaceGraphQLAPIIdOutput"
+            },
+            "API_RESEARCHMARKETPLACE_GRAPHQLAPIENDPOINTOUTPUT": {
+              "Ref": "apiresearchmarketplaceGraphQLAPIEndpointOutput"
             }
           }
         },
@@ -193,6 +207,47 @@
                   }
                 ]
               }
+            }
+          ]
+        }
+      }
+    },
+    "AmplifyResourcesPolicy": {
+      "DependsOn": [
+        "LambdaExecutionRole"
+      ],
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "amplify-lambda-execution-policy",
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:GetItem"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": [
+                    "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/User-${apiId}-${env}",
+                    {
+                      "apiId": {
+                        "Ref": "apiresearchmarketplaceGraphQLAPIIdOutput"
+                      },
+                      "env": {
+                        "Ref": "env"
+                      }
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
