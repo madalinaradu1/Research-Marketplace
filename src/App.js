@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Amplify, Hub, Auth, API, graphqlOperation } from 'aws-amplify';
-import { withAuthenticator, ThemeProvider } from '@aws-amplify/ui-react';
+import { withAuthenticator, Authenticator, SelectField, useAuthenticator, ThemeProvider } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { theme } from './theme';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -297,4 +297,45 @@ function App({ signOut, user }) {
   );
 }
 
-export default withAuthenticator(App);
+const formFields = {
+  signUp: {
+    email: {
+      order: 1,
+      placeholder: 'Enter your GCU email',
+      isRequired: true,
+      label: 'Email'
+    },
+    password: {
+      order: 2,
+      placeholder: 'Enter your password',
+      isRequired: true,
+      label: 'Password'
+    },
+    confirm_password: {
+      order: 3,
+      placeholder: 'Confirm your password',
+      isRequired: true,
+      label: 'Confirm Password'
+    }
+  }
+};
+
+const components = {
+  SignUp: {
+    FormFields() {
+      const { validationErrors } = useAuthenticator();
+      return (
+        <>
+        <Authenticator.SignUp.FormFields />
+        {}
+      </>
+      );
+    },
+  },
+};
+
+export default withAuthenticator(App, {
+  formFields,
+  components
+});
+

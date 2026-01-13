@@ -20,19 +20,19 @@
         "adminDeleteUser": {
           "userPoolId": "placeholder",
           "deploymentBucketName": "amplify-research-marketplace-dev-5a02e-deployment",
-          "s3Key": "amplify-builds/adminDeleteUser-4d564a50616a4d565034-build.zip"
+          "s3Key": "amplify-builds/adminDeleteUser-596a7764732b67597644-build.zip"
         },
         "createUserRecord": {
           "deploymentBucketName": "amplify-research-marketplace-dev-5a02e-deployment",
-          "s3Key": "amplify-builds/createUserRecord-6c6f3572706b556f6148-build.zip"
+          "s3Key": "amplify-builds/createUserRecord-732f78417274684e6d45-build.zip"
         },
         "emailApiHandler": {
           "deploymentBucketName": "amplify-research-marketplace-dev-5a02e-deployment",
-          "s3Key": "amplify-builds/emailApiHandler-68554f62364247645278-build.zip"
+          "s3Key": "amplify-builds/emailApiHandler-7635645733777a676b43-build.zip"
         },
         "researchmarketplace2a916c6aPostConfirmation": {
           "deploymentBucketName": "amplify-research-marketplace-dev-5a02e-deployment",
-          "s3Key": "amplify-builds/researchmarketplace2a916c6aPostConfirmation-5a4f525846396d614842-build.zip"
+          "s3Key": "amplify-builds/researchmarketplace2a916c6aPostConfirmation-55453333696144585671-build.zip"
         },
         "researchmarketplace": {},
         "researchmarketplace2a916c6a": {}

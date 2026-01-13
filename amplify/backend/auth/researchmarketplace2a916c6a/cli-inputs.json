@@ -24,7 +24,7 @@
     ],
     "aliasAttributes": [],
     "userpoolClientGenerateSecret": false,
-    "userpoolClientRefreshTokenValidity": "30",
+    "userpoolClientRefreshTokenValidity": 30,
     "userpoolClientWriteAttributes": [
       "email"
     ],
@@ -32,7 +32,16 @@
       "email"
     ],
     "userpoolClientLambdaRole": "resear2a916c6a_userpoolclient_lambda_role",
-    "userpoolClientSetAttributes": false,
+    "userpoolClientSetAttributes": true,
+    "customAttributes": [
+      {
+        "attributeDataType": "String",
+        "developerOnlyAttribute": false,
+        "mutable": true,
+        "name": "role",
+        "required": false
+      }
+    ],
     "sharedId": "2a916c6a",
     "resourceName": "researchmarketplace2a916c6a",
     "authSelections": "identityPoolAndUserPool",
@@ -68,7 +77,6 @@
         ]
       }
     ],
-    "thirdPartyAuth": false,
     "userPoolGroups": false,
     "adminQueries": false,
     "triggers": {
@@ -77,11 +85,12 @@
       ]
     },
     "hostedUI": false,
-    "authProviders": [],
     "parentStack": {
       "Ref": "AWS::StackId"
     },
     "authTriggerConnections": "[\n  {\n    \"triggerType\": \"PostConfirmation\",\n    \"lambdaFunctionName\": \"researchmarketplace2a916c6aPostConfirmation\"\n  }\n]",
-    "permissions": []
+    "permissions": [],
+    "authProviders": [],
+    "thirdPartyAuth": true
   }
 }

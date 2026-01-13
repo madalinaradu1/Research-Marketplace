@@ -85,14 +85,35 @@ export async function createUserAfterSignUp(userData) {
       console.error('Error checking existing user by email:', error);
     }
     
-    // STOP HERE - DO NOT CREATE NEW USERS AUTOMATICALLY
+    // Create new user if not found
     console.log('No existing user found. User must be created by admin first.');
-    return null;
+    
+    const newUser = {
+      id: username,
+      email: email,
+      name: attributes.name || email.split('@')[0],
+      role:'Student', // Get role from Cognito attribute
+      profileComplete: false,
+      status: 'Active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      await API.graphql(graphqlOperation(createUser, { input: newUser }));
+      console.log('New user created:', newUser);
+      return newUser;
+    } catch (createError) {
+      console.error('Error creating new user:', createError);
+      return null;
+    }
+    
   } catch (error) {
     console.error('Error in createUserAfterSignUp:', error);
     return null;
   }
 }
+
 
 /**
  * Checks if a user record exists in DynamoDB
