@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "api": {
+      "researchmarketplace": [
+        "Mutation"
+      ]
+    },
+    "auth": {
+      "researchmarketplace2a916c6a": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "userPoolId",
+      "environmentVariableName": "USER_POOL_ID"
+    }
+  ]
+}

@@ -13,6 +13,7 @@ const ProfilePage = ({ user, refreshProfile }) => {
     currentProgram: '',
     degreeType: '',
     expectedGraduation: '',
+    gpa: '',
     researchInterests: '',
     skillsExperience: '',
     availability: '',
@@ -22,6 +23,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+  const [gpaError, setGpaError] = useState('');
+  const [graduationError, setGraduationError] = useState('');
+  const [studentIdError, setStudentIdError] = useState('');
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
@@ -51,10 +55,11 @@ const ProfilePage = ({ user, refreshProfile }) => {
       setFormState({
         name: user.name || '',
         email: user.email || '',
-        studentId: user.id || user.username || '',
+        studentId: user.studentId || '',
         currentProgram: user.major || '',
         degreeType: user.academicYear || '',
         expectedGraduation: user.expectedGraduation || '',
+        gpa: user.gpa || '',
         researchInterests: user.researchInterests ? user.researchInterests.join(', ') : '',
         skillsExperience: user.skills ? user.skills.join(', ') : '',
         availability: user.availability || '',
@@ -132,6 +137,41 @@ const ProfilePage = ({ user, refreshProfile }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'gpa') {
+      const gpaValue = parseFloat(value);
+      if (value && (gpaValue < 1.0 || gpaValue > 4.0)) {
+        setGpaError('GPA must be between 1.0 and 4.0');
+      } else {
+        setGpaError('');
+      }
+    }
+    if (name === 'expectedGraduation') {
+      if (value) {
+        const selectedDate = new Date(value + '-01');
+        const today = new Date();
+        today.setDate(1);
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate < today) {
+          setGraduationError('Expected graduation date must be in the future');
+        } else {
+          setGraduationError('');
+        }
+      } else {
+        setGraduationError('');
+      }
+    }
+    if (name === 'studentId') {
+      const alphanumericRegex = /^[a-zA-Z0-9]*$/;
+      if (!alphanumericRegex.test(value)) {
+        setStudentIdError('Student ID must be alphanumeric only (no spaces)');
+      } else if (value.length > 0 && value.length < 5) {
+        setStudentIdError('Student ID must be at least 5 characters');
+      } else if (value.length > 20) {
+        setStudentIdError('Student ID must not exceed 20 characters');
+      } else {
+        setStudentIdError('');
+      }
+    }
     setFormState(prev => ({ ...prev, [name]: value }));
   };
 
@@ -140,6 +180,32 @@ const ProfilePage = ({ user, refreshProfile }) => {
     setIsSubmitting(true);
     setMessage(null);
     setError(null);
+
+    const alphanumericRegex = /^[a-zA-Z0-9]*$/;
+    if (formState.studentId && (!alphanumericRegex.test(formState.studentId) || formState.studentId.length < 5 || formState.studentId.length > 20)) {
+      setError('Please enter a valid Student ID (5-20 alphanumeric characters, no spaces)');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const gpaValue = parseFloat(formState.gpa);
+    if (formState.gpa && (gpaValue < 1.0 || gpaValue > 4.0)) {
+      setError('GPA must be between 1.0 and 4.0');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (formState.expectedGraduation) {
+      const selectedDate = new Date(formState.expectedGraduation + '-01');
+      const today = new Date();
+      today.setDate(1);
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        setError('Expected graduation date must be in the future');
+        setIsSubmitting(false);
+        return;
+      }
+    }
 
     try {
       // Convert arrays
@@ -153,13 +219,14 @@ const ProfilePage = ({ user, refreshProfile }) => {
         ? formState.certificates.split(',').map(item => item.trim()).filter(item => item)
         : [];
       
-      // Prepare input for updateUser mutation
+      // Prepare input for updateUser mutation (only include fields that exist in UpdateUserInput)
       const input = {
         id: user.id || user.username,
         name: formState.name,
         major: formState.currentProgram,
         academicYear: formState.degreeType,
         expectedGraduation: formState.expectedGraduation || null,
+        gpa: formState.gpa ? parseFloat(formState.gpa) : null,
         researchInterests,
         skills,
         availability: formState.availability || null,
@@ -177,10 +244,11 @@ const ProfilePage = ({ user, refreshProfile }) => {
       setFormState({
         name: updatedUser.name || '',
         email: updatedUser.email || '',
-        studentId: updatedUser.id || '',
+        studentId: updatedUser.studentId || '',
         currentProgram: updatedUser.major || '',
         degreeType: updatedUser.academicYear || '',
         expectedGraduation: updatedUser.expectedGraduation || '',
+        gpa: updatedUser.gpa || '',
         researchInterests: updatedUser.researchInterests ? updatedUser.researchInterests.join(', ') : '',
         skillsExperience: updatedUser.skills ? updatedUser.skills.join(', ') : '',
         availability: updatedUser.availability || '',
@@ -193,7 +261,28 @@ const ProfilePage = ({ user, refreshProfile }) => {
         refreshProfile();
       }
     } catch (err) {
-      setError('An error occurred while updating your profile. Please try again.');
+      console.error('Error updating user profile:', err);
+      
+      let errorMessage = 'An error occurred while updating your profile. Please try again.';
+      
+      if (err.errors && err.errors.length > 0) {
+        errorMessage = err.errors[0].message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      if (err.response) {
+        const status = err.response.status;
+        if (status === 401 || status === 403) {
+          errorMessage = 'Your session expired. Please sign in again.';
+        } else if (status === 500) {
+          errorMessage = 'Server error while saving. Try again.';
+        } else if (err.response.data && err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -232,14 +321,21 @@ const ProfilePage = ({ user, refreshProfile }) => {
         >
         <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="1rem">
-            <TextField
-              name="studentId"
-              label="Student ID"
-              placeholder="Your student ID"
-              value={formState.studentId}
-              onChange={handleChange}
-              isReadOnly
-            />
+            <Flex direction="column" gap="0.25rem">
+              <TextField
+                name="studentId"
+                label="Student ID"
+                placeholder="Enter your university-issued student ID"
+                value={formState.studentId}
+                onChange={handleChange}
+                hasError={!!studentIdError}
+                descriptiveText="Enter your university-issued student ID"
+                maxLength={20}
+              />
+              {studentIdError && <Text color="red" fontSize="0.875rem">{studentIdError}</Text>}
+            </Flex>
+            
+            <Heading level={5} marginTop="1rem" marginBottom="0.5rem">Academic Information</Heading>
             
             <TextField
               name="currentProgram"
@@ -257,34 +353,49 @@ const ProfilePage = ({ user, refreshProfile }) => {
               onChange={handleChange}
             />
             
-            <TextField
-              name="expectedGraduation"
-              label="Expected Graduation Date"
-              placeholder="e.g., Spring 2025"
-              value={formState.expectedGraduation}
-              onChange={handleChange}
-            />
+            <Flex direction="column" gap="0.25rem">
+              <TextField
+                name="gpa"
+                label="GPA"
+                placeholder="Enter your GPA (1.0 - 4.0)"
+                type="number"
+                step="0.1"
+                min="1.0"
+                max="4.0"
+                value={formState.gpa || ''}
+                onChange={handleChange}
+                hasError={!!gpaError}
+                descriptiveText="GPA must be between 1.0 and 4.0"
+              />
+              {gpaError && <Text color="red" fontSize="0.875rem">{gpaError}</Text>}
+            </Flex>
+            
+            <Flex direction="column" gap="0.25rem">
+              <TextField
+                name="expectedGraduation"
+                label="Expected Graduation Date"
+                type="month"
+                value={formState.expectedGraduation}
+                onChange={handleChange}
+                hasError={!!graduationError}
+              />
+              {graduationError && <Text color="red" fontSize="0.875rem">{graduationError}</Text>}
+            </Flex>
+            
+            <Heading level={5} marginTop="1rem" marginBottom="0.5rem">Research Profile</Heading>
             
             <TextField
               name="researchInterests"
               label="Research Interests"
-              placeholder="Enter research interests separated by commas"
+              placeholder="e.g., Machine Learning, Molecular Biology, Environmental Science"
               value={formState.researchInterests}
-              onChange={handleChange}
-            />
-            
-            <TextField
-              name="skillsExperience"
-              label="Skills and Experience"
-              placeholder="Enter skills and experience separated by commas"
-              value={formState.skillsExperience}
               onChange={handleChange}
             />
             
             <TextField
               name="availability"
               label="Availability"
-              placeholder="e.g., Fall 2024, Spring 2025"
+              placeholder="e.g., Fall 2024, Spring 2025, 10-15 hours per week"
               value={formState.availability}
               onChange={handleChange}
             />
@@ -292,15 +403,25 @@ const ProfilePage = ({ user, refreshProfile }) => {
             <TextField
               name="personalStatement"
               label="Personal Statement"
-              placeholder="Brief description of your motivation for research"
+              placeholder="Describe your motivation for research, academic goals, and what you hope to achieve through undergraduate research opportunities."
               value={formState.personalStatement}
+              onChange={handleChange}
+            />
+            
+            <Heading level={5} marginTop="1rem" marginBottom="0.5rem">Additional Information (Optional)</Heading>
+            
+            <TextField
+              name="skillsExperience"
+              label="Skills and Experience (Optional)"
+              placeholder="e.g., Python, R, Lab Techniques, Data Analysis"
+              value={formState.skillsExperience}
               onChange={handleChange}
             />
             
             <TextField
               name="certificates"
-              label="Certificates"
-              placeholder="Enter certificates separated by commas"
+              label="Certificates (Optional)"
+              placeholder="e.g., CITI Training, IRB Certification, Safety Training"
               value={formState.certificates}
               onChange={handleChange}
             />
@@ -317,6 +438,7 @@ const ProfilePage = ({ user, refreshProfile }) => {
                 size="small"
                 isLoading={isSubmitting}
                 loadingText="Saving..."
+                isDisabled={!!gpaError || !!graduationError || !!studentIdError}
               >
                 Save Changes
               </Button>
