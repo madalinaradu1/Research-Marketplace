@@ -317,6 +317,14 @@ const formFields = {
       isRequired: true,
       label: 'Confirm Password'
     }
+  },
+  confirmSignUp: {
+    confirmation_code: {
+      placeholder: 'Enter your verification code',
+      isRequired: true,
+      label: 'Verification Code',
+      type: 'text'
+    }
   }
 };
 
@@ -329,6 +337,15 @@ const components = {
         <Authenticator.SignUp.FormFields />
         {}
       </>
+      );
+    },
+  },
+  ConfirmSignUp: {
+    FormFields() {
+      return (
+        <>
+          <Authenticator.ConfirmSignUp.FormFields />
+        </>
       );
     },
   },
