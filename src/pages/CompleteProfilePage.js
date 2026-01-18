@@ -31,12 +31,62 @@ const CompleteProfilePage = ({ user }) => {
     certificates: user?.certificates?.join(', ') || '',
     role: user?.role || 'Student'
   });
+  const [researchInterestTags, setResearchInterestTags] = useState(
+    user?.researchInterests || []
+  );
+  const [researchInterestInput, setResearchInterestInput] = useState('');
+  const [skillsTags, setSkillsTags] = useState(user?.skills || []);
+  const [skillsInput, setSkillsInput] = useState('');
+  const [certificateTags, setCertificateTags] = useState(user?.certificates || []);
+  const [certificateInput, setCertificateInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormState(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleTagKeyDown = (e) => {
+    if (e.key === 'Enter' && researchInterestInput.trim()) {
+      e.preventDefault();
+      if (!researchInterestTags.includes(researchInterestInput.trim())) {
+        setResearchInterestTags([...researchInterestTags, researchInterestInput.trim()]);
+      }
+      setResearchInterestInput('');
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+    setResearchInterestTags(researchInterestTags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleSkillsKeyDown = (e) => {
+    if (e.key === 'Enter' && skillsInput.trim()) {
+      e.preventDefault();
+      if (!skillsTags.includes(skillsInput.trim())) {
+        setSkillsTags([...skillsTags, skillsInput.trim()]);
+      }
+      setSkillsInput('');
+    }
+  };
+
+  const removeSkill = (skillToRemove) => {
+    setSkillsTags(skillsTags.filter(skill => skill !== skillToRemove));
+  };
+
+  const handleCertificateKeyDown = (e) => {
+    if (e.key === 'Enter' && certificateInput.trim()) {
+      e.preventDefault();
+      if (!certificateTags.includes(certificateInput.trim())) {
+        setCertificateTags([...certificateTags, certificateInput.trim()]);
+      }
+      setCertificateInput('');
+    }
+  };
+
+  const removeCertificate = (certToRemove) => {
+    setCertificateTags(certificateTags.filter(cert => cert !== certToRemove));
   };
 
   const handleSubmit = async (e) => {
@@ -49,15 +99,9 @@ const CompleteProfilePage = ({ user }) => {
       const currentUser = await Auth.currentAuthenticatedUser();
       
       // Convert arrays
-      const researchInterests = formState.researchInterests
-        ? formState.researchInterests.split(',').map(item => item.trim()).filter(item => item)
-        : [];
-      const skills = formState.skillsExperience
-        ? formState.skillsExperience.split(',').map(item => item.trim()).filter(item => item)
-        : [];
-      const certificates = formState.certificates
-        ? formState.certificates.split(',').map(item => item.trim()).filter(item => item)
-        : [];
+      const researchInterests = researchInterestTags;
+      const skills = skillsTags;
+      const certificates = certificateTags;
       
       // Prepare input for user mutation
       const input = {
@@ -107,12 +151,16 @@ const CompleteProfilePage = ({ user }) => {
               required
             />
             
-            <TextField
+            <SelectField
               name="role"
-              label="Role"
+              label="Role *"
               value={formState.role}
-              isReadOnly
-            />
+              onChange={handleChange}
+              required
+            >
+              <option value="Student">Student</option>
+              <option value="Faculty">Faculty</option>
+            </SelectField>
             
             {formState.role === 'Student' && (
               <>
@@ -163,23 +211,75 @@ const CompleteProfilePage = ({ user }) => {
                   required
                 />
                 
-                <TextField
-                  name="researchInterests"
-                  label="Research Interests *"
-                  placeholder="Enter research interests separated by commas"
-                  value={formState.researchInterests}
-                  onChange={handleChange}
-                  required
-                />
+                <Flex direction="column" gap="0.5rem">
+                  <Text fontWeight="bold">Research Interests *</Text>
+                  {researchInterestTags.length > 0 && (
+                    <Flex wrap="wrap" gap="0.5rem" marginBottom="0.5rem">
+                      {researchInterestTags.map((tag, index) => (
+                        <Flex
+                          key={index}
+                          alignItems="center"
+                          gap="0.5rem"
+                          padding="0.25rem 0.75rem"
+                          backgroundColor="#E6D4F5"
+                          borderRadius="20px"
+                        >
+                          <Text fontSize="0.9rem">{tag}</Text>
+                          <Button
+                            size="small"
+                            variation="link"
+                            onClick={() => removeTag(tag)}
+                            style={{ padding: '0', minWidth: 'auto', color: tokens.colors.neutral[90], backgroundColor: '#E6D4F5', border: 'none' }}
+                          >
+                            ×
+                          </Button>
+                        </Flex>
+                      ))}
+                    </Flex>
+                  )}
+                  <TextField
+                    name="researchInterestInput"
+                    placeholder="Type and press Enter to add"
+                    value={researchInterestInput}
+                    onChange={(e) => setResearchInterestInput(e.target.value)}
+                    onKeyDown={handleTagKeyDown}
+                  />
+                </Flex>
                 
-                <TextField
-                  name="skillsExperience"
-                  label="Skills and Experience *"
-                  placeholder="Enter skills and experience separated by commas"
-                  value={formState.skillsExperience}
-                  onChange={handleChange}
-                  required
-                />
+                <Flex direction="column" gap="0.5rem">
+                  <Text fontWeight="bold">Skills and Experience *</Text>
+                  {skillsTags.length > 0 && (
+                    <Flex wrap="wrap" gap="0.5rem" marginBottom="0.5rem">
+                      {skillsTags.map((skill, index) => (
+                        <Flex
+                          key={index}
+                          alignItems="center"
+                          gap="0.5rem"
+                          padding="0.25rem 0.75rem"
+                          backgroundColor="#E6D4F5"
+                          borderRadius="20px"
+                        >
+                          <Text fontSize="0.9rem">{skill}</Text>
+                          <Button
+                            size="small"
+                            variation="link"
+                            onClick={() => removeSkill(skill)}
+                            style={{ padding: '0', minWidth: 'auto', color: tokens.colors.neutral[90], backgroundColor: '#E6D4F5', border: 'none' }}
+                          >
+                            ×
+                          </Button>
+                        </Flex>
+                      ))}
+                    </Flex>
+                  )}
+                  <TextField
+                    name="skillsInput"
+                    placeholder="Type and press Enter to add"
+                    value={skillsInput}
+                    onChange={(e) => setSkillsInput(e.target.value)}
+                    onKeyDown={handleSkillsKeyDown}
+                  />
+                </Flex>
                 
                 <TextField
                   name="availability"
@@ -209,13 +309,40 @@ const CompleteProfilePage = ({ user }) => {
                   rows={3}
                 />
                 
-                <TextField
-                  name="certificates"
-                  label="Certificates (Optional)"
-                  placeholder="Enter certificates separated by commas"
-                  value={formState.certificates}
-                  onChange={handleChange}
-                />
+                <Flex direction="column" gap="0.5rem">
+                  <Text fontWeight="bold">Certificates (Optional)</Text>
+                  {certificateTags.length > 0 && (
+                    <Flex wrap="wrap" gap="0.5rem" marginBottom="0.5rem">
+                      {certificateTags.map((cert, index) => (
+                        <Flex
+                          key={index}
+                          alignItems="center"
+                          gap="0.5rem"
+                          padding="0.25rem 0.75rem"
+                          backgroundColor="#E6D4F5"
+                          borderRadius="20px"
+                        >
+                          <Text fontSize="0.9rem">{cert}</Text>
+                          <Button
+                            size="small"
+                            variation="link"
+                            onClick={() => removeCertificate(cert)}
+                            style={{ padding: '0', minWidth: 'auto', color: tokens.colors.neutral[90], backgroundColor: '#E6D4F5', border: 'none' }}
+                          >
+                            ×
+                          </Button>
+                        </Flex>
+                      ))}
+                    </Flex>
+                  )}
+                  <TextField
+                    name="certificateInput"
+                    placeholder="Type and press Enter to add"
+                    value={certificateInput}
+                    onChange={(e) => setCertificateInput(e.target.value)}
+                    onKeyDown={handleCertificateKeyDown}
+                  />
+                </Flex>
               </>
             )}
             
