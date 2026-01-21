@@ -311,6 +311,7 @@ const FacultyDashboard = ({ user }) => {
   
   const handleSubmitProject = async (e) => {
     e.preventDefault();
+    console.log('[FacultyDashboard] Create Project clicked - handler executing');
     setIsSubmitting(true);
     setError(null);
     setSuccessMessage(null);
@@ -376,7 +377,7 @@ const FacultyDashboard = ({ user }) => {
         requiresTranscript: projectForm.requiresTranscript,
         facultyID: userId,
         isActive: projectForm.isActive === true || projectForm.isActive === 'true',
-        projectStatus: (selectedProject && selectedProject.projectStatus === 'Returned' && viewingReturnReason) ? 'Coordinator Review' : (selectedProject ? selectedProject.projectStatus : 'Coordinator Review')
+        projectStatus: (selectedProject && selectedProject.projectStatus === 'Returned' && viewingReturnReason) ? 'Coordinator Review' : (selectedProject ? selectedProject.projectStatus : 'Pending')
       };
       
       console.log('Project input:', input);
@@ -411,6 +412,7 @@ const FacultyDashboard = ({ user }) => {
         }
       } else {
         // Create new project
+        console.log('[FacultyDashboard] Creating new project with status: Pending');
         console.log('Creating new project with input:', JSON.stringify(input, null, 2));
         result = await API.graphql(graphqlOperation(createProject, { input }));
         console.log('Project created:', result);

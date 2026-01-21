@@ -212,6 +212,9 @@ export default function UserUpdateForm(props) {
     applicationCount: "",
     createdAt: "",
     updatedAt: "",
+    college: "",
+    classesTaught: [],
+    facultyResearchInterests: [],
   };
   const [name, setName] = React.useState(initialValues.name);
   const [email, setEmail] = React.useState(initialValues.email);
@@ -254,6 +257,12 @@ export default function UserUpdateForm(props) {
   );
   const [createdAt, setCreatedAt] = React.useState(initialValues.createdAt);
   const [updatedAt, setUpdatedAt] = React.useState(initialValues.updatedAt);
+  const [college, setCollege] = React.useState(initialValues.college);
+  const [classesTaught, setClassesTaught] = React.useState(
+    initialValues.classesTaught
+  );
+  const [facultyResearchInterests, setFacultyResearchInterests] =
+    React.useState(initialValues.facultyResearchInterests);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = userRecord
@@ -284,6 +293,11 @@ export default function UserUpdateForm(props) {
     setApplicationCount(cleanValues.applicationCount);
     setCreatedAt(cleanValues.createdAt);
     setUpdatedAt(cleanValues.updatedAt);
+    setCollege(cleanValues.college);
+    setClassesTaught(cleanValues.classesTaught ?? []);
+    setCurrentClassesTaughtValue("");
+    setFacultyResearchInterests(cleanValues.facultyResearchInterests ?? []);
+    setCurrentFacultyResearchInterestsValue("");
     setErrors({});
   };
   const [userRecord, setUserRecord] = React.useState(userModelProp);
@@ -313,6 +327,14 @@ export default function UserUpdateForm(props) {
   const [currentCertificatesValue, setCurrentCertificatesValue] =
     React.useState("");
   const certificatesRef = React.createRef();
+  const [currentClassesTaughtValue, setCurrentClassesTaughtValue] =
+    React.useState("");
+  const classesTaughtRef = React.createRef();
+  const [
+    currentFacultyResearchInterestsValue,
+    setCurrentFacultyResearchInterestsValue,
+  ] = React.useState("");
+  const facultyResearchInterestsRef = React.createRef();
   const validations = {
     name: [{ type: "Required" }],
     email: [{ type: "Required" }],
@@ -335,6 +357,9 @@ export default function UserUpdateForm(props) {
     applicationCount: [],
     createdAt: [{ type: "Required" }],
     updatedAt: [{ type: "Required" }],
+    college: [],
+    classesTaught: [],
+    facultyResearchInterests: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -400,6 +425,9 @@ export default function UserUpdateForm(props) {
           applicationCount: applicationCount ?? null,
           createdAt,
           updatedAt,
+          college: college ?? null,
+          classesTaught: classesTaught ?? null,
+          facultyResearchInterests: facultyResearchInterests ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -481,6 +509,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -525,6 +556,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.email ?? value;
@@ -569,6 +603,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.role ?? value;
@@ -613,6 +650,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.department ?? value;
@@ -657,6 +697,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.major ?? value;
@@ -701,6 +744,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.academicYear ?? value;
@@ -749,6 +795,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.gpa ?? value;
@@ -789,6 +838,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             values = result?.skills ?? values;
@@ -854,6 +906,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             values = result?.researchInterests ?? values;
@@ -927,6 +982,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             values = result?.careerInterests ?? values;
@@ -1001,6 +1059,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.resumeKey ?? value;
@@ -1045,6 +1106,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.affiliation ?? value;
@@ -1089,6 +1153,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.profileComplete ?? value;
@@ -1133,6 +1200,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.status ?? value;
@@ -1177,6 +1247,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.expectedGraduation ?? value;
@@ -1223,6 +1296,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.availability ?? value;
@@ -1267,6 +1343,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.personalStatement ?? value;
@@ -1309,6 +1388,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             values = result?.certificates ?? values;
@@ -1384,6 +1466,9 @@ export default function UserUpdateForm(props) {
               applicationCount: value,
               createdAt,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.applicationCount ?? value;
@@ -1430,6 +1515,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt: value,
               updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.createdAt ?? value;
@@ -1476,6 +1564,9 @@ export default function UserUpdateForm(props) {
               applicationCount,
               createdAt,
               updatedAt: value,
+              college,
+              classesTaught,
+              facultyResearchInterests,
             };
             const result = onChange(modelFields);
             value = result?.updatedAt ?? value;
@@ -1490,6 +1581,199 @@ export default function UserUpdateForm(props) {
         hasError={errors.updatedAt?.hasError}
         {...getOverrideProps(overrides, "updatedAt")}
       ></TextField>
+      <TextField
+        label="College"
+        isRequired={false}
+        isReadOnly={false}
+        value={college}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              email,
+              role,
+              department,
+              major,
+              academicYear,
+              gpa,
+              skills,
+              researchInterests,
+              careerInterests,
+              resumeKey,
+              affiliation,
+              profileComplete,
+              status,
+              expectedGraduation,
+              availability,
+              personalStatement,
+              certificates,
+              applicationCount,
+              createdAt,
+              updatedAt,
+              college: value,
+              classesTaught,
+              facultyResearchInterests,
+            };
+            const result = onChange(modelFields);
+            value = result?.college ?? value;
+          }
+          if (errors.college?.hasError) {
+            runValidationTasks("college", value);
+          }
+          setCollege(value);
+        }}
+        onBlur={() => runValidationTasks("college", college)}
+        errorMessage={errors.college?.errorMessage}
+        hasError={errors.college?.hasError}
+        {...getOverrideProps(overrides, "college")}
+      ></TextField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              name,
+              email,
+              role,
+              department,
+              major,
+              academicYear,
+              gpa,
+              skills,
+              researchInterests,
+              careerInterests,
+              resumeKey,
+              affiliation,
+              profileComplete,
+              status,
+              expectedGraduation,
+              availability,
+              personalStatement,
+              certificates,
+              applicationCount,
+              createdAt,
+              updatedAt,
+              college,
+              classesTaught: values,
+              facultyResearchInterests,
+            };
+            const result = onChange(modelFields);
+            values = result?.classesTaught ?? values;
+          }
+          setClassesTaught(values);
+          setCurrentClassesTaughtValue("");
+        }}
+        currentFieldValue={currentClassesTaughtValue}
+        label={"Classes taught"}
+        items={classesTaught}
+        hasError={errors?.classesTaught?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("classesTaught", currentClassesTaughtValue)
+        }
+        errorMessage={errors?.classesTaught?.errorMessage}
+        setFieldValue={setCurrentClassesTaughtValue}
+        inputFieldRef={classesTaughtRef}
+        defaultFieldValue={""}
+      >
+        <TextField
+          label="Classes taught"
+          isRequired={false}
+          isReadOnly={false}
+          value={currentClassesTaughtValue}
+          onChange={(e) => {
+            let { value } = e.target;
+            if (errors.classesTaught?.hasError) {
+              runValidationTasks("classesTaught", value);
+            }
+            setCurrentClassesTaughtValue(value);
+          }}
+          onBlur={() =>
+            runValidationTasks("classesTaught", currentClassesTaughtValue)
+          }
+          errorMessage={errors.classesTaught?.errorMessage}
+          hasError={errors.classesTaught?.hasError}
+          ref={classesTaughtRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "classesTaught")}
+        ></TextField>
+      </ArrayField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              name,
+              email,
+              role,
+              department,
+              major,
+              academicYear,
+              gpa,
+              skills,
+              researchInterests,
+              careerInterests,
+              resumeKey,
+              affiliation,
+              profileComplete,
+              status,
+              expectedGraduation,
+              availability,
+              personalStatement,
+              certificates,
+              applicationCount,
+              createdAt,
+              updatedAt,
+              college,
+              classesTaught,
+              facultyResearchInterests: values,
+            };
+            const result = onChange(modelFields);
+            values = result?.facultyResearchInterests ?? values;
+          }
+          setFacultyResearchInterests(values);
+          setCurrentFacultyResearchInterestsValue("");
+        }}
+        currentFieldValue={currentFacultyResearchInterestsValue}
+        label={"Faculty research interests"}
+        items={facultyResearchInterests}
+        hasError={errors?.facultyResearchInterests?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks(
+            "facultyResearchInterests",
+            currentFacultyResearchInterestsValue
+          )
+        }
+        errorMessage={errors?.facultyResearchInterests?.errorMessage}
+        setFieldValue={setCurrentFacultyResearchInterestsValue}
+        inputFieldRef={facultyResearchInterestsRef}
+        defaultFieldValue={""}
+      >
+        <TextField
+          label="Faculty research interests"
+          isRequired={false}
+          isReadOnly={false}
+          value={currentFacultyResearchInterestsValue}
+          onChange={(e) => {
+            let { value } = e.target;
+            if (errors.facultyResearchInterests?.hasError) {
+              runValidationTasks("facultyResearchInterests", value);
+            }
+            setCurrentFacultyResearchInterestsValue(value);
+          }}
+          onBlur={() =>
+            runValidationTasks(
+              "facultyResearchInterests",
+              currentFacultyResearchInterestsValue
+            )
+          }
+          errorMessage={errors.facultyResearchInterests?.errorMessage}
+          hasError={errors.facultyResearchInterests?.hasError}
+          ref={facultyResearchInterestsRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "facultyResearchInterests")}
+        ></TextField>
+      </ArrayField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

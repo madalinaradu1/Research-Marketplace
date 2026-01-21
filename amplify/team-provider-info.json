@@ -32,7 +32,7 @@
         },
         "researchmarketplace2a916c6aPostConfirmation": {
           "deploymentBucketName": "amplify-research-marketplace-dev-5a02e-deployment",
-          "s3Key": "amplify-builds/researchmarketplace2a916c6aPostConfirmation-55453333696144585671-build.zip"
+          "s3Key": "amplify-builds/researchmarketplace2a916c6aPostConfirmation-394c4332612b46314668-build.zip"
         },
         "researchmarketplace": {},
         "researchmarketplace2a916c6a": {}
