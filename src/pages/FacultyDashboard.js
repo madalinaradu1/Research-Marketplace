@@ -1443,7 +1443,21 @@ const FacultyDashboard = ({ user }) => {
                         setSuccessMessage('Message sent successfully!');
                       } catch (err) {
                         console.error('Error sending message:', err);
-                        setError('Failed to send message. Please try again.');
+                        
+                        // Log detailed GraphQL error information
+                        if (err.errors && err.errors.length > 0) {
+                          console.error('GraphQL Error Details:');
+                          err.errors.forEach((error, index) => {
+                            console.error(`Error ${index + 1}:`);
+                            console.error('  Message:', error.message);
+                            console.error('  ErrorType:', error.errorType);
+                            console.error('  Path:', error.path);
+                            console.error('  Locations:', error.locations);
+                          });
+                          setError(`Failed to send message: ${err.errors[0].message}`);
+                        } else {
+                          setError('Failed to send message. Please try again.');
+                        }
                       } finally {
                         setIsSendingMessage(false);
                       }

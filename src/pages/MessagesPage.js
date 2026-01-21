@@ -278,7 +278,7 @@ const MessagesPage = ({ user }) => {
         subject: selectedMessage.subject.startsWith('Re:') ? selectedMessage.subject : `Re: ${selectedMessage.subject}`,
         body: replyText,
         isRead: false,
-        threadID: threadID
+        sentAt: new Date().toISOString()
       };
       
       console.log('Sending message with input:', messageInput);

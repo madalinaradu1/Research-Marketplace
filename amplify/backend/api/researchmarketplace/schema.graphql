@@ -117,7 +117,8 @@ type StudentPost @model @auth(rules: [
 
 type Message @model @auth(rules: [
   { allow: owner, operations: [create, read, update, delete] },
-  { allow: private, operations: [read] }
+  { allow: private, operations: [read] },
+  { allow: groups, groups: ["Student", "Faculty", "Coordinator"], operations: [create, read, update] }
 ]) {
   id: ID!
   senderID: ID!

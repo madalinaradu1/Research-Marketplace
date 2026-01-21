@@ -29,11 +29,13 @@ export const getMessage = /* GraphQL */ `
   query GetMessage($id: ID!) {
     getMessage(id: $id) {
       id
-      content
-      sender
-      recipient
-      timestamp
+      senderID
+      receiverID
+      subject
+      body
       isRead
+      readAt
+      sentAt
       createdAt
       updatedAt
     }
@@ -48,11 +50,13 @@ export const createMessage = /* GraphQL */ `
   ) {
     createMessage(input: $input, condition: $condition) {
       id
-      content
-      sender
-      recipient
-      timestamp
+      senderID
+      receiverID
+      subject
+      body
       isRead
+      readAt
+      sentAt
       createdAt
       updatedAt
     }
@@ -66,11 +70,13 @@ export const updateMessage = /* GraphQL */ `
   ) {
     updateMessage(input: $input, condition: $condition) {
       id
-      content
-      sender
-      recipient
-      timestamp
+      senderID
+      receiverID
+      subject
+      body
       isRead
+      readAt
+      sentAt
       createdAt
       updatedAt
     }
@@ -111,18 +117,20 @@ export const getMessageThread = /* GraphQL */ `
     listMessages(
       filter: {
         or: [
-          { and: [{ sender: { eq: $userId1 } }, { recipient: { eq: $userId2 } }] }
-          { and: [{ sender: { eq: $userId2 } }, { recipient: { eq: $userId1 } }] }
+          { and: [{ senderID: { eq: $userId1 } }, { receiverID: { eq: $userId2 } }] }
+          { and: [{ senderID: { eq: $userId2 } }, { receiverID: { eq: $userId1 } }] }
         ]
       }
     ) {
       items {
         id
-        content
-        sender
-        recipient
-        timestamp
+        senderID
+        receiverID
+        subject
+        body
         isRead
+        readAt
+        sentAt
         createdAt
         updatedAt
       }
