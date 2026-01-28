@@ -42,6 +42,9 @@ export const getUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -77,6 +80,9 @@ export const listUsers = /* GraphQL */ `
         applicationCount
         createdAt
         updatedAt
+        college
+        classesTaught
+        facultyResearchInterests
         owner
         __typename
       }
@@ -386,6 +392,52 @@ export const listDeletedUsers = /* GraphQL */ `
         isTestMode
         userData
         status
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getAuditLog = /* GraphQL */ `
+  query GetAuditLog($id: ID!) {
+    getAuditLog(id: $id) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listAuditLogs = /* GraphQL */ `
+  query ListAuditLogs(
+    $filter: ModelAuditLogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listAuditLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        userId
+        userName
+        userEmail
+        action
+        resource
+        details
+        timestamp
+        ipAddress
+        userAgent
         createdAt
         updatedAt
         __typename

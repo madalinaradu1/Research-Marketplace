@@ -72,52 +72,40 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
     setError(null);
     
     try {
-      const now = new Date().toISOString();
       const input = {
         id: application.id,
         status: statusUpdate
       };
       
-      // Add appropriate timestamp based on status
-      if (statusUpdate === 'Department Review') {
-        input.submittedToDepartmentAt = now;
-      } else if (statusUpdate === 'Admin Review') {
-        input.submittedToAdminAt = now;
-      } else if (statusUpdate === 'Faculty Review') {
-        input.submittedToFacultyAt = now;
-      } else if (statusUpdate === 'Approved') {
-        input.approvedAt = now;
-      } else if (statusUpdate === 'Selected' && userRole === 'Faculty') {
+      // Handle special case for faculty selecting a student
+      if (statusUpdate === 'Selected' && userRole === 'Faculty') {
         input.status = 'Approved';
-        input.approvedAt = now;
-        input.selectedAt = now;
         input.isSelected = true;
+        input.selectedAt = new Date().toISOString();
       } else if (statusUpdate === 'Approved' && userRole === 'Faculty' && application.status === 'Approved') {
-        input.selectedAt = now;
         input.isSelected = true;
-      } else if (statusUpdate === 'Returned') {
-        input.returnedAt = now;
-      } else if (statusUpdate === 'Rejected') {
-        input.rejectedAt = now;
+        input.selectedAt = new Date().toISOString();
       }
       
       // Add notes based on user role
-      if (userRole === 'Faculty') {
-        input.facultyNotes = notes;
-      } else if (userRole === 'Coordinator') {
-        input.coordinatorNotes = notes;
-      } else if (userRole === 'Admin') {
-        input.adminNotes = notes;
+      if (notes && notes.trim()) {
+        if (userRole === 'Faculty') {
+          input.facultyNotes = notes;
+        } else if (userRole === 'Coordinator') {
+          input.coordinatorNotes = notes;
+        }
       }
       
       // Add rejection or acceptance reasons
-      if (statusUpdate === 'Rejected' && rejectionReason) {
+      if (statusUpdate === 'Rejected' && rejectionReason && rejectionReason.trim()) {
         input.rejectionReason = rejectionReason;
-      } else if ((statusUpdate === 'Approved' || statusUpdate === 'Selected') && acceptanceReason) {
+      } else if ((statusUpdate === 'Approved' || statusUpdate === 'Selected') && acceptanceReason && acceptanceReason.trim()) {
         input.acceptanceReason = acceptanceReason;
       }
       
-      await API.graphql(graphqlOperation(updateApplication, { input }));
+      console.log('Updating application with input:', input);
+      
+      const response = await API.graphql(graphqlOperation(updateApplication, { input }));
       
       // Send email notification for status change
       try {
@@ -138,7 +126,22 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error updating application:', err);
-      setError('Failed to update application. Please try again.');
+      
+      // Log detailed GraphQL error information
+      if (err.errors && err.errors.length > 0) {
+        console.error('GraphQL Error Details:');
+        err.errors.forEach((error, index) => {
+          console.error(`Error ${index + 1}:`);
+          console.error('  Message:', error.message);
+          console.error('  ErrorType:', error.errorType);
+          console.error('  Path:', error.path);
+          console.error('  Locations:', error.locations);
+        });
+        setError(`Failed to update application: ${err.errors[0].message}`);
+      } else {
+        console.error('Full error object:', JSON.stringify(err, null, 2));
+        setError('Failed to update application. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
