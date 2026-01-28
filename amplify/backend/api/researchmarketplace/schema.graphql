@@ -30,6 +30,9 @@ type User @model @auth(rules: [
   notifications: [Notification] @hasMany(indexName: "byUser", fields: ["id"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
+  college: String
+  classesTaught: [String]
+  facultyResearchInterests: [String]
 }
 
 type Project @model @auth(rules: [
