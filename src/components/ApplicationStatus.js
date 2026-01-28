@@ -70,8 +70,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
       const input = {
         id: application.id,
         status: 'Cancelled',
-        withdrawReason,
-        cancelledAt: new Date().toISOString()
+        withdrawReason
       };
       
       await API.graphql(graphqlOperation(updateApplication, { input }));
@@ -79,7 +78,12 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error withdrawing application:', err);
-      setError('Failed to withdraw application. Please try again.');
+      if (err.errors && err.errors.length > 0) {
+        console.error('GraphQL error:', err.errors[0].message);
+        setError(err.errors[0].message || 'Failed to withdraw application. Please try again.');
+      } else {
+        setError('Failed to withdraw application. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
