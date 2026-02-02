@@ -45,6 +45,9 @@ export const createUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -94,6 +97,9 @@ export const updateUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -143,6 +149,9 @@ export const deleteUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -607,6 +616,72 @@ export const deleteDeletedUser = /* GraphQL */ `
       isTestMode
       userData
       status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const createAuditLog = /* GraphQL */ `
+  mutation CreateAuditLog(
+    $input: CreateAuditLogInput!
+    $condition: ModelAuditLogConditionInput
+  ) {
+    createAuditLog(input: $input, condition: $condition) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateAuditLog = /* GraphQL */ `
+  mutation UpdateAuditLog(
+    $input: UpdateAuditLogInput!
+    $condition: ModelAuditLogConditionInput
+  ) {
+    updateAuditLog(input: $input, condition: $condition) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteAuditLog = /* GraphQL */ `
+  mutation DeleteAuditLog(
+    $input: DeleteAuditLogInput!
+    $condition: ModelAuditLogConditionInput
+  ) {
+    deleteAuditLog(input: $input, condition: $condition) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
       createdAt
       updatedAt
       __typename

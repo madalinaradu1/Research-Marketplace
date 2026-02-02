@@ -311,6 +311,7 @@ const FacultyDashboard = ({ user }) => {
   
   const handleSubmitProject = async (e) => {
     e.preventDefault();
+    console.log('[FacultyDashboard] Create Project clicked - handler executing');
     setIsSubmitting(true);
     setError(null);
     setSuccessMessage(null);
@@ -376,7 +377,7 @@ const FacultyDashboard = ({ user }) => {
         requiresTranscript: projectForm.requiresTranscript,
         facultyID: userId,
         isActive: projectForm.isActive === true || projectForm.isActive === 'true',
-        projectStatus: (selectedProject && selectedProject.projectStatus === 'Returned' && viewingReturnReason) ? 'Coordinator Review' : (selectedProject ? selectedProject.projectStatus : 'Coordinator Review')
+        projectStatus: (selectedProject && selectedProject.projectStatus === 'Returned' && viewingReturnReason) ? 'Coordinator Review' : (selectedProject ? selectedProject.projectStatus : 'Pending')
       };
       
       console.log('Project input:', input);
@@ -411,6 +412,7 @@ const FacultyDashboard = ({ user }) => {
         }
       } else {
         // Create new project
+        console.log('[FacultyDashboard] Creating new project with status: Pending');
         console.log('Creating new project with input:', JSON.stringify(input, null, 2));
         result = await API.graphql(graphqlOperation(createProject, { input }));
         console.log('Project created:', result);
@@ -1441,7 +1443,21 @@ const FacultyDashboard = ({ user }) => {
                         setSuccessMessage('Message sent successfully!');
                       } catch (err) {
                         console.error('Error sending message:', err);
-                        setError('Failed to send message. Please try again.');
+                        
+                        // Log detailed GraphQL error information
+                        if (err.errors && err.errors.length > 0) {
+                          console.error('GraphQL Error Details:');
+                          err.errors.forEach((error, index) => {
+                            console.error(`Error ${index + 1}:`);
+                            console.error('  Message:', error.message);
+                            console.error('  ErrorType:', error.errorType);
+                            console.error('  Path:', error.path);
+                            console.error('  Locations:', error.locations);
+                          });
+                          setError(`Failed to send message: ${err.errors[0].message}`);
+                        } else {
+                          setError('Failed to send message. Please try again.');
+                        }
                       } finally {
                         setIsSendingMessage(false);
                       }

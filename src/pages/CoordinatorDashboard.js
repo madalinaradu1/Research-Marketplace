@@ -98,7 +98,7 @@ const CoordinatorDashboard = ({ user }) => {
       const projectsResult = await API.graphql(graphqlOperation(listProjects, { limit: 100 }));
       const allProjects = projectsResult.data?.listProjects?.items || [];
       const pendingProjects = allProjects
-        .filter(p => p.projectStatus === 'Coordinator Review')
+        .filter(p => p.projectStatus === 'Pending')
         .map(project => {
           const faculty = allUsers.find(user => user.id === project.facultyID);
           return {

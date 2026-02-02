@@ -30,6 +30,9 @@ type User @model @auth(rules: [
   notifications: [Notification] @hasMany(indexName: "byUser", fields: ["id"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
+  college: String
+  classesTaught: [String]
+  facultyResearchInterests: [String]
 }
 
 type Project @model @auth(rules: [
@@ -66,7 +69,8 @@ type Application @model @auth(rules: [
   { allow: owner, operations: [create, read, update, delete] },
   { allow: private, operations: [read] },
   { allow: groups, groups: ["Admin"], operations: [read, update] },
-  { allow: groups, groups: ["Coordinator"], operations: [read, update] }
+  { allow: groups, groups: ["Coordinator"], operations: [read, update] },
+  { allow: groups, groups: ["Faculty"], operations: [read, update] }
 ]) {
   id: ID!
   studentID: ID! @index(name: "byStudent")
@@ -113,7 +117,8 @@ type StudentPost @model @auth(rules: [
 
 type Message @model @auth(rules: [
   { allow: owner, operations: [create, read, update, delete] },
-  { allow: private, operations: [read] }
+  { allow: private, operations: [read] },
+  { allow: groups, groups: ["Student", "Faculty", "Coordinator"], operations: [create, read, update] }
 ]) {
   id: ID!
   senderID: ID!
