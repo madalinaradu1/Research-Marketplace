@@ -36,6 +36,7 @@ const cleanHtmlContent = (html) => {
 };
 
 const MessagesPage = ({ user }) => {
+   const [locallyReadMessages, setLocallyReadMessages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +56,8 @@ const MessagesPage = ({ user }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
   const [messageScrollRef, setMessageScrollRef] = useState(null);
+ 
+
 
   useEffect(() => {
     fetchData();
@@ -139,6 +142,9 @@ const MessagesPage = ({ user }) => {
         threadGroups[threadId].push(msg);
       });
       
+      const readMessages = JSON.parse(localStorage.getItem(`read_messages_${userId}`) || '[]');
+      setLocallyReadMessages(readMessages); 
+
       // Convert to array of conversations, showing latest message first
       const conversations = Object.values(threadGroups)
         .map(thread => {
@@ -150,7 +156,11 @@ const MessagesPage = ({ user }) => {
             threadID: threadId,
             thread: sortedThread,
             threadId: threadId,
-            hasUnread: sortedThread.some(msg => msg.receiverID === userId && !msg.isRead && msg.senderID !== userId),
+            hasUnread: sortedThread.some(msg => {
+            const isLocallyRead = readMessages.includes(msg.id);
+            return msg.receiverID === userId && !msg.isRead && !isLocallyRead && msg.senderID !== userId;
+        }),
+
             isIncoming: true
           };
         })
@@ -166,7 +176,7 @@ const MessagesPage = ({ user }) => {
       // Load archived sent messages from localStorage (for admins)
       const archivedSent = JSON.parse(localStorage.getItem(`archived_sent_messages_${userId}`) || '[]');
       setArchivedSentMessages(archivedSent);
-      
+
       // Fetch available recipients based on user role
       await fetchAvailableRecipients(userId, allUsers);
     } catch (err) {
@@ -241,19 +251,42 @@ const MessagesPage = ({ user }) => {
     }
   };
 
-  const markAsRead = async (messageId) => {
-    try {
-      await API.graphql(graphqlOperation(updateMessage, { 
-        input: { id: messageId, isRead: true }
-      }));
+const markAsRead = async (messageId) => {
+  try {
+    const userId = user.id || user.username;
+    
+    // Store read status locally
+    const readMessages = JSON.parse(localStorage.getItem(`read_messages_${userId}`) || '[]');
+    if (!readMessages.includes(messageId)) {
+      readMessages.push(messageId);
+      localStorage.setItem(`read_messages_${userId}`, JSON.stringify(readMessages));
+      setLocallyReadMessages(readMessages);
       
-      setMessages(prev => prev.map(msg => 
-        msg.id === messageId ? { ...msg, isRead: true } : msg
-      ));
-    } catch (err) {
-      console.error('Error marking message as read:', err);
+      // Update messages state to trigger re-render
+      setMessages(prev => prev.map(conversation => {
+        if (conversation.thread) {
+          // Update thread messages
+          const updatedThread = conversation.thread.map(msg => 
+            msg.id === messageId ? { ...msg, isRead: true } : msg
+          );
+          // Recalculate hasUnread for the conversation
+          const hasUnread = updatedThread.some(msg => {
+            const isLocallyRead = readMessages.includes(msg.id);
+            return msg.receiverID === userId && !msg.isRead && !isLocallyRead && msg.senderID !== userId;
+          });
+          return { ...conversation, thread: updatedThread, hasUnread };
+        } else if (conversation.id === messageId) {
+          return { ...conversation, isRead: true, hasUnread: false };
+        }
+        return conversation;
+      }));
     }
-  };
+  } catch (err) {
+    console.error('Error marking message as read:', err);
+  }
+};
+
+
 
   const sendReply = async () => {
     if (!replyText.trim() || !selectedMessage) return;
@@ -278,7 +311,7 @@ const MessagesPage = ({ user }) => {
         subject: selectedMessage.subject.startsWith('Re:') ? selectedMessage.subject : `Re: ${selectedMessage.subject}`,
         body: replyText,
         isRead: false,
-        threadID: threadID
+        sentAt: new Date().toISOString()
       };
       
       console.log('Sending message with input:', messageInput);
@@ -292,16 +325,16 @@ const MessagesPage = ({ user }) => {
         localStorage.setItem(`archived_messages_${userId}`, JSON.stringify(newArchived));
       }
       
-      // Create notification
-      const recipient = users.find(u => u.id === recipientId);
-      const notificationInput = {
-        userID: recipientId,
-        type: 'MESSAGE_RECEIVED',
-        message: `You have a new reply from ${user.name}`,
-        isRead: false
-      };
-      
-      await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
+     // Create notification
+// const recipient = users.find(u => u.id === recipientId);
+// const notificationInput = {
+//   userID: recipientId,
+//   type: 'MESSAGE_RECEIVED',
+//   message: `You have a new reply from ${user.name}`,
+//   isRead: false
+// };
+
+// await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
       
       // Send email notification for reply
       try {
@@ -479,13 +512,19 @@ const MessagesPage = ({ user }) => {
                     border={message.hasUnread ? '1px solid #4299e1' : '1px solid #e2e8f0'}
                     style={{ cursor: 'pointer' }}
                     onClick={() => {
-                      setSelectedMessage(message);
-                      message.thread?.forEach(msg => {
-                        if (msg.isIncoming && !msg.isRead) {
-                          markAsRead(msg.id);
-                        }
-                      });
-                    }}
+                    setSelectedMessage(message);
+                    // Mark messages as read when modal opens
+                    if (message.thread) {
+                    message.thread.forEach(msg => {
+                    if (msg.receiverID === (user.id || user.username) && !msg.isRead) {
+                    markAsRead(msg.id);
+                   }
+                });
+                 } else if (message.receiverID === (user.id || user.username) && !message.isRead) {
+                   markAsRead(message.id);
+              }
+            }}
+
                   >
                     <Flex direction="column" gap="0.5rem">
                       <Flex justifyContent="space-between" alignItems="center">
@@ -797,15 +836,15 @@ const MessagesPage = ({ user }) => {
             justifyContent="center"
             alignItems="center"
             height="100%"
-            padding="2rem"
+            padding="1rem"
           >
             <Card
-              maxWidth="900px"
-              width="100%"
+              maxWidth="700px"
+              width="90%"
               backgroundColor="white"
               onClick={(e) => e.stopPropagation()}
             >
-              <Flex direction="column" gap="1.5rem" padding="2rem">
+              <Flex direction="column" gap="1.5rem" padding="1rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Send New Message</Heading>
                   <Button size="small" onClick={() => setShowNewMessage(false)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
@@ -839,7 +878,7 @@ const MessagesPage = ({ user }) => {
                 
                 <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
                   <Heading level={5} color="#2d3748" marginBottom="1rem">Your Message</Heading>
-                  <div style={{ height: '300px' }}>
+                  <div style={{ height: '115px' }}>
                     <ReactQuill
                       value={newMessage.body}
                       onChange={(value) => {
@@ -861,7 +900,7 @@ const MessagesPage = ({ user }) => {
                           ['clean']
                         ]
                       }}
-                      style={{ height: '250px' }}
+                      style={{ height: '90px' }}
                     />
                   </div>
                 </Card>
@@ -912,20 +951,20 @@ const MessagesPage = ({ user }) => {
                           body: newMessage.body,
                           isRead: false,
                           sentAt: new Date().toISOString(),
-                          threadID: threadID
                         };
                         
                         await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
                         
                         // Create notification
-                        const notificationInput = {
-                          userID: newMessage.recipient,
-                          type: 'MESSAGE_RECEIVED',
-                          message: `You have a new message from ${user.name}`,
-                          isRead: false
-                        };
-                        
-                        await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
+// const notificationInput = {
+//   userId: newMessage.recipient,
+//   type: 'MESSAGE_RECEIVED',
+//   message: `You have a new message from ${user.name}`,
+//   isRead: false
+// };
+
+// await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
+
                         
                         // Send email notification
                         try {
@@ -933,7 +972,27 @@ const MessagesPage = ({ user }) => {
                             recipient?.email,
                             recipient?.name,
                             user.name,
-                            newMessage.subject,
+                            newMessage.subject,// Create notification
+                            // const recipient = users.find(u => u.id === recipientId);
+                            // const notificationInput = {
+                            //   userID: recipientId,
+                            //   type: 'MESSAGE_RECEIVED',
+                            //   message: `You have a new reply from ${user.name}`,
+                            //   isRead: false
+                            // };
+
+                            // await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
+// Create notification
+// const recipient = users.find(u => u.id === recipientId);
+// const notificationInput = {
+//   userID: recipientId,
+//   type: 'MESSAGE_RECEIVED',
+//   message: `You have a new reply from ${user.name}`,
+//   isRead: false
+// };
+
+// await API.graphql(graphqlOperation(createNotification, { input: notificationInput }));
+
                             newMessage.body,
                             'Research Project'
                           );
