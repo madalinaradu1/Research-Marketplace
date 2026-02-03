@@ -13,6 +13,61 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
 }
+:root {
+  --font-size-base: 16px;
+}
+
+:root.large-font {
+  --font-size-base: 20px;
+}
+
+body {
+  font-size: var(--font-size-base);
+}
+.user-icon-button {
+  background-color: #552b9a !important;
+  color: white !important;
+}
+
+.user-icon-button:hover {
+  background-color: #552b9a !important;
+  color: white !important;
+}
+
+.user-icon-button:focus {
+  background-color: #552b9a !important;
+  color: white !important;
+}
+
+.user-icon-button:active {
+  background-color: #552b9a !important;
+  color: white !important;
+}
+
+.accessibility-icon {
+  color: #552b9a !important;
+  background-color: white !important;
+}
+
+.accessibility-button {
+  color: black !important;
+  background-color: white !important;
+}
+
+.accessibility-button:hover {
+  color: black !important;
+  background-color: white !important;
+}
+
+.accessibility-button:focus {
+  color: black !important;
+  background-color: white !important;
+}
+
+.accessibility-button:active {
+  color: black !important;
+  background-color: white !important;
+}
 
 /* Consistent card styling */
 .app-card {
@@ -329,7 +384,7 @@
   background-color: inherit;
 }
 
-[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button) {
+[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.user-icon-button) {
   background-color: #f7fafc !important;
   color: black !important;
 }
@@ -428,7 +483,6 @@
   border: 1px solid black !important;
 }
 
-/* Override any blue button styling in admin dashboard */
 [data-amplify-theme] button {
   background-color: white !important;
   color: black !important;
@@ -439,6 +493,19 @@
   background-color: #f7fafc !important;
   color: black !important;
   border: 1px solid black !important;
+}
+
+.user-icon-button,
+.user-icon-button:hover,
+.user-icon-button:focus,
+.user-icon-button:active,
+[data-amplify-theme] .user-icon-button,
+[data-amplify-theme] .user-icon-button:hover,
+[data-amplify-theme] .user-icon-button:focus,
+[data-amplify-theme] .user-icon-button:active {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid white !important;
 }
 
 /* Style meatball dropdown buttons in Student Research Community */
@@ -616,16 +683,11 @@ header {
 }
 
 /* Make header text white */
-header * {
-  color: white !important;
-}
-
 header h1,
 header h2,
 header h3,
 header p,
-header span,
-header div {
+header span {
   color: white !important;
 }
 
@@ -836,7 +898,7 @@ header .amplify-flex[style*="position: absolute"] button:hover {
 }
 
 /* Override any global hover effects */
-[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button) {
+[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.user-icon-button) {
   background-color: #f7fafc !important;
   color: black !important;
 }

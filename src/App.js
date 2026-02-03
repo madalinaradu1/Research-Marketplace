@@ -51,7 +51,12 @@ function App({ signOut, user }) {
   };
   
   useEffect(() => {
-    // Check for email link access and clean URL parameter
+  // Initialize font size from localStorage
+  const savedFontSize = localStorage.getItem('fontSize');
+  if (savedFontSize === 'large') {
+    document.documentElement.classList.add('large-font');
+  }    
+  // Check for email link access and clean URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('from') === 'email') {
       // Clear the URL parameter immediately

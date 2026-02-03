@@ -41,6 +41,7 @@ const Header = ({ user, signOut }) => {
   }} = useTheme() || {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Check if the current path matches the given path
@@ -142,8 +143,13 @@ const Header = ({ user, signOut }) => {
           }
           .header-search-field svg {
             fill: white !important;
+          } 
+          .accessibility-button,
+          .accessibility-button:hover,
+          .accessibility-button:focus {
+             color: white !important;
           }
-        `}
+        `}    
       </style>
       <Flex
         as="header"
@@ -310,13 +316,78 @@ const Header = ({ user, signOut }) => {
             outline: 'none'
           }}
           className="header-search-field"
-        />
+        /> 
+        
+        {/* Accessibility Dropdown */}
+        <View 
+          style={{ position: 'relative' }}
+          onMouseEnter={() => setIsAccessibilityOpen(true)}
+          onMouseLeave={() => setIsAccessibilityOpen(false)}
+        >
+          <div
+            className="accessibility-icon"
+            style={{
+              backgroundColor: 'white',
+              color: '#552b9a',
+              borderRadius: '8px',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid white',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
+          >
+           🚹
+          </div>
+          
+          {isAccessibilityOpen && (
+            <Flex 
+              direction="column" 
+              gap="0.5rem" 
+              backgroundColor="white" 
+              padding="0.5rem" 
+              style={{ 
+                position: 'absolute', 
+                top: '100%', 
+                right: '0', 
+                minWidth: '200px', 
+                zIndex: 1001, 
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                border: '1px solid #ccc'
+              }}
+              onMouseLeave={() => setIsAccessibilityOpen(false)}
+            >
+              <Text fontSize="0.9rem" fontWeight="bold" color="black" padding="0.5rem">
+                Accessibility
+              </Text>
+              <Button 
+                onClick={() => {
+                  document.documentElement.classList.toggle('large-font');
+                  localStorage.setItem('fontSize', document.documentElement.classList.contains('large-font') ? 'large' : 'normal');
+                }} 
+                backgroundColor="white" 
+                color="black" 
+                border="none" 
+                size="small" 
+                justifyContent="flex-start"
+              >
+                {document.documentElement.classList.contains('large-font') ? '✓ ' : ''}Large Text
+              </Button>
+            </Flex>
+          )}
+        </View>
+        
         <View style={{ position: 'relative' }}>
           <Button 
+            className="user-icon-button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             onMouseEnter={() => setIsMenuOpen(true)}
-            backgroundColor="#552b9a" 
-            color="white"
+            backgroundColor="white" 
+            color="black"
             size="small"
             style={{
               borderRadius: '8px',
@@ -330,7 +401,7 @@ const Header = ({ user, signOut }) => {
           >
             👤
           </Button>
-          
+
           {isMenuOpen && (
             <Flex 
               direction="column" 
@@ -363,6 +434,7 @@ const Header = ({ user, signOut }) => {
                 >
                   👤
                 </View>
+
                 <Flex direction="column" gap="0.5rem" flex="1">
                   <Text fontSize="0.9rem" fontWeight="bold" color="black">
                     Hello, {user?.name || (user?.email ? user.email.split('@')[0] : user?.username || 'User')}
