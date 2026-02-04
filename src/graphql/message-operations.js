@@ -42,6 +42,7 @@ export const getMessage = /* GraphQL */ `
   }
 `;
 
+
 // Message mutations
 export const createMessage = /* GraphQL */ `
   mutation CreateMessage(
