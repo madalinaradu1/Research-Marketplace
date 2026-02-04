@@ -200,7 +200,12 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       onSuccess();
     } catch (err) {
       console.error('Error submitting application:', err);
-      setError('Failed to submit application. Please try again.');
+      if (err.errors && err.errors.length > 0) {
+        console.error('GraphQL error:', err.errors[0].message);
+        setError(err.errors[0].message || 'Failed to submit application. Please try again.');
+      } else {
+        setError('Failed to submit application. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
