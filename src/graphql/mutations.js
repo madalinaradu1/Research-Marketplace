@@ -688,3 +688,66 @@ export const deleteAuditLog = /* GraphQL */ `
     }
   }
 `;
+export const createTag = /* GraphQL */ `
+  mutation CreateTag(
+    $input: CreateTagInput!
+    $condition: ModelTagConditionInput
+  ) {
+    createTag(input: $input, condition: $condition) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateTag = /* GraphQL */ `
+  mutation UpdateTag(
+    $input: UpdateTagInput!
+    $condition: ModelTagConditionInput
+  ) {
+    updateTag(input: $input, condition: $condition) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteTag = /* GraphQL */ `
+  mutation DeleteTag(
+    $input: DeleteTagInput!
+    $condition: ModelTagConditionInput
+  ) {
+    deleteTag(input: $input, condition: $condition) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;

@@ -181,3 +181,26 @@ type AuditLog @model @auth(rules: [
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
+
+type Tag {
+  tag_id: ID! 
+  display_name: String!
+  normalized_name: String!
+  parent_tag_id: ID
+  tag_type: String!
+  aliases: [String]
+  description: String
+  hierarchy_path: [String]
+  status: String!
+}
+
+type Query {
+  getTagById(tag_id: ID!): Tag
+    @auth(rules: [{ allow: private, provider: userPools }])
+
+  listTagsByPrefix(prefix: String!, limit: Int): [Tag]  
+    @auth(rules: [{ allow: private, provider: userPools }])
+  
+  listChildTags(parent_tag_id: ID!): [Tag]
+    @auth(rules: [{ allow: private, provider: userPools }])
+}

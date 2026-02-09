@@ -27,32 +27,99 @@
     }
   },
   "Resources": {
-    "EmptyResource": {
-      "Type": "Custom::EmptyResource",
-      "Condition": "AlwaysFalse"
+    "TagsTableDataSource": {
+      "Type": "AWS::AppSync::DataSource",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "Name": "TagsTableDataSource",
+        "Type": "AMAZON_DYNAMODB",
+        "ServiceRoleArn": { "Fn::GetAtt": ["TagsTableDataSourceRole", "Arn"] },
+        "DynamoDBConfig": {
+          "AwsRegion": { "Ref": "AWS::Region" },
+          "TableName": { "Fn::Sub": "Tags-${env}" }
+        }
+      }
+    },
+    "TagsTableDataSourceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": { "Service": "appsync.amazonaws.com" },
+            "Action": "sts:AssumeRole"
+          }]
+        },
+        "Policies": [{
+          "PolicyName": "TagsTableAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": ["dynamodb:GetItem", "dynamodb:Query"],
+              "Resource": [
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Tags-${env}" },
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Tags-${env}/index/*" }
+              ]
+            }]
+          }
+        }]
+      }
+    },
+    "GetTagByIdResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "TypeName": "Query",
+        "FieldName": "getTagById",
+        "DataSourceName": { "Fn::GetAtt": ["TagsTableDataSource", "Name"] },
+        "RequestMappingTemplate": "{\n  \"version\": \"2017-02-28\",\n  \"operation\": \"GetItem\",\n  \"key\": {\n    \"PK\": $util.dynamodb.toDynamoDBJson(\"TAG\"),\n    \"SK\": $util.dynamodb.toDynamoDBJson(\"TAG#${ctx.args.tag_id}\")\n  }\n}",
+        "ResponseMappingTemplate": "#if($ctx.error)\n  $util.error($ctx.error.message, $ctx.error.type)\n#end\n#if($ctx.result && !$ctx.result.isEmpty())\n  $util.toJson($ctx.result)\n#else\n  null\n#end"
+      },
+      "DependsOn": ["TagsTableDataSource"]
+    },
+    "ListTagsByPrefixResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "TypeName": "Query",
+        "FieldName": "listTagsByPrefix",
+        "DataSourceName": { "Fn::GetAtt": ["TagsTableDataSource", "Name"] },
+        "RequestMappingTemplate": "#set($prefix = $ctx.args.prefix.toLowerCase())\n#set($limit = $ctx.args.limit)\n#if(!$limit || $limit > 50)\n  #set($limit = 50)\n#end\n\n{\n  \"version\": \"2017-02-28\",\n  \"operation\": \"Query\",\n  \"index\": \"GSI1\",\n  \"query\": {\n    \"expression\": \"GSI1PK = :pk AND begins_with(GSI1SK, :prefix)\",\n    \"expressionValues\": {\n      \":pk\": $util.dynamodb.toDynamoDBJson(\"TAG_NAME\"),\n      \":prefix\": $util.dynamodb.toDynamoDBJson($prefix)\n    }\n  },\n  \"limit\": $limit,\n  \"scanIndexForward\": true\n}",
+        "ResponseMappingTemplate": "#if($ctx.error)\n  $util.error($ctx.error.message, $ctx.error.type)\n#end\n$util.toJson($ctx.result.items)"
+      },
+      "DependsOn": ["TagsTableDataSource"]
+    },
+    "ListChildTagsResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "TypeName": "Query",
+        "FieldName": "listChildTags",
+        "DataSourceName": { "Fn::GetAtt": ["TagsTableDataSource", "Name"] },
+        "RequestMappingTemplate": "{\n  \"version\": \"2017-02-28\",\n  \"operation\": \"Query\",\n  \"index\": \"GSI2\",\n  \"query\": {\n    \"expression\": \"GSI2PK = :pk\",\n    \"expressionValues\": {\n      \":pk\": $util.dynamodb.toDynamoDBJson(\"PARENT#${ctx.args.parent_tag_id}\")\n    }\n  }\n}",
+        "ResponseMappingTemplate": "#if($ctx.error)\n  $util.error($ctx.error.message, $ctx.error.type)\n#end\n$util.toJson($ctx.result.items)"
+      },
+      "DependsOn": ["TagsTableDataSource"]
     }
   },
   "Conditions": {
     "HasEnvironmentParameter": {
-      "Fn::Not": [
-        {
-          "Fn::Equals": [
-            {
-              "Ref": "env"
-            },
-            "NONE"
-          ]
-        }
-      ]
+      "Fn::Not": [{
+        "Fn::Equals": [{ "Ref": "env" }, "NONE"]
+      }]
     },
     "AlwaysFalse": {
       "Fn::Equals": ["true", "false"]
     }
   },
   "Outputs": {
-    "EmptyOutput": {
-      "Description": "An empty output. You may delete this if you have at least one resource above.",
-      "Value": ""
+    "TagsDataSourceName": {
+      "Value": { "Fn::GetAtt": ["TagsTableDataSource", "Name"] }
     }
   }
 }
+
+
+

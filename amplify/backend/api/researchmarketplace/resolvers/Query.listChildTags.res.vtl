@@ -1,0 +1,12 @@
+#if($ctx.error)
+  $util.error($ctx.error.message, $ctx.error.type)
+#end
+
+## Extract child tag IDs and fetch canonical tags
+#set($childIds = [])
+#foreach($item in $ctx.result.items)
+  #set($added = $childIds.add($item.child_tag_id))
+#end
+
+## Return child IDs for batch resolution
+$util.toJson($childIds)

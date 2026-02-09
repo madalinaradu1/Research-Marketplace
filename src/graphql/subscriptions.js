@@ -676,3 +676,57 @@ export const onDeleteAuditLog = /* GraphQL */ `
     }
   }
 `;
+export const onCreateTag = /* GraphQL */ `
+  subscription OnCreateTag($filter: ModelSubscriptionTagFilterInput) {
+    onCreateTag(filter: $filter) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateTag = /* GraphQL */ `
+  subscription OnUpdateTag($filter: ModelSubscriptionTagFilterInput) {
+    onUpdateTag(filter: $filter) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteTag = /* GraphQL */ `
+  subscription OnDeleteTag($filter: ModelSubscriptionTagFilterInput) {
+    onDeleteTag(filter: $filter) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;

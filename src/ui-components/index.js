@@ -10,6 +10,8 @@ export { default as DeletedUserCreateForm } from "./DeletedUserCreateForm";
 export { default as DeletedUserUpdateForm } from "./DeletedUserUpdateForm";
 export { default as MessageCreateForm } from "./MessageCreateForm";
 export { default as MessageUpdateForm } from "./MessageUpdateForm";
+export { default as TagCreateForm } from "./TagCreateForm";
+export { default as TagUpdateForm } from "./TagUpdateForm";
 export { default as UserCreateForm } from "./UserCreateForm";
 export { default as UserUpdateForm } from "./UserUpdateForm";
 export { default as studioTheme } from "./studioTheme";
