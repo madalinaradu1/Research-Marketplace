@@ -23,6 +23,7 @@ import OpportunityDetails from './pages/OpportunityDetails';
 import CompleteProfilePage from './pages/CompleteProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
 import MessagesPage from './pages/MessagesPage';
+import OldMessagesPage from './pages/OldMessagesPage';
 import ApplicationPage from './pages/ApplicationPage';
 import StudentPostsPage from './pages/StudentPostsPage';
 
@@ -277,6 +278,9 @@ function App({ signOut, user }) {
             <Route path="/messages" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <MessagesPage user={userProfile || user} />} />
+            <Route path="/old-messages" element={shouldCompleteProfile ? 
+              <Navigate to="/complete-profile" /> : 
+              <OldMessagesPage user={userProfile || user} />} />
             <Route path="/apply/:projectId" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <ApplicationPage user={userProfile || user} />} />
