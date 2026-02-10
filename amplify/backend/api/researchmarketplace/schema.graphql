@@ -106,11 +106,16 @@ type StudentPost @model @auth(rules: [
   { allow: private, operations: [read] }
 ]) {
   id: ID!
+  type: String!
   title: String!
-  content: String!
-  authorID: ID! @index(name: "byAuthor")
-  isAnonymous: Boolean!
-  tags: [String]
+  description: String!
+  studentID: ID! @index(name: "byAuthor")
+  department: String
+  researchAreas: [String]
+  skillsOffered: [String]
+  skillsNeeded: [String]
+  timeCommitment: String
+  student: User @belongsTo(fields: ["studentID"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -183,7 +188,7 @@ type AuditLog @model @auth(rules: [
 }
 
 type Tag {
-  tag_id: ID! 
+  tag_id: ID!
   display_name: String!
   normalized_name: String!
   parent_tag_id: ID
