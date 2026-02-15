@@ -45,6 +45,9 @@ export const createUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -94,6 +97,9 @@ export const updateUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -143,6 +149,9 @@ export const deleteUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -606,6 +615,135 @@ export const deleteDeletedUser = /* GraphQL */ `
       deletionExecutedAt
       isTestMode
       userData
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const createAuditLog = /* GraphQL */ `
+  mutation CreateAuditLog(
+    $input: CreateAuditLogInput!
+    $condition: ModelAuditLogConditionInput
+  ) {
+    createAuditLog(input: $input, condition: $condition) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateAuditLog = /* GraphQL */ `
+  mutation UpdateAuditLog(
+    $input: UpdateAuditLogInput!
+    $condition: ModelAuditLogConditionInput
+  ) {
+    updateAuditLog(input: $input, condition: $condition) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteAuditLog = /* GraphQL */ `
+  mutation DeleteAuditLog(
+    $input: DeleteAuditLogInput!
+    $condition: ModelAuditLogConditionInput
+  ) {
+    deleteAuditLog(input: $input, condition: $condition) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const createTag = /* GraphQL */ `
+  mutation CreateTag(
+    $input: CreateTagInput!
+    $condition: ModelTagConditionInput
+  ) {
+    createTag(input: $input, condition: $condition) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateTag = /* GraphQL */ `
+  mutation UpdateTag(
+    $input: UpdateTagInput!
+    $condition: ModelTagConditionInput
+  ) {
+    updateTag(input: $input, condition: $condition) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteTag = /* GraphQL */ `
+  mutation DeleteTag(
+    $input: DeleteTagInput!
+    $condition: ModelTagConditionInput
+  ) {
+    deleteTag(input: $input, condition: $condition) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
       status
       createdAt
       updatedAt

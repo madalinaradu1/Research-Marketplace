@@ -27,32 +27,60 @@
     }
   },
   "Resources": {
-    "EmptyResource": {
-      "Type": "Custom::EmptyResource",
-      "Condition": "AlwaysFalse"
+    "TagsTableDataSource": {
+      "Type": "AWS::AppSync::DataSource",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "Name": "TagsTableDataSource",
+        "Type": "AMAZON_DYNAMODB",
+        "ServiceRoleArn": { "Fn::GetAtt": ["TagsTableDataSourceRole", "Arn"] },
+        "DynamoDBConfig": {
+          "AwsRegion": { "Ref": "AWS::Region" },
+          "TableName": { "Fn::Sub": "Tags-${env}" }
+        }
+      }
+    },
+    "TagsTableDataSourceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": { "Service": "appsync.amazonaws.com" },
+            "Action": "sts:AssumeRole"
+          }]
+        },
+        "Policies": [{
+          "PolicyName": "TagsTableAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": ["dynamodb:GetItem", "dynamodb:Query"],
+              "Resource": [
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Tags-${env}" },
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Tags-${env}/index/*" }
+              ]
+            }]
+          }
+        }]
+      }
     }
   },
   "Conditions": {
     "HasEnvironmentParameter": {
-      "Fn::Not": [
-        {
-          "Fn::Equals": [
-            {
-              "Ref": "env"
-            },
-            "NONE"
-          ]
-        }
-      ]
+      "Fn::Not": [{
+        "Fn::Equals": [{ "Ref": "env" }, "NONE"]
+      }]
     },
     "AlwaysFalse": {
       "Fn::Equals": ["true", "false"]
     }
   },
   "Outputs": {
-    "EmptyOutput": {
-      "Description": "An empty output. You may delete this if you have at least one resource above.",
-      "Value": ""
+    "TagsDataSourceName": {
+      "Value": { "Fn::GetAtt": ["TagsTableDataSource", "Name"] }
     }
   }
 }

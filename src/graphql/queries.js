@@ -1,6 +1,60 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const getTagById = /* GraphQL */ `
+  query GetTagById($tag_id: ID!) {
+    getTagById(tag_id: $tag_id) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listTagsByPrefix = /* GraphQL */ `
+  query ListTagsByPrefix($prefix: String!, $limit: Int) {
+    listTagsByPrefix(prefix: $prefix, limit: $limit) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listChildTags = /* GraphQL */ `
+  query ListChildTags($parent_tag_id: ID!) {
+    listChildTags(parent_tag_id: $parent_tag_id) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
 export const getUser = /* GraphQL */ `
   query GetUser($id: ID!) {
     getUser(id: $id) {
@@ -42,6 +96,9 @@ export const getUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -77,6 +134,9 @@ export const listUsers = /* GraphQL */ `
         applicationCount
         createdAt
         updatedAt
+        college
+        classesTaught
+        facultyResearchInterests
         owner
         __typename
       }
@@ -385,6 +445,104 @@ export const listDeletedUsers = /* GraphQL */ `
         deletionExecutedAt
         isTestMode
         userData
+        status
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getAuditLog = /* GraphQL */ `
+  query GetAuditLog($id: ID!) {
+    getAuditLog(id: $id) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listAuditLogs = /* GraphQL */ `
+  query ListAuditLogs(
+    $filter: ModelAuditLogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listAuditLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        userId
+        userName
+        userEmail
+        action
+        resource
+        details
+        timestamp
+        ipAddress
+        userAgent
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getTag = /* GraphQL */ `
+  query GetTag($tag_id: ID!) {
+    getTag(tag_id: $tag_id) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listTags = /* GraphQL */ `
+  query ListTags(
+    $tag_id: ID
+    $filter: ModelTagFilterInput
+    $limit: Int
+    $nextToken: String
+    $sortDirection: ModelSortDirection
+  ) {
+    listTags(
+      tag_id: $tag_id
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      sortDirection: $sortDirection
+    ) {
+      items {
+        tag_id
+        display_name
+        normalized_name
+        parent_tag_id
+        tag_type
+        aliases
+        description
+        hierarchy_path
         status
         createdAt
         updatedAt

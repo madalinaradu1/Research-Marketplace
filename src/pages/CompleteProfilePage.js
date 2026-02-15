@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { API, graphqlOperation, Auth } from 'aws-amplify';
 import { 
   Flex, 
@@ -14,31 +14,71 @@ import {
 import { createUser, updateUser } from '../graphql/operations';
 import { useNavigate } from 'react-router-dom';
 
+const TagInput = ({ label, tags, input, setInput, onKeyDown, onRemove, placeholder, required }) => (
+  <Flex direction="column" gap="0.5rem">
+    <Text fontWeight="bold">{label} {required && '*'}</Text>
+    {tags.length > 0 && (
+      <Flex wrap="wrap" gap="0.5rem" marginBottom="0.5rem">
+        {tags.map((tag, index) => (
+          <Flex
+            key={index}
+            alignItems="center"
+            gap="0.5rem"
+            padding="0.25rem 0.75rem"
+            backgroundColor="#E6D4F5"
+            borderRadius="20px"
+          >
+            <Text fontSize="0.9rem">{tag}</Text>
+            <Button
+              size="small"
+              variation="link"
+              onClick={() => onRemove(tag)}
+              style={{ padding: '0', minWidth: 'auto', color: '#000', backgroundColor: '#E6D4F5', border: 'none' }}
+            >
+              ×
+            </Button>
+          </Flex>
+        ))}
+      </Flex>
+    )}
+    <TextField
+      placeholder={placeholder}
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      onKeyDown={onKeyDown}
+    />
+  </Flex>
+);
+
 const CompleteProfilePage = ({ user }) => {
   const navigate = useNavigate();
   const { tokens } = useTheme();
+  
+  // Form state for text fields
   const [formState, setFormState] = useState({
     name: user?.name || '',
     currentProgram: user?.major || '',
     degreeType: user?.academicYear || '',
     expectedGraduation: user?.expectedGraduation || '',
     gpa: user?.gpa || '',
-    researchInterests: user?.researchInterests?.join(', ') || '',
-    skillsExperience: user?.skills?.join(', ') || '',
     availability: user?.availability || '',
     personalStatement: user?.personalStatement || '',
     facultyRecommendations: '',
-    certificates: user?.certificates?.join(', ') || '',
-    role: user?.role || 'Student'
+    role: user?.role || 'Student',
+    // Faculty-specific fields
+    college: user?.college || ''
   });
-  const [researchInterestTags, setResearchInterestTags] = useState(
-    user?.researchInterests || []
-  );
+  
+  const [researchInterestTags, setResearchInterestTags] = useState(user?.researchInterests || []);
   const [researchInterestInput, setResearchInterestInput] = useState('');
   const [skillsTags, setSkillsTags] = useState(user?.skills || []);
   const [skillsInput, setSkillsInput] = useState('');
   const [certificateTags, setCertificateTags] = useState(user?.certificates || []);
   const [certificateInput, setCertificateInput] = useState('');
+  const [classesTaughtTags, setClassesTaughtTags] = useState(user?.classesTaught || []);
+  const [classesTaughtInput, setClassesTaughtInput] = useState('');
+  const [facultyResearchTags, setFacultyResearchTags] = useState(user?.facultyResearchInterests || []);
+  const [facultyResearchInput, setFacultyResearchInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -47,47 +87,18 @@ const CompleteProfilePage = ({ user }) => {
     setFormState(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleTagKeyDown = (e) => {
-    if (e.key === 'Enter' && researchInterestInput.trim()) {
-      e.preventDefault();
-      if (!researchInterestTags.includes(researchInterestInput.trim())) {
-        setResearchInterestTags([...researchInterestTags, researchInterestInput.trim()]);
+  const createTagHandlers = useCallback((input, tags, setTags, setInput) => ({
+    onKeyDown: (e) => {
+      if (e.key === 'Enter' && input.trim()) {
+        e.preventDefault();
+        if (!tags.includes(input.trim())) {
+          setTags([...tags, input.trim()]);
+        }
+        setInput('');
       }
-      setResearchInterestInput('');
-    }
-  };
-
-  const removeTag = (tagToRemove) => {
-    setResearchInterestTags(researchInterestTags.filter(tag => tag !== tagToRemove));
-  };
-
-  const handleSkillsKeyDown = (e) => {
-    if (e.key === 'Enter' && skillsInput.trim()) {
-      e.preventDefault();
-      if (!skillsTags.includes(skillsInput.trim())) {
-        setSkillsTags([...skillsTags, skillsInput.trim()]);
-      }
-      setSkillsInput('');
-    }
-  };
-
-  const removeSkill = (skillToRemove) => {
-    setSkillsTags(skillsTags.filter(skill => skill !== skillToRemove));
-  };
-
-  const handleCertificateKeyDown = (e) => {
-    if (e.key === 'Enter' && certificateInput.trim()) {
-      e.preventDefault();
-      if (!certificateTags.includes(certificateInput.trim())) {
-        setCertificateTags([...certificateTags, certificateInput.trim()]);
-      }
-      setCertificateInput('');
-    }
-  };
-
-  const removeCertificate = (certToRemove) => {
-    setCertificateTags(certificateTags.filter(cert => cert !== certToRemove));
-  };
+    },
+    onRemove: (tag) => setTags(tags.filter(item => item !== tag))
+  }), []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,22 +114,31 @@ const CompleteProfilePage = ({ user }) => {
       const skills = skillsTags;
       const certificates = certificateTags;
       
-      // Prepare input for user mutation
+      // Prepare input for user mutation - conditionally include fields based on role
       const input = {
         id: currentUser.username,
         name: formState.name,
         email: currentUser.attributes.email,
-        major: formState.currentProgram,
-        academicYear: formState.degreeType,
-        expectedGraduation: formState.expectedGraduation,
-        gpa: formState.gpa ? parseFloat(formState.gpa) : null,
-        researchInterests,
-        skills,
-        availability: formState.availability,
-        personalStatement: formState.personalStatement,
-        certificates,
         role: formState.role,
-        profileComplete: true
+        profileComplete: true,
+        // Student-specific fields - only included if role is Student
+        ...(formState.role === 'Student' && {
+          major: formState.currentProgram,
+          academicYear: formState.degreeType,
+          expectedGraduation: formState.expectedGraduation,
+          gpa: formState.gpa ? parseFloat(formState.gpa) : null,
+          researchInterests,
+          skills,
+          availability: formState.availability,
+          personalStatement: formState.personalStatement,
+          certificates
+        }),
+        // Faculty-specific fields - only included if role is Faculty
+        ...(formState.role === 'Faculty' && {
+          college: formState.college,
+          classesTaught: classesTaughtTags,
+          facultyResearchInterests: facultyResearchTags
+        })
       };
 
       // Update the existing user profile
@@ -211,75 +231,25 @@ const CompleteProfilePage = ({ user }) => {
                   required
                 />
                 
-                <Flex direction="column" gap="0.5rem">
-                  <Text fontWeight="bold">Research Interests *</Text>
-                  {researchInterestTags.length > 0 && (
-                    <Flex wrap="wrap" gap="0.5rem" marginBottom="0.5rem">
-                      {researchInterestTags.map((tag, index) => (
-                        <Flex
-                          key={index}
-                          alignItems="center"
-                          gap="0.5rem"
-                          padding="0.25rem 0.75rem"
-                          backgroundColor="#E6D4F5"
-                          borderRadius="20px"
-                        >
-                          <Text fontSize="0.9rem">{tag}</Text>
-                          <Button
-                            size="small"
-                            variation="link"
-                            onClick={() => removeTag(tag)}
-                            style={{ padding: '0', minWidth: 'auto', color: tokens.colors.neutral[90], backgroundColor: '#E6D4F5', border: 'none' }}
-                          >
-                            ×
-                          </Button>
-                        </Flex>
-                      ))}
-                    </Flex>
-                  )}
-                  <TextField
-                    name="researchInterestInput"
-                    placeholder="Type and press Enter to add"
-                    value={researchInterestInput}
-                    onChange={(e) => setResearchInterestInput(e.target.value)}
-                    onKeyDown={handleTagKeyDown}
-                  />
-                </Flex>
+                <TagInput
+                  label="Research Interests"
+                  tags={researchInterestTags}
+                  input={researchInterestInput}
+                  setInput={setResearchInterestInput}
+                  {...createTagHandlers(researchInterestInput, researchInterestTags, setResearchInterestTags, setResearchInterestInput)}
+                  placeholder="Type and press Enter to add"
+                  required
+                />
                 
-                <Flex direction="column" gap="0.5rem">
-                  <Text fontWeight="bold">Skills and Experience *</Text>
-                  {skillsTags.length > 0 && (
-                    <Flex wrap="wrap" gap="0.5rem" marginBottom="0.5rem">
-                      {skillsTags.map((skill, index) => (
-                        <Flex
-                          key={index}
-                          alignItems="center"
-                          gap="0.5rem"
-                          padding="0.25rem 0.75rem"
-                          backgroundColor="#E6D4F5"
-                          borderRadius="20px"
-                        >
-                          <Text fontSize="0.9rem">{skill}</Text>
-                          <Button
-                            size="small"
-                            variation="link"
-                            onClick={() => removeSkill(skill)}
-                            style={{ padding: '0', minWidth: 'auto', color: tokens.colors.neutral[90], backgroundColor: '#E6D4F5', border: 'none' }}
-                          >
-                            ×
-                          </Button>
-                        </Flex>
-                      ))}
-                    </Flex>
-                  )}
-                  <TextField
-                    name="skillsInput"
-                    placeholder="Type and press Enter to add"
-                    value={skillsInput}
-                    onChange={(e) => setSkillsInput(e.target.value)}
-                    onKeyDown={handleSkillsKeyDown}
-                  />
-                </Flex>
+                <TagInput
+                  label="Skills and Experience"
+                  tags={skillsTags}
+                  input={skillsInput}
+                  setInput={setSkillsInput}
+                  {...createTagHandlers(skillsInput, skillsTags, setSkillsTags, setSkillsInput)}
+                  placeholder="Type and press Enter to add"
+                  required
+                />
                 
                 <TextField
                   name="availability"
@@ -309,40 +279,48 @@ const CompleteProfilePage = ({ user }) => {
                   rows={3}
                 />
                 
-                <Flex direction="column" gap="0.5rem">
-                  <Text fontWeight="bold">Certificates (Optional)</Text>
-                  {certificateTags.length > 0 && (
-                    <Flex wrap="wrap" gap="0.5rem" marginBottom="0.5rem">
-                      {certificateTags.map((cert, index) => (
-                        <Flex
-                          key={index}
-                          alignItems="center"
-                          gap="0.5rem"
-                          padding="0.25rem 0.75rem"
-                          backgroundColor="#E6D4F5"
-                          borderRadius="20px"
-                        >
-                          <Text fontSize="0.9rem">{cert}</Text>
-                          <Button
-                            size="small"
-                            variation="link"
-                            onClick={() => removeCertificate(cert)}
-                            style={{ padding: '0', minWidth: 'auto', color: tokens.colors.neutral[90], backgroundColor: '#E6D4F5', border: 'none' }}
-                          >
-                            ×
-                          </Button>
-                        </Flex>
-                      ))}
-                    </Flex>
-                  )}
-                  <TextField
-                    name="certificateInput"
-                    placeholder="Type and press Enter to add"
-                    value={certificateInput}
-                    onChange={(e) => setCertificateInput(e.target.value)}
-                    onKeyDown={handleCertificateKeyDown}
-                  />
-                </Flex>
+                <TagInput
+                  label="Certificates"
+                  tags={certificateTags}
+                  input={certificateInput}
+                  setInput={setCertificateInput}
+                  {...createTagHandlers(certificateInput, certificateTags, setCertificateTags, setCertificateInput)}
+                  placeholder="Type and press Enter to add"
+                />
+              </>
+            )}
+                     
+            {/* Faculty-specific fields */}
+            {formState.role === 'Faculty' && (
+              <>
+                <TextField
+                  name="college"
+                  label="College/Department *"
+                  placeholder="e.g., College of Science, Engineering and Technology"
+                  value={formState.college}
+                  onChange={handleChange}
+                  required
+                />
+
+                <TagInput
+                  label="Classes Taught"
+                  tags={classesTaughtTags}
+                  input={classesTaughtInput}
+                  setInput={setClassesTaughtInput}
+                  {...createTagHandlers(classesTaughtInput, classesTaughtTags, setClassesTaughtTags, setClassesTaughtInput)}
+                  placeholder="Type and press Enter to add"
+                  required
+                />
+
+                <TagInput
+                  label="Research Interests"
+                  tags={facultyResearchTags}
+                  input={facultyResearchInput}
+                  setInput={setFacultyResearchInput}
+                  {...createTagHandlers(facultyResearchInput, facultyResearchTags, setFacultyResearchTags, setFacultyResearchInput)}
+                  placeholder="Type and press Enter to add"
+                  required
+                />
               </>
             )}
             

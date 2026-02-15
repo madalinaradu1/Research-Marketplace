@@ -45,6 +45,9 @@ export const onCreateUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -94,6 +97,9 @@ export const onUpdateUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -143,6 +149,9 @@ export const onDeleteUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -603,6 +612,117 @@ export const onDeleteDeletedUser = /* GraphQL */ `
       deletionExecutedAt
       isTestMode
       userData
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateAuditLog = /* GraphQL */ `
+  subscription OnCreateAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+    onCreateAuditLog(filter: $filter) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateAuditLog = /* GraphQL */ `
+  subscription OnUpdateAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+    onUpdateAuditLog(filter: $filter) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteAuditLog = /* GraphQL */ `
+  subscription OnDeleteAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+    onDeleteAuditLog(filter: $filter) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateTag = /* GraphQL */ `
+  subscription OnCreateTag($filter: ModelSubscriptionTagFilterInput) {
+    onCreateTag(filter: $filter) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateTag = /* GraphQL */ `
+  subscription OnUpdateTag($filter: ModelSubscriptionTagFilterInput) {
+    onUpdateTag(filter: $filter) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteTag = /* GraphQL */ `
+  subscription OnDeleteTag($filter: ModelSubscriptionTagFilterInput) {
+    onDeleteTag(filter: $filter) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
       status
       createdAt
       updatedAt
