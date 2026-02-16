@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { API, graphqlOperation, Auth, Storage } from 'aws-amplify';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -17,6 +17,8 @@ import {
 } from '@aws-amplify/ui-react';
 import { createApplication, updateUser, listApplications } from '../graphql/operations';
 import { sendNewItemNotification } from '../utils/emailNotifications';
+import { useTags } from '../contexts/TagContext';
+import { mapTagIdsToDisplayNames } from '../lib/tags/tagDisplay';
 
 const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
   const cacheKey = `application_draft_${user.id || user.username}_${project.id}`;
@@ -48,6 +50,23 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
   const [error, setError] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  const { tagsById } = useTags();
+
+  const researchInterestNames = useMemo(
+    () => mapTagIdsToDisplayNames(user.researchInterests || [], tagsById),
+    [user.researchInterests, tagsById]
+  );
+
+  const skillNames = useMemo(
+    () => mapTagIdsToDisplayNames(user.skills || [], tagsById),
+    [user.skills, tagsById]
+  );
+
+  const certificateNames = useMemo(
+    () => mapTagIdsToDisplayNames(user.certificates || [], tagsById),
+    [user.certificates, tagsById]
+  );
 
   const addCourse = () => {
     if (courses.length < 10) {
@@ -243,8 +262,9 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
           <Text>Program: {user.major || 'Not specified'}</Text>
           <Text>Degree: {user.academicYear || 'Not specified'}</Text>
           <Text>Expected Graduation: {user.expectedGraduation || 'Not specified'}</Text>
-          <Text>Research Interests: {user.researchInterests?.join(', ') || 'Not specified'}</Text>
-          <Text>Skills: {user.skills?.join(', ') || 'Not specified'}</Text>
+          <Text>Research Interests: {user.researchInterestNames.join(', ') || 'Not specified'}</Text>
+          <Text>Skills: {user.skillNames.join(', ') || 'Not specified'}</Text>
+          <Text>Certificates: {user.certificateNames.join(', ') || 'Not specified'}</Text>
           <Text>Availability: {user.availability || 'Not specified'}</Text>
         </Card>
 

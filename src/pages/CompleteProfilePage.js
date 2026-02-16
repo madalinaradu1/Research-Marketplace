@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect} from 'react';
 import { API, graphqlOperation, Auth } from 'aws-amplify';
 import { 
   Flex, 
@@ -13,6 +13,9 @@ import {
 } from '@aws-amplify/ui-react';
 import { createUser, updateUser } from '../graphql/operations';
 import { useNavigate } from 'react-router-dom';
+import TagSelector from '../components/TagSelector';
+import { useTags } from '../contexts/TagContext';
+
 
 const TagInput = ({ label, tags, input, setInput, onKeyDown, onRemove, placeholder, required }) => (
   <Flex direction="column" gap="0.5rem">
@@ -53,6 +56,8 @@ const TagInput = ({ label, tags, input, setInput, onKeyDown, onRemove, placehold
 const CompleteProfilePage = ({ user }) => {
   const navigate = useNavigate();
   const { tokens } = useTheme();
+  const { tagsById, resolveTagIds } = useTags();
+
   
   // Form state for text fields
   const [formState, setFormState] = useState({
@@ -69,12 +74,15 @@ const CompleteProfilePage = ({ user }) => {
     college: user?.college || ''
   });
   
-  const [researchInterestTags, setResearchInterestTags] = useState(user?.researchInterests || []);
-  const [researchInterestInput, setResearchInterestInput] = useState('');
-  const [skillsTags, setSkillsTags] = useState(user?.skills || []);
-  const [skillsInput, setSkillsInput] = useState('');
-  const [certificateTags, setCertificateTags] = useState(user?.certificates || []);
-  const [certificateInput, setCertificateInput] = useState('');
+  const [researchInterestTagIds, setResearchInterestTagIds] = useState(
+    Array.isArray(user?.researchInterests) ? user.researchInterests : []
+  );
+  const [skillsTagIds, setSkillsTagIds] = useState(
+    Array.isArray(user?.skills) ? user.skills : []
+  );
+  const [certificateTagIds, setCertificateTagIds] = useState(
+    Array.isArray(user?.certificates) ? user.certificates : []
+  );
   const [classesTaughtTags, setClassesTaughtTags] = useState(user?.classesTaught || []);
   const [classesTaughtInput, setClassesTaughtInput] = useState('');
   const [facultyResearchTags, setFacultyResearchTags] = useState(user?.facultyResearchInterests || []);
@@ -109,19 +117,34 @@ const CompleteProfilePage = ({ user }) => {
       // Get current authenticated user
       const currentUser = await Auth.currentAuthenticatedUser();
       
-      // Convert arrays
-      const researchInterests = researchInterestTags;
-      const skills = skillsTags;
-      const certificates = certificateTags;
-      
-      // Prepare input for user mutation - conditionally include fields based on role
+      if (formState.role === 'Student' && tagsById.size === 0) {
+        setError('Tag catalog is still loading. Please wait and try again.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const researchInterests = resolveTagIds(researchInterestTagIds);
+      const skills = resolveTagIds(skillsTagIds);
+      const certificates = resolveTagIds(certificateTagIds);
+
+      if (formState.role === 'Student' && researchInterests.length === 0) {
+        setError('Please select at least one research interest.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (formState.role === 'Student' && skills.length === 0) {
+        setError('Please select at least one skill.');
+        setIsSubmitting(false);
+        return;
+      }
+
       const input = {
         id: currentUser.username,
         name: formState.name,
         email: currentUser.attributes.email,
         role: formState.role,
         profileComplete: true,
-        // Student-specific fields - only included if role is Student
         ...(formState.role === 'Student' && {
           major: formState.currentProgram,
           academicYear: formState.degreeType,
@@ -133,7 +156,6 @@ const CompleteProfilePage = ({ user }) => {
           personalStatement: formState.personalStatement,
           certificates
         }),
-        // Faculty-specific fields - only included if role is Faculty
         ...(formState.role === 'Faculty' && {
           college: formState.college,
           classesTaught: classesTaughtTags,
@@ -231,26 +253,26 @@ const CompleteProfilePage = ({ user }) => {
                   required
                 />
                 
-                <TagInput
-                  label="Research Interests"
-                  tags={researchInterestTags}
-                  input={researchInterestInput}
-                  setInput={setResearchInterestInput}
-                  {...createTagHandlers(researchInterestInput, researchInterestTags, setResearchInterestTags, setResearchInterestInput)}
-                  placeholder="Type and press Enter to add"
-                  required
-                />
-                
-                <TagInput
-                  label="Skills and Experience"
-                  tags={skillsTags}
-                  input={skillsInput}
-                  setInput={setSkillsInput}
-                  {...createTagHandlers(skillsInput, skillsTags, setSkillsTags, setSkillsInput)}
-                  placeholder="Type and press Enter to add"
-                  required
-                />
-                
+                <Flex direction="column" gap="0.5rem">
+                  <Text fontWeight="bold">Research Interests *</Text>
+                  <TagSelector
+                    selectedTagIds={researchInterestTagIds}
+                    onChange={setResearchInterestTagIds}
+                    placeholder="List research interests...(e.g., Machine Learning, Neuroscience)"
+                    maxSelections={10}
+                  />
+                </Flex>
+
+                <Flex direction="column" gap="0.5rem">
+                  <Text fontWeight="bold">Skills and Experience *</Text>
+                  <TagSelector
+                    selectedTagIds={skillsTagIds}
+                    onChange={setSkillsTagIds}
+                    placeholder="List skills and experience...(e.g., Python, Data Analysis)"
+                    maxSelections={15}
+                  />
+                </Flex>
+
                 <TextField
                   name="availability"
                   label="Availability *"
@@ -279,14 +301,15 @@ const CompleteProfilePage = ({ user }) => {
                   rows={3}
                 />
                 
-                <TagInput
-                  label="Certificates"
-                  tags={certificateTags}
-                  input={certificateInput}
-                  setInput={setCertificateInput}
-                  {...createTagHandlers(certificateInput, certificateTags, setCertificateTags, setCertificateInput)}
-                  placeholder="Type and press Enter to add"
-                />
+                <Flex direction="column" gap="0.5rem">
+                  <Text fontWeight="bold">Skills and Experience *</Text>
+                  <TagSelector
+                    selectedTagIds={certificateTagIds}
+                    onChange={setCertificateTagIds}
+                    placeholder="List certifications...(e.g., CompTIA Security+, Google Data Analyst)"
+                    maxSelections={15}
+                  />
+                </Flex>
               </>
             )}
                      
