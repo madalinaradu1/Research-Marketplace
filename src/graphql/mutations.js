@@ -380,11 +380,44 @@ export const createStudentPost = /* GraphQL */ `
   ) {
     createStudentPost(input: $input, condition: $condition) {
       id
+      type
       title
-      content
-      authorID
-      isAnonymous
-      tags
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        applicationCount
+        createdAt
+        updatedAt
+        college
+        classesTaught
+        facultyResearchInterests
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       owner
@@ -399,11 +432,44 @@ export const updateStudentPost = /* GraphQL */ `
   ) {
     updateStudentPost(input: $input, condition: $condition) {
       id
+      type
       title
-      content
-      authorID
-      isAnonymous
-      tags
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        applicationCount
+        createdAt
+        updatedAt
+        college
+        classesTaught
+        facultyResearchInterests
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       owner
@@ -418,11 +484,44 @@ export const deleteStudentPost = /* GraphQL */ `
   ) {
     deleteStudentPost(input: $input, condition: $condition) {
       id
+      type
       title
-      content
-      authorID
-      isAnonymous
-      tags
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        applicationCount
+        createdAt
+        updatedAt
+        college
+        classesTaught
+        facultyResearchInterests
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       owner
@@ -682,69 +781,6 @@ export const deleteAuditLog = /* GraphQL */ `
       timestamp
       ipAddress
       userAgent
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const createTag = /* GraphQL */ `
-  mutation CreateTag(
-    $input: CreateTagInput!
-    $condition: ModelTagConditionInput
-  ) {
-    createTag(input: $input, condition: $condition) {
-      tag_id
-      display_name
-      normalized_name
-      parent_tag_id
-      tag_type
-      aliases
-      description
-      hierarchy_path
-      status
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const updateTag = /* GraphQL */ `
-  mutation UpdateTag(
-    $input: UpdateTagInput!
-    $condition: ModelTagConditionInput
-  ) {
-    updateTag(input: $input, condition: $condition) {
-      tag_id
-      display_name
-      normalized_name
-      parent_tag_id
-      tag_type
-      aliases
-      description
-      hierarchy_path
-      status
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const deleteTag = /* GraphQL */ `
-  mutation DeleteTag(
-    $input: DeleteTagInput!
-    $condition: ModelTagConditionInput
-  ) {
-    deleteTag(input: $input, condition: $condition) {
-      tag_id
-      display_name
-      normalized_name
-      parent_tag_id
-      tag_type
-      aliases
-      description
-      hierarchy_path
-      status
       createdAt
       updatedAt
       __typename

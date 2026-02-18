@@ -13,8 +13,6 @@ export const getTagById = /* GraphQL */ `
       description
       hierarchy_path
       status
-      createdAt
-      updatedAt
       __typename
     }
   }
@@ -31,8 +29,6 @@ export const listTagsByPrefix = /* GraphQL */ `
       description
       hierarchy_path
       status
-      createdAt
-      updatedAt
       __typename
     }
   }
@@ -49,8 +45,26 @@ export const listChildTags = /* GraphQL */ `
       description
       hierarchy_path
       status
-      createdAt
-      updatedAt
+      __typename
+    }
+  }
+`;
+export const listAllTags = /* GraphQL */ `
+  query ListAllTags($limit: Int, $nextToken: String) {
+    listAllTags(limit: $limit, nextToken: $nextToken) {
+      items {
+        tag_id
+        display_name
+        normalized_name
+        parent_tag_id
+        tag_type
+        aliases
+        description
+        hierarchy_path
+        status
+        __typename
+      }
+      nextToken
       __typename
     }
   }
@@ -285,11 +299,44 @@ export const getStudentPost = /* GraphQL */ `
   query GetStudentPost($id: ID!) {
     getStudentPost(id: $id) {
       id
+      type
       title
-      content
-      authorID
-      isAnonymous
-      tags
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        applicationCount
+        createdAt
+        updatedAt
+        college
+        classesTaught
+        facultyResearchInterests
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       owner
@@ -306,11 +353,15 @@ export const listStudentPosts = /* GraphQL */ `
     listStudentPosts(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        type
         title
-        content
-        authorID
-        isAnonymous
-        tags
+        description
+        studentID
+        department
+        researchAreas
+        skillsOffered
+        skillsNeeded
+        timeCommitment
         createdAt
         updatedAt
         owner
@@ -501,58 +552,6 @@ export const listAuditLogs = /* GraphQL */ `
     }
   }
 `;
-export const getTag = /* GraphQL */ `
-  query GetTag($tag_id: ID!) {
-    getTag(tag_id: $tag_id) {
-      tag_id
-      display_name
-      normalized_name
-      parent_tag_id
-      tag_type
-      aliases
-      description
-      hierarchy_path
-      status
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const listTags = /* GraphQL */ `
-  query ListTags(
-    $tag_id: ID
-    $filter: ModelTagFilterInput
-    $limit: Int
-    $nextToken: String
-    $sortDirection: ModelSortDirection
-  ) {
-    listTags(
-      tag_id: $tag_id
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-      sortDirection: $sortDirection
-    ) {
-      items {
-        tag_id
-        display_name
-        normalized_name
-        parent_tag_id
-        tag_type
-        aliases
-        description
-        hierarchy_path
-        status
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
 export const projectsByFacultyID = /* GraphQL */ `
   query ProjectsByFacultyID(
     $facultyID: ID!
@@ -681,16 +680,16 @@ export const applicationsByProjectID = /* GraphQL */ `
     }
   }
 `;
-export const studentPostsByAuthorID = /* GraphQL */ `
-  query StudentPostsByAuthorID(
-    $authorID: ID!
+export const studentPostsByStudentID = /* GraphQL */ `
+  query StudentPostsByStudentID(
+    $studentID: ID!
     $sortDirection: ModelSortDirection
     $filter: ModelStudentPostFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    studentPostsByAuthorID(
-      authorID: $authorID
+    studentPostsByStudentID(
+      studentID: $studentID
       sortDirection: $sortDirection
       filter: $filter
       limit: $limit
@@ -698,11 +697,15 @@ export const studentPostsByAuthorID = /* GraphQL */ `
     ) {
       items {
         id
+        type
         title
-        content
-        authorID
-        isAnonymous
-        tags
+        description
+        studentID
+        department
+        researchAreas
+        skillsOffered
+        skillsNeeded
+        timeCommitment
         createdAt
         updatedAt
         owner

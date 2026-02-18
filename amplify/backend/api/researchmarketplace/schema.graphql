@@ -199,13 +199,17 @@ type Tag {
   status: String!
 }
 
+type TagConnection {
+  items: [Tag!]!
+  nextToken: String
+}
+
 type Query {
   getTagById(tag_id: ID!): Tag
-    @auth(rules: [{ allow: private, provider: userPools }])
 
   listTagsByPrefix(prefix: String!, limit: Int): [Tag]  
-    @auth(rules: [{ allow: private, provider: userPools }])
   
   listChildTags(parent_tag_id: ID!): [Tag]
-    @auth(rules: [{ allow: private, provider: userPools }])
+
+  listAllTags(limit: Int, nextToken: String): TagConnection
 }
