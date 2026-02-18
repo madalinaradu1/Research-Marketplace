@@ -1,0 +1,115 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Tags vocabulary table for canonical tag registry",
+	"Parameters": {
+		"env": {
+			"Type": "String"
+		}
+	},
+	"Resources": {
+		"TagsTable": {
+			"Type": "AWS::DynamoDB::Table",
+			"DeletionPolicy": "Retain",
+			"UpdateReplacePolicy": "Retain",
+			"Properties": {
+				"TableName": {
+					"Fn::Sub": "Tags-${env}"
+				},
+				"BillingMode": "PAY_PER_REQUEST",
+				"PointInTimeRecoverySpecification": {
+					"PointInTimeRecoveryEnabled": true
+				},
+				"SSESpecification": {
+					"SSEEnabled": true
+				},
+				"AttributeDefinitions": [
+					{
+						"AttributeName": "PK",
+						"AttributeType": "S"
+					},
+					{
+						"AttributeName": "SK",
+						"AttributeType": "S"
+					},
+					{
+						"AttributeName": "GSI1PK",
+						"AttributeType": "S"
+					},
+					{
+						"AttributeName": "GSI1SK",
+						"AttributeType": "S"
+					},
+					{
+						"AttributeName": "GSI2PK",
+						"AttributeType": "S"
+					},
+					{
+						"AttributeName": "GSI2SK",
+						"AttributeType": "S"
+					}
+				],
+				"KeySchema": [
+					{
+						"AttributeName": "PK",
+						"KeyType": "HASH"
+					},
+					{
+						"AttributeName": "SK",
+						"KeyType": "RANGE"
+					}
+				],
+				"GlobalSecondaryIndexes": [
+					{
+						"IndexName": "GSI1",
+						"KeySchema": [
+							{
+								"AttributeName": "GSI1PK",
+								"KeyType": "HASH"
+							},
+							{
+								"AttributeName": "GSI1SK",
+								"KeyType": "RANGE"
+							}
+						],
+						"Projection": {
+							"ProjectionType": "ALL"
+						}
+					},
+					{
+						"IndexName": "GSI2",
+						"KeySchema": [
+							{
+								"AttributeName": "GSI2PK",
+								"KeyType": "HASH"
+							},
+							{
+								"AttributeName": "GSI2SK",
+								"KeyType": "RANGE"
+							}
+						],
+						"Projection": {
+							"ProjectionType": "ALL"
+						}
+					}
+				]
+			}
+		}
+	},
+	"Outputs": {
+		"TagsTableName": {
+			"Value": {
+				"Ref": "TagsTable"
+			},
+			"Description": "Tags table name"
+		},
+		"TagsTableArn": {
+			"Value": {
+				"Fn::GetAtt": [
+					"TagsTable",
+					"Arn"
+				]
+			},
+			"Description": "Tags table ARN"
+		}
+	}
+}

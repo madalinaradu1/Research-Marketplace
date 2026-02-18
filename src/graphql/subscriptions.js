@@ -45,6 +45,9 @@ export const onCreateUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -94,6 +97,9 @@ export const onUpdateUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -143,6 +149,9 @@ export const onDeleteUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -371,11 +380,44 @@ export const onCreateStudentPost = /* GraphQL */ `
   ) {
     onCreateStudentPost(filter: $filter, owner: $owner) {
       id
+      type
       title
-      content
-      authorID
-      isAnonymous
-      tags
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        applicationCount
+        createdAt
+        updatedAt
+        college
+        classesTaught
+        facultyResearchInterests
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       owner
@@ -390,11 +432,44 @@ export const onUpdateStudentPost = /* GraphQL */ `
   ) {
     onUpdateStudentPost(filter: $filter, owner: $owner) {
       id
+      type
       title
-      content
-      authorID
-      isAnonymous
-      tags
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        applicationCount
+        createdAt
+        updatedAt
+        college
+        classesTaught
+        facultyResearchInterests
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       owner
@@ -409,11 +484,44 @@ export const onDeleteStudentPost = /* GraphQL */ `
   ) {
     onDeleteStudentPost(filter: $filter, owner: $owner) {
       id
+      type
       title
-      content
-      authorID
-      isAnonymous
-      tags
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        applicationCount
+        createdAt
+        updatedAt
+        college
+        classesTaught
+        facultyResearchInterests
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       owner
@@ -604,6 +712,63 @@ export const onDeleteDeletedUser = /* GraphQL */ `
       isTestMode
       userData
       status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateAuditLog = /* GraphQL */ `
+  subscription OnCreateAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+    onCreateAuditLog(filter: $filter) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateAuditLog = /* GraphQL */ `
+  subscription OnUpdateAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+    onUpdateAuditLog(filter: $filter) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteAuditLog = /* GraphQL */ `
+  subscription OnDeleteAuditLog($filter: ModelSubscriptionAuditLogFilterInput) {
+    onDeleteAuditLog(filter: $filter) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
       createdAt
       updatedAt
       __typename

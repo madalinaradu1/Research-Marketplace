@@ -3,6 +3,9 @@ import { API, graphqlOperation } from 'aws-amplify';
 import { Flex, Heading, Card, TextField, Button, Text, View, Divider } from '@aws-amplify/ui-react';
 import { updateUser, listApplications, listProjects, updateApplication } from '../graphql/operations';
 import { useNavigate } from 'react-router-dom';
+import TagSelector from '../components/TagSelector';
+import { useTags } from '../contexts/TagContext';
+
 
 const ProfilePage = ({ user, refreshProfile }) => {
   const navigate = useNavigate();
@@ -13,11 +16,8 @@ const ProfilePage = ({ user, refreshProfile }) => {
     currentProgram: '',
     degreeType: '',
     expectedGraduation: '',
-    researchInterests: '',
-    skillsExperience: '',
     availability: '',
-    personalStatement: '',
-    certificates: ''
+    personalStatement: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
@@ -44,7 +44,11 @@ const ProfilePage = ({ user, refreshProfile }) => {
   const [deleteAction, setDeleteAction] = useState(null);
   const [applications, setApplications] = useState([]);
   const [projects, setProjects] = useState([]);
-
+  const [researchInterestTagIds, setResearchInterestTagIds] = useState([]);
+  const [skillsTagIds, setSkillsTagIds] = useState([]);
+  const [certificateTagIds, setCertificateTagIds] = useState([]);
+  const { tagsById, resolveTagIds } = useTags();
+  
   // Initialize form with user data and load calendar events
   useEffect(() => {
     if (user) {
@@ -55,15 +59,19 @@ const ProfilePage = ({ user, refreshProfile }) => {
         currentProgram: user.major || '',
         degreeType: user.academicYear || '',
         expectedGraduation: user.expectedGraduation || '',
-        researchInterests: user.researchInterests ? user.researchInterests.join(', ') : '',
-        skillsExperience: user.skills ? user.skills.join(', ') : '',
         availability: user.availability || '',
-        personalStatement: user.personalStatement || '',
-        certificates: user.certificates ? user.certificates.join(', ') : ''
+        personalStatement: user.personalStatement || ''
       });
       loadCalendarEvents();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (tagsById.size === 0) return;
+    setResearchInterestTagIds((prev) => resolveTagIds(prev));
+    setSkillsTagIds((prev) => resolveTagIds(prev));
+  }, [tagsById, resolveTagIds]);
+
   
   const loadCalendarEvents = async () => {
     try {
@@ -143,15 +151,10 @@ const ProfilePage = ({ user, refreshProfile }) => {
 
     try {
       // Convert arrays
-      const researchInterests = formState.researchInterests
-        ? formState.researchInterests.split(',').map(item => item.trim()).filter(item => item)
-        : [];
-      const skills = formState.skillsExperience
-        ? formState.skillsExperience.split(',').map(item => item.trim()).filter(item => item)
-        : [];
-      const certificates = formState.certificates
-        ? formState.certificates.split(',').map(item => item.trim()).filter(item => item)
-        : [];
+      const researchInterests = resolveTagIds(researchInterestTagIds);
+      const skills = resolveTagIds(skillsTagIds);
+      const certificates = resolveTagIds(certificateTagIds);
+
       
       // Prepare input for updateUser mutation
       const input = {
@@ -181,13 +184,15 @@ const ProfilePage = ({ user, refreshProfile }) => {
         currentProgram: updatedUser.major || '',
         degreeType: updatedUser.academicYear || '',
         expectedGraduation: updatedUser.expectedGraduation || '',
-        researchInterests: updatedUser.researchInterests ? updatedUser.researchInterests.join(', ') : '',
-        skillsExperience: updatedUser.skills ? updatedUser.skills.join(', ') : '',
         availability: updatedUser.availability || '',
         personalStatement: updatedUser.personalStatement || '',
-        certificates: updatedUser.certificates ? updatedUser.certificates.join(', ') : ''
       });
       
+      setResearchInterestTagIds(resolveTagIds(updatedUser.researchInterests || []));
+      setSkillsTagIds(resolveTagIds(updatedUser.skills || []));
+      setCertificateTagIds(resolveTagIds(updatedUser.certificates || []));
+
+
       // Refresh the user profile in the parent component
       if (refreshProfile) {
         refreshProfile();
@@ -265,22 +270,26 @@ const ProfilePage = ({ user, refreshProfile }) => {
               onChange={handleChange}
             />
             
-            <TextField
-              name="researchInterests"
-              label="Research Interests"
-              placeholder="Enter research interests separated by commas"
-              value={formState.researchInterests}
-              onChange={handleChange}
-            />
-            
-            <TextField
-              name="skillsExperience"
-              label="Skills and Experience"
-              placeholder="Enter skills and experience separated by commas"
-              value={formState.skillsExperience}
-              onChange={handleChange}
-            />
-            
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Research Interests</Text>
+              <TagSelector
+                selectedTagIds={researchInterestTagIds}
+                onChange={setResearchInterestTagIds}
+                placeholder="List research interests...(e.g., Machine Learning, Neuroscience)"
+                maxSelections={10}
+              />
+            </Flex>
+
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Skills and Experience</Text>
+              <TagSelector
+                selectedTagIds={skillsTagIds}
+                onChange={setSkillsTagIds}
+                placeholder="List skills and experience...(e.g., Python, Data Analysis)"
+                maxSelections={15}
+              />
+            </Flex>
+
             <TextField
               name="availability"
               label="Availability"
@@ -297,14 +306,16 @@ const ProfilePage = ({ user, refreshProfile }) => {
               onChange={handleChange}
             />
             
-            <TextField
-              name="certificates"
-              label="Certificates"
-              placeholder="Enter certificates separated by commas"
-              value={formState.certificates}
-              onChange={handleChange}
-            />
-            
+            <Flex direction="column" gap="0.5rem">
+              <Text fontWeight="bold">Certifications</Text>
+              <TagSelector
+                selectedTagIds={certificateTagIds}
+                onChange={setCertificateTagIds}
+                placeholder="List certifications...(e.g., CompTIA Security+, Google Data Analyst)"
+                maxSelections={10}
+              />
+            </Flex>
+
             {message && <Text color="green">{message}</Text>}
             {error && <Text color="red">{error}</Text>}
             

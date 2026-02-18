@@ -56,30 +56,36 @@ const Header = ({ user, signOut }) => {
   };
   
   const fetchUnreadCount = async () => {
-    if (!user || !user.id) return;
+  if (!user || !user.id) return;
+  
+  try {
+    const userId = user.id || user.username;
+    if (!userId) return;
     
-    try {
-      const userId = user.id || user.username;
-      if (!userId) return;
-      
-      const messageResult = await API.graphql(graphqlOperation(listMessages, { 
-        limit: 100
-      }));
-      
-      const allMessages = messageResult.data?.listMessages?.items || [];
-      const unreadMessages = allMessages.filter(msg => 
-        msg.receiverID === userId && !msg.isRead
-      );
-      
-      setUnreadCount(unreadMessages.length);
-    } catch (error) {
-      // Only log error if it's not a "No current user" error
-      if (!error.message?.includes('No current user')) {
-        console.error('Error fetching unread count:', error);
-      }
-      setUnreadCount(0);
+    const messageResult = await API.graphql(graphqlOperation(listMessages, { 
+      limit: 100
+    }));
+    
+    const allMessages = messageResult.data?.listMessages?.items || [];
+    
+    // Load locally read messages from localStorage
+    const readMessages = JSON.parse(localStorage.getItem(`read_messages_${userId}`) || '[]');
+    
+    const unreadMessages = allMessages.filter(msg => {
+      const isLocallyRead = readMessages.includes(msg.id);
+      return msg.receiverID === userId && !msg.isRead && !isLocallyRead;
+    });
+    
+    setUnreadCount(unreadMessages.length);
+  } catch (error) {
+    // Only log error if it's not a "No current user" error
+    if (!error.message?.includes('No current user')) {
+      console.error('Error fetching unread count:', error);
     }
-  };
+    setUnreadCount(0);
+  }
+};
+
   
   useEffect(() => {
     if (user && user.id) {

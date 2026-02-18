@@ -30,6 +30,9 @@ type User @model @auth(rules: [
   notifications: [Notification] @hasMany(indexName: "byUser", fields: ["id"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
+  college: String
+  classesTaught: [String]
+  facultyResearchInterests: [String]
 }
 
 type Project @model @auth(rules: [
@@ -66,7 +69,8 @@ type Application @model @auth(rules: [
   { allow: owner, operations: [create, read, update, delete] },
   { allow: private, operations: [read] },
   { allow: groups, groups: ["Admin"], operations: [read, update] },
-  { allow: groups, groups: ["Coordinator"], operations: [read, update] }
+  { allow: groups, groups: ["Coordinator"], operations: [read, update] },
+  { allow: groups, groups: ["Faculty"], operations: [read, update] }
 ]) {
   id: ID!
   studentID: ID! @index(name: "byStudent")
@@ -102,18 +106,24 @@ type StudentPost @model @auth(rules: [
   { allow: private, operations: [read] }
 ]) {
   id: ID!
+  type: String!
   title: String!
-  content: String!
-  authorID: ID! @index(name: "byAuthor")
-  isAnonymous: Boolean!
-  tags: [String]
+  description: String!
+  studentID: ID! @index(name: "byAuthor")
+  department: String
+  researchAreas: [String]
+  skillsOffered: [String]
+  skillsNeeded: [String]
+  timeCommitment: String
+  student: User @belongsTo(fields: ["studentID"])
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
 
 type Message @model @auth(rules: [
   { allow: owner, operations: [create, read, update, delete] },
-  { allow: private, operations: [read] }
+  { allow: private, operations: [read] },
+  { allow: groups, groups: ["Student", "Faculty", "Coordinator"], operations: [create, read, update] }
 ]) {
   id: ID!
   senderID: ID!
@@ -175,4 +185,31 @@ type AuditLog @model @auth(rules: [
   userAgent: String
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
+}
+
+type Tag {
+  tag_id: ID!
+  display_name: String!
+  normalized_name: String!
+  parent_tag_id: ID
+  tag_type: String!
+  aliases: [String]
+  description: String
+  hierarchy_path: [String]
+  status: String!
+}
+
+type TagConnection {
+  items: [Tag!]!
+  nextToken: String
+}
+
+type Query {
+  getTagById(tag_id: ID!): Tag
+
+  listTagsByPrefix(prefix: String!, limit: Int): [Tag]  
+  
+  listChildTags(parent_tag_id: ID!): [Tag]
+
+  listAllTags(limit: Int, nextToken: String): TagConnection
 }

@@ -77,6 +77,12 @@
       "service": "Cognito"
     }
   },
+  "customResources": {
+    "TagsTable": {
+      "providerPlugin": "awscloudformation",
+      "service": "CloudFormation"
+    }
+  },
   "function": {
     "adminDeleteUser": {
       "build": true,

@@ -1,6 +1,74 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const getTagById = /* GraphQL */ `
+  query GetTagById($tag_id: ID!) {
+    getTagById(tag_id: $tag_id) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      __typename
+    }
+  }
+`;
+export const listTagsByPrefix = /* GraphQL */ `
+  query ListTagsByPrefix($prefix: String!, $limit: Int) {
+    listTagsByPrefix(prefix: $prefix, limit: $limit) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      __typename
+    }
+  }
+`;
+export const listChildTags = /* GraphQL */ `
+  query ListChildTags($parent_tag_id: ID!) {
+    listChildTags(parent_tag_id: $parent_tag_id) {
+      tag_id
+      display_name
+      normalized_name
+      parent_tag_id
+      tag_type
+      aliases
+      description
+      hierarchy_path
+      status
+      __typename
+    }
+  }
+`;
+export const listAllTags = /* GraphQL */ `
+  query ListAllTags($limit: Int, $nextToken: String) {
+    listAllTags(limit: $limit, nextToken: $nextToken) {
+      items {
+        tag_id
+        display_name
+        normalized_name
+        parent_tag_id
+        tag_type
+        aliases
+        description
+        hierarchy_path
+        status
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
 export const getUser = /* GraphQL */ `
   query GetUser($id: ID!) {
     getUser(id: $id) {
@@ -42,6 +110,9 @@ export const getUser = /* GraphQL */ `
       }
       createdAt
       updatedAt
+      college
+      classesTaught
+      facultyResearchInterests
       owner
       __typename
     }
@@ -77,6 +148,9 @@ export const listUsers = /* GraphQL */ `
         applicationCount
         createdAt
         updatedAt
+        college
+        classesTaught
+        facultyResearchInterests
         owner
         __typename
       }
@@ -225,11 +299,44 @@ export const getStudentPost = /* GraphQL */ `
   query GetStudentPost($id: ID!) {
     getStudentPost(id: $id) {
       id
+      type
       title
-      content
-      authorID
-      isAnonymous
-      tags
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      student {
+        id
+        name
+        email
+        role
+        department
+        major
+        academicYear
+        gpa
+        skills
+        researchInterests
+        careerInterests
+        resumeKey
+        affiliation
+        profileComplete
+        status
+        expectedGraduation
+        availability
+        personalStatement
+        certificates
+        applicationCount
+        createdAt
+        updatedAt
+        college
+        classesTaught
+        facultyResearchInterests
+        owner
+        __typename
+      }
       createdAt
       updatedAt
       owner
@@ -246,11 +353,15 @@ export const listStudentPosts = /* GraphQL */ `
     listStudentPosts(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        type
         title
-        content
-        authorID
-        isAnonymous
-        tags
+        description
+        studentID
+        department
+        researchAreas
+        skillsOffered
+        skillsNeeded
+        timeCommitment
         createdAt
         updatedAt
         owner
@@ -395,6 +506,52 @@ export const listDeletedUsers = /* GraphQL */ `
     }
   }
 `;
+export const getAuditLog = /* GraphQL */ `
+  query GetAuditLog($id: ID!) {
+    getAuditLog(id: $id) {
+      id
+      userId
+      userName
+      userEmail
+      action
+      resource
+      details
+      timestamp
+      ipAddress
+      userAgent
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listAuditLogs = /* GraphQL */ `
+  query ListAuditLogs(
+    $filter: ModelAuditLogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listAuditLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        userId
+        userName
+        userEmail
+        action
+        resource
+        details
+        timestamp
+        ipAddress
+        userAgent
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
 export const projectsByFacultyID = /* GraphQL */ `
   query ProjectsByFacultyID(
     $facultyID: ID!
@@ -523,16 +680,16 @@ export const applicationsByProjectID = /* GraphQL */ `
     }
   }
 `;
-export const studentPostsByAuthorID = /* GraphQL */ `
-  query StudentPostsByAuthorID(
-    $authorID: ID!
+export const studentPostsByStudentID = /* GraphQL */ `
+  query StudentPostsByStudentID(
+    $studentID: ID!
     $sortDirection: ModelSortDirection
     $filter: ModelStudentPostFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    studentPostsByAuthorID(
-      authorID: $authorID
+    studentPostsByStudentID(
+      studentID: $studentID
       sortDirection: $sortDirection
       filter: $filter
       limit: $limit
@@ -540,11 +697,15 @@ export const studentPostsByAuthorID = /* GraphQL */ `
     ) {
       items {
         id
+        type
         title
-        content
-        authorID
-        isAnonymous
-        tags
+        description
+        studentID
+        department
+        researchAreas
+        skillsOffered
+        skillsNeeded
+        timeCommitment
         createdAt
         updatedAt
         owner

@@ -43,6 +43,9 @@ export declare type UserUpdateFormInputValues = {
     applicationCount?: number;
     createdAt?: string;
     updatedAt?: string;
+    college?: string;
+    classesTaught?: string[];
+    facultyResearchInterests?: string[];
 };
 export declare type UserUpdateFormValidationValues = {
     name?: ValidationFunction<string>;
@@ -66,6 +69,9 @@ export declare type UserUpdateFormValidationValues = {
     applicationCount?: ValidationFunction<number>;
     createdAt?: ValidationFunction<string>;
     updatedAt?: ValidationFunction<string>;
+    college?: ValidationFunction<string>;
+    classesTaught?: ValidationFunction<string>;
+    facultyResearchInterests?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type UserUpdateFormOverridesProps = {
@@ -91,6 +97,9 @@ export declare type UserUpdateFormOverridesProps = {
     applicationCount?: PrimitiveOverrideProps<TextFieldProps>;
     createdAt?: PrimitiveOverrideProps<TextFieldProps>;
     updatedAt?: PrimitiveOverrideProps<TextFieldProps>;
+    college?: PrimitiveOverrideProps<TextFieldProps>;
+    classesTaught?: PrimitiveOverrideProps<TextFieldProps>;
+    facultyResearchInterests?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type UserUpdateFormProps = React.PropsWithChildren<{
     overrides?: UserUpdateFormOverridesProps | undefined | null;

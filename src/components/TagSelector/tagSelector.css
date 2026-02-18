@@ -1,0 +1,71 @@
+.tag-selector {
+  position: relative;
+}
+
+.tag-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #e8eefc;
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.85rem;
+}
+
+.tag-chip-remove {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0;
+  line-height: 1;
+}
+
+.tag-selector-input {
+  width: 100%;
+  border: 1px solid #b8c4dd;
+  border-radius: 6px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.95rem;
+}
+
+.tag-selector-input:focus {
+  outline: 2px solid #1f6feb;
+  outline-offset: 1px;
+}
+
+.tag-dropdown {
+  position: absolute;
+  z-index: 40;
+  width: 100%;
+  margin: 0.35rem 0 0;
+  padding: 0.3rem 0;
+  list-style: none;
+  border: 1px solid #b8c4dd;
+  border-radius: 6px;
+  background: #ffffff;
+  max-height: 240px;
+  overflow-y: auto;
+  box-shadow: 0 6px 20px rgba(10, 30, 80, 0.15);
+}
+
+.tag-dropdown-option {
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+}
+
+.tag-dropdown-option.is-highlighted {
+  background: #edf4ff;
+}
+
+.tag-dropdown-empty {
+  padding: 0.45rem 0.7rem;
+  color: #5f6c85;
+}
