@@ -262,9 +262,10 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
           <Text>Program: {user.major || 'Not specified'}</Text>
           <Text>Degree: {user.academicYear || 'Not specified'}</Text>
           <Text>Expected Graduation: {user.expectedGraduation || 'Not specified'}</Text>
-          <Text>Research Interests: {user.researchInterestNames.join(', ') || 'Not specified'}</Text>
-          <Text>Skills: {user.skillNames.join(', ') || 'Not specified'}</Text>
-          <Text>Certificates: {user.certificateNames.join(', ') || 'Not specified'}</Text>
+          <Text>Research Interests: {researchInterestNames.join(', ') || 'Not specified'}</Text>
+          <Text>Skills: {skillNames.join(', ') || 'Not specified'}</Text>
+          <Text>Certificates: {certificateNames.join(', ') || 'Not specified'}</Text>
+
           <Text>Availability: {user.availability || 'Not specified'}</Text>
         </Card>
 
