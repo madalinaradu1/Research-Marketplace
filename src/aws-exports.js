@@ -6,17 +6,17 @@ const awsmobile = {
     "aws_cloud_logic_custom": [
         {
             "name": "emailapi",
-            "endpoint": "https://biwbhn48s4.execute-api.us-west-2.amazonaws.com/dev",
+            "endpoint": "https://enjm321sfe.execute-api.us-west-2.amazonaws.com/devtwo",
             "region": "us-west-2"
         }
     ],
-    "aws_appsync_graphqlEndpoint": "https://ybryyyo4mffpfjnpke5773rwxi.appsync-api.us-west-2.amazonaws.com/graphql",
+    "aws_appsync_graphqlEndpoint": "https://zzofc2cainadlfbnmouwxklzwu.appsync-api.us-west-2.amazonaws.com/graphql",
     "aws_appsync_region": "us-west-2",
     "aws_appsync_authenticationType": "AMAZON_COGNITO_USER_POOLS",
-    "aws_cognito_identity_pool_id": "us-west-2:9a627cc8-5163-4db0-9f52-198770c096d2",
+    "aws_cognito_identity_pool_id": "us-west-2:e09c2e65-b485-459b-988e-b52e33a6438a",
     "aws_cognito_region": "us-west-2",
-    "aws_user_pools_id": "us-west-2_UA7PlngqC",
-    "aws_user_pools_web_client_id": "rao5ioafak02qs0dqe6rc8fop",
+    "aws_user_pools_id": "us-west-2_rSW3cZ1KD",
+    "aws_user_pools_web_client_id": "16ugn1ocf1asmp0gn8flu5476n",
     "oauth": {},
     "aws_cognito_username_attributes": [
         "EMAIL"
@@ -36,7 +36,7 @@ const awsmobile = {
     "aws_cognito_verification_mechanisms": [
         "EMAIL"
     ],
-    "aws_user_files_s3_bucket": "researchmarketplace271964ce15f84e66ba7233fe6f91dev-dev",
+    "aws_user_files_s3_bucket": "researchmarketplace271964ce15f84e66ba7233fe6f91devtwo-devtwo",
     "aws_user_files_s3_bucket_region": "us-west-2"
 };
 

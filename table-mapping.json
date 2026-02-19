@@ -1,0 +1,47 @@
+[
+  {
+    "Entity": "Application",
+    "OldTable": "Application-hvnh5hz7svec3c47oqsta2ksb4-dev",
+    "NewTable": "Application-3fvzogkphbcx7hvq7p7ge3fxom-devtwo"
+  },
+  {
+    "Entity": "AuditLog",
+    "OldTable": "AuditLog-hvnh5hz7svec3c47oqsta2ksb4-dev",
+    "NewTable": "AuditLog-3fvzogkphbcx7hvq7p7ge3fxom-devtwo"
+  },
+  {
+    "Entity": "DeletedUser",
+    "OldTable": "DeletedUser-hvnh5hz7svec3c47oqsta2ksb4-dev",
+    "NewTable": "DeletedUser-3fvzogkphbcx7hvq7p7ge3fxom-devtwo"
+  },
+  {
+    "Entity": "Message",
+    "OldTable": "Message-hvnh5hz7svec3c47oqsta2ksb4-dev",
+    "NewTable": "Message-3fvzogkphbcx7hvq7p7ge3fxom-devtwo"
+  },
+  {
+    "Entity": "Notification",
+    "OldTable": "Notification-hvnh5hz7svec3c47oqsta2ksb4-dev",
+    "NewTable": "Notification-3fvzogkphbcx7hvq7p7ge3fxom-devtwo"
+  },
+  {
+    "Entity": "Project",
+    "OldTable": "Project-hvnh5hz7svec3c47oqsta2ksb4-dev",
+    "NewTable": "Project-3fvzogkphbcx7hvq7p7ge3fxom-devtwo"
+  },
+  {
+    "Entity": "StudentPost",
+    "OldTable": "StudentPost-hvnh5hz7svec3c47oqsta2ksb4-dev",
+    "NewTable": "StudentPost-3fvzogkphbcx7hvq7p7ge3fxom-devtwo"
+  },
+  {
+    "Entity": "Tags",
+    "OldTable": "Tags-dev",
+    "NewTable": "Tags-devtwo"
+  },
+  {
+    "Entity": "User",
+    "OldTable": "User-hvnh5hz7svec3c47oqsta2ksb4-dev",
+    "NewTable": "User-3fvzogkphbcx7hvq7p7ge3fxom-devtwo"
+  }
+]

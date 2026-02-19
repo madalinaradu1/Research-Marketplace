@@ -13,7 +13,6 @@ const TAG_SELECTION_SET = `
   tag_type
   aliases
   description
-  hierarchy_path
   status
 `;
 
