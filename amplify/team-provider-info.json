@@ -54,5 +54,61 @@
         "TagsTable": {}
       }
     }
+  },
+  "devtwo": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-research-marketplace-devtwo-0aa72-authRole",
+      "UnauthRoleArn": "arn:aws:iam::688819142309:role/amplify-research-marketplace-devtwo-0aa72-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::688819142309:role/amplify-research-marketplace-devtwo-0aa72-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-research-marketplace-devtwo-0aa72-deployment",
+      "UnauthRoleName": "amplify-research-marketplace-devtwo-0aa72-unauthRole",
+      "StackName": "amplify-research-marketplace-devtwo-0aa72",
+      "StackId": "arn:aws:cloudformation:us-west-2:688819142309:stack/amplify-research-marketplace-devtwo-0aa72/07eba620-0d1e-11f1-9cb4-06b5a4f7b433",
+      "AmplifyAppId": "d1ev55w0oxuc99",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-research-marketplace-devtwo-0aa72-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
+    },
+    "categories": {
+      "auth": {
+        "researchmarketplace2a916c6a": {}
+      },
+      "function": {
+        "adminDeleteUser": {
+          "userPoolId": "placeholder",
+          "deploymentBucketName": "amplify-research-marketplace-devtwo-0aa72-deployment",
+          "s3Key": "amplify-builds/adminDeleteUser-596a7764732b67597644-build.zip"
+        },
+        "createUserRecord": {
+          "deploymentBucketName": "amplify-research-marketplace-devtwo-0aa72-deployment",
+          "s3Key": "amplify-builds/createUserRecord-732f78417274684e6d45-build.zip"
+        },
+        "emailApiHandler": {
+          "deploymentBucketName": "amplify-research-marketplace-devtwo-0aa72-deployment",
+          "s3Key": "amplify-builds/emailApiHandler-7635645733777a676b43-build.zip"
+        },
+        "researchmarketplace2a916c6aPostConfirmation": {
+          "deploymentBucketName": "amplify-research-marketplace-devtwo-0aa72-deployment",
+          "s3Key": "amplify-builds/researchmarketplace2a916c6aPostConfirmation-6852534953302b717742-build.zip"
+        },
+        "researchmarketplace": {},
+        "researchmarketplace2a916c6a": {}
+      },
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d1ev55w0oxuc99",
+          "type": "cicd"
+        }
+      },
+      "api": {
+        "emailapi": {},
+        "researchmarketplace": {}
+      },
+      "customResources": {
+        "TagsTable": {}
+      },
+      "storage": {
+        "researchFiles": {}
+      }
+    }
   }
 }

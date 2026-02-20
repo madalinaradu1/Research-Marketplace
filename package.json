@@ -5,8 +5,6 @@
   "dependencies": {
     "@aws-amplify/ui-react": "^5.0.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.913.0",
-    "@aws-sdk/client-dynamodb": "^3.913.0",
-    "@aws-sdk/lib-dynamodb": "^3.913.0",
     "aws-amplify": "^5.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -42,5 +40,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.993.0",
+    "@aws-sdk/lib-dynamodb": "^3.993.0"
   }
 }

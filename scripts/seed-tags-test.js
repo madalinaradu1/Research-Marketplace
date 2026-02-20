@@ -33,7 +33,7 @@ async function seedTestTags() {
       status: 'ACTIVE',
       aliases: tagDef.aliases || [],
       description: tagDef.description || null,
-      hierarchy_path: normalizedName,
+      hierarchy_path: [normalizedName],
       created_at: timestamp,
       created_by_role: 'ADMIN',
       created_by_id: 'system'

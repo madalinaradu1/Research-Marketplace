@@ -62,5 +62,5 @@ export function buildHierarchyPath(tagId, allTags) {
     currentId = tag.parent_tag_id;
   }
 
-  return path.join('/');
+  return path;
 }
