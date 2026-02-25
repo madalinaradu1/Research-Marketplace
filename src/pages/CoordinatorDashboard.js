@@ -17,7 +17,8 @@ import {
   SelectField,
   useTheme,
   View,
-  Divider
+  Divider,
+  Loader
 } from '@aws-amplify/ui-react';
 import { Storage } from 'aws-amplify';
 import { listProjects, listApplications, listUsers, updateProject, updateApplication } from '../graphql/operations';
@@ -377,7 +378,15 @@ const CoordinatorDashboard = ({ user }) => {
     return items.slice(startIndex, startIndex + itemsPerPage);
   };
   
-  if (loading) return <Text>Loading...</Text>;
+ if (loading) {
+  return (
+    <View width="100%" backgroundColor="#f5f5f5">
+      <Flex justifyContent="center" alignItems="center" padding="2rem 2rem 2rem" gap="2rem" minHeight="84px">
+        <Loader size="large" />
+      </Flex>
+    </View>
+  );
+}
 
   return (
     <View width="100%" backgroundColor="#f5f5f5">
