@@ -6,7 +6,9 @@ import { updateUser } from '../graphql/operations';
  * @param {string} userId - The user ID to update (optional, uses current user if not provided)
  * @returns {Promise} - Promise representing the updated user
  */
+
 export async function syncUserGroupsToRole(userId = null) {
+  /*
   try {
     // Get current user if userId not provided
     const currentUser = await Auth.currentAuthenticatedUser();
@@ -55,4 +57,6 @@ export async function syncUserGroupsToRole(userId = null) {
     // Don't throw error, just return null to prevent app crashes
     return null;
   }
+  */
+  return null;
 }

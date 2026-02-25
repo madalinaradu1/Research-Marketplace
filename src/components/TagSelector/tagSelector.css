@@ -16,7 +16,7 @@
   background: #e8eefc;
   border-radius: 999px;
   padding: 0.2rem 0.65rem;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .tag-chip-remove {
@@ -30,15 +30,17 @@
 
 .tag-selector-input {
   width: 100%;
-  border: 1px solid #b8c4dd;
+  border: 1px solid #b2becf;
   border-radius: 6px;
   padding: 0.55rem 0.7rem;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .tag-selector-input:focus {
-  outline: 2px solid #1f6feb;
-  outline-offset: 1px;
+  outline: none;
+  border-color: #0f62fe;
+  box-shadow: 0 0 0 1px #0f62fe;
 }
 
 .tag-dropdown {
