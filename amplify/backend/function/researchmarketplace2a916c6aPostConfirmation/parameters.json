@@ -1,4 +1,4 @@
 {
-  "modules": "custom",
+  "modules": "custom,assignDefaultGroup",
   "resourceName": "researchmarketplace2a916c6aPostConfirmation"
 }
