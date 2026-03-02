@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { API, graphqlOperation, Auth } from 'aws-amplify';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -28,9 +28,47 @@ import { sendEmailNotification, sendNewItemNotification } from '../utils/emailNo
 import ApplicationReview from '../components/ApplicationReview';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 import { getStatusColorValue } from '../utils/statusColors';
+import '../components/TagSelector/tagSelector.css';
+import TagSelector from '../components/TagSelector';
+import { useTags } from '../contexts/TagContext';
+import { toResolvedTagIds, tagIdsToDisplayNames } from '../components/TagSelector/tagHelpers';
+
+const COLLEGE_OPTIONS = [
+  'College of the Arts and Sciences',
+  'Collangelo College of Business',
+  'College of Education',
+  'College of Nursing and Health Care Professions',
+  'College of Science, Engineering, and Technology',
+  'College of Theology',
+  'College of Doctoral Studies',
+  'College of Health Sciences',
+  'College of Graduate Studies'
+];
+
+function normalizeWords(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function matchesCollegeByWordPrefix(college, query) {
+  const qWords = normalizeWords(query);
+  if (!qWords.length) return true;
+
+  const cWords = normalizeWords(college);
+  return qWords.every((qWord) => cWords.some((cWord) => cWord.startsWith(qWord)));
+}
 
 const FacultyDashboard = ({ user }) => {
   const { tokens } = useTheme();
+  const { tagsById, resolveTagIds } = useTags();
+  const fieldLabelProps = {
+    fontSize: tokens.fontSizes.medium,
+    fontWeight: tokens.fontWeights.medium,
+    color: tokens.colors.font.primary
+  };
   const [projects, setProjects] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,6 +132,8 @@ const FacultyDashboard = ({ user }) => {
   const [deletingProject, setDeletingProject] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [applicationSearchTerm, setApplicationSearchTerm] = useState('');
+  const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
+  const [debouncedCollegeQuery, setDebouncedCollegeQuery] = useState(projectForm.department || '');
   const [viewingProject, setViewingProject] = useState(null);
   const [sortOptions, setSortOptions] = useState({
     newest: true,
@@ -102,10 +142,38 @@ const FacultyDashboard = ({ user }) => {
     department: false,
     deadline: false
   });
-  
+  const [projectResearchTagIds, setProjectResearchTagIds] = useState([]);
+  const [projectSkillTagIds, setProjectSkillTagIds] = useState([]);
 
-  
 
+  const handleCollegeChange = (e) => {
+    const value = e.target.value;
+    const newForm = { ...projectForm, department: value };
+    setProjectForm(newForm);
+    saveProjectToDraft(newForm);
+    setShowCollegeDropdown(true);
+  };
+
+  const handleCollegeSelect = (college) => {
+    const newForm = { ...projectForm, department: college };
+    setProjectForm(newForm);
+    saveProjectToDraft(newForm);
+    setShowCollegeDropdown(false);
+  };
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedCollegeQuery(projectForm.department || '');
+    }, 250);
+    return () => clearTimeout(t);
+  }, [projectForm.department]);
+
+  const collegeSuggestions = useMemo(() => {
+    const query = (debouncedCollegeQuery || '').trim();
+    return COLLEGE_OPTIONS
+      .filter((college) => matchesCollegeByWordPrefix(college, query))
+      .slice(0, 8);
+  }, [debouncedCollegeQuery]);
   
   // Refs for ReactQuill components to suppress findDOMNode warnings
   const messageQuillRef = useRef(null);
@@ -293,18 +361,35 @@ const FacultyDashboard = ({ user }) => {
     }
   };
   
+  const hydrateProjectTagSelections = useCallback((formLike) => {
+  setProjectResearchTagIds(toResolvedTagIds(formLike?.tags, resolveTagIds));
+  setProjectSkillTagIds(toResolvedTagIds(formLike?.skillsRequired, resolveTagIds));
+}, [resolveTagIds]);
+
+  const handleResearchTagsChange = useCallback((nextIds) => {
+    setProjectResearchTagIds(nextIds);
+    const names = tagIdsToDisplayNames(nextIds, tagsById);
+    const newForm = { ...projectForm, tags: names.join(', ') };
+    setProjectForm(newForm);
+    saveProjectToDraft(newForm);
+  }, [projectForm, saveProjectToDraft, tagsById]);
+
+  const handleSkillsTagsChange = useCallback((nextIds) => {
+    setProjectSkillTagIds(nextIds);
+    const names = tagIdsToDisplayNames(nextIds, tagsById);
+    const newForm = { ...projectForm, skillsRequired: names.join(', ') };
+    setProjectForm(newForm);
+    saveProjectToDraft(newForm);
+  }, [projectForm, saveProjectToDraft, tagsById]);
+
+  useEffect(() => {
+    hydrateProjectTagSelections(projectForm);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleProjectFormChange = (e) => {
     const { name, value } = e.target;
     const newForm = { ...projectForm, [name]: value };
-    setProjectForm(newForm);
-    saveProjectToDraft(newForm);
-  };
-  
-  const handleSkillsChange = (e) => {
-    const newForm = { 
-      ...projectForm, 
-      skillsRequired: e.target.value 
-    };
     setProjectForm(newForm);
     saveProjectToDraft(newForm);
   };
@@ -340,21 +425,10 @@ const FacultyDashboard = ({ user }) => {
       const userId = currentUser.username;
       console.log('Current authenticated user ID:', userId);
       
-      // Convert skills and tags strings to arrays
-      const skillsArray = projectForm.skillsRequired
-        ? projectForm.skillsRequired
-            .split(',')
-            .map(skill => skill.trim())
-            .filter(skill => skill)
-        : [];
-      
-      const tagsArray = projectForm.tags
-        ? projectForm.tags
-            .split(',')
-            .map(tag => tag.trim())
-            .filter(tag => tag)
-        : [];
-      
+      // Convert tag IDs to display names for API input
+      const skillsArray = tagIdsToDisplayNames(projectSkillTagIds, tagsById);
+      const tagsArray = tagIdsToDisplayNames(projectResearchTagIds, tagsById);
+
       // Format the date properly for GraphQL
       // Use UTC date to avoid timezone issues
       const deadline = projectForm.applicationDeadline 
@@ -442,6 +516,7 @@ const FacultyDashboard = ({ user }) => {
         description: '',
         department: user.department || '',
         skillsRequired: '',
+        tags: '',
         qualifications: '',
         duration: '',
         applicationDeadline: '',
@@ -537,7 +612,9 @@ const FacultyDashboard = ({ user }) => {
     
     setSelectedProject(project);
     setIsEditingProject(true);
-    setProjectForm(loadCachedEditData());
+    const editForm = loadCachedEditData();
+    setProjectForm(editForm);
+    hydrateProjectTagSelections(editForm);
     setIsCreatingProject(true);
     setActiveTabIndex(0);
   };
@@ -728,6 +805,7 @@ const FacultyDashboard = ({ user }) => {
             
             const newForm = loadCachedDraftData();
             setProjectForm(newForm);
+            hydrateProjectTagSelections(newForm);
             saveProjectToDraft(newForm);
           }}
         >
@@ -1399,6 +1477,8 @@ const FacultyDashboard = ({ user }) => {
                     onClick={() => {
                       setMessagingStudent(null);
                       setMessageText('');
+                      setProjectResearchTagIds([]);
+                      setProjectSkillTagIds([]);
                     }}
                     backgroundColor="white"
                     color="#4a5568"
@@ -1482,7 +1562,11 @@ const FacultyDashboard = ({ user }) => {
           height="100vh"
           backgroundColor="rgba(0, 0, 0, 0.5)"
           style={{ zIndex: 1000 }}
-          onClick={() => setIsCreatingProject(false)}
+          onClick={() => {
+            setIsCreatingProject(false);
+            setProjectResearchTagIds([]);
+            setProjectSkillTagIds([]);
+          }}
         >
           <Flex
             justifyContent="center"
@@ -1496,7 +1580,9 @@ const FacultyDashboard = ({ user }) => {
               maxHeight="100vh"
               backgroundColor="white"
               style={{ overflow: 'auto' }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+              }}
             >
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
@@ -1556,14 +1642,35 @@ const FacultyDashboard = ({ user }) => {
                       </div>
                     </div>
                     <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
-                      <TextField
-                        name="department"
-                        label="College *"
-                        value={projectForm.department}
-                        onChange={handleProjectFormChange}
-                        required
-                        flex="1"
-                      />
+                      <View flex="1" position="relative">
+                        <TextField
+                          name="department"
+                          label="College *"
+                          value={projectForm.department}
+                          onChange={handleCollegeChange}
+                          onFocus={() => setShowCollegeDropdown(true)}
+                          onBlur={() => setTimeout(() => setShowCollegeDropdown(false), 120)}
+                          required
+                        />
+
+                        {showCollegeDropdown && collegeSuggestions.length > 0 && (
+                          <ul
+                            className="tag-dropdown"
+                            style={{ zIndex: 20, maxHeight: '220px', overflowY: 'auto' }}
+                          >
+                            {collegeSuggestions.map((college) => (
+                              <li
+                                key={college}
+                                className="tag-dropdown-option"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => handleCollegeSelect(college)}
+                              >
+                                {college}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </View>
                       <TextField
                         name="applicationDeadline"
                         label="Application Deadline *"
@@ -1574,24 +1681,24 @@ const FacultyDashboard = ({ user }) => {
                         flex="1"
                       />
                     </Flex>
-                    <TextField
-                      name="skillsRequired"
-                      label="Skills Required (comma-separated)"
-                      value={projectForm.skillsRequired}
-                      onChange={handleSkillsChange}
-                      placeholder="e.g. Python, Data Analysis, Machine Learning"
-                    />
-                    <TextField
-                      name="tags"
-                      label="Research Tags (comma-separated)"
-                      value={projectForm.tags}
-                      onChange={(e) => {
-                        const newForm = { ...projectForm, tags: e.target.value };
-                        setProjectForm(newForm);
-                        saveProjectToDraft(newForm);
-                      }}
-                      placeholder="e.g. lab, field, geology, code, clinical"
-                    />
+                    <Flex direction="column" gap="0.5rem">
+                      <Text {...fieldLabelProps}>Research Interests *</Text>
+                      <TagSelector
+                        selectedTagIds={projectResearchTagIds}
+                        onChange={handleResearchTagsChange}
+                        placeholder="List research interests...(e.g., Machine Learning, Neuroscience)"
+                        maxSelections={10}
+                      />
+                    </Flex>
+                    <Flex direction="column" gap="0.5rem">
+                      <Text {...fieldLabelProps}>Skills and Experience *</Text>
+                      <TagSelector
+                        selectedTagIds={projectSkillTagIds}
+                        onChange={handleSkillsTagsChange}
+                        placeholder="List skills and experience...(e.g., Python, Data Analysis)"
+                        maxSelections={15}
+                      />
+                    </Flex>
                     <TextAreaField
                       name="qualifications"
                       label="Required Qualifications/Prerequisites"
