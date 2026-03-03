@@ -10,7 +10,9 @@ exports.handler = async (event, context) => {
     }
     
     // Extract user data from the event
-    const { userAttributes, userName } = event.request;
+    //const { userAttributes, userName } = event.request;
+    const userAttributes = event.request?.userAttributes || {};
+    const userName = event.userName;
     // Initialize DynamoDB document client
     const dynamodb = new AWS.DynamoDB.DocumentClient();
     
@@ -25,28 +27,13 @@ exports.handler = async (event, context) => {
     // Construct DynamoDB table name using environment variables
     const tableName = `User-${process.env.API_RESEARCHMARKETPLACE_GRAPHQLAPIIDOUTPUT}-${process.env.ENV}`;
     
-    // Check for existing users with same email to prevent duplicates
-    try {
-      const existingUsers = await dynamodb.scan({
-        TableName: tableName,
-        FilterExpression: 'email = :email',
-        ExpressionAttributeValues: {
-          ':email': email
-        }
-      }).promise();
-      
-      // If user with email exists, exit early
-      if (existingUsers.Items && existingUsers.Items.length > 0) {
-        console.log('DUPLICATE DETECTED: User with this email already exists');
-        // Don't create duplicate - just return
-        return event;
-      }
-    } catch (scanError) {
-      console.error('Error checking for duplicates:', scanError);
-    }
-    
     // Set default role as Student
     let role = 'Student';
+    if (email.endsWith('@my.gcu.edu')) {
+      role = 'Student';
+    } else if (email.endsWith('@gcu.edu')) {
+      role = 'Faculty';
+    }
     
     // Construct user record with required fields
     const userRecord = {
@@ -57,12 +44,14 @@ exports.handler = async (event, context) => {
       status: 'Active',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      __typename: 'User'
+      __typename: 'User',
+      profileComplete: false
     };
   
     // Use conditional write to prevent race conditions
     try {
       await dynamodb.put({
+        TableName: tableName,
         Item: userRecord,
         ConditionExpression: 'attribute_not_exists(id)' // Only create if ID doesn't exist
       }).promise();
@@ -84,4 +73,3 @@ exports.handler = async (event, context) => {
   // Return the original event
   return event;
 };
-

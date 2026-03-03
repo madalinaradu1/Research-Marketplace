@@ -23,14 +23,13 @@ import OpportunityDetails from './pages/OpportunityDetails';
 import CompleteProfilePage from './pages/CompleteProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
 import MessagesPage from './pages/MessagesPage';
+import OldMessagesPage from './pages/OldMessagesPage';
 import ApplicationPage from './pages/ApplicationPage';
 import StudentPostsPage from './pages/StudentPostsPage';
 
 // Import utilities
-import { createUserAfterSignUp, checkUserExists } from './utils/userManagement';
 import { getUser, listUsers } from './graphql/operations';
 import { testApiAccess } from './utils/testApi';
-import { syncUserGroupsToRole } from './utils/syncUserGroups';
 import { debugAuth } from './utils/debugAuth';
 import { isUserAdmin } from './utils/isUserAdmin';
 
@@ -91,46 +90,22 @@ function App({ signOut, user }) {
     // Debug authentication
     debugAuth();
     
-    // Set up listener for auth events
-    const listener = Hub.listen('auth', async (data) => {
-      const { payload } = data;
-      
-      if (payload.event === 'signUp') {
-        console.log('User signed up:', payload.data);
-        // User creation will happen after confirmation
+    const listener = Hub.listen('auth', ({ payload }) => {
+      const event = payload?.event;
+
+      if (event === 'signUp') {
+        console.log('User signed up');
       }
-      
-      if (payload.event === 'signIn') {
-        try {
-          const userData = await Auth.currentAuthenticatedUser();
-          const userExists = await checkUserExists(userData.attributes.email);
-          
-          if (!userExists) {
-            console.log('Creating new user record after sign in');
-            await createUserAfterSignUp(userData);
-          }
-        } catch (error) {
-          console.error('Error handling sign in:', error);
-        }
+
+      if (event === 'signIn') {
+        console.log('User signed in');
+        // Optional: trigger a profile refetch only, no DB writes here
+      }
+
+      if (event === 'signOut') {
+        console.log('User signed out');
       }
     });
-    
-    // Check if we need to create a user record for the current user
-    const checkCurrentUser = async () => {
-      try {
-        const userData = await Auth.currentAuthenticatedUser();
-        const userExists = await checkUserExists(userData.attributes.email);
-        
-        if (!userExists) {
-          console.log('Creating user record for current user');
-          await createUserAfterSignUp(userData);
-        }
-      } catch (error) {
-        console.error('Error checking current user:', error);
-      }
-    };
-    
-    checkCurrentUser();
     
     // Fetch user profile data
     const fetchUserProfile = async () => {
@@ -138,9 +113,6 @@ function App({ signOut, user }) {
       try {
         // getUser is already imported at the top
         const userData = await Auth.currentAuthenticatedUser();
-        
-        // Sync user's Cognito groups with their role in DynamoDB
-        await syncUserGroupsToRole(userData.username);
         
         let userProfile = null;
         
@@ -174,19 +146,9 @@ function App({ signOut, user }) {
         console.log('User profile role:', userProfile?.role);
         console.log('Is admin check:', isUserAdmin(user, userProfile));
         
-        // If user doesn't exist, try to find existing user by email
         if (!userProfile) {
-          console.log('User profile missing, searching by email');
-          const foundUser = await createUserAfterSignUp(userData);
-          console.log('createUserAfterSignUp returned:', foundUser);
-          
-          if (foundUser) {
-            setUserProfile(foundUser);
-          } else {
-            console.log('No user found - user must be created by admin first');
-            // Don't create user automatically - redirect to error or contact admin
-            setUserProfile(null);
-          }
+          console.log('User profile missing after lookup');
+          setUserProfile(null);
         } else {
           setUserProfile(userProfile);
         }
@@ -217,10 +179,13 @@ function App({ signOut, user }) {
   const isAdmin = isUserAdmin(user, userProfile);
   const isFaculty = userProfile?.role === 'Faculty';
   const isCoordinator = userProfile?.role === 'Coordinator';
-  const shouldCompleteProfile = !isAdmin && !isFaculty && !isCoordinator && userProfile && userProfile.profileComplete === false;
-  
+  const shouldCompleteProfile = 
+    !isAdmin &&  
+    !isCoordinator && 
+    userProfile && 
+    userProfile.profileComplete !== true &&
+    (userProfile.role === 'Student' || userProfile.role === 'Faculty');
 
-  
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -250,7 +215,16 @@ function App({ signOut, user }) {
         
         <main>
           <Routes>
-            <Route path="/" element={shouldCompleteProfile ? 
+            <Route 
+              path="/complete-profile" 
+              element={
+                (userProfile?.role === 'Student' || userProfile?.role === 'Faculty')
+                  ? <CompleteProfilePage user={userProfile || user} />
+                  : <Navigate to="/dashboard" replace />
+              } 
+            />
+            <Route path="/" element={
+              shouldCompleteProfile ?
               <Navigate to="/complete-profile" /> : 
               <Navigate to="/dashboard" />} />
             <Route path="/complete-profile" element={
@@ -282,6 +256,9 @@ function App({ signOut, user }) {
             <Route path="/messages" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <MessagesPage user={userProfile || user} />} />
+            <Route path="/old-messages" element={shouldCompleteProfile ? 
+              <Navigate to="/complete-profile" /> : 
+              <OldMessagesPage user={userProfile || user} />} />
             <Route path="/apply/:projectId" element={shouldCompleteProfile ? 
               <Navigate to="/complete-profile" /> : 
               <ApplicationPage user={userProfile || user} />} />
