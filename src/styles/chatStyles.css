@@ -1,0 +1,143 @@
+/* Dark Mode Chat Styles */
+
+.chat-drawer {
+  background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+}
+
+.chat-header {
+  background: linear-gradient(135deg, #2d2d2d 0%, #1f1f1f 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-message-own {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.chat-message-other {
+  background: linear-gradient(135deg, #374151 0%, #1F2937 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chat-input {
+  background: #1a1a1a;
+  border: 1px solid #404040;
+  color: white;
+  transition: border-color 0.2s ease;
+}
+
+.chat-input:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.applicant-card {
+  background: linear-gradient(135deg, #111827 0%, #0a0f1a 100%);
+  border: 1px solid #374151;
+  transition: all 0.2s ease;
+}
+
+.applicant-card:hover {
+  border-color: #3B82F6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.modal-backdrop-dark {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.modal-content-dark {
+  background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+  border: 1px solid #374151;
+}
+
+.status-badge {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.message-bubble {
+  animation: slideIn 0.2s ease;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 3px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #525252;
+}
+
+/* Button hover effects */
+.message-button {
+  transition: all 0.2s ease;
+}
+
+.message-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.message-button:active {
+  transform: scale(0.98);
+}
+
+/* Typing indicator (optional) */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: #6B7280;
+  border-radius: 50%;
+  animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
