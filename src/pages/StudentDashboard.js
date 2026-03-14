@@ -22,6 +22,8 @@ import { listApplications, listProjects, createApplication } from '../graphql/op
 import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 import ApplicationStatus from '../components/ApplicationStatus';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
+import { getRecommendedProjects } from '../graphql/recommendation-operations';
+
 
 const StudentDashboard = ({ user }) => {
   const navigate = useNavigate();
@@ -43,8 +45,10 @@ const StudentDashboard = ({ user }) => {
   const [lastViewedTime, setLastViewedTime] = useState(null);
   const [applicationsPage, setApplicationsPage] = useState(1);
   const [returnedPage, setReturnedPage] = useState(1);
+  const [recommendedProjects, setRecommendedProjects] = useState([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false);
   const itemsPerPage = 10;
-  
+
   useEffect(() => {
     fetchData();
   }, [user]);
@@ -97,7 +101,30 @@ const StudentDashboard = ({ user }) => {
           // Set approved/published projects for display (coordinator-approved projects)
           const filteredProjects = allProjects.filter(p => p.isActive && (p.projectStatus === 'Approved' || p.projectStatus === 'Published'));
           setProjects(filteredProjects);
-          
+
+          try {
+            setRecommendationsLoading(true);
+            const recResult = await API.graphql(graphqlOperation(getRecommendedProjects, { userId, limit: 10 }));
+            setRecommendedProjects(recResult.data?.getRecommendedProjects || []);
+          } catch (recErr) {
+            console.error('Recommendation query failed: ', recErr);
+            const fallback = [...filteredProjects]
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              .slice(0,10)
+              .map((p) => ({
+                projectId: p.id,
+                score: 0,
+                requiredMatches: 0,
+                optionalMatches: 0,
+                matchedTagIds: [],
+                reasons: ['Newly added project'],
+                project: p 
+              }));
+            setRecommendedProjects(fallback);
+          } finally {
+            setRecommendationsLoading(false);
+          }
+
           // Use all projects for enriching applications
           const enrichedApplications = userApplications.map(app => {
             const project = allProjects.find(p => p.id === app.projectID);
@@ -310,6 +337,30 @@ const StudentDashboard = ({ user }) => {
           </Flex>
         </Card>
       </Flex>
+
+      <Card variation="elevated" backgroundColor="white">
+        <Heading level={4}>Recommended for You</Heading>
+        {recommendationsLoading ? (
+          <Loader size="small" />
+        ) : (
+          <Collection items={recommendedProjects.slice(0, 5)} type="list" gap="0.75rem" direction="column">
+            {(rec) => (
+              <Card key={rec.projectId} variation="outlined" backgroundColor="white">
+                <Flex direction="column" gap="0.4rem">
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Heading level={5}>{rec.project?.title || 'Project'}</Heading>
+                    <Badge backgroundColor="#2f855a" color="white">{rec.score.toFixed(1)}</Badge>
+                  </Flex>
+                  <Text fontSize="0.9rem">{rec.project?.department}</Text>
+                  <Text fontSize="0.8rem" color="#4a5568">
+                    {rec.reasons?.length ? `Matched: ${rec.reasons.slice(0, 3).join(', ')}` : 'Recommended by recency'}
+                  </Text>
+                </Flex>
+              </Card>
+            )}
+          </Collection>
+        )}
+      </Card>
       
       <Tabs
         currentIndex={activeTabIndex}

@@ -1,5 +1,10 @@
 import { API, graphqlOperation } from 'aws-amplify';
-import { normalizeTagName } from './normalize';
+import {
+  isPrefixMatch,
+  normalizeDisplayPrefix,
+  normalizeTagName,
+  normalizeWords
+} from './normalize';
 
 const MAX_LIMIT = 50;
 const LIST_ALL_LIMIT = 200;
@@ -74,6 +79,21 @@ async function queryPrefixRaw(prefix, limit = MAX_LIMIT) {
   return items.map(toTag);
 }
 
+function buildQueryPrefixes(rawQuery) {
+  return Array.from(new Set(normalizeWords(rawQuery)))
+    .map((word) => normalizeTagName(word))
+    .filter(Boolean);
+}
+
+function rankPrefixMatch(tag, rawPrefix) {
+  const normalizedPrefix = normalizeTagName(rawPrefix);
+  const displayPrefix = normalizeDisplayPrefix(rawPrefix);
+  const normalizedName = (tag?.normalized_name || '').toLowerCase();
+  const displayName = (tag?.display_name || '').toLowerCase();
+
+  return normalizedName.startsWith(normalizedPrefix) || displayName.startsWith(displayPrefix) ? 0 : 1;
+}
+
 async function queryAllTagsPage(nextToken, limit = LIST_ALL_LIMIT) {
   const variables = { limit };
   if (nextToken) variables.nextToken = nextToken;
@@ -94,9 +114,24 @@ async function queryAllTagsPage(nextToken, limit = LIST_ALL_LIMIT) {
 }
 
 export async function fetchTagsByPrefix(prefix, limit = MAX_LIMIT) {
-  const normalizedPrefix = normalizeTagName(prefix);
-  const raw = await queryPrefixRaw(normalizedPrefix, limit);
-  return sortByDisplayName(activeOnly(dedupeByTagId(raw)));
+  const queryPrefixes = buildQueryPrefixes(prefix);
+  if (!queryPrefixes.length) {
+    return [];
+  }
+
+  const queryLimit = Math.max(limit, MAX_LIMIT);
+  const batches = await Promise.all(
+    queryPrefixes.map((queryPrefix) => queryPrefixRaw(queryPrefix, queryLimit))
+  );
+
+  return activeOnly(dedupeByTagId(batches.flat()))
+    .filter((tag) => isPrefixMatch(tag, prefix))
+    .sort((a, b) => {
+      const rankDelta = rankPrefixMatch(a, prefix) - rankPrefixMatch(b, prefix);
+      if (rankDelta !== 0) return rankDelta;
+      return a.display_name.localeCompare(b.display_name);
+    })
+    .slice(0, limit);
 }
 
 function upsertAll(map, tags) {

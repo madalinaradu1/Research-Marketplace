@@ -1,0 +1,16 @@
+[
+  {
+    "Action": [
+      "dynamodb:GetItem",
+      "dynamodb:BatchGetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/User-*",
+      "arn:aws:dynamodb:*:*:table/Project-*",
+      "arn:aws:dynamodb:*:*:table/ProjectTagIndex-*",
+      "arn:aws:dynamodb:*:*:table/ProjectTagIndex-*/index/*"
+    ]
+  }
+]

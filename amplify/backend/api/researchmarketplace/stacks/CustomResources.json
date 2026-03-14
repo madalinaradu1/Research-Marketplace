@@ -77,6 +77,51 @@
         ]
       }
     },
+    "ProjectTagIndexDataSource": {
+      "Type": "AWS::AppSync::DataSource",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "Name": "ProjectTagIndexDataSource",
+        "Type": "AMAZON_DYNAMODB",
+        "ServiceRoleArn": { "Fn::GetAtt": ["ProjectTagIndexDataSourceRole", "Arn"] },
+        "DynamoDBConfig": {
+          "AwsRegion": { "Ref": "AWS::Region" },
+          "TableName": { "Fn::Sub": "ProjectTagIndex-${env}" }
+        }
+      }
+    },
+    "ProjectTagIndexDataSourceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": { "Service": "appsync.amazonaws.com" },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "ProjectTagIndexTableAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": ["dynamodb:PutItem", "dynamodb:DeleteItem"],
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/ProjectTagIndex-${env}"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
     "QueryGetTagByIdResolver": {
       "Type": "AWS::AppSync::Resolver",
       "Properties": {
@@ -92,6 +137,38 @@
         }
       },
       "DependsOn": ["TagsTableDataSource"]
+    },
+    "MutationPutProjectTagIndexMappingResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "TypeName": "Mutation",
+        "FieldName": "putProjectTagIndexMapping",
+        "DataSourceName": { "Fn::GetAtt": ["ProjectTagIndexDataSource", "Name"] },
+        "RequestMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.putProjectTagIndexMapping.req.vtl"
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.putProjectTagIndexMapping.res.vtl"
+        }
+      },
+      "DependsOn": ["ProjectTagIndexDataSource"]
+    },
+    "MutationDeleteProjectTagIndexMappingResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "TypeName": "Mutation",
+        "FieldName": "deleteProjectTagIndexMapping",
+        "DataSourceName": { "Fn::GetAtt": ["ProjectTagIndexDataSource", "Name"] },
+        "RequestMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.deleteProjectTagIndexMapping.req.vtl"
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.deleteProjectTagIndexMapping.res.vtl"
+        }
+      },
+      "DependsOn": ["ProjectTagIndexDataSource"]
     },
     "QueryListTagsByPrefixResolver": {
       "Type": "AWS::AppSync::Resolver",

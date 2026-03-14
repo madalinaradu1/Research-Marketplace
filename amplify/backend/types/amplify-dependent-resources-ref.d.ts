@@ -43,6 +43,13 @@ export type AmplifyDependentResourcesAttributes = {
       "Name": "string",
       "Region": "string"
     },
+    "projectRecommendations": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "researchmarketplace2a916c6aPostConfirmation": {
       "Arn": "string",
       "LambdaExecutionRole": "string",

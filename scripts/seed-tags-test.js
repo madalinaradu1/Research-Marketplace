@@ -1,25 +1,28 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
-import { CANONICAL_TAGS } from './seed-data/tagsData.js';
-import { generateTagId, normalizeTagName } from '../amplify/backend/function/researchmarketplace2a916c6aPostConfirmation/src/lib/tags/tagUtils.js';
+import {
+  buildWordIndexItems,
+  generateTagId,
+  normalizeTagName
+} from '../amplify/backend/function/researchmarketplace2a916c6aPostConfirmation/src/lib/tags/tagUtils.js';
+import { loadAllTagDefinitions } from './seed-data/loadTagDefinitions.js';
 
-const client = new DynamoDBClient({region: process.env.AWS_REGION || 'us-west-2'});
+const client = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-west-2' });
 const docClient = DynamoDBDocumentClient.from(client);
 
-const TABLE_NAME = `Tags-${process.env.ENV || 'dev'}`;
+const TABLE_NAME = `Tags-${process.env.ENV || 'devtwo'}`;
+const TAG_DEFINITIONS = loadAllTagDefinitions();
 
 async function seedTestTags() {
   console.log(`Seeding test tags to table: ${TABLE_NAME}`);
-  
-  // Take only first 2 tags
-  const testTags = CANONICAL_TAGS.slice(0, 2);
-  
+
+  const testTags = TAG_DEFINITIONS.slice(0, 2);
+
   for (const tagDef of testTags) {
     const tagId = generateTagId(tagDef.display_name, tagDef.tag_type);
     const normalizedName = normalizeTagName(tagDef.display_name);
     const timestamp = new Date().toISOString();
 
-    // Create canonical tag
     const canonicalTag = {
       PK: 'TAG',
       SK: `TAG#${tagId}`,
@@ -43,31 +46,35 @@ async function seedTestTags() {
       TableName: TABLE_NAME,
       Item: canonicalTag
     }));
-    console.log(`✓ Added tag: ${tagDef.display_name}`);
+    console.log(`Added tag: ${tagDef.display_name}`);
 
-    // Create aliases
-    if (tagDef.aliases && tagDef.aliases.length > 0) {
-      for (const alias of tagDef.aliases) {
-        const aliasNormalized = normalizeTagName(alias);
-        await docClient.send(new PutCommand({
-          TableName: TABLE_NAME,
-          Item: {
-            PK: 'TAG',
-            SK: `ALIAS#${aliasNormalized}`,
-            alias: alias,
-            alias_normalized: aliasNormalized,
-            tag_id: tagId,
-            status: 'ACTIVE'
-          }
-        }));
-        console.log(`  ✓ Added alias: ${alias}`);
-      }
+    for (const wordItem of buildWordIndexItems(canonicalTag)) {
+      await docClient.send(new PutCommand({
+        TableName: TABLE_NAME,
+        Item: wordItem
+      }));
+      console.log(`  Added word index: ${wordItem.GSI1SK}`);
+    }
+
+    for (const alias of tagDef.aliases || []) {
+      const aliasNormalized = normalizeTagName(alias);
+      await docClient.send(new PutCommand({
+        TableName: TABLE_NAME,
+        Item: {
+          PK: 'TAG',
+          SK: `ALIAS#${aliasNormalized}`,
+          alias,
+          alias_normalized: aliasNormalized,
+          tag_id: tagId,
+          status: 'ACTIVE'
+        }
+      }));
+      console.log(`  Added alias: ${alias}`);
     }
   }
 
   console.log('\nTest seeding complete!');
-  console.log(`Added ${testTags.length} tags with their aliases`);
+  console.log(`Added ${testTags.length} tags with their aliases and word indexes`);
 }
 
 seedTestTags().catch(console.error);
-

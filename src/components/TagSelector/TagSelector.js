@@ -136,10 +136,6 @@ export default function TagSelector({
       return;
     }
 
-    if (event.key === 'Backspace' && !inputValue && selectedIds.length) {
-      event.preventDefault();
-      removeTag(selectedIds[selectedIds.length - 1]);
-    }
   }
 
   return (
