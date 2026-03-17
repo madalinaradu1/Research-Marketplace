@@ -1,0 +1,52 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Project tag index table for recommendations",
+  "Parameters": {
+    "env": { "Type": "String" }
+  },
+  "Resources": {
+    "ProjectTagIndexTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "TableName": { "Fn::Sub": "ProjectTagIndex-${env}" },
+        "BillingMode": "PAY_PER_REQUEST",
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        },
+        "SSESpecification": {
+          "SSEEnabled": true
+        },
+        "AttributeDefinitions": [
+          { "AttributeName": "PK", "AttributeType": "S" },
+          { "AttributeName": "SK", "AttributeType": "S" },
+          { "AttributeName": "projectId", "AttributeType": "S" },
+          { "AttributeName": "tagId", "AttributeType": "S" }
+        ],
+        "KeySchema": [
+          { "AttributeName": "PK", "KeyType": "HASH" },
+          { "AttributeName": "SK", "KeyType": "RANGE" }
+        ],
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "byProjectId",
+            "KeySchema": [
+              { "AttributeName": "projectId", "KeyType": "HASH" },
+              { "AttributeName": "tagId", "KeyType": "RANGE" }
+            ],
+            "Projection": { "ProjectionType": "ALL" }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "ProjectTagIndexTableName": {
+      "Value": { "Ref": "ProjectTagIndexTable" }
+    },
+    "ProjectTagIndexTableArn": {
+      "Value": { "Fn::GetAtt": ["ProjectTagIndexTable", "Arn"] }
+    }
+  }
+}

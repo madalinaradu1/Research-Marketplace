@@ -1,0 +1,18 @@
+{
+  "permissions": {},
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "projectTable",
+      "environmentVariableName": "PROJECT_TABLE"
+    },
+    {
+      "cloudFormationParameterName": "userTable",
+      "environmentVariableName": "USER_TABLE"
+    },
+    {
+      "cloudFormationParameterName": "indexTable",
+      "environmentVariableName": "INDEX_TABLE"
+    }
+  ]
+}

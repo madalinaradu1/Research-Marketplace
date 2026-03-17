@@ -32,6 +32,9 @@ import '../components/TagSelector/tagSelector.css';
 import TagSelector from '../components/TagSelector';
 import { useTags } from '../contexts/TagContext';
 import { toResolvedTagIds, tagIdsToDisplayNames } from '../components/TagSelector/tagHelpers';
+import { syncProjectTagIndex, removeProjectTagIndexMappings } from '../lib/recommendations/projectTagIndexSync';
+import { hasWordPrefixMatch } from '../lib/tags/normalize';
+
 
 const COLLEGE_OPTIONS = [
   'College of the Arts and Sciences',
@@ -171,7 +174,7 @@ const FacultyDashboard = ({ user }) => {
   const collegeSuggestions = useMemo(() => {
     const query = (debouncedCollegeQuery || '').trim();
     return COLLEGE_OPTIONS
-      .filter((college) => matchesCollegeByWordPrefix(college, query))
+      .filter((college) => !query || hasWordPrefixMatch(college, query))
       .slice(0, 8);
   }, [debouncedCollegeQuery]);
   
@@ -523,7 +526,24 @@ const FacultyDashboard = ({ user }) => {
         requiresTranscript: false,
         isActive: true
       });
+
+      const savedProject = selectedProject ? result.data.updateProject : result.data.createProject;
+      const projectId = savedProject.id;
+      const oldRequiredTagIds = selectedProject ? resolveTagIds(selectedProject.skillsRequired || []) : [];
+      const oldOptionalTagIds = selectedProject ? resolveTagIds(selectedProject.tags || []) : [];
+      const newRequiredTagIds = resolveTagIds(projectSkillTagIds);
+      const newOptionalTagIds = resolveTagIds(projectResearchTagIds);
       
+      await syncProjectTagIndex({
+        projectId,
+        oldRequiredTagIds,
+        oldOptionalTagIds,
+        newRequiredTagIds,
+        newOptionalTagIds
+      });
+      setProjectResearchTagIds([]);
+      setProjectSkillTagIds([]);
+
       // Clear draft after successful submission
       clearProjectDraft();
       
@@ -555,14 +575,24 @@ const FacultyDashboard = ({ user }) => {
     
     setDeletingProject(project.id);
     setError(null);
+    const requiredTagIds = resolveTagIds(project.skillsRequired || []);
+    const optionalTagIds = resolveTagIds(project.tags || []);
     
     try {
       await API.graphql(graphqlOperation(deleteProject, { 
         input: { id: project.id } 
       }));
-      
-      setSuccessMessage('Project deleted successfully!');
-      fetchData(); // Refresh the data
+
+      try {
+        await removeProjectTagIndexMappings({ projectId: project.id, requiredTagIds, optionalTagIds });
+        setSuccessMessage('Project deleted successfully!');
+      } catch (syncError) {
+        console.error('ProjectTagIndex cleanup failed after project deletion:', syncError);
+        setSuccessMessage('Project deleted, but tag index cleanup failed. Rebuild recommendations before relying on them.');
+      }
+
+      fetchData();
+
     } catch (err) {
       console.error('Error deleting project:', err);
       setError('Failed to delete project. Please try again.');

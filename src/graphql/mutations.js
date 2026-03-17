@@ -1,6 +1,16 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const putProjectTagIndexMapping = /* GraphQL */ `
+  mutation PutProjectTagIndexMapping($input: PutProjectTagIndexInput!) {
+    putProjectTagIndexMapping(input: $input)
+  }
+`;
+export const deleteProjectTagIndexMapping = /* GraphQL */ `
+  mutation DeleteProjectTagIndexMapping($input: DeleteProjectTagIndexInput!) {
+    deleteProjectTagIndexMapping(input: $input)
+  }
+`;
 export const createUser = /* GraphQL */ `
   mutation CreateUser(
     $input: CreateUserInput!

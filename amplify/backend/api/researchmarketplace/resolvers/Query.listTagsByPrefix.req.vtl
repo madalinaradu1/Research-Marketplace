@@ -11,7 +11,7 @@
   "query": {
     "expression": "GSI1PK = :pk AND begins_with(GSI1SK, :prefix)",
     "expressionValues": {
-      ":pk": $util.dynamodb.toDynamoDBJson("TAG_NAME"),
+      ":pk": $util.dynamodb.toDynamoDBJson("TAG_WORD"),
       ":prefix": $util.dynamodb.toDynamoDBJson($prefix)
     }
   },

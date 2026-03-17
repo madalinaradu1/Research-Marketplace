@@ -69,6 +69,51 @@ export const listAllTags = /* GraphQL */ `
     }
   }
 `;
+export const getRecommendedProjects = /* GraphQL */ `
+  query GetRecommendedProjects(
+    $limit: Int
+    $userId: ID
+    $userTagIds: [String!]
+  ) {
+    getRecommendedProjects(
+      limit: $limit
+      userId: $userId
+      userTagIds: $userTagIds
+    ) {
+      projectId
+      score
+      requiredMatches
+      optionalMatches
+      matchedTagIds
+      reasons
+      project {
+        id
+        title
+        description
+        department
+        faculty
+        skillsRequired
+        tags
+        qualifications
+        duration
+        applicationDeadline
+        facultyID
+        isActive
+        requiresTranscript
+        projectStatus
+        coordinatorNotes
+        rejectionReason
+        selectedStudentID
+        filledAt
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      __typename
+    }
+  }
+`;
 export const getUser = /* GraphQL */ `
   query GetUser($id: ID!) {
     getUser(id: $id) {

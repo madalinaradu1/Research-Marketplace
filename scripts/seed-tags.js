@@ -1,13 +1,19 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand, BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
-import { CANONICAL_TAGS } from './seed-data/tagsData.js';
-import { generateTagId, normalizeTagName, validateHierarchy, buildHierarchyPath } from '../amplify/backend/function/researchmarketplace2a916c6aPostConfirmation/src/lib/tags/tagUtils.js';
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  buildHierarchyPath,
+  buildWordIndexItems,
+  generateTagId,
+  normalizeTagName,
+  validateHierarchy
+} from '../amplify/backend/function/researchmarketplace2a916c6aPostConfirmation/src/lib/tags/tagUtils.js';
+import { loadAllTagDefinitions } from './seed-data/loadTagDefinitions.js';
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-west-2' });
 const docClient = DynamoDBDocumentClient.from(client);
 
-const TABLE_NAME = `Tags-${process.env.ENV || 'dev'}`;
-const BATCH_SIZE = 25;
+const TABLE_NAME = `Tags-${process.env.ENV || 'devtwo'}`;
+const TAG_DEFINITIONS = loadAllTagDefinitions();
 
 async function batchWrite(items) {
   for (const item of items) {
@@ -30,7 +36,7 @@ async function seedTags() {
   const processedTags = [];
 
   // First pass: create canonical tags
-  for (const tagDef of CANONICAL_TAGS) {
+  for (const tagDef of TAG_DEFINITIONS) {
     const tagId = generateTagId(tagDef.display_name, tagDef.tag_type);
     const normalizedName = normalizeTagName(tagDef.display_name);
     const timestamp = new Date().toISOString();
@@ -66,8 +72,12 @@ async function seedTags() {
     tag.hierarchy_path = buildHierarchyPath(tag.tag_id, processedTags);
   }
 
-  // Third pass: create aliases and edges
-  for (const tagDef of CANONICAL_TAGS) {
+  // Third pass: create word-search items, aliases, and edges
+  for (const tag of processedTags) {
+    allItems.push(...buildWordIndexItems(tag));
+  }
+
+  for (const tagDef of TAG_DEFINITIONS) {
     const tagId = generateTagId(tagDef.display_name, tagDef.tag_type);
 
     // Create alias items
