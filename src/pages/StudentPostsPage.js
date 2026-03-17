@@ -87,6 +87,7 @@ const StudentPostsPage = ({ user }) => {
       }));
       
       const posts = result.data.listStudentPosts.items || [];
+      console.log('Fetched posts:', posts.length, posts);
       
       // Fetch student data for each post if not already included
       const postsWithStudents = await Promise.all(
@@ -113,6 +114,7 @@ const StudentPostsPage = ({ user }) => {
       setPosts(postsWithStudents);
     } catch (error) {
       console.error('Error fetching posts:', error);
+      console.error('Fetch error details:', JSON.stringify(error, null, 2));
     } finally {
       setLoading(false);
     }
@@ -138,19 +140,19 @@ const StudentPostsPage = ({ user }) => {
         researchAreas: formData.researchAreas ? formData.researchAreas.split(',').map(s => s.trim()) : [],
         skillsOffered: formData.skillsOffered ? formData.skillsOffered.split(',').map(s => s.trim()) : [],
         skillsNeeded: formData.skillsNeeded ? formData.skillsNeeded.split(',').map(s => s.trim()) : [],
-        timeCommitment: formData.timeCommitment || null,
-        isActive: true
+        timeCommitment: formData.timeCommitment || null
       };
 
       if (editingPost) {
         input.id = editingPost.id;
-        // Don't include studentID when updating - it should remain unchanged
         await API.graphql(graphqlOperation(updateStudentPost, { input }));
       } else {
         input.studentID = userId;
-        await API.graphql(graphqlOperation(createStudentPost, { input }));
+        const result = await API.graphql(graphqlOperation(createStudentPost, { input }));
+        console.log('Post created:', result);
       }
 
+      await fetchPosts();
       setShowCreateForm(false);
       setEditingPost(null);
       setFormData({
@@ -166,9 +168,14 @@ const StudentPostsPage = ({ user }) => {
       fetchPosts();
     } catch (error) {
       console.error('Error creating post:', error);
+      console.error('Full error object:', JSON.stringify(error, null, 2));
       if (error.errors) {
         console.error('GraphQL errors:', error.errors);
-        error.errors.forEach(err => console.error('Error details:', err));
+        error.errors.forEach(err => {
+          console.error('Error details:', err);
+          console.error('Error message:', err.message);
+          console.error('Error path:', err.path);
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -208,7 +215,7 @@ const StudentPostsPage = ({ user }) => {
   };
 
   const getPostsByType = (type) => {
-    return posts.filter(post => post.type === type && post.isActive);
+    return posts.filter(post => post.type === type);
   };
 
   const getPostTypeLabel = (type) => {
@@ -258,7 +265,7 @@ const StudentPostsPage = ({ user }) => {
         <TabItem title="All Posts">
           <Card backgroundColor="white" padding="1.5rem">
             {(() => {
-              const validPosts = posts.filter(post => post.isActive && post.student);
+              const validPosts = posts.filter(post => post.student);
               return validPosts.length === 0 ? (
                 <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
                   <Text fontSize="3rem">💬</Text>
