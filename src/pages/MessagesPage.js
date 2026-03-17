@@ -16,8 +16,10 @@ import {
   View
 } from '@aws-amplify/ui-react';
 import { listUsers, listApplications, listProjects } from '../graphql/operations';
-import { listMessages, createMessage, getMessageThread } from '../graphql/message-operations';
+import { listMessages, createMessage, getMessageThread, updateMessage, deleteMessage } from '../graphql/message-operations';
 import { sendEmailNotification } from '../utils/emailNotifications';
+import { useNavigate } from 'react-router-dom';
+
 
 // Clean HTML content to remove excessive spacing
 const cleanHtmlContent = (html) => {
@@ -48,6 +50,7 @@ const MessagesPage = ({ user }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [isReplying, setIsReplying] = useState(false);
@@ -58,6 +61,13 @@ const MessagesPage = ({ user }) => {
   const [messageScrollRef, setMessageScrollRef] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showFormatting, setShowFormatting] = useState(false);
+  const [hoveredMessage, setHoveredMessage] = useState(null);
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [editText, setEditText] = useState('');
+  const [showArchivedConversations, setShowArchivedConversations] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(null);
+  const [hasArchivedMessages, setHasArchivedMessages] = useState(false);
+  const [isArchivedConversation, setIsArchivedConversation] = useState(false);
 
 
 
@@ -162,7 +172,38 @@ const MessagesPage = ({ user }) => {
         })
         .sort((a, b) => b.lastMessageTime - a.lastMessageTime);
       
-      setMessages(conversations);
+      // Separate active and archived conversations
+let activeConversations, archivedConversations;
+
+if (user.role === 'Student') {
+  activeConversations = conversations.filter(conversation => 
+    !conversation.thread.some(msg => msg.body && msg.body.startsWith('[ARCHIVED]'))
+  );
+  archivedConversations = conversations.filter(conversation => 
+    conversation.thread.some(msg => msg.body && msg.body.startsWith('[ARCHIVED]'))
+  );
+} else {
+  // Admin/Faculty only see non-archived conversations
+  activeConversations = conversations.filter(conversation => 
+    !conversation.thread.some(msg => msg.body && msg.body.startsWith('[ARCHIVED]'))
+  );
+  archivedConversations = [];
+}
+
+// Show archived conversations if student clicked "Past Conversations"
+const displayedConversations = (user.role === 'Student' && showArchivedConversations) 
+  ? archivedConversations 
+  : activeConversations;
+
+    setMessages(displayedConversations);
+
+    setMessages(displayedConversations);
+
+      // Check for archived messages for students
+    if (user.role === 'Student') {
+  setHasArchivedMessages(archivedConversations.length > 0);
+}
+
       setUsers(allUsers);
       
       // Fetch available recipients based on user role
@@ -299,6 +340,7 @@ const MessagesPage = ({ user }) => {
       }
       
       setReplyText('');
+
       // Add the new message to the current conversation
 const newMessage = {
   id: Date.now().toString(), // Temporary ID
@@ -340,14 +382,116 @@ setMessages(prev => prev.map(conversation =>
 
   const selectConversation = (conversation) => {
     setSelectedConversation(conversation);
+  
+    // Check if this conversation is archived
+    const isArchived = conversation.thread.some(msg => 
+      msg.body && msg.body.startsWith('[ARCHIVED]')
+    );
+    setIsArchivedConversation(isArchived);
+  
+   // Mark all unread messages in this conversation as read
+   conversation.thread.forEach(msg => {
+     if (msg.receiverID === (user.id || user.username) && !msg.isRead) {
+       markAsRead(msg.id);
+     }
+   });
+ };
+
+
+  const deleteMessageHandler = async (messageId) => {
+  try {
+    await API.graphql(graphqlOperation(deleteMessage, { 
+      input: { id: messageId } 
+    }));
     
-    // Mark all unread messages in this conversation as read
-    conversation.thread.forEach(msg => {
-      if (msg.receiverID === (user.id || user.username) && !msg.isRead) {
-        markAsRead(msg.id);
+    // Update local state
+    setSelectedConversation(prev => ({
+      ...prev,
+      thread: prev.thread.filter(msg => msg.id !== messageId)
+    }));
+    
+    setMessages(prev => prev.map(conversation => 
+      conversation.id === selectedConversation.id 
+        ? {
+            ...conversation,
+            thread: conversation.thread.filter(msg => msg.id !== messageId)
+          }
+        : conversation
+    ));
+  } catch (err) {
+    console.error('Error deleting message:', err);
+    setError('Failed to delete message.');
+  }
+};
+
+const startEdit = (message) => {
+  setEditingMessage(message.id);
+  setEditText(message.body);
+};
+
+const saveEdit = async (messageId) => {
+  try {
+    await API.graphql(graphqlOperation(updateMessage, {
+      input: { 
+        id: messageId, 
+        body: editText 
       }
-    });
-  };
+    }));
+    
+    // Update local state
+    setSelectedConversation(prev => ({
+      ...prev,
+      thread: prev.thread.map(msg => 
+        msg.id === messageId ? { ...msg, body: editText } : msg
+      )
+    }));
+    
+    setMessages(prev => prev.map(conversation => 
+      conversation.id === selectedConversation.id 
+        ? {
+            ...conversation,
+            thread: conversation.thread.map(msg => 
+              msg.id === messageId ? { ...msg, body: editText } : msg
+            )
+          }
+        : conversation
+    ));
+    
+    setEditingMessage(null);
+    setEditText('');
+  } catch (err) {
+    console.error('Error updating message:', err);
+    setError('Failed to update message.');
+  }
+};
+  const archiveConversation = async (conversationId) => {
+  try {
+    const conversation = messages.find(c => c.id === conversationId);
+    if (!conversation) return;
+
+    const userId = user.id || user.username;
+    
+    // Only update messages sent by the current user
+    for (const msg of conversation.thread) {
+      if (msg.senderID === userId) {
+        await API.graphql(graphqlOperation(updateMessage, {
+          input: { 
+            id: msg.id, 
+            body: msg.body.startsWith('[ARCHIVED]') ? msg.body : `[ARCHIVED] ${msg.body}`
+          }
+        }));
+      }
+    }
+
+    setMessages(prev => prev.filter(c => c.id !== conversationId));
+    setSelectedConversation(null);
+    setShowDeleteConfirmation(null);
+  } catch (err) {
+    console.error('Error archiving conversation:', err);
+    setError('Failed to archive conversation.');
+  }
+};
+
 
   if (loading) {
     return (
@@ -386,30 +530,62 @@ setMessages(prev => prev.map(conversation =>
         </Card>
       )}
       
-            {/* Main Split Layout */}
-      <Flex height="calc(120vh - 140px)" backgroundColor="white" marginLeft="-6rem">
-        {/* Left Sidebar - Conversations List (30%) */}
-        <View 
+{/* Main Split Layout - Unified Card */}
+<Card 
+  backgroundColor="white" 
+  marginLeft="-6rem" 
+  borderRadius="12px"
+  padding="0"
+  style={{ 
+    height: "calc(120vh - 140px)",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    overflow: "hidden"
+  }}
+>
+  <Flex height="100%">
+    {/* Left Sidebar - Conversations List (30%) */}
+    <View 
           width={{ base: '100%', large: '30%' }} 
           borderRight="1px solid #e2e8f0"
           display={{ base: selectedConversation ? 'none' : 'block', large: 'block' }}
         >
           <Flex direction="column" height="100%">
-            <Card backgroundColor="#f8fafc" padding="0 1rem" margin="0.5rem 0 0 6px" borderRadius="0" style={{ height: '1.8rem', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
-              <Heading level={4} color="#2d3748">Conversations</Heading>
-            </Card>
-            {/* Search Bar */}
-<View padding="0" margin="-0.3rem 18px 0 6px">
+      <View backgroundColor="white" padding="0 1rem" style={{ height: '1.8rem', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+       <Heading level={4} color="#2d3748">Conversations</Heading>
+       {user.role === 'Student' && (
+        <Button
+          size="small"
+          backgroundColor="transparent"
+          color="#6b7280"
+          onClick={() => navigate('/old-messages')}
+          style={{
+           fontSize: '16px',
+           padding: '2px 4px',
+           border: 'none',
+           minWidth: 'auto',
+           minHeight: 'auto'
+         }}
+       >
+         📁
+       </Button>
+     )}
+   </View>
+
+
+
+{/* Search Bar */}
+<View padding="0.5rem 1rem" margin="0 6px" backgroundColor="white">
   <TextField
-    placeholder="Search..."
+    placeholder="🔍 Search conversations..."
     value={searchTerm}
     onChange={(e) => setSearchTerm(e.target.value)}
     size="small"
     style={{
-      border: '2px solid #e2e8f0',
-      borderRadius: '12px',
-      backgroundColor: 'white',
-      transition: 'border-color 0.2s ease'
+      border: '1px solid #d1d5db',
+      borderRadius: '8px',
+      backgroundColor: '#f9fafb',
+      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+      fontSize: '14px'
     }}
   />
 </View>
@@ -473,15 +649,41 @@ setMessages(prev => prev.map(conversation =>
           </Text>
         </Flex>
 
-                                                <Text fontSize="0.8rem" color="#718096" style={{ 
-                          overflow: 'hidden', 
-                          textOverflow: 'ellipsis', 
-                          whiteSpace: 'nowrap' 
-                        }}>
-                          {(conversation.latestMessage.body || '').replace(/<[^>]*>/g, '').substring(0, 60)}...
-                        </Text>
+                  <Flex justifyContent="space-between" alignItems="center">
+                      <Text fontSize="0.8rem" color="#718096" style={{ 
+                            overflow: 'hidden', 
+                            textOverflow: 'ellipsis', 
+                            whiteSpace: 'nowrap',
+                            flex: 1,
+                            marginRight: '8px'
+                          }}>
+                            {(conversation.latestMessage.body || '').replace(/<[^>]*>/g, '').substring(0, 60)}...
+                          </Text>
+                          
+                          {(user.role === 'Admin' || user.role === 'Faculty') && (
+                            <Button
+                              size="small"
+                              backgroundColor="transparent"
+                              color="#dc2626"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowDeleteConfirmation(conversation.id);
+                              }}
+                              style={{
+                                padding: '2px',
+                                fontSize: '14px',
+                                minWidth: 'auto',
+                                minHeight: 'auto',
+                                opacity: '0.7'
+                              }}
+                            >
+                              🗑️
+                            </Button>
+                          )}
+                        </Flex>
 
                       </Flex>
+
                     </View>
                   </Card>
                 ))}
@@ -500,7 +702,7 @@ setMessages(prev => prev.map(conversation =>
           {selectedConversation ? (
             <Flex direction="column" height="100%">
                {/* Chat Header */}
-              <Card backgroundColor="#f8fafc" padding="0 1rem" margin="0.5rem 0 0 0" borderRadius="0" borderBottom="1px solid #e2e8f0" style={{ height: '1.8rem', overflow: 'hidden', width: 'calc(100% - 6px)', display: 'flex', alignItems: 'center' }}>
+                <View backgroundColor="white" padding="0 1rem" borderBottom="1px solid #e2e8f0" style={{ height: '1.8rem', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
                 <Flex justifyContent="space-between" alignItems="center">
                   <Flex alignItems="center" gap="1rem">
                     <Button
@@ -519,8 +721,7 @@ setMessages(prev => prev.map(conversation =>
                     </Flex>
                   </Flex>
                 </Flex>
-              </Card>
-
+               </View>
 
               {/* Messages Area */}
               <View 
@@ -535,56 +736,154 @@ setMessages(prev => prev.map(conversation =>
     key={msg.id || index}
     justifyContent={msg.senderID === (user.id || user.username) ? 'flex-end' : 'flex-start'}
   >
-        <div
-  style={{
-    padding: '0.1rem 0.8rem',
-    maxWidth: '70%',
-    borderRadius: '1rem',
-    background: msg.senderID === (user.id || user.username) 
-      ? 'linear-gradient(135deg, #fef3c7, #fde68a)' 
-      : 'linear-gradient(135deg, #dbeafe, #bfdbfe)',
-    borderBottomRightRadius: msg.senderID === (user.id || user.username) ? '0.25rem' : '1rem',
-    borderBottomLeftRadius: msg.senderID === (user.id || user.username) ? '1rem' : '0.25rem',
-    pointerEvents: 'none',
-    userSelect: 'none'
-  }}
->
+    <div
+      style={{
+        position: 'relative',
+        padding: '0.1rem 0.8rem',
+        maxWidth: '70%',
+        borderRadius: '1rem',
+        background: msg.senderID === (user.id || user.username) 
+          ? 'linear-gradient(135deg, #fef3c7, #fde68a)' 
+          : 'linear-gradient(135deg, #dbeafe, #bfdbfe)',
+        borderBottomRightRadius: msg.senderID === (user.id || user.username) ? '0.25rem' : '1rem',
+        borderBottomLeftRadius: msg.senderID === (user.id || user.username) ? '1rem' : '0.25rem',
+      }}
+      onMouseEnter={() => setHoveredMessage(msg.id)}
+      onMouseLeave={() => setHoveredMessage(null)}
+    >
+      {/* Three-dot menu - only show for user's own messages */}
+{msg.senderID === (user.id || user.username) && hoveredMessage === msg.id && (
+  <div
+    style={{
+      position: 'absolute',
+      right: '8px',
+      top: '8px',
+      background: 'transparent',
+      borderRadius: '4px',
+      border: 'none',
+      zIndex: 10
+    }}
+  >
+         <Button
+           size="small"
+           backgroundColor="transparent"
+           color="#666"
+           style={{ 
+            padding: '2px', 
+            fontSize: '16px',
+            background: 'transparent',
+            border: 'none',
+            outline: 'none',
+            boxShadow: 'none',
+            opacity: '0.3',
+            minWidth: 'auto',
+            minHeight: 'auto'
+           }}
+
+            onClick={(e) => {
+              e.stopPropagation();
+              const rect = e.target.getBoundingClientRect();
+              const menu = document.createElement('div');
+              menu.style.cssText = `
+                position: fixed;
+                top: ${rect.bottom + 5}px;
+                left: ${rect.left - 60}px;
+                background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                min-width: 80px;
+              `;
+              menu.innerHTML = `
+                <div style="padding: 8px 0;">
+                  <button onclick="this.parentElement.parentElement.remove(); window.editMessage('${msg.id}')" 
+                          style="width: 100%; padding: 8px 16px; border: none; background: none; text-align: left; cursor: pointer; font-size: 14px;">
+                    Edit
+                  </button>
+                  <button onclick="this.parentElement.parentElement.remove(); window.deleteMessage('${msg.id}')" 
+                          style="width: 100%; padding: 8px 16px; border: none; background: none; text-align: left; cursor: pointer; color: #dc2626; font-size: 14px;">
+                    Delete
+                  </button>
+                </div>
+              `;
+              document.body.appendChild(menu);
+              
+              // Global functions for menu actions
+              window.editMessage = (id) => startEdit(msg);
+              window.deleteMessage = (id) => deleteMessageHandler(id);
+              
+              // Close menu when clicking outside
+              setTimeout(() => {
+                const closeMenu = (e) => {
+                  if (!menu.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                  }
+                };
+                document.addEventListener('click', closeMenu);
+              }, 100);
+            }}
+          >
+            ⋮
+          </Button>
+        </div>
+      )}
 
       <Flex direction="column" gap="0rem">
-                <div 
-          style={{ 
-            color: msg.senderID === (user.id || user.username) ? '#ffffff !important' : '#2d3748',
-            fontSize: '0.9rem',
-            lineHeight: '1',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            MozUserSelect: 'none',
-            msUserSelect: 'none'
-          }} 
-          dangerouslySetInnerHTML={{ 
-            __html: cleanHtmlContent(msg.body || msg.content) || 'No content' 
-          }} 
-        />
-
-        <Text 
-          fontSize="0.7rem" 
-          color={msg.senderID === (user.id || user.username) ? 'rgba(255,255,255,0.8)' : '#718096'}
-          textAlign="right"
-        >
-          {new Date(msg.sentAt || msg.createdAt).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          })}
-        </Text>
+        {editingMessage === msg.id ? (
+          <div style={{ padding: '8px 0' }}>
+            <ReactQuill
+              value={editText}
+              onChange={setEditText}
+              style={{ minHeight: '60px', background: 'white', borderRadius: '4px' }}
+            />
+            <Flex gap="8px" marginTop="8px">
+              <Button size="small" onClick={() => saveEdit(msg.id)} backgroundColor="#4299e1" color="white">
+                Save
+              </Button>
+              <Button size="small" onClick={() => setEditingMessage(null)} backgroundColor="#e2e8f0" color="#666">
+                Cancel
+              </Button>
+            </Flex>
+          </div>
+        ) : (
+          <>
+            <div 
+              style={{ 
+                color: msg.senderID === (user.id || user.username) ? '#ffffff !important' : '#2d3748',
+                fontSize: '0.9rem',
+                lineHeight: '1',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none'
+              }} 
+              dangerouslySetInnerHTML={{ 
+                __html: cleanHtmlContent(msg.body || msg.content) || 'No content' 
+              }} 
+            />
+            <Text 
+              fontSize="0.7rem" 
+              color={msg.senderID === (user.id || user.username) ? 'rgba(255,255,255,0.8)' : '#718096'}
+              textAlign="right"
+            >
+              {new Date(msg.sentAt || msg.createdAt).toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+               })}
+            </Text>
+          </>
+        )}
       </Flex>
     </div>
   </Flex>
 ))}
                 </Flex>
               </View>
-              
+             
               {/* Reply Input */}
-<Card backgroundColor="white" padding="1rem 0.5rem 0.5rem 1rem" margin="0 6px 6px 0" borderRadius="0" borderTop="1px solid #e2e8f0" style={{ boxShadow: '0 -2px 8px rgba(0,0,0,0.1)' }}>
+<View backgroundColor="white" padding="1rem 0.5rem 0.5rem 1rem" borderTop="1px solid #e2e8f0">
   <Flex direction="column" gap="0.5rem">
         <div style={{ 
       border: '2px solid #e2e8f0', 
@@ -606,10 +905,11 @@ setMessages(prev => prev.map(conversation =>
     ] : false
   }}
   style={{ 
-    height: showFormatting ? '100px' : '40px',
-    border: 'none',
-    transition: 'height 0.3s ease'
-  }}
+  minHeight: showFormatting ? '100px' : '40px',
+  maxHeight: '200px',
+  border: 'none',
+  overflow: 'auto'
+}}
 />
 
     </div>
@@ -631,24 +931,25 @@ setMessages(prev => prev.map(conversation =>
         Aa
       </Button>
       <Button 
-        onClick={sendReply}
-        backgroundColor="#4f46e5"
-        color="white"
-        size="small"
-        isLoading={isReplying}
-        isDisabled={!replyText.trim()}
-        style={{
-          borderRadius: '8px',
-          padding: '8px 16px',
-          fontWeight: '600'
-        }}
-      >
-        Send
-      </Button>
+       onClick={sendReply}
+       backgroundColor="#4f46e5"
+       color="white"
+       size="small"
+       isLoading={isReplying}
+       isDisabled={!replyText.trim() || isArchivedConversation}
+       style={{
+         borderRadius: '8px',
+         padding: '8px 16px',
+         fontWeight: '600'
+     }}
+   >
+  {isArchivedConversation ? 'Chat Ended' : 'Send'}
+</Button>
+
     </Flex>
   </Flex>
-</Card>
-                       </Flex>
+</View>
+         </Flex>
           ) : (
             <Flex direction="column" alignItems="center" justifyContent="center" height="100%" gap="1rem">
               <Text fontSize="3rem">💬</Text>
@@ -660,6 +961,8 @@ setMessages(prev => prev.map(conversation =>
           )}
         </View>
       </Flex>
+    </Card>
+
 
       {/* New Message Modal - Only for Admin/Faculty */}
       {showNewMessage && (
@@ -731,7 +1034,7 @@ setMessages(prev => prev.map(conversation =>
                   </div>
                 </Flex>
                 
-                <Flex gap="1rem" justifyContent="flex-end">
+                <Flex gap="1rem" justifyContent="flex-end" marginTop="1rem">
                   <Button 
                     onClick={() => {
                       setShowNewMessage(false);
@@ -800,6 +1103,61 @@ setMessages(prev => prev.map(conversation =>
           </Flex>
         </View>
       )}
+       {showDeleteConfirmation && (
+      <View
+        position="fixed"
+        top="0"
+        left="0"
+        width="100vw"
+        height="100vh"
+        backgroundColor="rgba(0, 0, 0, 0.5)"
+        style={{ zIndex: 1000 }}
+        onClick={() => setShowDeleteConfirmation(null)}
+      >
+        <Flex
+          justifyContent="center"
+          alignItems="center"
+          height="100%"
+          padding="1rem"
+        >
+          <Card
+            maxWidth="400px"
+            width="90%"
+            backgroundColor="white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Flex direction="column" gap="1rem" padding="1.5rem">
+              <Heading level={4} color="#2d3748">Delete Conversation</Heading>
+              <Text color="#4a5568">
+                Are you sure you want to delete this conversation? This will archive it for the student but remove it from your view.
+              </Text>
+              <Flex gap="1rem" justifyContent="flex-end">
+                <Button 
+                  onClick={() => setShowDeleteConfirmation(null)}
+                  backgroundColor="white"
+                  color="#4a5568"
+                  border="1px solid #e2e8f0"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                onClick={() => {
+                   console.log('Delete button clicked!');
+                   console.log('Conversation ID:', showDeleteConfirmation);
+                   archiveConversation(showDeleteConfirmation);
+                    }}
+                  backgroundColor="#dc2626"
+                  color="white"
+                >
+                  Delete
+                 </Button>
+
+              </Flex>
+            </Flex>
+          </Card>
+        </Flex>
+      </View>
+    )}
     </View>
   );
 };

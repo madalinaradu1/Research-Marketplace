@@ -8,12 +8,15 @@ export const listStudentPosts = /* GraphQL */ `
     listStudentPosts(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        type
         title
-        content
-        authorId
-        category
-        tags
-        isPublic
+        description
+        studentID
+        department
+        researchAreas
+        skillsOffered
+        skillsNeeded
+        timeCommitment
         createdAt
         updatedAt
       }
@@ -26,12 +29,15 @@ export const getStudentPost = /* GraphQL */ `
   query GetStudentPost($id: ID!) {
     getStudentPost(id: $id) {
       id
+      type
       title
-      content
-      authorId
-      category
-      tags
-      isPublic
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
       createdAt
       updatedAt
     }
@@ -45,12 +51,15 @@ export const createStudentPost = /* GraphQL */ `
   ) {
     createStudentPost(input: $input, condition: $condition) {
       id
+      type
       title
-      content
-      authorId
-      category
-      tags
-      isPublic
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
       createdAt
       updatedAt
     }
@@ -64,12 +73,15 @@ export const updateStudentPost = /* GraphQL */ `
   ) {
     updateStudentPost(input: $input, condition: $condition) {
       id
+      type
       title
-      content
-      authorId
-      category
-      tags
-      isPublic
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
       createdAt
       updatedAt
     }
@@ -82,6 +94,52 @@ export const deleteStudentPost = /* GraphQL */ `
     $condition: ModelStudentPostConditionInput
   ) {
     deleteStudentPost(input: $input, condition: $condition) {
+      id
+    }
+  }
+`;
+
+export const onCreateStudentPostCustom = /* GraphQL */ `
+  subscription OnCreateStudentPost {
+    onCreateStudentPost {
+      id
+      type
+      title
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const onUpdateStudentPostCustom = /* GraphQL */ `
+  subscription OnUpdateStudentPost {
+    onUpdateStudentPost {
+      id
+      type
+      title
+      description
+      studentID
+      department
+      researchAreas
+      skillsOffered
+      skillsNeeded
+      timeCommitment
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const onDeleteStudentPostCustom = /* GraphQL */ `
+  subscription OnDeleteStudentPost {
+    onDeleteStudentPost {
       id
     }
   }

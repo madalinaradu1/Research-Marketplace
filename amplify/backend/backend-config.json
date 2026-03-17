@@ -133,6 +133,12 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "projectRecommendations": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "researchmarketplace2a916c6aPostConfirmation": {
       "build": true,
       "dependsOn": [
@@ -209,6 +215,46 @@
         {
           "category": "function",
           "resourceName": "emailApiHandler"
+        }
+      ]
+    },
+    "AMPLIFY_function_projectRecommendations_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "projectRecommendations"
+        }
+      ]
+    },
+    "AMPLIFY_function_projectRecommendations_indexTable": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "projectRecommendations"
+        }
+      ]
+    },
+    "AMPLIFY_function_projectRecommendations_projectTable": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "projectRecommendations"
+        }
+      ]
+    },
+    "AMPLIFY_function_projectRecommendations_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "projectRecommendations"
+        }
+      ]
+    },
+    "AMPLIFY_function_projectRecommendations_userTable": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "projectRecommendations"
         }
       ]
     },

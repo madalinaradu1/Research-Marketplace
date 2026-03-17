@@ -1,0 +1,7 @@
+#if($ctx.error)
+  $util.error($ctx.error.message, $ctx.error.type)
+#end
+$util.toJson({
+  "items": $util.defaultIfNull($ctx.result.items, []),
+  "nextToken": $ctx.result.nextToken
+})

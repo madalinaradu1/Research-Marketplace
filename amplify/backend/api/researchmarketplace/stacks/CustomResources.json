@@ -45,34 +45,187 @@
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
-          "Statement": [{
-            "Effect": "Allow",
-            "Principal": { "Service": "appsync.amazonaws.com" },
-            "Action": "sts:AssumeRole"
-          }]
-        },
-        "Policies": [{
-          "PolicyName": "TagsTableAccess",
-          "PolicyDocument": {
-            "Version": "2012-10-17",
-            "Statement": [{
+          "Statement": [
+            {
               "Effect": "Allow",
-              "Action": ["dynamodb:GetItem", "dynamodb:Query"],
-              "Resource": [
-                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Tags-${env}" },
-                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Tags-${env}/index/*" }
+              "Principal": { "Service": "appsync.amazonaws.com" },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "TagsTableAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": ["dynamodb:GetItem", "dynamodb:Query"],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Tags-${env}"
+                    },
+                    {
+                      "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Tags-${env}/index/*"
+                    }
+                  ]
+                }
               ]
-            }]
+            }
           }
-        }]
+        ]
       }
+    },
+    "ProjectTagIndexDataSource": {
+      "Type": "AWS::AppSync::DataSource",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "Name": "ProjectTagIndexDataSource",
+        "Type": "AMAZON_DYNAMODB",
+        "ServiceRoleArn": { "Fn::GetAtt": ["ProjectTagIndexDataSourceRole", "Arn"] },
+        "DynamoDBConfig": {
+          "AwsRegion": { "Ref": "AWS::Region" },
+          "TableName": { "Fn::Sub": "ProjectTagIndex-${env}" }
+        }
+      }
+    },
+    "ProjectTagIndexDataSourceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": { "Service": "appsync.amazonaws.com" },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "ProjectTagIndexTableAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": ["dynamodb:PutItem", "dynamodb:DeleteItem"],
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/ProjectTagIndex-${env}"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "QueryGetTagByIdResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "TypeName": "Query",
+        "FieldName": "getTagById",
+        "DataSourceName": { "Fn::GetAtt": ["TagsTableDataSource", "Name"] },
+        "RequestMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Query.getTagById.req.vtl"
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Query.getTagById.res.vtl"
+        }
+      },
+      "DependsOn": ["TagsTableDataSource"]
+    },
+    "MutationPutProjectTagIndexMappingResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "TypeName": "Mutation",
+        "FieldName": "putProjectTagIndexMapping",
+        "DataSourceName": { "Fn::GetAtt": ["ProjectTagIndexDataSource", "Name"] },
+        "RequestMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.putProjectTagIndexMapping.req.vtl"
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.putProjectTagIndexMapping.res.vtl"
+        }
+      },
+      "DependsOn": ["ProjectTagIndexDataSource"]
+    },
+    "MutationDeleteProjectTagIndexMappingResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "TypeName": "Mutation",
+        "FieldName": "deleteProjectTagIndexMapping",
+        "DataSourceName": { "Fn::GetAtt": ["ProjectTagIndexDataSource", "Name"] },
+        "RequestMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.deleteProjectTagIndexMapping.req.vtl"
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Mutation.deleteProjectTagIndexMapping.res.vtl"
+        }
+      },
+      "DependsOn": ["ProjectTagIndexDataSource"]
+    },
+    "QueryListTagsByPrefixResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "TypeName": "Query",
+        "FieldName": "listTagsByPrefix",
+        "DataSourceName": { "Fn::GetAtt": ["TagsTableDataSource", "Name"] },
+        "RequestMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Query.listTagsByPrefix.req.vtl"
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Query.listTagsByPrefix.res.vtl"
+        }
+      },
+      "DependsOn": ["TagsTableDataSource"]
+    },
+    "QueryListChildTagsResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "TypeName": "Query",
+        "FieldName": "listChildTags",
+        "DataSourceName": { "Fn::GetAtt": ["TagsTableDataSource", "Name"] },
+        "RequestMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Query.listChildTags.req.vtl"
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Query.listChildTags.res.vtl"
+        }
+      },
+      "DependsOn": ["TagsTableDataSource"]
+    },
+    "QueryListAllTagsResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": { "Ref": "AppSyncApiId" },
+        "TypeName": "Query",
+        "FieldName": "listAllTags",
+        "DataSourceName": { "Fn::GetAtt": ["TagsTableDataSource", "Name"] },
+        "RequestMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Query.listAllTags.req.vtl"
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Sub": "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Query.listAllTags.res.vtl"
+        }
+      },
+      "DependsOn": ["TagsTableDataSource"]
     }
   },
   "Conditions": {
     "HasEnvironmentParameter": {
-      "Fn::Not": [{
-        "Fn::Equals": [{ "Ref": "env" }, "NONE"]
-      }]
+      "Fn::Not": [
+        {
+          "Fn::Equals": [{ "Ref": "env" }, "NONE"]
+        }
+      ]
     },
     "AlwaysFalse": {
       "Fn::Equals": ["true", "false"]

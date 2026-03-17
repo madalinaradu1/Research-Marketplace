@@ -1,43 +1,47 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback} from 'react';
 import { API, graphqlOperation, Auth } from 'aws-amplify';
 import { 
   Flex, 
   Heading, 
   TextField, 
-  SelectField, 
   Button, 
   Card,
   Text,
   TextAreaField,
   useTheme
 } from '@aws-amplify/ui-react';
-import { createUser, updateUser } from '../graphql/operations';
-import { useNavigate } from 'react-router-dom';
+import { updateUser } from '../graphql/operations';
+import TagSelector from '../components/TagSelector';
+import { useTags } from '../contexts/TagContext';
 
-const TagInput = ({ label, tags, input, setInput, onKeyDown, onRemove, placeholder, required }) => (
-  <Flex direction="column" gap="0.5rem">
-    <Text fontWeight="bold">{label} {required && '*'}</Text>
+
+const TagInput = ({
+  label,
+  tags,
+  input,
+  setInput,
+  onKeyDown,
+  onRemove,
+  placeholder,
+  required,
+  labelProps
+}) => (
+  <Flex direction="column" gap="0.35rem">
+    <Text {...labelProps}>{label} {required && '*'}</Text>
     {tags.length > 0 && (
-      <Flex wrap="wrap" gap="0.5rem" marginBottom="0.5rem">
+      <Flex wrap="wrap" gap="0.5rem" marginBottom="0">
         {tags.map((tag, index) => (
-          <Flex
-            key={index}
-            alignItems="center"
-            gap="0.5rem"
-            padding="0.25rem 0.75rem"
-            backgroundColor="#E6D4F5"
-            borderRadius="20px"
-          >
-            <Text fontSize="0.9rem">{tag}</Text>
-            <Button
-              size="small"
-              variation="link"
+          <span key={index} className="tag-chip">
+            <span>{tag}</span>
+            <button
+              type="button"
+              className="tag-chip-remove"
               onClick={() => onRemove(tag)}
-              style={{ padding: '0', minWidth: 'auto', color: '#000', backgroundColor: '#E6D4F5', border: 'none' }}
+              aria-label={`Remove ${tag}`}
             >
-              ×
-            </Button>
-          </Flex>
+              x
+            </button>
+          </span>
         ))}
       </Flex>
     )}
@@ -49,11 +53,21 @@ const TagInput = ({ label, tags, input, setInput, onKeyDown, onRemove, placehold
     />
   </Flex>
 );
-
 const CompleteProfilePage = ({ user }) => {
-  const navigate = useNavigate();
   const { tokens } = useTheme();
-  
+  const { tagsById, resolveTagIds } = useTags();
+  const fieldLabelProps = {
+    fontSize: tokens.fontSizes.medium,
+    fontWeight: tokens.fontWeights.medium,
+    color: tokens.colors.font.primary
+  };
+
+  const email = (user?.email || '').toLowerCase().trim();
+  const lockedRole = 
+    user?.role || 
+    (email.endsWith('@my.gcu.edu') ? 'Student'
+    : email.endsWith('@gcu.edu') ? 'Faculty' : 'Student'); // Default to Student if email domain is unrecognized
+
   // Form state for text fields
   const [formState, setFormState] = useState({
     name: user?.name || '',
@@ -64,21 +78,25 @@ const CompleteProfilePage = ({ user }) => {
     availability: user?.availability || '',
     personalStatement: user?.personalStatement || '',
     facultyRecommendations: '',
-    role: user?.role || 'Student',
+    role: lockedRole,
     // Faculty-specific fields
     college: user?.college || ''
   });
   
-  const [researchInterestTags, setResearchInterestTags] = useState(user?.researchInterests || []);
-  const [researchInterestInput, setResearchInterestInput] = useState('');
-  const [skillsTags, setSkillsTags] = useState(user?.skills || []);
-  const [skillsInput, setSkillsInput] = useState('');
-  const [certificateTags, setCertificateTags] = useState(user?.certificates || []);
-  const [certificateInput, setCertificateInput] = useState('');
+  const [researchInterestTagIds, setResearchInterestTagIds] = useState(
+    Array.isArray(user?.researchInterests) ? user.researchInterests : []
+  );
+  const [skillsTagIds, setSkillsTagIds] = useState(
+    Array.isArray(user?.skills) ? user.skills : []
+  );
+  const [certificateTagIds, setCertificateTagIds] = useState(
+    Array.isArray(user?.certificates) ? user.certificates : []
+  );
+  const [facultyResearchTagIds, setFacultyResearchTagIds] = useState(
+  Array.isArray(user?.facultyResearchInterests) ? user.facultyResearchInterests : []
+  );
   const [classesTaughtTags, setClassesTaughtTags] = useState(user?.classesTaught || []);
   const [classesTaughtInput, setClassesTaughtInput] = useState('');
-  const [facultyResearchTags, setFacultyResearchTags] = useState(user?.facultyResearchInterests || []);
-  const [facultyResearchInput, setFacultyResearchInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -109,20 +127,37 @@ const CompleteProfilePage = ({ user }) => {
       // Get current authenticated user
       const currentUser = await Auth.currentAuthenticatedUser();
       
-      // Convert arrays
-      const researchInterests = researchInterestTags;
-      const skills = skillsTags;
-      const certificates = certificateTags;
-      
-      // Prepare input for user mutation - conditionally include fields based on role
+      if (lockedRole === 'Student' && tagsById.size === 0) {
+        setError('Tag catalog is still loading. Please wait and try again.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const researchInterests = resolveTagIds(researchInterestTagIds);
+      const skills = resolveTagIds(skillsTagIds);
+      const certificates = resolveTagIds(certificateTagIds);
+      const facultyResearchInterests = resolveTagIds(facultyResearchTagIds);
+
+      if (lockedRole === 'Student' && researchInterests.length === 0) {
+        setError('Please select at least one research interest.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (lockedRole === 'Student' && skills.length === 0) {
+        setError('Please select at least one skill.');
+        setIsSubmitting(false);
+        return;
+      }
+
       const input = {
-        id: currentUser.username,
+        //id: currentUser.username,
+        id: user?.id || currentUser.username,
         name: formState.name,
         email: currentUser.attributes.email,
-        role: formState.role,
+        role: lockedRole,
         profileComplete: true,
-        // Student-specific fields - only included if role is Student
-        ...(formState.role === 'Student' && {
+        ...(lockedRole === 'Student' && {
           major: formState.currentProgram,
           academicYear: formState.degreeType,
           expectedGraduation: formState.expectedGraduation,
@@ -133,11 +168,10 @@ const CompleteProfilePage = ({ user }) => {
           personalStatement: formState.personalStatement,
           certificates
         }),
-        // Faculty-specific fields - only included if role is Faculty
-        ...(formState.role === 'Faculty' && {
+        ...(lockedRole === 'Faculty' && {
           college: formState.college,
           classesTaught: classesTaughtTags,
-          facultyResearchInterests: facultyResearchTags
+          facultyResearchInterests
         })
       };
 
@@ -171,18 +205,15 @@ const CompleteProfilePage = ({ user }) => {
               required
             />
             
-            <SelectField
+            <TextField
               name="role"
-              label="Role *"
-              value={formState.role}
-              onChange={handleChange}
-              required
-            >
-              <option value="Student">Student</option>
-              <option value="Faculty">Faculty</option>
-            </SelectField>
-            
-            {formState.role === 'Student' && (
+              label="Role"
+              value={lockedRole}
+              isReadOnly
+            />
+
+        
+            {lockedRole === 'Student' && (
               <>
                 <TextField
                   name="studentId"
@@ -231,26 +262,26 @@ const CompleteProfilePage = ({ user }) => {
                   required
                 />
                 
-                <TagInput
-                  label="Research Interests"
-                  tags={researchInterestTags}
-                  input={researchInterestInput}
-                  setInput={setResearchInterestInput}
-                  {...createTagHandlers(researchInterestInput, researchInterestTags, setResearchInterestTags, setResearchInterestInput)}
-                  placeholder="Type and press Enter to add"
-                  required
-                />
-                
-                <TagInput
-                  label="Skills and Experience"
-                  tags={skillsTags}
-                  input={skillsInput}
-                  setInput={setSkillsInput}
-                  {...createTagHandlers(skillsInput, skillsTags, setSkillsTags, setSkillsInput)}
-                  placeholder="Type and press Enter to add"
-                  required
-                />
-                
+                <Flex direction="column" gap="0.5rem">
+                  <Text {...fieldLabelProps}>Research Interests *</Text>
+                  <TagSelector
+                    selectedTagIds={researchInterestTagIds}
+                    onChange={setResearchInterestTagIds}
+                    placeholder="List research interests...(e.g., Machine Learning, Neuroscience)"
+                    maxSelections={10}
+                  />
+                </Flex>
+
+                <Flex direction="column" gap="0.5rem">
+                  <Text {...fieldLabelProps}>Skills and Experience *</Text>
+                  <TagSelector
+                    selectedTagIds={skillsTagIds}
+                    onChange={setSkillsTagIds}
+                    placeholder="List skills and experience...(e.g., Python, Data Analysis)"
+                    maxSelections={15}
+                  />
+                </Flex>
+
                 <TextField
                   name="availability"
                   label="Availability *"
@@ -279,19 +310,20 @@ const CompleteProfilePage = ({ user }) => {
                   rows={3}
                 />
                 
-                <TagInput
-                  label="Certificates"
-                  tags={certificateTags}
-                  input={certificateInput}
-                  setInput={setCertificateInput}
-                  {...createTagHandlers(certificateInput, certificateTags, setCertificateTags, setCertificateInput)}
-                  placeholder="Type and press Enter to add"
-                />
+                <Flex direction="column" gap="0.5rem">
+                  <Text {...fieldLabelProps}>Certifications *</Text>
+                  <TagSelector
+                    selectedTagIds={certificateTagIds}
+                    onChange={setCertificateTagIds}
+                    placeholder="List certifications...(e.g., CompTIA Security+, Google Data Analyst)"
+                    maxSelections={15}
+                  />
+                </Flex>
               </>
             )}
                      
             {/* Faculty-specific fields */}
-            {formState.role === 'Faculty' && (
+            {lockedRole === 'Faculty' && (
               <>
                 <TextField
                   name="college"
@@ -310,17 +342,18 @@ const CompleteProfilePage = ({ user }) => {
                   {...createTagHandlers(classesTaughtInput, classesTaughtTags, setClassesTaughtTags, setClassesTaughtInput)}
                   placeholder="Type and press Enter to add"
                   required
+                  labelProps={fieldLabelProps}
                 />
 
-                <TagInput
-                  label="Research Interests"
-                  tags={facultyResearchTags}
-                  input={facultyResearchInput}
-                  setInput={setFacultyResearchInput}
-                  {...createTagHandlers(facultyResearchInput, facultyResearchTags, setFacultyResearchTags, setFacultyResearchInput)}
-                  placeholder="Type and press Enter to add"
-                  required
-                />
+                <Flex direction="column" gap="0.5rem">
+                  <Text {...fieldLabelProps}>Research Interests *</Text>
+                  <TagSelector
+                    selectedTagIds={facultyResearchTagIds}
+                    onChange={setFacultyResearchTagIds}
+                    placeholder="List research interests...(e.g., Machine Learning, Neuroscience)"
+                    maxSelections={10}
+                  />
+                </Flex>
               </>
             )}
             
@@ -344,3 +377,4 @@ const CompleteProfilePage = ({ user }) => {
 };
 
 export default CompleteProfilePage;
+

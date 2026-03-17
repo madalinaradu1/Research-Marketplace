@@ -5,8 +5,6 @@
   "dependencies": {
     "@aws-amplify/ui-react": "^5.0.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.913.0",
-    "@aws-sdk/client-dynamodb": "^3.913.0",
-    "@aws-sdk/lib-dynamodb": "^3.913.0",
     "aws-amplify": "^5.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -22,8 +20,10 @@
     "deploy:dev": "git add . && git commit -m 'Deploy to dev' && git push origin dev",
     "deploy:master": "git add . && git commit -m 'Deploy to master' && git push origin master",
     "seed:tags": "node --experimental-modules scripts/seed-tags.js",
+    "seed:tags:additional": "node --experimental-modules scripts/seed-additional-tags.js",
     "test:tags": "node --experimental-modules scripts/test-tags.js",
-    "seed:tags:test": "node --experimental-modules scripts/seed-tags-test.js"
+    "seed:tags:test": "node --experimental-modules scripts/seed-tags-test.js",
+    "test:recommendations": "node scripts/test-recommendation-scoring.js"
   },
   "eslintConfig": {
     "extends": [
@@ -42,5 +42,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.993.0",
+    "@aws-sdk/lib-dynamodb": "^3.993.0"
   }
 }

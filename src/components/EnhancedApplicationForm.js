@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { API, graphqlOperation, Auth, Storage } from 'aws-amplify';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -17,6 +17,8 @@ import {
 } from '@aws-amplify/ui-react';
 import { createApplication, updateUser, listApplications } from '../graphql/operations';
 import { sendNewItemNotification } from '../utils/emailNotifications';
+import { useTags } from '../contexts/TagContext';
+import { mapTagIdsToDisplayNames } from '../lib/tags/tagDisplay';
 
 const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
   const cacheKey = `application_draft_${user.id || user.username}_${project.id}`;
@@ -48,6 +50,23 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
   const [error, setError] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  const { tagsById } = useTags();
+
+  const researchInterestNames = useMemo(
+    () => mapTagIdsToDisplayNames(user.researchInterests || [], tagsById),
+    [user.researchInterests, tagsById]
+  );
+
+  const skillNames = useMemo(
+    () => mapTagIdsToDisplayNames(user.skills || [], tagsById),
+    [user.skills, tagsById]
+  );
+
+  const certificateNames = useMemo(
+    () => mapTagIdsToDisplayNames(user.certificates || [], tagsById),
+    [user.certificates, tagsById]
+  );
 
   const addCourse = () => {
     if (courses.length < 10) {
@@ -111,7 +130,7 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       setError('This project requires transcript upload. Please upload your transcript.');
       setIsSubmitting(false);
       return;
-    }
+    } 
 
     try {
       // Check application limit by counting current applications
@@ -243,8 +262,10 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
           <Text>Program: {user.major || 'Not specified'}</Text>
           <Text>Degree: {user.academicYear || 'Not specified'}</Text>
           <Text>Expected Graduation: {user.expectedGraduation || 'Not specified'}</Text>
-          <Text>Research Interests: {user.researchInterests?.join(', ') || 'Not specified'}</Text>
-          <Text>Skills: {user.skills?.join(', ') || 'Not specified'}</Text>
+          <Text>Research Interests: {researchInterestNames.join(', ') || 'Not specified'}</Text>
+          <Text>Skills: {skillNames.join(', ') || 'Not specified'}</Text>
+          <Text>Certificates: {certificateNames.join(', ') || 'Not specified'}</Text>
+
           <Text>Availability: {user.availability || 'Not specified'}</Text>
         </Card>
 
@@ -355,8 +376,14 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
                       
                       <TextField
                         label="Year"
+                        type="text"
                         value={course.year}
-                        onChange={(e) => updateCourse(index, 'year', e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d{0,4}$/.test(value)) {
+                            updateCourse(index, 'year', value);
+                          }
+                        }}
                         placeholder="e.g. 2024"
                         flex="1"
                       />
@@ -386,7 +413,30 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
               <input
                 type="file"
                 accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                onChange={(e) => setUploadedFile(e.target.files[0])}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const allowedExts = ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'];
+                    const fileExt = file.name.split('.').pop().toLowerCase();
+                    
+                    if (!allowedExts.includes(fileExt)) {
+                      setError('Invalid file type. Only PDF, DOC, DOCX, TXT, JPG, JPEG, and PNG files are allowed.');
+                      e.target.value = '';
+                      setUploadedFile(null);
+                      return;
+                    }
+                    
+                    const maxSize = 5 * 1024 * 1024;
+                    if (file.size > maxSize) {
+                      setError('File size exceeds 5MB limit. Please select a smaller file.');
+                      e.target.value = '';
+                      setUploadedFile(null);
+                      return;
+                    }
+                    setError(null);
+                    setUploadedFile(file);
+                  }
+                }}
                 style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
                 required={project.requiresTranscript}
               />

@@ -17,13 +17,18 @@ import {
   SelectField,
   useTheme,
   View,
-  Divider
+  Divider,
+  Loader
 } from '@aws-amplify/ui-react';
 import { Storage } from 'aws-amplify';
 import { listProjects, listApplications, listUsers, updateProject, updateApplication } from '../graphql/operations';
 import { createMessage } from '../graphql/message-operations';
 import { sendStatusChangeNotification, sendEmailNotification } from '../utils/emailNotifications';
 import { getStatusColorValue } from '../utils/statusColors';
+import TagSelector from '../components/TagSelector';
+import { useTags } from '../contexts/TagContext';
+import { tagIdsToDisplayNames } from '../components/TagSelector/tagHelpers';
+import { syncProjectTagIndex } from '../lib/recommendations/projectTagIndexSync';
 
 const CoordinatorDashboard = ({ user }) => {
   const { tokens } = useTheme();
@@ -56,6 +61,9 @@ const CoordinatorDashboard = ({ user }) => {
   const itemsPerPage = 10;
   const [openKebabMenu, setOpenKebabMenu] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
+  const { tagsById, resolveTagIds } = useTags();
+  const [projectResearchTagIds, setProjectResearchTagIds] = useState([]);
+  const [projectSkillTagIds, setProjectSkillTagIds] = useState([]);
   const [projectForm, setProjectForm] = useState({
     title: '',
     description: '',
@@ -250,16 +258,27 @@ const CoordinatorDashboard = ({ user }) => {
     setProjectForm(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSkillsTagsChange = (nextIds) => {
+    setProjectSkillTagIds(nextIds);
+    setProjectForm((prev) => ({
+      ...prev,
+      skillsRequired: tagIdsToDisplayNames(nextIds, tagsById).join(', ')
+    }));
+  };
+
+  const handleResearchTagsChange = (nextIds) => {
+    setProjectResearchTagIds(nextIds);
+    setProjectForm((prev) => ({
+      ...prev,
+      tags: tagIdsToDisplayNames(nextIds, tagsById).join(', ')
+    }));
+  };
+
   const handleUpdateProject = async (e) => {
     e.preventDefault();
     try {
-      const skillsArray = projectForm.skillsRequired
-        ? projectForm.skillsRequired.split(',').map(skill => skill.trim()).filter(skill => skill)
-        : [];
-      
-      const tagsArray = projectForm.tags
-        ? projectForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
-        : [];
+      const skillsArray = tagIdsToDisplayNames(projectSkillTagIds, tagsById);
+      const tagsArray = tagIdsToDisplayNames(projectResearchTagIds, tagsById);
       
       const deadline = projectForm.applicationDeadline 
         ? new Date(projectForm.applicationDeadline + 'T00:00:00Z').toISOString() 
@@ -279,9 +298,24 @@ const CoordinatorDashboard = ({ user }) => {
         isActive: projectForm.isActive
       };
       
+      const oldRequiredTagIds = resolveTagIds(editingProject.skillsRequired || []);
+      const oldOptionalTagIds = resolveTagIds(editingProject.tags || []);
+      const newRequiredTagIds = resolveTagIds(skillsArray);
+      const newOptionalTagIds = resolveTagIds(tagsArray);
+
       await API.graphql(graphqlOperation(updateProject, { input }));
+      await syncProjectTagIndex({
+        projectId: editingProject.id,
+        oldRequiredTagIds,
+        oldOptionalTagIds,
+        newRequiredTagIds,
+        newOptionalTagIds
+      });
       setEditingProject(null);
+      setProjectResearchTagIds([]);
+      setProjectSkillTagIds([]);
       fetchData();
+
     } catch (error) {
       console.error('Error updating project:', error);
     }
@@ -377,7 +411,15 @@ const CoordinatorDashboard = ({ user }) => {
     return items.slice(startIndex, startIndex + itemsPerPage);
   };
   
-  if (loading) return <Text>Loading...</Text>;
+ if (loading) {
+  return (
+    <View width="100%" backgroundColor="#f5f5f5">
+      <Flex justifyContent="center" alignItems="center" padding="2rem 2rem 2rem" gap="2rem" minHeight="84px">
+        <Loader size="large" />
+      </Flex>
+    </View>
+  );
+}
 
   return (
     <View width="100%" backgroundColor="#f5f5f5">
@@ -440,13 +482,17 @@ const CoordinatorDashboard = ({ user }) => {
                                 <button
                                   className="meatball-dropdown-item"
                                   onClick={() => {
+                                    const skillIds = resolveTagIds(project.skillsRequired || []);
+                                    const researchIds = resolveTagIds(project.tags || []);
                                     setEditingProject(project);
+                                    setProjectSkillTagIds(skillIds);
+                                    setProjectResearchTagIds(researchIds);
                                     setProjectForm({
                                       title: project.title || '',
                                       description: project.description || '',
                                       department: project.department || '',
-                                      skillsRequired: project.skillsRequired?.join(', ') || '',
-                                      tags: project.tags?.join(', ') || '',
+                                      skillsRequired: tagIdsToDisplayNames(skillIds, tagsById).join(', '),
+                                      tags: tagIdsToDisplayNames(researchIds, tagsById).join(', '),
                                       qualifications: project.qualifications || '',
                                       duration: project.duration || '',
                                       applicationDeadline: project.applicationDeadline ? new Date(project.applicationDeadline).toISOString().split('T')[0] : '',
@@ -1475,7 +1521,11 @@ const CoordinatorDashboard = ({ user }) => {
           height="100vh"
           backgroundColor="rgba(0, 0, 0, 0.5)"
           style={{ zIndex: 1000 }}
-          onClick={() => setEditingProject(null)}
+          onClick={() => {
+            setEditingProject(null);
+            setProjectResearchTagIds([]);
+            setProjectSkillTagIds([]);
+          }}
         >
           <Flex
             justifyContent="center"
@@ -1537,20 +1587,24 @@ const CoordinatorDashboard = ({ user }) => {
                       flex="1"
                     />
                   </Flex>
-                  <TextField
-                    name="skillsRequired"
-                    label="Skills Required (comma-separated)"
-                    value={projectForm.skillsRequired}
-                    onChange={handleProjectFormChange}
-                    placeholder="e.g. Python, Data Analysis, Machine Learning"
-                  />
-                  <TextField
-                    name="tags"
-                    label="Research Tags (comma-separated)"
-                    value={projectForm.tags}
-                    onChange={handleProjectFormChange}
-                    placeholder="e.g. lab, field, geology, code, clinical"
-                  />
+                  <Flex direction="column" gap="0.5rem">
+                    <Text fontWeight="bold">Skills Required</Text>
+                    <TagSelector
+                      selectedTagIds={projectSkillTagIds}
+                      onChange={handleSkillsTagsChange}
+                      placeholder="List skills and experience...(e.g. Python, Data Analysis)"
+                      maxSelections={15}
+                    />
+                  </Flex>
+                  <Flex direction="column" gap="0.5rem">
+                    <Text fontWeight="bold">Research Tags</Text>
+                    <TagSelector
+                      selectedTagIds={projectResearchTagIds}
+                      onChange={handleResearchTagsChange}
+                      placeholder="List research tags...(e.g. Artificial Intelligence, Biomedical Engineering)"
+                      maxSelections={10}
+                    />
+                  </Flex>
                   <TextAreaField
                     name="qualifications"
                     label="Required Qualifications/Prerequisites"
@@ -1579,7 +1633,11 @@ const CoordinatorDashboard = ({ user }) => {
                     <option value="true">Yes</option>
                   </SelectField>
                   <Flex gap="1rem">
-                    <Button onClick={() => setEditingProject(null)}>Cancel</Button>
+                    <Button onClick={() => {
+                      setEditingProject(null);
+                      setProjectResearchTagIds([]);
+                      setProjectSkillTagIds([]);
+                    }}>Cancel</Button>
                     <Button 
                       type="submit"
                       backgroundColor="white"
