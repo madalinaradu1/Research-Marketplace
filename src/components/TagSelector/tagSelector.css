@@ -19,6 +19,11 @@
   font-size: 0.95rem;
 }
 
+.tag-chip:hover,
+.tag-chip:focus-within {
+  background: #e8eefc;
+}
+
 .tag-chip-remove {
   border: none;
   background: transparent;
@@ -26,6 +31,13 @@
   font-size: 0.85rem;
   padding: 0;
   line-height: 1;
+}
+
+.tag-chip-remove:hover,
+.tag-chip-remove:focus {
+  background: transparent !important;
+  color: inherit !important;
+  box-shadow: none !important;
 }
 
 .tag-selector-input {

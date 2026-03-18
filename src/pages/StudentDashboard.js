@@ -23,7 +23,26 @@ import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 import ApplicationStatus from '../components/ApplicationStatus';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 import { getRecommendedProjects } from '../graphql/recommendation-operations';
+import { useTags } from '../contexts/TagContext';
 
+const formatGraphQLError = (err) => {
+  if (!err) return null;
+
+  return {
+    name: err.name || null,
+    message: err.message || null,
+    errors: err.errors || null,
+    data: err.data || null,
+    graphQLErrors: err.graphQLErrors || null,
+    networkError: err.networkError
+      ? {
+          name: err.networkError.name || null,
+          message: err.networkError.message || null
+        }
+      : null,
+    stack: err.stack || null
+  };
+};
 
 const StudentDashboard = ({ user }) => {
   const navigate = useNavigate();
@@ -47,7 +66,9 @@ const StudentDashboard = ({ user }) => {
   const [returnedPage, setReturnedPage] = useState(1);
   const [recommendedProjects, setRecommendedProjects] = useState([]);
   const [recommendationsLoading, setRecommendationsLoading] = useState(false);
+  const { tagsById } = useTags();
   const itemsPerPage = 10;
+  
 
   useEffect(() => {
     fetchData();
@@ -107,7 +128,7 @@ const StudentDashboard = ({ user }) => {
             const recResult = await API.graphql(graphqlOperation(getRecommendedProjects, { userId, limit: 10 }));
             setRecommendedProjects(recResult.data?.getRecommendedProjects || []);
           } catch (recErr) {
-            console.error('Recommendation query failed: ', recErr);
+            console.error('Recommendation query failed:', formatGraphQLError(recErr));
             const fallback = [...filteredProjects]
               .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
               .slice(0,10)
@@ -120,6 +141,11 @@ const StudentDashboard = ({ user }) => {
                 reasons: ['Newly added project'],
                 project: p 
               }));
+            console.warn('Using recommendation fallback projects:', {
+              fallbackCount: fallback.length,
+              approvedProjectCount: filteredProjects.length,
+              userId
+            });
             setRecommendedProjects(fallback);
           } finally {
             setRecommendationsLoading(false);
@@ -338,26 +364,33 @@ const StudentDashboard = ({ user }) => {
         </Card>
       </Flex>
 
-      <Card variation="elevated" backgroundColor="white">
-        <Heading level={4}>Recommended for You</Heading>
+      <Card variation="elevated" backgroundColor="white" padding="1rem 1.5rem">
+        <Heading level={4} marginBottom="1.5rem">
+          Recommended for You
+        </Heading>
         {recommendationsLoading ? (
           <Loader size="small" />
         ) : (
           <Collection items={recommendedProjects.slice(0, 5)} type="list" gap="0.75rem" direction="column">
-            {(rec) => (
-              <Card key={rec.projectId} variation="outlined" backgroundColor="white">
-                <Flex direction="column" gap="0.4rem">
-                  <Flex justifyContent="space-between" alignItems="center">
+            {(rec) => {
+              const reasonLabels = rec.reasons?.slice(0, 3).map((reason) =>
+                tagsById.get(reason)?.display_name || reason
+              );
+
+              return (
+                <Card key={rec.projectId} variation="outlined" backgroundColor="white">
+                  <Flex direction="column" gap="0.4rem">
                     <Heading level={5}>{rec.project?.title || 'Project'}</Heading>
-                    <Badge backgroundColor="#2f855a" color="white">{rec.score.toFixed(1)}</Badge>
+                    <Text fontSize="0.9rem">{rec.project?.department}</Text>
+                    <Text fontSize="0.8rem" color="#4a5568">
+                      {reasonLabels?.length
+                        ? `Matched: ${reasonLabels.join(', ')}`
+                        : 'Recommended by recency'}
+                    </Text>
                   </Flex>
-                  <Text fontSize="0.9rem">{rec.project?.department}</Text>
-                  <Text fontSize="0.8rem" color="#4a5568">
-                    {rec.reasons?.length ? `Matched: ${rec.reasons.slice(0, 3).join(', ')}` : 'Recommended by recency'}
-                  </Text>
-                </Flex>
-              </Card>
-            )}
+                </Card>
+              );
+            }}
           </Collection>
         )}
       </Card>

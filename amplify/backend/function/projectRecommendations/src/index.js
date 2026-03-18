@@ -5,8 +5,19 @@
 	REGION
 	USER_TABLE
 Amplify Params - DO NOT EDIT */
-const AWS = require('aws-sdk');
-const ddb = new AWS.DynamoDB.DocumentClient();
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const {
+  DynamoDBDocumentClient,
+  GetCommand,
+  QueryCommand,
+  BatchGetCommand,
+  ScanCommand
+} = require('@aws-sdk/lib-dynamodb');
+
+const ddbClient = new DynamoDBClient({ region: process.env.REGION });
+const ddb = DynamoDBDocumentClient.from(ddbClient, {
+  marshallOptions: { removeUndefinedValues: true }
+});
 
 const REQUIRED_WEIGHT = 3;
 const OPTIONAL_WEIGHT = 1.5;
@@ -22,50 +33,90 @@ exports.handler = async (event) => {
   const identityUserId = event.identity?.username || event.identity?.sub || null;
   const userId = args.userId || identityUserId;
 
-  let userTagIds = Array.isArray(args.userTagIds) ? args.userTagIds.filter(Boolean) : [];
-  if (!userTagIds.length && userId) userTagIds = await loadUserTagIds(userId);
-  if (!userTagIds.length) return newestFallback(limit);
+  try {
+    validateConfig();
 
-  const candidateMap = await buildCandidateMap(userTagIds);
-  if (!candidateMap.size) return newestFallback(limit);
+    let userTagIds = Array.isArray(args.userTagIds) ? args.userTagIds.filter(Boolean) : [];
+    if (!userTagIds.length && userId) userTagIds = await loadUserTagIds(userId);
+    if (!userTagIds.length) return newestFallback(limit);
 
-  const projects = await batchGetProjects(Array.from(candidateMap.keys()));
-  const nowIso = new Date().toISOString();
+    const candidateMap = await buildCandidateMap(userTagIds);
+    if (!candidateMap.size) return newestFallback(limit);
 
-  const scored = projects 
-    .filter((p) => 
-      p &&
-      p.isActive === true &&
-      (p.projectStatus === 'Approved' || p.projectStatus === 'Published') &&
-      (!p.applicationDeadline || p.applicationDeadline > nowIso)
-    )
-    .map((project) => {
-      const c = candidateMap.get(project.id);
-      const matched = Array.from(c.matchedTagIds);
-      return {
-        projectId: project.id,
-        score: c.requiredMatches * REQUIRED_WEIGHT + c.optionalMatches * OPTIONAL_WEIGHT,
-        requiredMatches: c.requiredMatches,
-        optionalMatches: c.optionalMatches,
-        matchedTagIds: matched,
-        reasons: matched.slice(0, 3),
-        project
-      };
-    })
-    .sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      const bc = b.project?.createdAt || '';
-      const ac = a.project?.createdAt || '';
-      if (bc !== ac) return bc.localeCompare(ac);
-      return a.projectId.localeCompare(b.projectId);
-    });
+    const projects = await batchGetProjects(Array.from(candidateMap.keys()));
+    const nowIso = new Date().toISOString();
 
-  console.log('[recommend]', { userTagCount: userTagIds.length, candidateCount: candidateMap.size, topScore: scored[0]?.score || 0 });
-  return scored.length ? scored.slice(0, limit) : newestFallback(limit);
+    const scored = projects 
+      .filter((p) => 
+        p &&
+        p.isActive === true &&
+        (p.projectStatus === 'Approved' || p.projectStatus === 'Published') &&
+        (!p.applicationDeadline || p.applicationDeadline > nowIso)
+      )
+      .map((project) => {
+        const c = candidateMap.get(project.id);
+        const matched = Array.from(c.matchedTagIds);
+        return {
+          projectId: project.id,
+          score: c.requiredMatches * REQUIRED_WEIGHT + c.optionalMatches * OPTIONAL_WEIGHT,
+          requiredMatches: c.requiredMatches,
+          optionalMatches: c.optionalMatches,
+          matchedTagIds: matched,
+          reasons: matched.slice(0, 3),
+          project
+        };
+      })
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        const bc = b.project?.createdAt || '';
+        const ac = a.project?.createdAt || '';
+        if (bc !== ac) return bc.localeCompare(ac);
+        return a.projectId.localeCompare(b.projectId);
+      });
+
+    console.log('[recommend]', { userTagCount: userTagIds.length, candidateCount: candidateMap.size, topScore: scored[0]?.score || 0 });
+    return scored.length ? scored.slice(0, limit) : newestFallback(limit);
+  } catch (error) {
+    console.error('[recommend:error]', JSON.stringify({
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      request: {
+        limit,
+        hasExplicitUserId: Boolean(args.userId),
+        identityUserId,
+        userId,
+        userTagCount: Array.isArray(args.userTagIds) ? args.userTagIds.filter(Boolean).length : null
+      },
+      config: {
+        projectTable: PROJECT_TABLE,
+        userTable: USER_TABLE,
+        indexTable: INDEX_TABLE,
+        region: process.env.REGION
+      }
+    }));
+    throw error;
+  }
 };
 
+function validateConfig() {
+  const missing = [
+    ['PROJECT_TABLE', PROJECT_TABLE],
+    ['USER_TABLE', USER_TABLE],
+    ['INDEX_TABLE', INDEX_TABLE],
+    ['REGION', process.env.REGION]
+  ].filter(([, value]) => !value).map(([key]) => key);
+
+  if (missing.length) {
+    throw new Error(`Missing Lambda configuration: ${missing.join(', ')}`);
+  }
+}
+
 async function loadUserTagIds(userId) {
-  const r = await ddb.get({ TableName: USER_TABLE, Key: { id: userId } }).promise();
+  const r = await ddb.send(new GetCommand({
+    TableName: USER_TABLE,
+    Key: { id: userId }
+  }));
   const u = r.Item || {};
   const set = new Set();
   (u.researchInterests || []).forEach((t) => t && set.add(t));
@@ -80,13 +131,13 @@ async function buildCandidateMap(userTagIds) {
   for (const tagId of userTagIds) {
     let lastKey;
     do {
-      const q = await ddb.query({
+      const q = await ddb.send(new QueryCommand({
         TableName: INDEX_TABLE,
         KeyConditionExpression: '#pk = :pk',
         ExpressionAttributeNames: { '#pk': 'PK' },
         ExpressionAttributeValues: { ':pk': `TAG#${tagId}` },
         ExclusiveStartKey: lastKey
-      }).promise();
+      }));
 
       (q.Items || []).forEach((item) => {
         const pid = item.projectId;
@@ -109,9 +160,9 @@ async function batchGetProjects(projectIds) {
   const all = [];
 
   for (const ids of chunks) {
-    const r = await ddb.batchGet({
+    const r = await ddb.send(new BatchGetCommand({
       RequestItems: { [PROJECT_TABLE]: { Keys: ids.map((id) => ({ id })) } }
-    }).promise();
+    }));
     all.push(...(r.Responses?.[PROJECT_TABLE] || []));
   }
   return all;
@@ -119,7 +170,7 @@ async function batchGetProjects(projectIds) {
 
 async function newestFallback(limit) {
   const nowIso = new Date().toISOString();
-  const r = await ddb.scan({
+  const r = await ddb.send(new ScanCommand({
     TableName: PROJECT_TABLE,
     FilterExpression: '#active = :active AND (#status = :approved OR #status = :published) AND (attribute_not_exists(#deadline) OR #deadline > :now)',
     ExpressionAttributeNames: {
@@ -133,7 +184,7 @@ async function newestFallback(limit) {
       ':published': 'Published',
       ':now': nowIso
     }
-  }).promise();
+  }));
 
   return (r.Items || [])
     .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
