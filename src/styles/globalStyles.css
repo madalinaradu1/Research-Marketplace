@@ -21,52 +21,154 @@
   --font-size-base: 20px;
 }
 
+:root.high-contrast {
+  --color-primary: #000000;
+  --color-secondary: #000000;
+  --color-tertiary: #333333;
+  --color-background: #ffffff;
+  --color-border: #000000;
+}
+
+:root.high-contrast body,
+:root.high-contrast [data-amplify-theme] .amplify-text,
+:root.high-contrast [data-amplify-theme] .amplify-heading,
+:root.high-contrast p, :root.high-contrast span, :root.high-contrast label {
+  color: #000000 !important;
+}
+
+:root.high-contrast [data-amplify-theme] .amplify-card,
+:root.high-contrast [data-amplify-theme] .amplify-card:hover {
+  border: 2px solid #000000 !important;
+}
+
+:root.high-contrast input,
+:root.high-contrast textarea,
+:root.high-contrast select {
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+}
+
+:root.dyslexia-font,
+:root.dyslexia-font body,
+:root.dyslexia-font input,
+:root.dyslexia-font textarea,
+:root.dyslexia-font select,
+:root.dyslexia-font button,
+:root.dyslexia-font p,
+:root.dyslexia-font span,
+:root.dyslexia-font h1, :root.dyslexia-font h2, :root.dyslexia-font h3,
+:root.dyslexia-font h4, :root.dyslexia-font h5, :root.dyslexia-font h6 {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', 'Arial', sans-serif !important;
+  letter-spacing: 0.05em !important;
+  word-spacing: 0.12em !important;
+}
+
+:root.reduced-motion *,
+:root.reduced-motion *::before,
+:root.reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+:root.link-spacing a,
+:root.link-spacing button,
+:root.link-spacing [role="tab"] {
+  padding-top: 0.5em !important;
+  padding-bottom: 0.5em !important;
+}
+
 body {
   font-size: var(--font-size-base);
 }
-.user-icon-button {
-  background-color: #552b9a !important;
-  color: white !important;
+/* ── Halo GCU navbar icon buttons ── */
+.halo-nav-icon,
+.halo-nav-icon:focus,
+.halo-nav-icon:active,
+[data-amplify-theme] .halo-nav-icon,
+[data-amplify-theme] button.halo-nav-icon {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  background-color: #F3F4F6 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 18px !important;
+  color: #6B7280 !important;
+  cursor: pointer !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  transition: all 0.2s ease-in-out !important;
+  line-height: 1 !important;
 }
 
-.user-icon-button:hover {
-  background-color: #552b9a !important;
-  color: white !important;
+.halo-nav-icon:hover,
+[data-amplify-theme] .halo-nav-icon:hover,
+[data-amplify-theme] button.halo-nav-icon:hover {
+  background-color: #E5E7EB !important;
+  color: #111827 !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-.user-icon-button:focus {
-  background-color: #552b9a !important;
-  color: white !important;
+/* Halo dropdown panel */
+.halo-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 200px;
+  background: #ffffff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 6px;
+  z-index: 1001;
 }
 
-.user-icon-button:active {
-  background-color: #552b9a !important;
-  color: white !important;
+.halo-dropdown-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 8px 10px 4px;
 }
 
-.accessibility-icon {
-  color: #552b9a !important;
-  background-color: white !important;
+.halo-dropdown-item,
+[data-amplify-theme] .halo-dropdown-item,
+[data-amplify-theme] button.halo-dropdown-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  padding: 8px 10px !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  color: #374151 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  text-align: left !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
-.accessibility-button {
-  color: black !important;
-  background-color: white !important;
+.halo-dropdown-item:hover,
+[data-amplify-theme] .halo-dropdown-item:hover,
+[data-amplify-theme] button.halo-dropdown-item:hover {
+  background: #F3F4F6 !important;
+  color: #111827 !important;
+  border: none !important;
 }
 
-.accessibility-button:hover {
-  color: black !important;
-  background-color: white !important;
-}
-
-.accessibility-button:focus {
-  color: black !important;
-  background-color: white !important;
-}
-
-.accessibility-button:active {
-  color: black !important;
-  background-color: white !important;
+.halo-dropdown-item svg {
+  color: #6B7280;
+  flex-shrink: 0;
 }
 
 /* Consistent card styling */
@@ -384,7 +486,7 @@ body {
   background-color: inherit;
 }
 
-[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.user-icon-button) {
+[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon) {
   background-color: #f7fafc !important;
   color: black !important;
 }
@@ -495,17 +597,15 @@ body {
   border: 1px solid black !important;
 }
 
-.user-icon-button,
-.user-icon-button:hover,
-.user-icon-button:focus,
-.user-icon-button:active,
-[data-amplify-theme] .user-icon-button,
-[data-amplify-theme] .user-icon-button:hover,
-[data-amplify-theme] .user-icon-button:focus,
-[data-amplify-theme] .user-icon-button:active {
-  background-color: white !important;
-  color: black !important;
-  border: 1px solid white !important;
+.halo-nav-icon,
+.halo-nav-icon:hover,
+.halo-nav-icon:focus,
+.halo-nav-icon:active,
+[data-amplify-theme] .halo-nav-icon,
+[data-amplify-theme] .halo-nav-icon:hover,
+[data-amplify-theme] .halo-nav-icon:focus,
+[data-amplify-theme] .halo-nav-icon:active {
+  border: none !important;
 }
 
 /* Style meatball dropdown buttons in Student Research Community */
@@ -898,7 +998,7 @@ header .amplify-flex[style*="position: absolute"] button:hover {
 }
 
 /* Override any global hover effects */
-[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.user-icon-button) {
+[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon) {
   background-color: #f7fafc !important;
   color: black !important;
 }
