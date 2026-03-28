@@ -104,6 +104,15 @@ const Header = ({ user, signOut }) => {
     }
   }, [location.pathname]);
 
+  // Restore saved accessibility preferences on mount
+  useEffect(() => {
+    if (localStorage.getItem('fontSize') === 'large') document.documentElement.classList.add('large-font');
+    if (localStorage.getItem('highContrast') === 'on') document.documentElement.classList.add('high-contrast');
+    if (localStorage.getItem('dyslexiaFont') === 'on') document.documentElement.classList.add('dyslexia-font');
+    if (localStorage.getItem('reducedMotion') === 'on') document.documentElement.classList.add('reduced-motion');
+    if (localStorage.getItem('linkSpacing') === 'on') document.documentElement.classList.add('link-spacing');
+  }, []);
+
   return (
     <>
       <style>
@@ -330,83 +339,115 @@ const Header = ({ user, signOut }) => {
           onMouseEnter={() => setIsAccessibilityOpen(true)}
           onMouseLeave={() => setIsAccessibilityOpen(false)}
         >
-          <div
-            className="accessibility-icon"
-            style={{
-              backgroundColor: 'white',
-              color: '#552b9a',
-              borderRadius: '8px',
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid white',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              cursor: 'pointer'
-            }}
-          >
-           🚹
+          <div className="halo-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="4.5" r="2.5"/>
+              <path d="M12 7v5"/>
+              <path d="M8 11h8"/>
+              <path d="M10 22l2-8 2 8"/>
+            </svg>
           </div>
           
           {isAccessibilityOpen && (
-            <Flex 
-              direction="column" 
-              gap="0.5rem" 
-              backgroundColor="white" 
-              padding="0.5rem" 
-              style={{ 
-                position: 'absolute', 
-                top: '100%', 
-                right: '0', 
-                minWidth: '200px', 
-                zIndex: 1001, 
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                border: '1px solid #ccc'
-              }}
-              onMouseLeave={() => setIsAccessibilityOpen(false)}
-            >
-              <Text fontSize="0.9rem" fontWeight="bold" color="black" padding="0.5rem">
-                Accessibility
-              </Text>
-              <Button 
+            <div className="halo-dropdown" onMouseLeave={() => setIsAccessibilityOpen(false)}>
+              <div className="halo-dropdown-header">Accessibility</div>
+              <button
+                className="halo-dropdown-item"
                 onClick={() => {
                   document.documentElement.classList.toggle('large-font');
                   localStorage.setItem('fontSize', document.documentElement.classList.contains('large-font') ? 'large' : 'normal');
-                }} 
-                backgroundColor="white" 
-                color="black" 
-                border="none" 
-                size="small" 
-                justifyContent="flex-start"
+                }}
               >
-                {document.documentElement.classList.contains('large-font') ? '✓ ' : ''}Large Text
-              </Button>
-            </Flex>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>
+                </svg>
+                Large Text
+                {document.documentElement.classList.contains('large-font') && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                )}
+              </button>
+              <button
+                className="halo-dropdown-item"
+                onClick={() => {
+                  document.documentElement.classList.toggle('high-contrast');
+                  localStorage.setItem('highContrast', document.documentElement.classList.contains('high-contrast') ? 'on' : 'off');
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"/>
+                </svg>
+                High Contrast
+                {document.documentElement.classList.contains('high-contrast') && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                )}
+              </button>
+              <button
+                className="halo-dropdown-item"
+                onClick={() => {
+                  document.documentElement.classList.toggle('dyslexia-font');
+                  localStorage.setItem('dyslexiaFont', document.documentElement.classList.contains('dyslexia-font') ? 'on' : 'off');
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 20h16"/><path d="M7 4l5 16"/><path d="M17 4l-5 16"/>
+                </svg>
+                Dyslexia-Friendly
+                {document.documentElement.classList.contains('dyslexia-font') && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                )}
+              </button>
+              <button
+                className="halo-dropdown-item"
+                onClick={() => {
+                  document.documentElement.classList.toggle('reduced-motion');
+                  localStorage.setItem('reducedMotion', document.documentElement.classList.contains('reduced-motion') ? 'on' : 'off');
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><line x1="4" y1="4" x2="20" y2="20"/>
+                </svg>
+                Reduce Motion
+                {document.documentElement.classList.contains('reduced-motion') && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                )}
+              </button>
+              <button
+                className="halo-dropdown-item"
+                onClick={() => {
+                  document.documentElement.classList.toggle('link-spacing');
+                  localStorage.setItem('linkSpacing', document.documentElement.classList.contains('link-spacing') ? 'on' : 'off');
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 10H3"/><path d="M21 6H3"/><path d="M21 14H3"/><path d="M21 18H3"/>
+                </svg>
+                Link Spacing
+                {document.documentElement.classList.contains('link-spacing') && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                )}
+              </button>
+            </div>
           )}
         </View>
         
         <View style={{ position: 'relative' }}>
-          <Button 
-            className="user-icon-button"
+          <div
+            className="halo-nav-icon"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             onMouseEnter={() => setIsMenuOpen(true)}
-            backgroundColor="white" 
-            color="black"
-            size="small"
-            style={{
-              borderRadius: '8px',
-              width: '40px',
-              height: '40px',
-              padding: '0',
-              outline: 'none',
-              boxShadow: 'none',
-              border: '1px solid white'
-            }}
           >
             👤
-          </Button>
+          </div>
 
           {isMenuOpen && (
             <Flex 
