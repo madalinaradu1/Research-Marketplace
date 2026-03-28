@@ -192,6 +192,11 @@ enum ProjectTagType {
   OPTIONAL
 }
 
+enum RecommendationMatchKind {
+  DIRECT
+  RELATED
+}
+
 type ProjectTagIndex {
   PK: String!
   SK: String!
@@ -201,13 +206,38 @@ type ProjectTagIndex {
   createdAt: AWSDateTime
 }
 
+type RecommendationMatchDetail {
+  matchedTagId: String!
+  projectTagType: ProjectTagType!
+  matchKind: RecommendationMatchKind!
+  directUserTagIds: [String!]!
+  relatedSourceUserTagIds: [String!]!
+  relationWeight: Float
+  scoreContribution: Float!
+}
+
+type RecommendationExplanation {
+  directMatchedTagIds: [String!]!
+  relatedMatchedTagIds: [String!]!
+  directMatches: Int!
+  relatedMatches: Int!
+  directScore: Float!
+  relatedScore: Float!
+  matchDetails: [RecommendationMatchDetail!]!
+}
+
 type RecommendedProject {
   projectId: ID!
   score: Float!
   requiredMatches: Int!
   optionalMatches: Int!
+  directMatches: Int!
+  relatedMatches: Int!
+  directScore: Float!
+  relatedScore: Float!
   matchedTagIds: [String!]!
   reasons: [String!]!
+  explanation: RecommendationExplanation
   project: Project
 }
 

@@ -437,7 +437,17 @@ const FacultyDashboard = ({ user }) => {
       const deadline = projectForm.applicationDeadline 
         ? new Date(projectForm.applicationDeadline + 'T00:00:00Z').toISOString() 
         : null;
-      
+      const isFutureDeadline = Boolean(deadline && new Date(deadline) > new Date());
+      const wasExpired = Boolean(
+        selectedProject?.applicationDeadline &&
+        new Date(selectedProject.applicationDeadline) < new Date()
+      );
+      const shouldReactivateProject = Boolean(
+        selectedProject &&
+        (wasExpired || selectedProject.isActive === false) &&
+        isFutureDeadline
+      );
+
       console.log('Original date input:', projectForm.applicationDeadline);
       console.log('Formatted deadline for API:', deadline);
       
@@ -453,7 +463,9 @@ const FacultyDashboard = ({ user }) => {
         applicationDeadline: deadline,
         requiresTranscript: projectForm.requiresTranscript,
         facultyID: userId,
-        isActive: projectForm.isActive === true || projectForm.isActive === 'true',
+        isActive: shouldReactivateProject
+          ? true
+          : (projectForm.isActive === true || projectForm.isActive === 'true'),
         projectStatus: (selectedProject && selectedProject.projectStatus === 'Returned' && viewingReturnReason) ? 'Coordinator Review' : (selectedProject ? selectedProject.projectStatus : 'Pending')
       };
       
@@ -940,21 +952,6 @@ const FacultyDashboard = ({ user }) => {
                   <Flex direction="column" gap="0.5rem">
                     {(() => {
                       const filteredProjects = projects.filter(project => {
-                        // Filter out deactivated projects
-                        if (project.isActive === false) {
-                          return false;
-                        }
-                        
-                        // Filter out projects expired for more than 14 days
-                        if (project.applicationDeadline) {
-                          const deadline = new Date(project.applicationDeadline);
-                          const now = new Date();
-                          const daysSinceExpired = (now - deadline) / (1000 * 60 * 60 * 24);
-                          if (daysSinceExpired > 14) {
-                            return false; // Hide projects expired for more than 14 days
-                          }
-                        }
-                        
                         const title = (project.title || '').toLowerCase();
                         const department = (project.department || '').toLowerCase();
                         const skillsRequired = (project.skillsRequired || []).join(' ').toLowerCase();
@@ -1019,9 +1016,7 @@ const FacultyDashboard = ({ user }) => {
                             >
                               {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : (project.projectStatus || 'Draft')}
                             </Badge>
-                            {/* Only show meatball menu for non-expired projects */}
-                            {(!project.applicationDeadline || new Date(project.applicationDeadline) >= new Date()) && (
-                              <View position="relative">
+                            <View position="relative">
                               <Button 
                                 className="meatball-button"
                                 onClick={(e) => {
@@ -1042,9 +1037,8 @@ const FacultyDashboard = ({ user }) => {
                                         editProject(project);
                                         setOpenKebabMenu(null);
                                       }}
-                                      disabled={project.applicationDeadline && new Date(project.applicationDeadline) < new Date()}
                                     >
-                                      {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : 'Edit'}
+                                      Edit
                                     </button>
                                     <button
                                       className="meatball-dropdown-item"
@@ -1069,8 +1063,7 @@ const FacultyDashboard = ({ user }) => {
 
                                 </div>
                               )}
-                              </View>
-                            )}
+                            </View>
                           </Flex>
                         </Flex>
                         <Flex justifyContent="space-between" alignItems="center">

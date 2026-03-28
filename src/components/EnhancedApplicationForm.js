@@ -233,7 +233,42 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
   return (
     <Card>
       <Flex direction="column" gap="1rem">
-        <Heading level={3}>Apply to: {project.title}</Heading>
+        <Flex justifyContent="space-between" alignItems="center" gap="1rem">
+          <Heading level={3}>{project.title}</Heading>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close application form"
+            style={{
+              width: '2rem',
+              height: '2rem',
+              borderRadius: '0.5rem',
+              border: '3px solid #e2e8fa', 
+              backgroundColor: '#ffffff',
+              color: '#4a5568',
+              fontSize: '1.1rem',
+              lineHeight: 1,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+              boxShadow: '0 1px 2px rgba(15, 23, 42, 0.06)'
+            }}
+          >
+            <span
+              style={{
+                display: 'inline-block',
+                fontSize: '1.rem',
+                fontWeight: 500,
+                lineHeight: 1,
+                transform: 'translateY(-1px)'
+              }}
+           >
+              x
+            </span>
+          </button>
+        </Flex>
         
         <Alert variation="info">
           <Text>
