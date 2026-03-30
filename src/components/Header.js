@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { API, graphqlOperation } from 'aws-amplify';
 import { listMessages } from '../graphql/message-operations';
@@ -7,15 +7,11 @@ import {
   Image,
   Text,
   Button,
-  Menu,
-  MenuButton,
-  MenuItem,
   useTheme,
   View,
   SearchField
 } from '@aws-amplify/ui-react';
 import { useNavigate } from 'react-router-dom';
-import { isUserAdmin } from '../utils/isUserAdmin';
 
 const Header = ({ user, signOut }) => {
   const location = useLocation();
@@ -43,6 +39,8 @@ const Header = ({ user, signOut }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const accessibilityCloseTimeoutRef = useRef(null);
+  const profileCloseTimeoutRef = useRef(null);
 
   // Check if the current path matches the given path
   const isActive = (path) => {
@@ -104,6 +102,41 @@ const Header = ({ user, signOut }) => {
     }
   }, [location.pathname]);
 
+  const displayName = user?.name || (user?.email ? user.email.split('@')[0] : user?.username || 'User');
+
+  const clearCloseTimeout = (timeoutRef) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
+
+  const openAccessibilityMenu = () => {
+    clearCloseTimeout(accessibilityCloseTimeoutRef);
+    setIsAccessibilityOpen(true);
+  };
+
+  const scheduleAccessibilityClose = () => {
+    clearCloseTimeout(accessibilityCloseTimeoutRef);
+    accessibilityCloseTimeoutRef.current = setTimeout(() => {
+      setIsAccessibilityOpen(false);
+      accessibilityCloseTimeoutRef.current = null;
+    }, 10);
+  };
+
+  const openProfileMenu = () => {
+    clearCloseTimeout(profileCloseTimeoutRef);
+    setIsMenuOpen(true);
+  };
+
+  const scheduleProfileClose = () => {
+    clearCloseTimeout(profileCloseTimeoutRef);
+    profileCloseTimeoutRef.current = setTimeout(() => {
+      setIsMenuOpen(false);
+      profileCloseTimeoutRef.current = null;
+    }, 10);
+  };
+
   // Restore saved accessibility preferences on mount
   useEffect(() => {
     if (localStorage.getItem('fontSize') === 'large') document.documentElement.classList.add('large-font');
@@ -111,6 +144,13 @@ const Header = ({ user, signOut }) => {
     if (localStorage.getItem('dyslexiaFont') === 'on') document.documentElement.classList.add('dyslexia-font');
     if (localStorage.getItem('reducedMotion') === 'on') document.documentElement.classList.add('reduced-motion');
     if (localStorage.getItem('linkSpacing') === 'on') document.documentElement.classList.add('link-spacing');
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearCloseTimeout(accessibilityCloseTimeoutRef);
+      clearCloseTimeout(profileCloseTimeoutRef);
+    };
   }, []);
 
   return (
@@ -335,23 +375,31 @@ const Header = ({ user, signOut }) => {
         
         {/* Accessibility Dropdown */}
         <View 
+          className="halo-menu-anchor"
           style={{ position: 'relative' }}
-          onMouseEnter={() => setIsAccessibilityOpen(true)}
-          onMouseLeave={() => setIsAccessibilityOpen(false)}
+          onMouseEnter={openAccessibilityMenu}
+          onMouseLeave={scheduleAccessibilityClose}
         >
-          <div className="halo-nav-icon">
+          <button
+            type="button"
+            className="halo-nav-icon halo-accessibility-trigger"
+            aria-label="Accessibility options"
+            aria-haspopup="true"
+            aria-expanded={isAccessibilityOpen}
+          >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="4.5" r="2.5"/>
               <path d="M12 7v5"/>
               <path d="M8 11h8"/>
               <path d="M10 22l2-8 2 8"/>
             </svg>
-          </div>
+          </button>
           
           {isAccessibilityOpen && (
-            <div className="halo-dropdown" onMouseLeave={() => setIsAccessibilityOpen(false)}>
+            <div className="halo-dropdown">
               <div className="halo-dropdown-header">Accessibility</div>
               <button
+                type="button"
                 className="halo-dropdown-item"
                 onClick={() => {
                   document.documentElement.classList.toggle('large-font');
@@ -369,6 +417,7 @@ const Header = ({ user, signOut }) => {
                 )}
               </button>
               <button
+                type="button"
                 className="halo-dropdown-item"
                 onClick={() => {
                   document.documentElement.classList.toggle('high-contrast');
@@ -386,6 +435,7 @@ const Header = ({ user, signOut }) => {
                 )}
               </button>
               <button
+                type="button"
                 className="halo-dropdown-item"
                 onClick={() => {
                   document.documentElement.classList.toggle('dyslexia-font');
@@ -403,6 +453,7 @@ const Header = ({ user, signOut }) => {
                 )}
               </button>
               <button
+                type="button"
                 className="halo-dropdown-item"
                 onClick={() => {
                   document.documentElement.classList.toggle('reduced-motion');
@@ -420,6 +471,7 @@ const Header = ({ user, signOut }) => {
                 )}
               </button>
               <button
+                type="button"
                 className="halo-dropdown-item"
                 onClick={() => {
                   document.documentElement.classList.toggle('link-spacing');
@@ -440,56 +492,50 @@ const Header = ({ user, signOut }) => {
           )}
         </View>
         
-        <View style={{ position: 'relative' }}>
-          <div
+        <View
+          className="halo-menu-anchor"
+          style={{ position: 'relative' }}
+          onMouseEnter={() => clearCloseTimeout(profileCloseTimeoutRef)}
+          onMouseLeave={scheduleProfileClose}
+        >
+          <button
+            type="button"
             className="halo-nav-icon"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            onMouseEnter={() => setIsMenuOpen(true)}
+            onMouseEnter={openProfileMenu}
+            aria-label="Profile menu"
+            aria-haspopup="true"
+            aria-expanded={isMenuOpen}
           >
-            👤
-          </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.25" />
+              <path d="M5 19a7 7 0 0 1 14 0" />
+            </svg>
+          </button>
 
           {isMenuOpen && (
-            <Flex 
-              direction="column" 
-              gap="0.5rem" 
-              backgroundColor="white" 
-              padding="0.5rem" 
-              style={{ 
-                position: 'absolute', 
-                top: '100%', 
-                right: '0', 
-                minWidth: '250px', 
-                zIndex: 1001, 
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                border: '1px solid #ccc'
+            <Flex
+              direction="column"
+              className="halo-dropdown halo-profile-dropdown"
+              style={{
+                position: 'absolute',
+                zIndex: 1001
               }}
-              onMouseLeave={() => setIsMenuOpen(false)}
             >
-              <Flex direction="row" alignItems="center" gap="1rem">
-                <View
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    backgroundColor: 'white',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '30px'
-                  }}
-                >
-                  👤
-                </View>
-
-                <Flex direction="column" gap="0.5rem" flex="1">
-                  <Text fontSize="0.9rem" fontWeight="bold" color="black">
-                    Hello, {user?.name || (user?.email ? user.email.split('@')[0] : user?.username || 'User')}
-                  </Text>
+              <Flex direction="column" alignItems="stretch" gap="0.5rem">
+                <Flex direction="column" gap="0" flex="1">
+                  <div className="halo-dropdown-header">Profile</div>
+                  <div className="halo-profile-greeting">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="8" r="3.25" />
+                      <path d="M5 19a7 7 0 0 1 14 0" />
+                    </svg>
+                    <span>{displayName}</span>
+                  </div>
                   {user?.role === 'Student' && (
-                    <Button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Edit Profile</Button>
+                    <Button className="halo-dropdown-item halo-profile-action" onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Edit profile</Button>
                   )}
-                  <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Sign Out</Button>
+                  <Button className="halo-dropdown-item halo-profile-action" onClick={() => { handleSignOut(); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Sign out</Button>
                 </Flex>
               </Flex>
             </Flex>

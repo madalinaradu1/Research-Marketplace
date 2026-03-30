@@ -114,10 +114,27 @@ body {
   box-shadow: none !important;
 }
 
+.halo-nav-icon svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.halo-accessibility-trigger,
+.halo-accessibility-trigger:hover,
+.halo-accessibility-trigger:focus,
+[data-amplify-theme] .halo-accessibility-trigger,
+[data-amplify-theme] .halo-accessibility-trigger:hover,
+[data-amplify-theme] .halo-accessibility-trigger:focus {
+  background-color: #F3F4F6 !important;
+  color: #6B7280 !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
 /* Halo dropdown panel */
 .halo-dropdown {
   position: absolute;
-  top: calc(100% + 6px);
+  top: 100%;
   right: 0;
   min-width: 200px;
   background: #ffffff;
@@ -126,6 +143,19 @@ body {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   padding: 6px;
   z-index: 1001;
+}
+
+.halo-menu-anchor {
+  position: relative;
+}
+
+.halo-menu-anchor::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 240px;
+  height: 12px;
 }
 
 .halo-dropdown-header {
@@ -161,14 +191,53 @@ body {
 .halo-dropdown-item:hover,
 [data-amplify-theme] .halo-dropdown-item:hover,
 [data-amplify-theme] button.halo-dropdown-item:hover {
-  background: #F3F4F6 !important;
-  color: #111827 !important;
+  background: #ffffff !important;
+  color: #374151 !important;
   border: none !important;
+  box-shadow: none !important;
 }
 
 .halo-dropdown-item svg {
   color: #6B7280;
   flex-shrink: 0;
+}
+
+.halo-profile-dropdown {
+  min-width: 220px;
+  padding: 8px;
+}
+
+.halo-profile-greeting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #F3F4F6;
+  color: #111827;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.halo-profile-greeting svg {
+  color: #6B7280;
+  flex-shrink: 0;
+}
+
+.halo-profile-greeting span {
+  min-width: 0;
+  color: #111827 !important;
+}
+
+.halo-profile-action,
+[data-amplify-theme] .halo-profile-action,
+[data-amplify-theme] button.halo-profile-action {
+  gap: 0 !important;
+  padding: 0px 10px !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
 }
 
 /* Consistent card styling */
@@ -486,7 +555,7 @@ body {
   background-color: inherit;
 }
 
-[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon) {
+[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon):not(.halo-dropdown-item) {
   background-color: #f7fafc !important;
   color: black !important;
 }
@@ -998,7 +1067,7 @@ header .amplify-flex[style*="position: absolute"] button:hover {
 }
 
 /* Override any global hover effects */
-[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon) {
+[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon):not(.halo-dropdown-item) {
   background-color: #f7fafc !important;
   color: black !important;
 }
