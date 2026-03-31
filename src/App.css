@@ -66,19 +66,12 @@ button.amplify-button--primary:hover {
   background-color: #7a3ab0;
 }
 
-<<<<<<< HEAD
 button.amplify-button--primary:hover:not(:disabled) {
   background-color: #7a3ab0 !important;
-=======
-/* Light purple hover effect for all buttons */
-button:hover:not(:disabled):not(.tag-chip-remove) {
-  background-color: #f3e5f5 !important;
->>>>>>> 770bf802046dd325e625bf27f7e9adb8471fc763
   transition: background-color 0.2s ease;
   color: white !important;
 }
 
-<<<<<<< HEAD
 /* Tab base */
 .amplify-tabs-item,
 [role="tab"],
@@ -104,11 +97,6 @@ button:hover:not(:disabled):not(.tag-chip-remove) {
 [role="tablist"] button[data-state="active"] {
   box-shadow: inset 0 -3px 0 0 #9a4ad7 !important;
   color: #9a4ad7 !important;
-=======
-/* Preserve text color on hover */
-button:hover:not(:disabled):not(.tag-chip-remove) {
-  color: #7b1fa2 !important;
->>>>>>> 770bf802046dd325e625bf27f7e9adb8471fc763
 }
 
 /* ReactQuill HTML content normalization */

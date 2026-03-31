@@ -76,7 +76,6 @@ const Header = ({ user, signOut }) => {
   useEffect(() => {
     const level = parseInt(localStorage.getItem('fontSizeLevel') || '0');
     if (level > 0) document.documentElement.classList.add(`font-level-${level}`);
-    // Remove any leftover dark mode class
     document.documentElement.classList.remove('dark-mode');
     localStorage.removeItem('darkMode');
   }, []);
@@ -128,7 +127,6 @@ const Header = ({ user, signOut }) => {
     }, 10);
   };
 
-  // Restore saved accessibility preferences on mount
   useEffect(() => {
     if (localStorage.getItem('fontSize') === 'large') document.documentElement.classList.add('large-font');
     if (localStorage.getItem('highContrast') === 'on') document.documentElement.classList.add('high-contrast');
@@ -147,53 +145,16 @@ const Header = ({ user, signOut }) => {
   return (
     <>
       <style>{`
-        .header-search-field {
-          border: 1px solid rgba(0,0,0,0.3) !important;
-          border-radius: 4px !important;
-          overflow: hidden !important;
-        }
-        .header-search-field .amplify-field-group {
-          border: none !important;
-          box-shadow: none !important;
-        }
-        .header-search-field .amplify-field-group__outer-end {
-          border: none !important;
-        }
-        .header-search-field input {
-          color: black !important;
-          background-color: transparent !important;
-          border: none !important;
-          outline: none !important;
-        }
-        .header-search-field input::placeholder {
-          color: rgba(0,0,0,0.5) !important;
-          opacity: 1;
-        }
-        .header-search-field input:focus {
-          border: none !important;
-          outline: none !important;
-          box-shadow: none !important;
-        }
-        .header-search-field button {
-          background-color: transparent !important;
-          color: black !important;
-          border: none !important;
-        }
-        .header-search-field button:hover,
-        .header-search-field button:focus {
-          background-color: transparent !important;
-          box-shadow: none !important;
-          border: none !important;
-          outline: none !important;
-        }
-        .header-search-field svg {
-          fill: black !important;
-        }
-        .accessibility-button,
-        .accessibility-button:hover,
-        .accessibility-button:focus {
-          color: white !important;
-        }
+        .header-search-field { border: 1px solid rgba(0,0,0,0.3) !important; border-radius: 4px !important; overflow: hidden !important; }
+        .header-search-field .amplify-field-group { border: none !important; box-shadow: none !important; }
+        .header-search-field .amplify-field-group__outer-end { border: none !important; }
+        .header-search-field input { color: black !important; background-color: transparent !important; border: none !important; outline: none !important; }
+        .header-search-field input::placeholder { color: rgba(0,0,0,0.5) !important; opacity: 1; }
+        .header-search-field input:focus { border: none !important; outline: none !important; box-shadow: none !important; }
+        .header-search-field button { background-color: transparent !important; color: black !important; border: none !important; }
+        .header-search-field button:hover, .header-search-field button:focus { background-color: transparent !important; box-shadow: none !important; border: none !important; outline: none !important; }
+        .header-search-field svg { fill: black !important; }
+        .accessibility-button, .accessibility-button:hover, .accessibility-button:focus { color: white !important; }
       `}</style>
 
       <Flex
@@ -205,7 +166,6 @@ const Header = ({ user, signOut }) => {
         top="0"
         style={{ zIndex: 100 }}
       >
-<<<<<<< HEAD
         {/* Top banner */}
         <Flex
           direction="row"
@@ -236,330 +196,6 @@ const Header = ({ user, signOut }) => {
                 <Text fontSize={tokens.fontSizes.medium} color="black">
                   Grand Canyon University
                 </Text>
-=======
-      {/* Top banner with logo and title */}
-      <Flex
-        direction="row"
-        alignItems="flex-end"
-        justifyContent="flex-start"
-        padding="0.05rem 0.25rem 0.1rem"
-        gap={tokens.space.small}
-        minHeight="20px"
-      >
-        <Link to="/dashboard" style={{ textDecoration: 'none', position: 'relative', zIndex: 10, outline: 'none' }}>
-          <Flex direction="row" alignItems="flex-end" gap={tokens.space.small} marginTop="25px" marginBottom="-10px">
-            <Image
-              alt="GCU Logo"
-              src="/GCU_WHITE.png"
-              height="50px"
-              objectFit="contain"
-              marginBottom="0px"
-              marginTop="15px"
-              paddingLeft="20px"
-            />
-            <Flex direction="column" gap="0">
-              <Text
-                fontSize={tokens.fontSizes.medium}
-                fontWeight={tokens.fontWeights.bold}
-                color="white"
-              >
-                Undergraduate Research
-              </Text>
-              <Text
-                fontSize={tokens.fontSizes.medium}
-                fontWeight={tokens.fontWeights.bold}
-                color="white"
-              >
-                Opportunity Program
-              </Text>
-              <Text
-                fontSize={tokens.fontSizes.medium}
-                color="white"
-              >
-                Grand Canyon University
-              </Text>
-            </Flex>
-          </Flex>
-        </Link>
-      </Flex>
-      
-      {/* Navigation bar */}
-      <Flex
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        padding="0 0.25rem"
-        marginTop="-3.5rem"
-      >
-      {/* Navigation spacer */}
-      <View />
-
-      {/* Desktop Navigation */}
-      <Flex
-        direction="row"
-        alignItems="center"
-        gap={tokens.space.medium}
-        display={{ base: 'none', xl: 'flex' }}
-        padding="1.5rem 2rem"
-      >
-        {/* Hide navigation for Students with incomplete profiles */}
-        {!(user?.role === 'Student' && !user?.profileComplete) && (
-          <>
-            <Link to="/dashboard" style={{ textDecoration: isActive('/dashboard') ? 'underline white' : 'none' }}>
-              <Text
-                color={isActive('/dashboard') ? "white" : "rgba(255,255,255,0.8)"}
-                fontWeight={isActive('/dashboard') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-              >
-                Dashboard
-              </Text>
-            </Link>
-
-            {user?.role !== 'Coordinator' && user?.role !== 'Admin' && (
-              <Link to="/activity" style={{ textDecoration: isActive('/activity') ? 'underline white' : 'none' }}>
-                <Text
-                  color={isActive('/activity') ? "white" : "rgba(255,255,255,0.8)"}
-                  fontWeight={isActive('/activity') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-                >
-                  My Activity
-                </Text>
-              </Link>
-            )}
-            <Link to="/messages" style={{ position: 'relative', textDecoration: isActive('/messages') ? 'underline white' : 'none' }}>
-              <Text
-                color={isActive('/messages') ? "white" : "rgba(255,255,255,0.8)"}
-                fontWeight={isActive('/messages') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-              >
-                Messages
-              </Text>
-              {unreadCount > 0 && (
-                <View
-                  position="absolute"
-                  top="-8px"
-                  right="-8px"
-                  width="16px"
-                  height="16px"
-                  borderRadius="50%"
-                  backgroundColor="red"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Text fontSize="10px" color="white" fontWeight="bold">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </Text>
-                </View>
-              )}
-            </Link>
-            <Link to="/community" style={{ textDecoration: isActive('/community') ? 'underline white' : 'none' }}>
-              <Text
-                color={isActive('/community') ? "white" : "rgba(255,255,255,0.8)"}
-                fontWeight={isActive('/community') ? tokens.fontWeights.bold : tokens.fontWeights.normal}
-              >
-                Community
-              </Text>
-            </Link>
-          </>
-        )}
-        
-
-
-
-
-
-        <SearchField
-          placeholder="Search research opportunities..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onClear={() => setSearchTerm('')}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
-            }
-          }}
-          onSubmit={() => navigate(`/search?q=${encodeURIComponent(searchTerm)}`)}
-          width="300px"
-          size="small"
-          style={{
-            '--amplify-components-field-border-color': 'white',
-            '--amplify-components-field-color': 'white',
-            '--amplify-components-field-background-color': 'transparent',
-            '--amplify-components-field-focus-border-color': 'white',
-            '--amplify-components-field-focus-box-shadow': 'none',
-            '--amplify-components-searchfield-button-color': 'white',
-            '--amplify-components-button-color': 'white',
-            '--amplify-components-button-primary-color': 'white',
-            color: 'white',
-            border: '1px solid white',
-            outline: 'none'
-          }}
-          className="header-search-field"
-        /> 
-        
-        {/* Accessibility Dropdown */}
-        <View 
-          className="halo-menu-anchor"
-          style={{ position: 'relative' }}
-          onMouseEnter={openAccessibilityMenu}
-          onMouseLeave={scheduleAccessibilityClose}
-        >
-          <button
-            type="button"
-            className="halo-nav-icon halo-accessibility-trigger"
-            aria-label="Accessibility options"
-            aria-haspopup="true"
-            aria-expanded={isAccessibilityOpen}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="4.5" r="2.5"/>
-              <path d="M12 7v5"/>
-              <path d="M8 11h8"/>
-              <path d="M10 22l2-8 2 8"/>
-            </svg>
-          </button>
-          
-          {isAccessibilityOpen && (
-            <div className="halo-dropdown">
-              <div className="halo-dropdown-header">Accessibility</div>
-              <button
-                type="button"
-                className="halo-dropdown-item"
-                onClick={() => {
-                  document.documentElement.classList.toggle('large-font');
-                  localStorage.setItem('fontSize', document.documentElement.classList.contains('large-font') ? 'large' : 'normal');
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>
-                </svg>
-                Large Text
-                {document.documentElement.classList.contains('large-font') && (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                )}
-              </button>
-              <button
-                type="button"
-                className="halo-dropdown-item"
-                onClick={() => {
-                  document.documentElement.classList.toggle('high-contrast');
-                  localStorage.setItem('highContrast', document.documentElement.classList.contains('high-contrast') ? 'on' : 'off');
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"/>
-                </svg>
-                High Contrast
-                {document.documentElement.classList.contains('high-contrast') && (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                )}
-              </button>
-              <button
-                type="button"
-                className="halo-dropdown-item"
-                onClick={() => {
-                  document.documentElement.classList.toggle('dyslexia-font');
-                  localStorage.setItem('dyslexiaFont', document.documentElement.classList.contains('dyslexia-font') ? 'on' : 'off');
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 20h16"/><path d="M7 4l5 16"/><path d="M17 4l-5 16"/>
-                </svg>
-                Dyslexia-Friendly
-                {document.documentElement.classList.contains('dyslexia-font') && (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                )}
-              </button>
-              <button
-                type="button"
-                className="halo-dropdown-item"
-                onClick={() => {
-                  document.documentElement.classList.toggle('reduced-motion');
-                  localStorage.setItem('reducedMotion', document.documentElement.classList.contains('reduced-motion') ? 'on' : 'off');
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/><line x1="4" y1="4" x2="20" y2="20"/>
-                </svg>
-                Reduce Motion
-                {document.documentElement.classList.contains('reduced-motion') && (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                )}
-              </button>
-              <button
-                type="button"
-                className="halo-dropdown-item"
-                onClick={() => {
-                  document.documentElement.classList.toggle('link-spacing');
-                  localStorage.setItem('linkSpacing', document.documentElement.classList.contains('link-spacing') ? 'on' : 'off');
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10H3"/><path d="M21 6H3"/><path d="M21 14H3"/><path d="M21 18H3"/>
-                </svg>
-                Link Spacing
-                {document.documentElement.classList.contains('link-spacing') && (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                )}
-              </button>
-            </div>
-          )}
-        </View>
-        
-        <View
-          className="halo-menu-anchor"
-          style={{ position: 'relative' }}
-          onMouseEnter={() => clearCloseTimeout(profileCloseTimeoutRef)}
-          onMouseLeave={scheduleProfileClose}
-        >
-          <button
-            type="button"
-            className="halo-nav-icon"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            onMouseEnter={openProfileMenu}
-            aria-label="Profile menu"
-            aria-haspopup="true"
-            aria-expanded={isMenuOpen}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="12" cy="8" r="3.25" />
-              <path d="M5 19a7 7 0 0 1 14 0" />
-            </svg>
-          </button>
-
-          {isMenuOpen && (
-            <Flex
-              direction="column"
-              className="halo-dropdown halo-profile-dropdown"
-              style={{
-                position: 'absolute',
-                zIndex: 1001
-              }}
-            >
-              <Flex direction="column" alignItems="stretch" gap="0.5rem">
-                <Flex direction="column" gap="0" flex="1">
-                  <div className="halo-dropdown-header">Profile</div>
-                  <div className="halo-profile-greeting">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <circle cx="12" cy="8" r="3.25" />
-                      <path d="M5 19a7 7 0 0 1 14 0" />
-                    </svg>
-                    <span>{displayName}</span>
-                  </div>
-                  {user?.role === 'Student' && (
-                    <Button className="halo-dropdown-item halo-profile-action" onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Edit profile</Button>
-                  )}
-                  <Button className="halo-dropdown-item halo-profile-action" onClick={() => { handleSignOut(); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Sign out</Button>
-                </Flex>
->>>>>>> 770bf802046dd325e625bf27f7e9adb8471fc763
               </Flex>
             </Flex>
           </Link>
@@ -666,20 +302,25 @@ const Header = ({ user, signOut }) => {
             </div>
 
             {/* Accessibility Dropdown */}
-            <View style={{ position: 'relative' }} onClick={() => { setIsAccessibilityOpen(!isAccessibilityOpen); setIsMenuOpen(false); }}>
-              <div className="accessibility-icon" style={{
-                backgroundColor: 'white', color: '#552b9a', borderRadius: '8px',
+            <View
+              style={{ position: 'relative' }}
+              onMouseEnter={openAccessibilityMenu}
+              onMouseLeave={scheduleAccessibilityClose}
+            >
+              <div style={{
+                backgroundColor: 'white', borderRadius: '8px',
                 width: '40px', height: '40px', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', border: '1px solid white', fontSize: '16px',
-                fontWeight: 'bold', cursor: 'pointer'
+                justifyContent: 'center', border: '1px solid white', cursor: 'pointer'
               }}>
-                🚹
+                <img src="/accessibility-icon.png" alt="Accessibility" style={{ width: '28px', height: '28px' }} />
               </div>
 
               {isAccessibilityOpen && (
                 <Flex direction="column" gap="0.5rem" backgroundColor="white" padding="0.5rem"
                   style={{ position: 'absolute', top: '100%', right: '0', minWidth: '200px',
                     zIndex: 1001, boxShadow: '0 4px 8px rgba(0,0,0,0.3)', border: '1px solid #ccc' }}
+                  onMouseEnter={() => clearCloseTimeout(accessibilityCloseTimeoutRef)}
+                  onMouseLeave={scheduleAccessibilityClose}
                 >
                   <Text fontSize="0.9rem" fontWeight="bold" color="black" padding="0.5rem">Accessibility</Text>
                   <Button
@@ -715,9 +356,12 @@ const Header = ({ user, signOut }) => {
             </View>
 
             {/* User Menu */}
-            <View style={{ position: 'relative' }}>
+            <View
+              style={{ position: 'relative' }}
+              onMouseEnter={openProfileMenu}
+              onMouseLeave={scheduleProfileClose}
+            >
               <Button
-                className="user-icon-button"
                 onClick={() => { setIsMenuOpen(!isMenuOpen); setIsAccessibilityOpen(false); }}
                 backgroundColor="white" color="black" size="small"
                 style={{ borderRadius: '8px', width: '40px', height: '40px', padding: '0', outline: 'none', boxShadow: 'none', border: '1px solid white' }}
@@ -729,6 +373,8 @@ const Header = ({ user, signOut }) => {
                 <Flex direction="column" gap="0.5rem" backgroundColor="white" padding="0.5rem"
                   style={{ position: 'absolute', top: '100%', right: '0', minWidth: '250px',
                     zIndex: 1001, boxShadow: '0 4px 8px rgba(0,0,0,0.3)', border: '1px solid #ccc' }}
+                  onMouseEnter={() => clearCloseTimeout(profileCloseTimeoutRef)}
+                  onMouseLeave={scheduleProfileClose}
                 >
                   <Flex direction="row" alignItems="center" gap="1rem">
                     <View style={{ width: '60px', height: '60px', backgroundColor: 'white', borderRadius: '8px',
@@ -737,7 +383,7 @@ const Header = ({ user, signOut }) => {
                     </View>
                     <Flex direction="column" gap="0.5rem" flex="1">
                       <Text fontSize="0.9rem" fontWeight="bold" color="black">
-                        Hello, {user?.name || (user?.email ? user.email.split('@')[0] : user?.username || 'User')}
+                        Hello, {displayName}
                       </Text>
                       {user?.role === 'Student' && (
                         <Button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Edit Profile</Button>
