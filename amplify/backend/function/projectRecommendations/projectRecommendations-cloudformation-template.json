@@ -93,7 +93,7 @@
             },
             "ENABLE_RELATED_TAG_EXPANSION": "true",
             "MIN_RELATION_WEIGHT": "0.35",
-            "MAX_RELATED_TAGS_PER_SOURCE": "3",
+            "MAX_RELATED_TAGS_PER_SOURCE": "4",
             "DEFAULT_RELATED_WEIGHT": "0.40",
             "RECOMMENDATION_DEBUG_LOGS": "true"
           }

@@ -66,6 +66,267 @@ export const TAG_RELATIONS = [
     note: 'Bioinformatics often overlaps with data science methods.'
   },
 
+  // Broad-domain umbrella expansion
+  {
+    sourceTagId: 'domain-biology',
+    targetTagId: 'domain-molecular-biology',
+    edgeWeight: 0.35,
+    bidirectional: false,
+    note: 'Broad Biology interest should surface Molecular Biology projects.'
+  },
+  {
+    sourceTagId: 'domain-biology',
+    targetTagId: 'domain-cell-biology',
+    edgeWeight: 0.35,
+    bidirectional: false,
+    note: 'Broad Biology interest should surface Cell Biology projects.'
+  },
+  {
+    sourceTagId: 'domain-biology',
+    targetTagId: 'domain-microbiology',
+    edgeWeight: 0.33,
+    bidirectional: false,
+    note: 'Broad Biology interest should surface Microbiology projects.'
+  },
+  {
+    sourceTagId: 'domain-biology',
+    targetTagId: 'domain-biochemistry',
+    edgeWeight: 0.3,
+    bidirectional: false,
+    note: 'Broad Biology interest should surface Biochemistry projects.'
+  },
+  {
+    sourceTagId: 'domain-biology',
+    targetTagId: 'domain-cancer-biology',
+    edgeWeight: 0.28,
+    bidirectional: false,
+    note: 'Broad Biology interest should surface Cancer Biology projects.'
+  },
+  {
+    sourceTagId: 'domain-biology',
+    targetTagId: 'domain-genetics',
+    edgeWeight: 0.28,
+    bidirectional: false,
+    note: 'Broad Biology interest should surface Genetics projects.'
+  },
+  {
+    sourceTagId: 'domain-biology',
+    targetTagId: 'domain-ecology',
+    edgeWeight: 0.25,
+    bidirectional: false,
+    note: 'Broad Biology interest should surface Ecology projects.'
+  },
+  {
+    sourceTagId: 'domain-biology',
+    targetTagId: 'domain-marine-biology',
+    edgeWeight: 0.25,
+    bidirectional: false,
+    note: 'Broad Biology interest should surface Marine Biology projects.'
+  },
+  {
+    sourceTagId: 'domain-biology',
+    targetTagId: 'domain-botany',
+    edgeWeight: 0.25,
+    bidirectional: false,
+    note: 'Broad Biology interest should surface Botany projects.'
+  },
+  {
+    sourceTagId: 'domain-biology',
+    targetTagId: 'domain-zoology',
+    edgeWeight: 0.25,
+    bidirectional: false,
+    note: 'Broad Biology interest should surface Zoology projects.'
+  },
+  {
+    sourceTagId: 'domain-computer-science',
+    targetTagId: 'domain-software-engineering',
+    edgeWeight: 0.35,
+    bidirectional: false,
+    note: 'Broad Computer Science interest should surface Software Engineering projects.'
+  },
+  {
+    sourceTagId: 'domain-computer-science',
+    targetTagId: 'domain-artificial-intelligence',
+    edgeWeight: 0.33,
+    bidirectional: false,
+    note: 'Broad Computer Science interest should surface Artificial Intelligence projects.'
+  },
+  {
+    sourceTagId: 'domain-computer-science',
+    targetTagId: 'domain-data-science',
+    edgeWeight: 0.33,
+    bidirectional: false,
+    note: 'Broad Computer Science interest should surface Data Science projects.'
+  },
+  {
+    sourceTagId: 'domain-computer-science',
+    targetTagId: 'domain-cybersecurity',
+    edgeWeight: 0.3,
+    bidirectional: false,
+    note: 'Broad Computer Science interest should surface Cybersecurity projects.'
+  },
+  {
+    sourceTagId: 'domain-computer-science',
+    targetTagId: 'domain-computer-engineering',
+    edgeWeight: 0.28,
+    bidirectional: false,
+    note: 'Broad Computer Science interest should surface Computer Engineering projects.'
+  },
+  {
+    sourceTagId: 'domain-computer-science',
+    targetTagId: 'domain-information-technology',
+    edgeWeight: 0.25,
+    bidirectional: false,
+    note: 'Broad Computer Science interest should surface Information Technology projects.'
+  },
+  {
+    sourceTagId: 'domain-public-health',
+    targetTagId: 'domain-epidemiology',
+    edgeWeight: 0.35,
+    bidirectional: false,
+    note: 'Broad Public Health interest should surface Epidemiology projects.'
+  },
+  {
+    sourceTagId: 'domain-public-health',
+    targetTagId: 'domain-biostatistics',
+    edgeWeight: 0.35,
+    bidirectional: false,
+    note: 'Broad Public Health interest should surface Biostatistics projects.'
+  },
+  {
+    sourceTagId: 'domain-public-health',
+    targetTagId: 'domain-environmental-health',
+    edgeWeight: 0.3,
+    bidirectional: false,
+    note: 'Broad Public Health interest should surface Environmental Health projects.'
+  },
+  {
+    sourceTagId: 'domain-public-health',
+    targetTagId: 'domain-health-informatics',
+    edgeWeight: 0.28,
+    bidirectional: false,
+    note: 'Broad Public Health interest should surface Health Informatics projects.'
+  },
+  {
+    sourceTagId: 'domain-public-health',
+    targetTagId: 'domain-mental-health',
+    edgeWeight: 0.28,
+    bidirectional: false,
+    note: 'Broad Public Health interest should surface Mental Health projects.'
+  },
+  {
+    sourceTagId: 'domain-public-health',
+    targetTagId: 'domain-clinical-research',
+    edgeWeight: 0.25,
+    bidirectional: false,
+    note: 'Broad Public Health interest should surface Clinical Research projects.'
+  },
+  {
+    sourceTagId: 'domain-chemistry',
+    targetTagId: 'domain-organic-chemistry',
+    edgeWeight: 0.35,
+    bidirectional: false,
+    note: 'Broad Chemistry interest should surface Organic Chemistry projects.'
+  },
+  {
+    sourceTagId: 'domain-chemistry',
+    targetTagId: 'domain-biochemistry',
+    edgeWeight: 0.33,
+    bidirectional: false,
+    note: 'Broad Chemistry interest should surface Biochemistry projects.'
+  },
+  {
+    sourceTagId: 'domain-chemistry',
+    targetTagId: 'domain-medicinal-chemistry',
+    edgeWeight: 0.3,
+    bidirectional: false,
+    note: 'Broad Chemistry interest should surface Medicinal Chemistry projects.'
+  },
+  {
+    sourceTagId: 'domain-chemistry',
+    targetTagId: 'skill-analytical-chemistry',
+    edgeWeight: 0.28,
+    bidirectional: false,
+    note: 'Broad Chemistry interest should surface Analytical Chemistry work.'
+  },
+  {
+    sourceTagId: 'domain-chemistry',
+    targetTagId: 'domain-drug-discovery',
+    edgeWeight: 0.25,
+    bidirectional: false,
+    note: 'Broad Chemistry interest should surface Drug Discovery projects.'
+  },
+  {
+    sourceTagId: 'domain-mechanical-engineering',
+    targetTagId: 'domain-robotics',
+    edgeWeight: 0.35,
+    bidirectional: false,
+    note: 'Broad Mechanical Engineering interest should surface Robotics projects.'
+  },
+  {
+    sourceTagId: 'domain-mechanical-engineering',
+    targetTagId: 'domain-automation',
+    edgeWeight: 0.33,
+    bidirectional: false,
+    note: 'Broad Mechanical Engineering interest should surface Automation projects.'
+  },
+  {
+    sourceTagId: 'domain-mechanical-engineering',
+    targetTagId: 'domain-thermodynamics',
+    edgeWeight: 0.3,
+    bidirectional: false,
+    note: 'Broad Mechanical Engineering interest should surface Thermodynamics projects.'
+  },
+  {
+    sourceTagId: 'domain-mechanical-engineering',
+    targetTagId: 'domain-fluid-dynamics',
+    edgeWeight: 0.28,
+    bidirectional: false,
+    note: 'Broad Mechanical Engineering interest should surface Fluid Dynamics projects.'
+  },
+  {
+    sourceTagId: 'domain-mechanical-engineering',
+    targetTagId: 'domain-engineering-design',
+    edgeWeight: 0.25,
+    bidirectional: false,
+    note: 'Broad Mechanical Engineering interest should surface Engineering Design projects.'
+  },
+  {
+    sourceTagId: 'domain-electrical-engineering',
+    targetTagId: 'domain-electronics',
+    edgeWeight: 0.35,
+    bidirectional: false,
+    note: 'Broad Electrical Engineering interest should surface Electronics projects.'
+  },
+  {
+    sourceTagId: 'domain-electrical-engineering',
+    targetTagId: 'domain-signal-processing',
+    edgeWeight: 0.33,
+    bidirectional: false,
+    note: 'Broad Electrical Engineering interest should surface Signal Processing projects.'
+  },
+  {
+    sourceTagId: 'domain-electrical-engineering',
+    targetTagId: 'domain-sensors',
+    edgeWeight: 0.3,
+    bidirectional: false,
+    note: 'Broad Electrical Engineering interest should surface Sensors projects.'
+  },
+  {
+    sourceTagId: 'domain-electrical-engineering',
+    targetTagId: 'skill-embedded-systems',
+    edgeWeight: 0.28,
+    bidirectional: false,
+    note: 'Broad Electrical Engineering interest should surface Embedded Systems work.'
+  },
+  {
+    sourceTagId: 'domain-electrical-engineering',
+    targetTagId: 'domain-radar-systems',
+    edgeWeight: 0.25,
+    bidirectional: false,
+    note: 'Broad Electrical Engineering interest should surface Radar Systems projects.'
+  },
+
   // Cybersecurity
   {
     sourceTagId: 'domain-cybersecurity',

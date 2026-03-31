@@ -182,7 +182,7 @@ function buildSortedMatchDetails(candidate) {
     });
 }
 
-function buildReasonTagIds(candidate, limit = 3) {
+function buildReasonTagIds(candidate, limit = 4) {
   return buildSortedMatchDetails(candidate)
     .map((detail) => detail.matchedTagId)
     .slice(0, limit);

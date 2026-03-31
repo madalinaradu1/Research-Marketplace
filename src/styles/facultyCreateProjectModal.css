@@ -527,14 +527,14 @@
 }
 .faculty-create-project-modal .fcpm-field .tag-chip-remove,
 [data-amplify-theme] .faculty-create-project-modal .fcpm-field .tag-chip-remove {
-  color: #94a3b8 !important;
+  color: #6b7280 !important;
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
 }
 .faculty-create-project-modal .fcpm-field .tag-chip-remove:hover,
 [data-amplify-theme] .faculty-create-project-modal .fcpm-field .tag-chip-remove:hover {
-  color: #ef4444 !important;
+  color: #4b5563 !important;
   background: transparent !important;
 }
 

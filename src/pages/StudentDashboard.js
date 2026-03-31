@@ -403,7 +403,7 @@ const StudentDashboard = ({ user }) => {
           <Collection items={recommendedProjects.slice(0, 5)} type="list" gap="0.5rem" direction="column">
             {(rec) => {
               const project = rec.project;
-              const reasonLabels = rec.reasons?.slice(0, 3).map((reason) =>
+              const reasonLabels = rec.reasons?.slice(0, 4).map((reason) =>
                 tagsById.get(reason)?.display_name || reason
               );
 
@@ -768,7 +768,7 @@ const StudentDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Skills Required</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.skillsRequired.map((skill, index) => (
-                        <Badge key={index} backgroundColor="#4299e1" color="white" padding="0.5rem 1rem">
+                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white" padding="0.5rem 1rem">
                           {skill}
                         </Badge>
                       ))}
@@ -781,7 +781,7 @@ const StudentDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Research Tags</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.tags.map((tag, index) => (
-                        <Badge key={index} backgroundColor="#38b2ac" color="white" padding="0.5rem 1rem">
+                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white" padding="0.5rem 1rem">
                           {tag}
                         </Badge>
                       ))}

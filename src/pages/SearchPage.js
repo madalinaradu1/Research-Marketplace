@@ -19,6 +19,8 @@ import {
 import { listProjects, listUsers } from '../graphql/operations';
 import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 
+const TAG_PILL_COLOR = '#c7b3ef';
+
 const SearchPage = ({ user }) => {
   const [searchParams] = useSearchParams();
   const [projects, setProjects] = useState([]);
@@ -418,7 +420,7 @@ const SearchPage = ({ user }) => {
                     <Text fontWeight="bold" fontSize="0.9rem" color="#2d3748">Skills Required:</Text>
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.skillsRequired.map((skill, index) => (
-                        <Badge key={index} backgroundColor="lightgray" color="white">
+                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white">
                           {skill}
                         </Badge>
                       ))}
@@ -431,7 +433,7 @@ const SearchPage = ({ user }) => {
                     <Text fontWeight="bold" fontSize="0.9rem" color="#2d3748">Research Tags:</Text>
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.tags.map((tag, index) => (
-                        <Badge key={index} backgroundColor="lightgray" color="white">
+                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white">
                           {tag}
                         </Badge>
                       ))}

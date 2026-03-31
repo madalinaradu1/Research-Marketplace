@@ -542,7 +542,7 @@ body {
 }
 
 /* Replace light purple highlights with authenticator button hover color for all buttons */
-[data-amplify-theme] button:hover {
+[data-amplify-theme] button:not(.tag-chip-remove):hover {
   background-color: #f7fafc !important;
 }
 
@@ -555,7 +555,7 @@ body {
   background-color: inherit;
 }
 
-[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon):not(.halo-dropdown-item) {
+[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon):not(.halo-dropdown-item):not(.tag-chip-remove) {
   background-color: #f7fafc !important;
   color: black !important;
 }
@@ -627,7 +627,7 @@ body {
 }
 
 /* Admin dashboard button hover - light gray without blue highlights */
-[data-amplify-theme] .amplify-card button:hover {
+[data-amplify-theme] .amplify-card button:not(.tag-chip-remove):hover {
   background-color: #f7fafc !important;
   color: black !important;
   outline: none !important;
@@ -648,19 +648,19 @@ body {
 }
 
 /* Make all admin dashboard buttons use consistent white/black styling */
-[data-amplify-theme] .amplify-card button {
+[data-amplify-theme] .amplify-card button:not(.tag-chip-remove) {
   background-color: white !important;
   color: black !important;
   border: 1px solid black !important;
 }
 
-[data-amplify-theme] button {
+[data-amplify-theme] button:not(.tag-chip-remove) {
   background-color: white !important;
   color: black !important;
   border: 1px solid black !important;
 }
 
-[data-amplify-theme] button:hover {
+[data-amplify-theme] button:not(.tag-chip-remove):hover {
   background-color: #f7fafc !important;
   color: black !important;
   border: 1px solid black !important;
@@ -1067,7 +1067,7 @@ header .amplify-flex[style*="position: absolute"] button:hover {
 }
 
 /* Override any global hover effects */
-[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon):not(.halo-dropdown-item) {
+[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon):not(.halo-dropdown-item):not(.tag-chip-remove) {
   background-color: #f7fafc !important;
   color: black !important;
 }

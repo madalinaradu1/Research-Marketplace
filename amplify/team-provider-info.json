@@ -94,7 +94,7 @@
         "researchmarketplace2a916c6a": {},
         "projectRecommendations": {
           "deploymentBucketName": "amplify-research-marketplace-devtwo-0aa72-deployment",
-          "s3Key": "amplify-builds/projectRecommendations-706a66574d4f79557977-build.zip",
+          "s3Key": "amplify-builds/projectRecommendations-74384271694830345075-build.zip",
           "projectTable": "Project-3fvzogkphbcx7hvq7p7ge3fxom-devtwo",
           "userTable": "User-3fvzogkphbcx7hvq7p7ge3fxom-devtwo",
           "indexTable": "ProjectTagIndex-devtwo"
