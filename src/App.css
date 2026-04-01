@@ -109,3 +109,32 @@ button.amplify-button--primary:hover:not(:disabled) {
 html.font-level-1 { font-size: 112.5%; }
 html.font-level-2 { font-size: 125%; }
 html.font-level-3 { font-size: 137.5%; }
+
+/* Accessibility: 3-level line spacing (excludes header) */
+html.line-spacing-1 *:not(header):not(header *) { line-height: 1.75 !important; }
+html.line-spacing-2 *:not(header):not(header *) { line-height: 2.25 !important; }
+html.line-spacing-3 *:not(header):not(header *) { line-height: 3.0 !important; }
+
+/* Accessibility: freeze header against high-contrast, dyslexia-font, line-spacing */
+html.high-contrast header,
+html.high-contrast header * {
+  background-color: #F0F0F0 !important;
+  color: black !important;
+  border-color: transparent !important;
+}
+
+html.dyslexia-font header,
+html.dyslexia-font header * {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+}
+
+html.line-spacing-1 header,
+html.line-spacing-1 header *,
+html.line-spacing-2 header,
+html.line-spacing-2 header *,
+html.line-spacing-3 header,
+html.line-spacing-3 header * {
+  line-height: normal !important;
+}

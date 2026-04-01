@@ -31,6 +31,9 @@ const Header = ({ user, signOut }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
+  const [dyslexiaFont, setDyslexiaFont] = useState(() => localStorage.getItem('dyslexiaFont') === 'on');
+  const [highContrast, setHighContrast] = useState(() => localStorage.getItem('highContrast') === 'on');
+  const [lineSpacingLevel, setLineSpacingLevel] = useState(() => parseInt(localStorage.getItem('lineSpacingLevel') || '0'));
   const [searchTerm, setSearchTerm] = useState('');
   const accessibilityCloseTimeoutRef = useRef(null);
   const profileCloseTimeoutRef = useRef(null);
@@ -133,6 +136,8 @@ const Header = ({ user, signOut }) => {
     if (localStorage.getItem('dyslexiaFont') === 'on') document.documentElement.classList.add('dyslexia-font');
     if (localStorage.getItem('reducedMotion') === 'on') document.documentElement.classList.add('reduced-motion');
     if (localStorage.getItem('linkSpacing') === 'on') document.documentElement.classList.add('link-spacing');
+    const savedLineSpacing = parseInt(localStorage.getItem('lineSpacingLevel') || '0');
+    if (savedLineSpacing > 0) document.documentElement.classList.add(`line-spacing-${savedLineSpacing}`);
   }, []);
 
   useEffect(() => {
@@ -340,12 +345,52 @@ const Header = ({ user, signOut }) => {
                       return ['Large Text', '✓ Large Text (1/3)', '✓ Large Text (2/3)', '✓ Large Text (3/3)'][level];
                     })()}
                   </Button>
+                  <Button
+                    onClick={() => {
+                      const next = !dyslexiaFont;
+                      document.documentElement.classList.toggle('dyslexia-font', next);
+                      localStorage.setItem('dyslexiaFont', next ? 'on' : 'off');
+                      setDyslexiaFont(next);
+                    }}
+                    backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start"
+                  >
+                    {dyslexiaFont ? '✓ Dyslexia-Friendly Font' : 'Dyslexia-Friendly Font'}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const next = !highContrast;
+                      document.documentElement.classList.toggle('high-contrast', next);
+                      localStorage.setItem('highContrast', next ? 'on' : 'off');
+                      setHighContrast(next);
+                    }}
+                    backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start"
+                  >
+                    {highContrast ? '✓ High Contrast' : 'High Contrast'}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const next = (lineSpacingLevel + 1) % 4;
+                      document.documentElement.classList.remove('line-spacing-1', 'line-spacing-2', 'line-spacing-3');
+                      if (next > 0) document.documentElement.classList.add(`line-spacing-${next}`);
+                      localStorage.setItem('lineSpacingLevel', next.toString());
+                      setLineSpacingLevel(next);
+                    }}
+                    backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start"
+                  >
+                    {['Line Spacing', '✓ Line Spacing (1/3)', '✓ Line Spacing (2/3)', '✓ Line Spacing (3/3)'][lineSpacingLevel]}
+                  </Button>
                   <Divider />
                   <Button
                     onClick={() => {
-                      document.documentElement.classList.remove('font-level-1', 'font-level-2', 'font-level-3', 'large-font');
+                      document.documentElement.classList.remove('font-level-1', 'font-level-2', 'font-level-3', 'large-font', 'dyslexia-font', 'high-contrast', 'line-spacing-1', 'line-spacing-2', 'line-spacing-3');
                       localStorage.removeItem('fontSizeLevel');
                       localStorage.removeItem('fontSize');
+                      localStorage.setItem('dyslexiaFont', 'off');
+                      localStorage.setItem('highContrast', 'off');
+                      localStorage.setItem('lineSpacingLevel', '0');
+                      setDyslexiaFont(false);
+                      setHighContrast(false);
+                      setLineSpacingLevel(0);
                     }}
                     backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start"
                   >
