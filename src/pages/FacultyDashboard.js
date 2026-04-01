@@ -857,6 +857,7 @@ const FacultyDashboard = ({ user }) => {
             localStorage.setItem(`lastViewedFacultyApplications_${userId}`, new Date().toISOString());
           }
         }}
+        style={{ '--amplify-components-tabs-item-hover-background-color': 'transparent' }}
       >
         <TabItem title="Posted Opportunities">
           <Flex direction="column" gap="2rem">

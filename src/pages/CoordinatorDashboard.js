@@ -440,6 +440,7 @@ const CoordinatorDashboard = ({ user }) => {
           setApprovedPage(1);
           setRejectedPage(1);
         }}
+        style={{ '--amplify-components-tabs-item-hover-background-color': 'transparent' }}
       >
         <TabItem title="Pending Reviews">
           <Flex direction="column" gap="2rem">
