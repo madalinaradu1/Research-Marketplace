@@ -76,12 +76,12 @@
 }
 
 /* Button hover effects */
-button:hover:not(:disabled) {
+button:hover:not(:disabled):not(.tag-chip-remove) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-button:active:not(:disabled) {
+button:active:not(:disabled):not(.tag-chip-remove) {
   transform: translateY(0);
 }
 

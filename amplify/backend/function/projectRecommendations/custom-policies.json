@@ -10,7 +10,8 @@
       "arn:aws:dynamodb:*:*:table/User-*",
       "arn:aws:dynamodb:*:*:table/Project-*",
       "arn:aws:dynamodb:*:*:table/ProjectTagIndex-*",
-      "arn:aws:dynamodb:*:*:table/ProjectTagIndex-*/index/*"
+      "arn:aws:dynamodb:*:*:table/ProjectTagIndex-*/index/*",
+      "arn:aws:dynamodb:*:*:table/TagRelations-*"
     ]
   }
 ]

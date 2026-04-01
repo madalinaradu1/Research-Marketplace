@@ -23,7 +23,28 @@ import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 import ApplicationStatus from '../components/ApplicationStatus';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 import { getRecommendedProjects } from '../graphql/recommendation-operations';
+import { useTags } from '../contexts/TagContext';
 
+const TAG_PILL_COLOR = '#c7b3ef';
+
+const formatGraphQLError = (err) => {
+  if (!err) return null;
+
+  return {
+    name: err.name || null,
+    message: err.message || null,
+    errors: err.errors || null,
+    data: err.data || null,
+    graphQLErrors: err.graphQLErrors || null,
+    networkError: err.networkError
+      ? {
+          name: err.networkError.name || null,
+          message: err.networkError.message || null
+        }
+      : null,
+    stack: err.stack || null
+  };
+};
 
 const StudentDashboard = ({ user }) => {
   const navigate = useNavigate();
@@ -47,7 +68,9 @@ const StudentDashboard = ({ user }) => {
   const [returnedPage, setReturnedPage] = useState(1);
   const [recommendedProjects, setRecommendedProjects] = useState([]);
   const [recommendationsLoading, setRecommendationsLoading] = useState(false);
+  const { tagsById } = useTags();
   const itemsPerPage = 10;
+  
 
   useEffect(() => {
     fetchData();
@@ -107,7 +130,7 @@ const StudentDashboard = ({ user }) => {
             const recResult = await API.graphql(graphqlOperation(getRecommendedProjects, { userId, limit: 10 }));
             setRecommendedProjects(recResult.data?.getRecommendedProjects || []);
           } catch (recErr) {
-            console.error('Recommendation query failed: ', recErr);
+            console.error('Recommendation query failed:', formatGraphQLError(recErr));
             const fallback = [...filteredProjects]
               .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
               .slice(0,10)
@@ -120,6 +143,11 @@ const StudentDashboard = ({ user }) => {
                 reasons: ['Newly added project'],
                 project: p 
               }));
+            console.warn('Using recommendation fallback projects:', {
+              fallbackCount: fallback.length,
+              approvedProjectCount: filteredProjects.length,
+              userId
+            });
             setRecommendedProjects(fallback);
           } finally {
             setRecommendationsLoading(false);
@@ -240,6 +268,33 @@ const StudentDashboard = ({ user }) => {
   };
   
   const statusCounts = getStatusCounts();
+  const activeApplicationsCount = applications.filter(
+    (app) => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)
+  ).length;
+
+  const hasActiveApplicationForProject = (projectId) =>
+    applications.some(
+      (app) =>
+        app.projectID === projectId &&
+        !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)
+    );
+
+  const isProjectExpired = (project) =>
+    Boolean(project?.applicationDeadline && new Date(project.applicationDeadline) < new Date());
+
+  const getApplyButtonLabel = (project) => {
+    if (!project) return 'Unavailable';
+    if (hasActiveApplicationForProject(project.id)) return 'Already Applied';
+    if (isProjectExpired(project)) return 'Expired';
+    if (activeApplicationsCount >= 3) return 'Limit Reached';
+    return 'Apply';
+  };
+
+  const isApplyDisabled = (project) =>
+    !project ||
+    hasActiveApplicationForProject(project.id) ||
+    isProjectExpired(project) ||
+    activeApplicationsCount >= 3;
   
   // Pagination helper function
   const renderPagination = (items, currentPage, setPage) => {
@@ -338,26 +393,64 @@ const StudentDashboard = ({ user }) => {
         </Card>
       </Flex>
 
-      <Card variation="elevated" backgroundColor="white">
-        <Heading level={4}>Recommended for You</Heading>
+      <Card variation="elevated" backgroundColor="white" padding="1rem 1.5rem">
+        <Heading level={4} marginBottom="1.5rem">
+          Recommended for You
+        </Heading>
         {recommendationsLoading ? (
           <Loader size="small" />
         ) : (
-          <Collection items={recommendedProjects.slice(0, 5)} type="list" gap="0.75rem" direction="column">
-            {(rec) => (
-              <Card key={rec.projectId} variation="outlined" backgroundColor="white">
-                <Flex direction="column" gap="0.4rem">
-                  <Flex justifyContent="space-between" alignItems="center">
-                    <Heading level={5}>{rec.project?.title || 'Project'}</Heading>
-                    <Badge backgroundColor="#2f855a" color="white">{rec.score.toFixed(1)}</Badge>
+          <Collection items={recommendedProjects.slice(0, 5)} type="list" gap="0.5rem" direction="column">
+            {(rec) => {
+              const project = rec.project;
+              const reasonLabels = rec.reasons?.slice(0, 4).map((reason) =>
+                tagsById.get(reason)?.display_name || reason
+              );
+
+              return (
+                <Card key={rec.projectId} variation="outlined" backgroundColor="white" padding="0.9rem">
+                  <Flex direction="column" gap="0.55rem">
+                    <Flex direction="column" gap="0.55rem">
+                      <Heading level={5}>{project?.title || 'Project'}</Heading>
+                      <Text fontSize="0.9rem">{project?.department}</Text>
+                      <Text fontSize="0.8rem" color="#4a5568">
+                        Deadline: {project?.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}
+                      </Text>
+                    </Flex>
+                    <Flex alignItems="flex-start" justifyContent="space-between" gap="0.75rem">
+                      <Flex flex="1" alignItems="center" gap="0.5rem" wrap="wrap">
+                        {reasonLabels?.length ? (
+                          <>
+                            <Text fontSize="0.8rem" color="#4a5568">
+                              Matched tags:
+                            </Text>
+                            {reasonLabels.map((label) => (
+                              <Badge key={label} backgroundColor={TAG_PILL_COLOR} color="white">
+                                {label}
+                              </Badge>
+                            ))}
+                          </>
+                        ) : (
+                          <Text fontSize="0.8rem" color="#4a5568">
+                            Recommended by recency
+                          </Text>
+                        )}
+                      </Flex>
+                      <Button
+                        backgroundColor="white"
+                        color="black"
+                        border="1px solid black"
+                        size="small"
+                        onClick={() => handleApply(project)}
+                        isDisabled={isApplyDisabled(project)}
+                      >
+                        {getApplyButtonLabel(project)}
+                      </Button>
+                    </Flex>
                   </Flex>
-                  <Text fontSize="0.9rem">{rec.project?.department}</Text>
-                  <Text fontSize="0.8rem" color="#4a5568">
-                    {rec.reasons?.length ? `Matched: ${rec.reasons.slice(0, 3).join(', ')}` : 'Recommended by recency'}
-                  </Text>
-                </Flex>
-              </Card>
-            )}
+                </Card>
+              );
+            }}
           </Collection>
         )}
       </Card>
@@ -392,19 +485,16 @@ const StudentDashboard = ({ user }) => {
               direction="column"
             >
               {(project) => {
-                const hasApplied = applications.some(app => app.projectID === project.id && !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status));
-                const isExpired = project.applicationDeadline && new Date(project.applicationDeadline) < new Date();
-                
                 return (
                 <Card key={project.id} backgroundColor="white">
                   <Flex direction="column" gap="0.5rem">
                     <Flex justifyContent="space-between" alignItems="center">
                       <Heading level={4}>{project.title}</Heading>
                       <Badge 
-                        backgroundColor={isExpired ? "gray" : "green"}
+                        backgroundColor={isProjectExpired(project) ? "gray" : "green"}
                         color="white"
                       >
-                        {isExpired ? "Expired" : "Active"}
+                        {isProjectExpired(project) ? "Expired" : "Active"}
                       </Badge>
                     </Flex>
                     
@@ -428,7 +518,7 @@ const StudentDashboard = ({ user }) => {
                         <Text fontWeight="bold" fontSize="0.9rem">Skills Required:</Text>
                         <Flex wrap="wrap" gap="0.5rem">
                           {project.skillsRequired.map((skill, index) => (
-                            <Badge key={index} backgroundColor="lightgray" color="white">
+                            <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white">
                               Skills: {skill}
                             </Badge>
                           ))}
@@ -441,7 +531,7 @@ const StudentDashboard = ({ user }) => {
                         <Text fontWeight="bold" fontSize="0.9rem">Research Tags:</Text>
                         <Flex wrap="wrap" gap="0.5rem">
                           {project.tags.map((tag, index) => (
-                            <Badge key={index} backgroundColor="lightgray" color="white">
+                            <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white">
                               {tag}
                             </Badge>
                           ))}
@@ -462,11 +552,9 @@ const StudentDashboard = ({ user }) => {
                           border="1px solid black"
                           size="small" 
                           onClick={() => handleApply(project)}
-                          isDisabled={hasApplied || isExpired || applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3}
+                          isDisabled={isApplyDisabled(project)}
                         >
-                          {hasApplied ? 'Already Applied' : 
-                           isExpired ? 'Expired' :
-                           applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? 'Limit Reached' : 'Apply'}
+                          {getApplyButtonLabel(project)}
                         </Button>
                       </Flex>
                     </Flex>
@@ -681,7 +769,7 @@ const StudentDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Skills Required</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.skillsRequired.map((skill, index) => (
-                        <Badge key={index} backgroundColor="#4299e1" color="white" padding="0.5rem 1rem">
+                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white" padding="0.5rem 1rem">
                           {skill}
                         </Badge>
                       ))}
@@ -694,7 +782,7 @@ const StudentDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Research Tags</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.tags.map((tag, index) => (
-                        <Badge key={index} backgroundColor="#38b2ac" color="white" padding="0.5rem 1rem">
+                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white" padding="0.5rem 1rem">
                           {tag}
                         </Badge>
                       ))}
@@ -704,10 +792,7 @@ const StudentDashboard = ({ user }) => {
                 
                 <Flex gap="0.5rem" justifyContent="flex-start">
                   {(() => {
-                    const hasApplied = applications.some(app => app.projectID === selectedProject.id && !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status));
-                    const isExpired = selectedProject.applicationDeadline && new Date(selectedProject.applicationDeadline) < new Date();
-                    
-                    if (isExpired) {
+                    if (isProjectExpired(selectedProject)) {
                       return (
                         <Button 
                           backgroundColor="white"
@@ -718,7 +803,7 @@ const StudentDashboard = ({ user }) => {
                           Expired
                         </Button>
                       );
-                    } else if (hasApplied) {
+                    } else if (hasActiveApplicationForProject(selectedProject.id)) {
                       return (
                         <Button 
                           backgroundColor="white"
@@ -727,6 +812,17 @@ const StudentDashboard = ({ user }) => {
                           isDisabled={true}
                         >
                           Already Applied
+                        </Button>
+                      );
+                    } else if (activeApplicationsCount >= 3) {
+                      return (
+                        <Button
+                          backgroundColor="white"
+                          color="black"
+                          border="1px solid black"
+                          isDisabled={true}
+                        >
+                          Limit Reached
                         </Button>
                       );
                     } else {
@@ -781,7 +877,10 @@ const StudentDashboard = ({ user }) => {
               <EnhancedApplicationForm 
                 project={selectedProject}
                 user={user}
-                onClose={() => setShowApplicationForm(false)}
+                onClose={() => {
+                  setShowApplicationForm(false);
+                  setSelectedProject(null);
+                }}
                 onSuccess={() => {
                   setShowApplicationForm(false);
                   setSelectedProject(null);

@@ -29,6 +29,7 @@ import ApplicationReview from '../components/ApplicationReview';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 import { getStatusColorValue } from '../utils/statusColors';
 import '../components/TagSelector/tagSelector.css';
+import '../styles/facultyCreateProjectModal.css';
 import TagSelector from '../components/TagSelector';
 import { useTags } from '../contexts/TagContext';
 import { toResolvedTagIds, tagIdsToDisplayNames } from '../components/TagSelector/tagHelpers';
@@ -437,7 +438,17 @@ const FacultyDashboard = ({ user }) => {
       const deadline = projectForm.applicationDeadline 
         ? new Date(projectForm.applicationDeadline + 'T00:00:00Z').toISOString() 
         : null;
-      
+      const isFutureDeadline = Boolean(deadline && new Date(deadline) > new Date());
+      const wasExpired = Boolean(
+        selectedProject?.applicationDeadline &&
+        new Date(selectedProject.applicationDeadline) < new Date()
+      );
+      const shouldReactivateProject = Boolean(
+        selectedProject &&
+        (wasExpired || selectedProject.isActive === false) &&
+        isFutureDeadline
+      );
+
       console.log('Original date input:', projectForm.applicationDeadline);
       console.log('Formatted deadline for API:', deadline);
       
@@ -453,7 +464,9 @@ const FacultyDashboard = ({ user }) => {
         applicationDeadline: deadline,
         requiresTranscript: projectForm.requiresTranscript,
         facultyID: userId,
-        isActive: projectForm.isActive === true || projectForm.isActive === 'true',
+        isActive: shouldReactivateProject
+          ? true
+          : (projectForm.isActive === true || projectForm.isActive === 'true'),
         projectStatus: (selectedProject && selectedProject.projectStatus === 'Returned' && viewingReturnReason) ? 'Coordinator Review' : (selectedProject ? selectedProject.projectStatus : 'Pending')
       };
       
@@ -941,21 +954,6 @@ const FacultyDashboard = ({ user }) => {
                   <Flex direction="column" gap="0.5rem">
                     {(() => {
                       const filteredProjects = projects.filter(project => {
-                        // Filter out deactivated projects
-                        if (project.isActive === false) {
-                          return false;
-                        }
-                        
-                        // Filter out projects expired for more than 14 days
-                        if (project.applicationDeadline) {
-                          const deadline = new Date(project.applicationDeadline);
-                          const now = new Date();
-                          const daysSinceExpired = (now - deadline) / (1000 * 60 * 60 * 24);
-                          if (daysSinceExpired > 14) {
-                            return false; // Hide projects expired for more than 14 days
-                          }
-                        }
-                        
                         const title = (project.title || '').toLowerCase();
                         const department = (project.department || '').toLowerCase();
                         const skillsRequired = (project.skillsRequired || []).join(' ').toLowerCase();
@@ -1020,9 +1018,7 @@ const FacultyDashboard = ({ user }) => {
                             >
                               {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : (project.projectStatus || 'Draft')}
                             </Badge>
-                            {/* Only show meatball menu for non-expired projects */}
-                            {(!project.applicationDeadline || new Date(project.applicationDeadline) >= new Date()) && (
-                              <View position="relative">
+                            <View position="relative">
                               <Button 
                                 className="meatball-button"
                                 onClick={(e) => {
@@ -1043,9 +1039,8 @@ const FacultyDashboard = ({ user }) => {
                                         editProject(project);
                                         setOpenKebabMenu(null);
                                       }}
-                                      disabled={project.applicationDeadline && new Date(project.applicationDeadline) < new Date()}
                                     >
-                                      {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : 'Edit'}
+                                      Edit
                                     </button>
                                     <button
                                       className="meatball-dropdown-item"
@@ -1070,8 +1065,7 @@ const FacultyDashboard = ({ user }) => {
 
                                 </div>
                               )}
-                              </View>
-                            )}
+                            </View>
                           </Flex>
                         </Flex>
                         <Flex justifyContent="space-between" alignItems="center">
@@ -1585,209 +1579,139 @@ const FacultyDashboard = ({ user }) => {
       
       {/* Create/Edit Project Modal */}
       {isCreatingProject && (
-        <View
-          position="fixed"
-          top="0"
-          left="0"
-          width="100vw"
-          height="100vh"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          style={{ zIndex: 1000 }}
-          onClick={() => {
-            setIsCreatingProject(false);
-            setProjectResearchTagIds([]);
-            setProjectSkillTagIds([]);
-          }}
-        >
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-            padding="2rem"
-          >
-            <Card
-              maxWidth="900px"
-              width="100%"
-              maxHeight="100vh"
-              backgroundColor="white"
-              style={{ overflow: 'auto' }}
-              onClick={(e) => {
-                e.stopPropagation()
-              }}
-            >
-              <Flex direction="column" gap="1.5rem" padding="2rem">
-                <Flex justifyContent="space-between" alignItems="center">
-                  <Heading level={3} color="#2d3748">
-                    {viewingReturnReason ? 'Project Returned - Edit & Resubmit' : (selectedProject ? 'Edit Project' : 'Create New Project')}
-                  </Heading>
-                  <Button size="small" onClick={() => {
-                    setIsCreatingProject(false);
-                    setSelectedProject(null);
-                    setIsEditingProject(false);
-                    setViewingReturnReason(null);
-                  }} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
-                </Flex>
-              
-                {viewingReturnReason?.coordinatorNotes && (
-                  <Card backgroundColor="#fff3cd" padding="1.5rem" border="1px solid #ffeaa7">
-                    <Text fontWeight="bold" color="#856404">Coordinator Notes:</Text>
-                    <Text color="#856404" marginTop="0.5rem">{viewingReturnReason.coordinatorNotes}</Text>
-                    <Text fontSize="0.9rem" color="#856404" marginTop="0.5rem" fontStyle="italic">
-                      Please address these concerns and resubmit your project.
-                    </Text>
-                  </Card>
-                )}
-                
-                <form onSubmit={handleSubmitProject}>
-                  <Flex direction="column" gap="1.5rem">
-                    <TextField
-                      name="title"
-                      label="Project Title *"
-                      value={projectForm.title}
-                      onChange={handleProjectFormChange}
-                      required
-                    />
-                    <div>
-                      <Text fontWeight="bold" marginBottom="0.5rem">Project Description *</Text>
-                      <div style={{ height: '300px' }}>
-                        <ReactQuill
-                          ref={createProjectQuillRef}
-                          value={projectForm.description}
-                          onChange={(value) => {
-                            if (value !== projectForm.description) {
-                              const newForm = { ...projectForm, description: value };
-                              setProjectForm(newForm);
-                              saveProjectToDraft(newForm);
-                            }
-                          }}
-                          placeholder="Describe the research project, objectives, and what students will learn..."
-                          modules={{
-                            toolbar: [
-                              ['bold', 'italic', 'underline'],
-                              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                              ['clean']
-                            ]
-                          }}
-                          style={{ height: '250px' }}
-                        />
-                      </div>
-                    </div>
-                    <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
-                      <View flex="1" position="relative">
-                        <TextField
-                          name="department"
-                          label="College *"
-                          value={projectForm.department}
-                          onChange={handleCollegeChange}
-                          onFocus={() => setShowCollegeDropdown(true)}
-                          onBlur={() => setTimeout(() => setShowCollegeDropdown(false), 120)}
-                          required
-                        />
+        <div className="faculty-create-project-modal" onClick={() => { setIsCreatingProject(false); setProjectResearchTagIds([]); setProjectSkillTagIds([]); }}>
+          <div className="fcpm-card" onClick={(e) => e.stopPropagation()}>
+            <div className="fcpm-body">
 
-                        {showCollegeDropdown && collegeSuggestions.length > 0 && (
-                          <ul
-                            className="tag-dropdown"
-                            style={{ zIndex: 20, maxHeight: '220px', overflowY: 'auto' }}
-                          >
-                            {collegeSuggestions.map((college) => (
-                              <li
-                                key={college}
-                                className="tag-dropdown-option"
-                                onMouseDown={(e) => e.preventDefault()}
-                                onClick={() => handleCollegeSelect(college)}
-                              >
-                                {college}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </View>
-                      <TextField
-                        name="applicationDeadline"
-                        label="Application Deadline *"
-                        type="date"
-                        value={projectForm.applicationDeadline}
-                        onChange={handleProjectFormChange}
-                        required
-                        flex="1"
+              <div className="fcpm-header">
+                <div className="fcpm-header-text">
+                  <h2 className="fcpm-title">
+                    {viewingReturnReason ? 'Edit & Resubmit Project' : (selectedProject ? 'Edit Project' : 'Create New Project')}
+                  </h2>
+                  {!viewingReturnReason && !selectedProject && (
+                    <p className="fcpm-subtitle">Post a new research opportunity for students to discover and apply to.</p>
+                  )}
+                </div>
+                <button className="fcpm-close" onClick={() => { setIsCreatingProject(false); setSelectedProject(null); setIsEditingProject(false); setViewingReturnReason(null); }}>✕</button>
+              </div>
+
+              {viewingReturnReason?.coordinatorNotes && (
+                <div className="fcpm-return-banner">
+                  <strong>⚠ Coordinator Notes</strong>
+                  <span>{viewingReturnReason.coordinatorNotes}</span>
+                  <br />
+                  <span style={{ fontStyle: 'italic', opacity: 0.8 }}>Please address these concerns and resubmit your project.</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmitProject} className="fcpm-form">
+
+                {/* Section 1: Basic Information */}
+                <div className="fcpm-section">
+                  <div className="fcpm-section-header">
+                    <p className="fcpm-section-title">Basic Information</p>
+                    <p className="fcpm-section-desc">Give your project a clear title and description so students know what to expect.</p>
+                  </div>
+                  <div className="fcpm-field">
+                    <label className="fcpm-label">Project Title <span className="fcpm-required">*</span></label>
+                    <input className="fcpm-input" type="text" name="title" value={projectForm.title} onChange={handleProjectFormChange} required placeholder="Enter a clear, descriptive project title" />
+                  </div>
+                  <div className="fcpm-field">
+                    <label className="fcpm-label">Project Description <span className="fcpm-required">*</span></label>
+                    <p className="fcpm-hint">Summarize the project goals, responsibilities, and what students will learn.</p>
+                    <div className="fcpm-editor-wrap">
+                      <ReactQuill
+                        ref={createProjectQuillRef}
+                        value={projectForm.description}
+                        onChange={(value) => { if (value !== projectForm.description) { const newForm = { ...projectForm, description: value }; setProjectForm(newForm); saveProjectToDraft(newForm); } }}
+                        placeholder="Describe the research project, its objectives, methodology, and expected outcomes..."
+                        modules={{ toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['clean']] }}
                       />
-                    </Flex>
-                    <Flex direction="column" gap="0.5rem">
-                      <Text {...fieldLabelProps}>Research Interests *</Text>
-                      <TagSelector
-                        selectedTagIds={projectResearchTagIds}
-                        onChange={handleResearchTagsChange}
-                        placeholder="List research interests...(e.g., Machine Learning, Neuroscience)"
-                        maxSelections={10}
-                      />
-                    </Flex>
-                    <Flex direction="column" gap="0.5rem">
-                      <Text {...fieldLabelProps}>Skills and Experience *</Text>
-                      <TagSelector
-                        selectedTagIds={projectSkillTagIds}
-                        onChange={handleSkillsTagsChange}
-                        placeholder="List skills and experience...(e.g., Python, Data Analysis)"
-                        maxSelections={15}
-                      />
-                    </Flex>
-                    <TextAreaField
-                      name="qualifications"
-                      label="Required Qualifications/Prerequisites"
-                      value={projectForm.qualifications}
-                      onChange={handleProjectFormChange}
-                      placeholder="e.g. Completion of PSYC 101, minimum GPA of 3.0, upper-division standing"
-                      rows={4}
-                    />
-                    <TextField
-                      name="duration"
-                      label="Project Duration"
-                      value={projectForm.duration}
-                      onChange={handleProjectFormChange}
-                      placeholder="e.g. 3 months, Fall Semester"
-                    />
-                    <SelectField
-                      name="requiresTranscript"
-                      label="Requires Transcript Upload"
-                      value={(projectForm.requiresTranscript || false).toString()}
-                      onChange={(e) => setProjectForm(prev => ({ 
-                        ...prev, 
-                        requiresTranscript: e.target.value === 'true' 
-                      }))}
-                    >
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: Project Details */}
+                <div className="fcpm-section">
+                  <div className="fcpm-section-header">
+                    <p className="fcpm-section-title">Project Details</p>
+                    <p className="fcpm-section-desc">Specify the college, timeline, and duration for this opportunity.</p>
+                  </div>
+                  <div className="fcpm-row-3">
+                    <div className="fcpm-field" style={{ position: 'relative' }}>
+                      <label className="fcpm-label">College <span className="fcpm-required">*</span></label>
+                      <input className="fcpm-input" type="text" name="department" value={projectForm.department} onChange={handleCollegeChange} onFocus={() => setShowCollegeDropdown(true)} onBlur={() => setTimeout(() => setShowCollegeDropdown(false), 120)} required placeholder="Start typing to search..." />
+                      {showCollegeDropdown && collegeSuggestions.length > 0 && (
+                        <ul className="tag-dropdown" style={{ zIndex: 20, maxHeight: '220px', overflowY: 'auto' }}>
+                          {collegeSuggestions.map((college) => (
+                            <li key={college} className="tag-dropdown-option" onMouseDown={(e) => e.preventDefault()} onClick={() => handleCollegeSelect(college)}>{college}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <div className="fcpm-field">
+                      <label className="fcpm-label">Application Deadline <span className="fcpm-required">*</span></label>
+                      <input className="fcpm-input" type="date" name="applicationDeadline" value={projectForm.applicationDeadline} onChange={handleProjectFormChange} required />
+                    </div>
+                    <div className="fcpm-field">
+                      <label className="fcpm-label">Project Duration</label>
+                      <input className="fcpm-input" type="text" name="duration" value={projectForm.duration} onChange={handleProjectFormChange} placeholder="e.g. 3 months" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 3: Research Profile */}
+                <div className="fcpm-section">
+                  <div className="fcpm-section-header">
+                    <p className="fcpm-section-title">Research Profile</p>
+                    <p className="fcpm-section-desc">Help students find this project by tagging relevant research areas and skills.</p>
+                  </div>
+                  <div className="fcpm-field">
+                    <label className="fcpm-label">Research Interests <span className="fcpm-required">*</span></label>
+                    <p className="fcpm-hint">e.g., Machine Learning, Neuroscience, Public Health</p>
+                    <TagSelector selectedTagIds={projectResearchTagIds} onChange={handleResearchTagsChange} placeholder="Type to search and add research interests..." maxSelections={10} />
+                  </div>
+                  <div className="fcpm-field">
+                    <label className="fcpm-label">Skills and Experience <span className="fcpm-required">*</span></label>
+                    <p className="fcpm-hint">e.g., Python, Data Analysis, Literature Review, Lab Experience</p>
+                    <TagSelector selectedTagIds={projectSkillTagIds} onChange={handleSkillsTagsChange} placeholder="Type to search and add required skills..." maxSelections={15} />
+                  </div>
+                </div>
+
+                {/* Section 4: Requirements */}
+                <div className="fcpm-section">
+                  <div className="fcpm-section-header">
+                    <p className="fcpm-section-title">Requirements</p>
+                    <p className="fcpm-section-desc">Set any prerequisites or application requirements for this project.</p>
+                  </div>
+                  <div className="fcpm-field">
+                    <label className="fcpm-label">Qualifications & Prerequisites</label>
+                    <textarea className="fcpm-textarea" name="qualifications" value={projectForm.qualifications} onChange={handleProjectFormChange} placeholder="List any coursework, GPA expectations, class standing, or prior experience required" rows={3} />
+                  </div>
+                  <div className="fcpm-toggle-row">
+                    <div className="fcpm-toggle-label">
+                      <span>Transcript Upload</span>
+                      <span>Require applicants to upload an unofficial transcript</span>
+                    </div>
+                    <select className="fcpm-toggle-select" name="requiresTranscript" value={(projectForm.requiresTranscript || false).toString()} onChange={(e) => setProjectForm(prev => ({ ...prev, requiresTranscript: e.target.value === 'true' }))}>
                       <option value="false">No</option>
                       <option value="true">Yes</option>
-                    </SelectField>
-                    
-                    <Flex gap="1rem" justifyContent="flex-end">
-                      <Button 
-                        onClick={() => {
-                          setIsCreatingProject(false);
-                          setSelectedProject(null);
-                          setIsEditingProject(false);
-                          setViewingReturnReason(null);
-                        }} 
-                        backgroundColor="white"
-                        color="#4a5568"
-                        border="1px solid #e2e8f0"
-                      >
-                        Cancel
-                      </Button>
-                      <Button 
-                        type="submit" 
-                        backgroundColor="white"
-                        color="black"
-                        border="1px solid black"
-                        isLoading={isSubmitting}
-                      >
-                        {selectedProject ? 'Update Project' : 'Create Project'}
-                      </Button>
-                    </Flex>
-                  </Flex>
-                </form>
-              </Flex>
-            </Card>
-          </Flex>
-        </View>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="fcpm-footer">
+                  <button type="button" className="fcpm-btn-cancel" onClick={() => { setIsCreatingProject(false); setSelectedProject(null); setIsEditingProject(false); setViewingReturnReason(null); }}>Cancel</button>
+                  <button type="submit" className="fcpm-btn-submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Saving…' : (selectedProject ? 'Update Project' : 'Create Project')}
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
       )}
       
 

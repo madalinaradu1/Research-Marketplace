@@ -1,81 +1,85 @@
-function scoreCandidate(candidate) {
-  return candidate.requiredMatches * 3 + candidate.optionalMatches * 1.5;
-}
+const assert = require('assert');
+const {
+  buildDirectExpandedTags,
+  mergeRelatedEdges,
+  createCandidateEntry,
+  upsertCandidateMatch,
+  finalizeCandidate,
+  buildRecommendationResponse,
+  compareRecommendations
+} = require('../amplify/backend/function/projectRecommendations/src/recommendationCore');
 
-function sortCandidates(candidates) {
-  return [...candidates].sort((a, b) => {
-    const scoreDiff = scoreCandidate(b) - scoreCandidate(a);
-    if (scoreDiff !== 0) return scoreDiff;
+const directExpanded = buildDirectExpandedTags(['domain-cybersecurity']);
+mergeRelatedEdges(
+  directExpanded,
+  'domain-cybersecurity',
+  [{ targetTagId: 'domain-ai-security', edgeWeight: 0.55 }],
+  0.4
+);
 
-    const bc = b.project.createdAt || '';
-    const ac = a.project.createdAt || '';
-    if (bc !== ac) return bc.localeCompare(ac);
+assert(
+  directExpanded.get('domain-cybersecurity').matchKind === 'DIRECT',
+  'Direct tags should remain direct'
+);
+assert(
+  directExpanded.get('domain-ai-security').matchKind === 'RELATED',
+  'Related tags should be added as related'
+);
 
-    return a.projectId.localeCompare(b.projectId);
-  });
-}
+const directCandidate = createCandidateEntry('direct-project');
+upsertCandidateMatch(
+  directCandidate,
+  { tagId: 'domain-cybersecurity', tagType: 'REQUIRED' },
+  directExpanded.get('domain-cybersecurity')
+);
+const finalizedDirect = finalizeCandidate(directCandidate, { defaultRelatedWeight: 0.4 });
+const directResponse = buildRecommendationResponse(
+  { id: 'direct-project', createdAt: '2026-03-03T00:00:00.000Z' },
+  finalizedDirect
+);
 
-function newestFallback(projects, limit) {
-  return [...projects]
-    .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
-    .slice(0, limit)
-    .map((project) => ({
-      projectId: project.id,
-      score: 0,
-      requiredMatches: 0,
-      optionalMatches: 0,
-      matchedTagIds: [],
-      reasons: ['Newest active project'],
-      project
-    }));
-}
+assert(directResponse.score === 3, 'Required direct match should score 3');
+assert(directResponse.directMatches === 1, 'Direct match count should be 1');
+assert(directResponse.relatedMatches === 0, 'Related match count should be 0');
 
-function assert(condition, message) {
-  if (!condition) {
-    throw new Error(message);
-  }
-}
+const relatedCandidate = createCandidateEntry('related-project');
+upsertCandidateMatch(
+  relatedCandidate,
+  { tagId: 'domain-ai-security', tagType: 'REQUIRED' },
+  directExpanded.get('domain-ai-security')
+);
+const finalizedRelated = finalizeCandidate(relatedCandidate, { defaultRelatedWeight: 0.4 });
+const relatedResponse = buildRecommendationResponse(
+  { id: 'related-project', createdAt: '2026-03-04T00:00:00.000Z' },
+  finalizedRelated
+);
 
-const fixtures = [
-  {
-    projectId: 'b-project',
-    requiredMatches: 1,
-    optionalMatches: 0,
-    project: { createdAt: '2026-03-01T00:00:00.000Z' }
-  },
-  {
-    projectId: 'a-project',
-    requiredMatches: 0,
-    optionalMatches: 2,
-    project: { createdAt: '2026-03-02T00:00:00.000Z' }
-  },
-  {
-    projectId: 'c-project',
-    requiredMatches: 1,
-    optionalMatches: 0,
-    project: { createdAt: '2026-03-03T00:00:00.000Z' }
-  },
-  {
-    projectId: 'aa-project',
-    requiredMatches: 1,
-    optionalMatches: 0,
-    project: { createdAt: '2026-03-03T00:00:00.000Z' }
-  }
-];
+assert(relatedResponse.score === 1.65, 'Required related match should score 3 * 0.55');
+assert(relatedResponse.directMatches === 0, 'Indirect-only candidate should have no direct matches');
+assert(relatedResponse.relatedMatches === 1, 'Indirect-only candidate should have one related match');
+assert(
+  compareRecommendations(directResponse, relatedResponse) < 0,
+  'Direct-match result should sort ahead of indirect-only result'
+);
 
-const sorted = sortCandidates(fixtures);
-const fallback = newestFallback([
-  { id: 'older-project', createdAt: '2026-03-01T00:00:00.000Z' },
-  { id: 'newest-project', createdAt: '2026-03-04T00:00:00.000Z' }
-], 1);
+const upgradedCandidate = createCandidateEntry('upgrade-project');
+upsertCandidateMatch(
+  upgradedCandidate,
+  { tagId: 'domain-ai-security', tagType: 'REQUIRED' },
+  directExpanded.get('domain-ai-security')
+);
 
-assert(scoreCandidate(fixtures[0]) === 3, 'Required score should be 3');
-assert(scoreCandidate(fixtures[1]) === 3, 'Two optional matches should score 3');
-assert(sorted[0].projectId === 'aa-project', 'Project ID should break ties after equal score and createdAt');
-assert(sorted[1].projectId === 'c-project', 'Lexically later project ID should come after same-score same-date tie');
-assert(sorted[2].projectId === 'a-project', 'Newer equal-score project should come before older equal-score project');
-assert(sorted[3].projectId === 'b-project', 'Oldest equal-score candidate should sort last');
-assert(fallback[0].projectId === 'newest-project', 'Fallback should return newest project first');
-assert(fallback[0].reasons[0] === 'Newest active project', 'Fallback reason should stay stable');
+const exactAiExpanded = buildDirectExpandedTags(['domain-ai-security']);
+upsertCandidateMatch(
+  upgradedCandidate,
+  { tagId: 'domain-ai-security', tagType: 'REQUIRED' },
+  exactAiExpanded.get('domain-ai-security')
+);
+
+const finalizedUpgraded = finalizeCandidate(upgradedCandidate, { defaultRelatedWeight: 0.4 });
+
+assert(finalizedUpgraded.directScore === 3, 'Exact match should override related match scoring');
+assert(finalizedUpgraded.relatedScore === 0, 'Same matched tag should not be double-counted');
+assert(finalizedUpgraded.directMatchedTagIds.has('domain-ai-security'), 'Exact tag should be kept');
 
 console.log('Recommendation scoring test passed.');

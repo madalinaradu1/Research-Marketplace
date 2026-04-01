@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation } from 'aws-amplify';
-import { Flex, Heading, Card, TextField, Button, Text, View, Divider } from '@aws-amplify/ui-react';
+import { Flex, Heading, Card, TextField, Button, Text, View, Divider, TextAreaField, useTheme } from '@aws-amplify/ui-react';
 import { updateUser, listApplications, listProjects, updateApplication } from '../graphql/operations';
 import { useNavigate } from 'react-router-dom';
 import TagSelector from '../components/TagSelector';
@@ -8,7 +8,13 @@ import { useTags } from '../contexts/TagContext';
 
 
 const ProfilePage = ({ user, refreshProfile }) => {
+  const { tokens } = useTheme();
   const navigate = useNavigate();
+  const fieldLabelProps = {
+    fontSize: tokens.fontSizes.medium,
+    fontWeight: tokens.fontWeights.medium,
+    color: tokens.colors.font.primary
+  };
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -44,9 +50,15 @@ const ProfilePage = ({ user, refreshProfile }) => {
   const [deleteAction, setDeleteAction] = useState(null);
   const [applications, setApplications] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [researchInterestTagIds, setResearchInterestTagIds] = useState([]);
-  const [skillsTagIds, setSkillsTagIds] = useState([]);
-  const [certificateTagIds, setCertificateTagIds] = useState([]);
+  const [researchInterestTagIds, setResearchInterestTagIds] = useState(
+    Array.isArray(user?.researchInterests) ? user.researchInterests : []
+  );
+  const [skillsTagIds, setSkillsTagIds] = useState(
+    Array.isArray(user?.skills) ? user.skills : []
+  );
+  const [certificateTagIds, setCertificateTagIds] = useState(
+    Array.isArray(user?.certificates) ? user.certificates : []
+  );
   const { tagsById, resolveTagIds } = useTags();
   
   // Initialize form with user data and load calendar events
@@ -67,10 +79,11 @@ const ProfilePage = ({ user, refreshProfile }) => {
   }, [user]);
 
   useEffect(() => {
-    if (tagsById.size === 0) return;
-    setResearchInterestTagIds((prev) => resolveTagIds(prev));
-    setSkillsTagIds((prev) => resolveTagIds(prev));
-  }, [tagsById, resolveTagIds]);
+    if (!user || tagsById.size === 0) return;
+    setResearchInterestTagIds(resolveTagIds(user.researchInterests || []));
+    setSkillsTagIds(resolveTagIds(user.skills || []));
+    setCertificateTagIds(resolveTagIds(user.certificates || []));
+  }, [user, tagsById, resolveTagIds]);
 
   
   const loadCalendarEvents = async () => {
@@ -235,43 +248,59 @@ const ProfilePage = ({ user, refreshProfile }) => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
           }}
         >
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="student-profile-form">
           <Flex direction="column" gap="1rem">
-            <TextField
-              name="studentId"
-              label="Student ID"
-              placeholder="Your student ID"
-              value={formState.studentId}
-              onChange={handleChange}
-              isReadOnly
-            />
-            
-            <TextField
-              name="currentProgram"
-              label="Current Academic Program"
-              placeholder="e.g., Computer Science, Biology"
-              value={formState.currentProgram}
-              onChange={handleChange}
-            />
-            
-            <TextField
-              name="degreeType"
-              label="Degree Pursued"
-              placeholder="e.g., Bachelor's, Master's, PhD"
-              value={formState.degreeType}
-              onChange={handleChange}
-            />
-            
-            <TextField
-              name="expectedGraduation"
-              label="Expected Graduation Date"
-              placeholder="e.g., Spring 2025"
-              value={formState.expectedGraduation}
-              onChange={handleChange}
-            />
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Student ID</Text>
+              <TextField
+                name="studentId"
+                label="Student ID"
+                labelHidden
+                placeholder="Your student ID"
+                value={formState.studentId}
+                onChange={handleChange}
+                isReadOnly
+              />
+            </Flex>
             
             <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">Research Interests</Text>
+              <Text {...fieldLabelProps}>Current Academic Program</Text>
+              <TextField
+                name="currentProgram"
+                label="Current Academic Program"
+                labelHidden
+                placeholder="e.g., Computer Science, Biology"
+                value={formState.currentProgram}
+                onChange={handleChange}
+              />
+            </Flex>
+            
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Degree Pursued</Text>
+              <TextField
+                name="degreeType"
+                label="Degree Pursued"
+                labelHidden
+                placeholder="e.g., Bachelor's, Master's, PhD"
+                value={formState.degreeType}
+                onChange={handleChange}
+              />
+            </Flex>
+            
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Expected Graduation Date</Text>
+              <TextField
+                name="expectedGraduation"
+                label="Expected Graduation Date"
+                labelHidden
+                placeholder="e.g., Spring 2025"
+                value={formState.expectedGraduation}
+                onChange={handleChange}
+              />
+            </Flex>
+            
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Research Interests</Text>
               <TagSelector
                 selectedTagIds={researchInterestTagIds}
                 onChange={setResearchInterestTagIds}
@@ -281,7 +310,7 @@ const ProfilePage = ({ user, refreshProfile }) => {
             </Flex>
 
             <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">Skills and Experience</Text>
+              <Text {...fieldLabelProps}>Skills and Experience</Text>
               <TagSelector
                 selectedTagIds={skillsTagIds}
                 onChange={setSkillsTagIds}
@@ -290,24 +319,33 @@ const ProfilePage = ({ user, refreshProfile }) => {
               />
             </Flex>
 
-            <TextField
-              name="availability"
-              label="Availability"
-              placeholder="e.g., Fall 2024, Spring 2025"
-              value={formState.availability}
-              onChange={handleChange}
-            />
-            
-            <TextField
-              name="personalStatement"
-              label="Personal Statement"
-              placeholder="Brief description of your motivation for research"
-              value={formState.personalStatement}
-              onChange={handleChange}
-            />
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Availability</Text>
+              <TextField
+                name="availability"
+                label="Availability"
+                labelHidden
+                placeholder="e.g., Fall 2024, Spring 2025"
+                value={formState.availability}
+                onChange={handleChange}
+              />
+            </Flex>
             
             <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">Certifications</Text>
+              <Text {...fieldLabelProps}>Personal Statement</Text>
+              <TextAreaField
+                name="personalStatement"
+                label="Personal Statement"
+                labelHidden
+                placeholder="Brief description of your motivation for research"
+                value={formState.personalStatement}
+                onChange={handleChange}
+                rows={4}
+              />
+            </Flex>
+            
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Certifications</Text>
               <TagSelector
                 selectedTagIds={certificateTagIds}
                 onChange={setCertificateTagIds}

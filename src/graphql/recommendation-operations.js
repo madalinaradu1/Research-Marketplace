@@ -5,8 +5,29 @@ export const getRecommendedProjects = /* GraphQL */ `
       score
       requiredMatches
       optionalMatches
+      directMatches
+      relatedMatches
+      directScore
+      relatedScore
       matchedTagIds
       reasons
+      explanation {
+        directMatchedTagIds
+        relatedMatchedTagIds
+        directMatches
+        relatedMatches
+        directScore
+        relatedScore
+        matchDetails {
+          matchedTagId
+          projectTagType
+          matchKind
+          directUserTagIds
+          relatedSourceUserTagIds
+          relationWeight
+          scoreContribution
+        }
+      }
       project {
         id
         title
