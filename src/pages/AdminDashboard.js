@@ -1067,7 +1067,7 @@ const AdminDashboard = ({ user }) => {
       <Tabs
         currentIndex={activeTabIndex}
         onChange={(index) => setActiveTabIndex(index)}
-        style={{ width: '100%' }}
+        style={{ width: '100%', '--amplify-components-tabs-item-hover-background-color': 'transparent' }}
       >
         <TabItem title="Dashboard">
           <Flex direction="column" gap="2rem">

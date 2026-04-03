@@ -12,8 +12,6 @@
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
-}
-:root {
   --font-size-base: 16px;
 }
 
@@ -81,54 +79,18 @@
 body {
   font-size: var(--font-size-base);
 }
-/* ── Halo GCU navbar icon buttons ── */
-.halo-nav-icon,
-.halo-nav-icon:focus,
-.halo-nav-icon:active,
-[data-amplify-theme] .halo-nav-icon,
-[data-amplify-theme] button.halo-nav-icon {
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 10px !important;
-  background-color: #F3F4F6 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 18px !important;
-  color: #6B7280 !important;
-  cursor: pointer !important;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-  padding: 0 !important;
-  transition: all 0.2s ease-in-out !important;
-  line-height: 1 !important;
+.user-icon-button {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid white !important;
 }
 
-.halo-nav-icon:hover,
-[data-amplify-theme] .halo-nav-icon:hover,
-[data-amplify-theme] button.halo-nav-icon:hover {
-  background-color: #E5E7EB !important;
-  color: #111827 !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.halo-nav-icon svg {
-  display: block;
-  flex-shrink: 0;
-}
-
-.halo-accessibility-trigger,
-.halo-accessibility-trigger:hover,
-.halo-accessibility-trigger:focus,
-[data-amplify-theme] .halo-accessibility-trigger,
-[data-amplify-theme] .halo-accessibility-trigger:hover,
-[data-amplify-theme] .halo-accessibility-trigger:focus {
-  background-color: #F3F4F6 !important;
-  color: #6B7280 !important;
-  box-shadow: none !important;
-  transition: none !important;
+.user-icon-button:hover,
+.user-icon-button:focus,
+.user-icon-button:active {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid white !important;
 }
 
 /* Halo dropdown panel */
@@ -149,98 +111,14 @@ body {
   position: relative;
 }
 
-.halo-menu-anchor::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: 240px;
-  height: 12px;
+.accessibility-button:hover,
+.accessibility-button:focus,
+.accessibility-button:active {
+  color: black !important;
+  background-color: white !important;
 }
 
-.halo-dropdown-header {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #9CA3AF;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 8px 10px 4px;
-}
-
-.halo-dropdown-item,
-[data-amplify-theme] .halo-dropdown-item,
-[data-amplify-theme] button.halo-dropdown-item {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  width: 100% !important;
-  padding: 8px 10px !important;
-  font-size: 0.85rem !important;
-  font-weight: 500 !important;
-  color: #374151 !important;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 8px !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease !important;
-  text-align: left !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-.halo-dropdown-item:hover,
-[data-amplify-theme] .halo-dropdown-item:hover,
-[data-amplify-theme] button.halo-dropdown-item:hover {
-  background: #ffffff !important;
-  color: #374151 !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.halo-dropdown-item svg {
-  color: #6B7280;
-  flex-shrink: 0;
-}
-
-.halo-profile-dropdown {
-  min-width: 220px;
-  padding: 8px;
-}
-
-.halo-profile-greeting {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 10px 8px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid #F3F4F6;
-  color: #111827;
-  font-size: 0.95rem;
-  font-weight: 600;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-}
-
-.halo-profile-greeting svg {
-  color: #6B7280;
-  flex-shrink: 0;
-}
-
-.halo-profile-greeting span {
-  min-width: 0;
-  color: #111827 !important;
-}
-
-.halo-profile-action,
-[data-amplify-theme] .halo-profile-action,
-[data-amplify-theme] button.halo-profile-action {
-  gap: 0 !important;
-  padding: 0px 10px !important;
-  font-size: 0.95rem !important;
-  font-weight: 600 !important;
-}
-
-/* Consistent card styling */
+/* Card styling */
 .app-card {
   background-color: var(--color-card-background);
   padding: var(--spacing-lg);
@@ -248,7 +126,6 @@ body {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Consistent button styling */
 .app-button-primary {
   background-color: white;
   color: black;
@@ -261,7 +138,7 @@ body {
   border: 1px solid #e2e8f0;
 }
 
-/* Modal overlay styling */
+/* Modal overlay */
 .app-modal-overlay {
   position: fixed;
   top: 0;
@@ -280,34 +157,79 @@ body {
   overflow: auto;
 }
 
-/* Override Amplify UI tab text colors */
+/* Tab text colors */
 [data-amplify-theme] [role="tab"] {
   color: black !important;
+  background-color: transparent !important;
+  border-bottom: 2px solid #d1d5db !important;
+  padding: 1rem 0.5rem !important;
+  transition: none !important;
+  position: relative !important;
+  overflow: visible !important;
 }
 
 [data-amplify-theme] [role="tab"][aria-selected="true"] {
-  color: black !important;
-  border-bottom-color: black !important;
+  color: #9a4ad7 !important;
+  border-bottom: 2px solid #9a4ad7 !important;
+  background-color: transparent !important;
 }
 
-[data-amplify-theme] [role="tab"]:hover {
+[data-amplify-theme] [role="tab"]:hover,
+[data-amplify-theme] .amplify-tabs [role="tab"]:hover,
+[role="tab"]:hover,
+[role="tablist"] button:hover,
+.amplify-tabs-item:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
   color: black !important;
 }
 
 [data-amplify-theme] [role="tab"]:focus {
   color: black !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-/* Override tab bottom border colors */
 [data-amplify-theme] [role="tablist"] [role="tab"][aria-selected="true"]::after {
-  background-color: black !important;
+  background-color: #9a4ad7 !important;
 }
 
-[data-amplify-theme] [role="tablist"] [role="tab"][aria-selected="true"] {
-  border-bottom: 2px solid black !important;
+[data-amplify-theme] .amplify-tabs {
+  border-bottom: 2px solid #d1d5db !important;
+  width: 100% !important;
+  overflow-x: visible !important;
+  max-width: 1320px !important;
 }
 
-/* Remove purple highlights and focus states */
+[data-amplify-theme] .amplify-tabs [role="tablist"] {
+  border-bottom: 2px solid #d1d5db !important;
+  display: flex !important;
+  width: 100% !important;
+  flex-wrap: nowrap !important;
+  overflow-x: visible !important;
+}
+
+[data-amplify-theme] .amplify-tabs [role="tab"] {
+  flex: 0 0 auto !important;
+  min-width: fit-content !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  padding: 1rem 2.5rem !important;
+  font-size: 0.9rem !important;
+  transition: none !important;
+}
+
+[data-amplify-theme] .amplify-tabs__list,
+[data-amplify-theme] .amplify-tabs__item {
+  flex: 0 0 auto !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  min-width: fit-content !important;
+}
+
+/* Remove focus outlines */
 [data-amplify-theme] *:focus {
   outline: none !important;
   box-shadow: none !important;
@@ -319,100 +241,103 @@ body {
   background-color: inherit !important;
 }
 
-[data-amplify-theme] input:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: #e2e8f0 !important;
-}
-
-[data-amplify-theme] textarea:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: #e2e8f0 !important;
-}
-
+[data-amplify-theme] input:focus,
+[data-amplify-theme] textarea:focus,
 [data-amplify-theme] select:focus {
   outline: none !important;
   box-shadow: none !important;
   border-color: #e2e8f0 !important;
 }
 
-/* Remove purple hover states */
+/* Button hover */
 [data-amplify-theme] button:hover {
   box-shadow: none !important;
 }
 
-[data-amplify-theme] [role="tab"]:hover {
-  background-color: transparent !important;
-}
-
-/* Meatball dropdown menu styling */
+/* Meatball dropdown */
 .meatball-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  z-index: 100;
-  min-width: 180px;
-  background-color: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 0.5rem 0;
+  position: absolute !important;
+  top: 100% !important;
+  right: 0 !important;
+  z-index: 100 !important;
+  min-width: 180px !important;
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 0.5rem 0 !important;
 }
 
 .meatball-dropdown-item {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  text-align: left;
-  background-color: white;
-  color: #2d3748;
-  border: none;
-  border-radius: 0;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  width: 100% !important;
+  padding: 0.75rem 1rem !important;
+  text-align: left !important;
+  background-color: white !important;
+  color: black !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-size: 0.9rem !important;
+  cursor: pointer !important;
 }
 
 .meatball-dropdown-item:hover {
   background-color: #f7fafc !important;
-  color: #2d3748 !important;
+  color: black !important;
 }
 
 .meatball-dropdown-item:disabled {
   color: #a0aec0;
   cursor: not-allowed;
-  background-color: white;
-}
-
-.meatball-dropdown-item:disabled:hover {
-  background-color: white !important;
-  color: #a0aec0 !important;
 }
 
 .meatball-button {
-  background-color: transparent;
-  color: #4a5568;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: background-color 0.2s ease;
+  background-color: transparent !important;
+  color: #4a5568 !important;
+  border: none !important;
+  padding: 0.5rem !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-size: 1.2rem !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .meatball-button:hover {
   background-color: #f7fafc !important;
   color: #2d3748 !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-/* Archive button styling */
+.meatball-button:focus,
+.meatball-button:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-amplify-theme] .meatball-button,
+[data-amplify-theme] button.meatball-button {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+[data-amplify-theme] .meatball-button:hover,
+[data-amplify-theme] button.meatball-button:hover {
+  background-color: #f7fafc !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Archive button */
 .archive-button {
   background-color: transparent !important;
   color: #718096 !important;
   border: none !important;
   outline: none !important;
   padding: 0.25rem !important;
-  transition: color 0.2s ease;
 }
 
 .archive-button:hover {
@@ -422,35 +347,23 @@ body {
   outline: none !important;
 }
 
-.archive-button:focus {
-  background-color: transparent !important;
-  color: #718096 !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
+.archive-button:focus,
 .archive-button:active {
   background-color: transparent !important;
-  color: #4a5568 !important;
   box-shadow: none !important;
   outline: none !important;
 }
 
-/* Remove all borders from Amplify authenticator buttons */
+/* Authenticator */
 [data-amplify-theme] [data-amplify-authenticator] button,
 [data-amplify-theme] [data-amplify-authenticator] button[type="submit"],
 [data-amplify-theme] [data-amplify-authenticator] .amplify-button,
 [data-amplify-theme] [data-amplify-authenticator] .amplify-button--primary,
 [data-amplify-theme] [data-amplify-authenticator] .amplify-tabs__item {
   border: none !important;
-  border-top: none !important;
-  border-bottom: none !important;
-  border-left: none !important;
-  border-right: none !important;
   text-decoration: none !important;
 }
 
-/* Additional selectors for tab buttons */
 [data-amplify-theme] .amplify-tabs button,
 [data-amplify-theme] .amplify-tabs__item,
 [data-amplify-theme] .amplify-tabs [role="tab"] {
@@ -459,24 +372,20 @@ body {
   text-decoration: none !important;
 }
 
-/* Override any underline text decoration */
 [data-amplify-theme] [data-amplify-authenticator] * {
   text-decoration: none !important;
 }
 
-/* Consistent styling for Amplify authenticator */
 [data-amplify-theme] [data-amplify-authenticator] {
   background: linear-gradient(180deg, rgb(117, 81, 194), rgb(255, 255, 255)) !important;
   font-family: inherit !important;
 }
 
-/* Authenticator container styling */
 [data-amplify-theme] [data-amplify-authenticator] .amplify-authenticator {
   background: linear-gradient(180deg, rgb(117, 81, 194), rgb(255, 255, 255)) !important;
   padding: 2rem !important;
 }
 
-/* Form container styling - single unified box */
 [data-amplify-theme] [data-amplify-authenticator] form,
 [data-amplify-theme] [data-amplify-authenticator] .amplify-card {
   background-color: white !important;
@@ -488,7 +397,6 @@ body {
   margin: 0 auto !important;
 }
 
-/* Heading styling */
 [data-amplify-theme] [data-amplify-authenticator] h1,
 [data-amplify-theme] [data-amplify-authenticator] h2,
 [data-amplify-theme] [data-amplify-authenticator] h3 {
@@ -497,7 +405,6 @@ body {
   margin-bottom: 1.5rem !important;
 }
 
-/* Input field styling */
 [data-amplify-theme] [data-amplify-authenticator] input,
 [data-amplify-theme] [data-amplify-authenticator] select {
   background-color: white !important;
@@ -515,14 +422,12 @@ body {
   outline: none !important;
 }
 
-/* Label styling */
 [data-amplify-theme] [data-amplify-authenticator] label {
   color: #4a5568 !important;
   font-weight: 500 !important;
   margin-bottom: 0.5rem !important;
 }
 
-/* Primary button styling */
 [data-amplify-theme] [data-amplify-authenticator] button[type="submit"],
 [data-amplify-theme] [data-amplify-authenticator] .amplify-button--primary {
   background-color: white !important;
@@ -532,7 +437,6 @@ body {
   padding: 0.75rem 1.5rem !important;
   font-weight: 500 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
 }
 
 [data-amplify-theme] [data-amplify-authenticator] button[type="submit"]:hover,
@@ -541,48 +445,9 @@ body {
   color: black !important;
 }
 
-/* Replace light purple highlights with authenticator button hover color for all buttons */
-[data-amplify-theme] button:not(.tag-chip-remove):hover {
-  background-color: #f7fafc !important;
-}
-
-[data-amplify-theme] .amplify-button:hover {
-  background-color: #f7fafc !important;
-}
-
-/* Override any purple hover states throughout the app */
-[data-amplify-theme] *:hover {
-  background-color: inherit;
-}
-
-[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon):not(.halo-dropdown-item):not(.tag-chip-remove) {
-  background-color: #f7fafc !important;
-  color: black !important;
-}
-
-/* Pagination button hover */
-[data-amplify-theme] button[style*="#552b9a"]:hover {
-  background-color: #f7fafc !important;
-  color: black !important;
-  border-color: #552b9a !important;
-}
-
-/* Secondary button styling */
-[data-amplify-theme] [data-amplify-authenticator] .amplify-button--link,
-[data-amplify-theme] [data-amplify-authenticator] button[data-variation="link"] {
-  background-color: transparent !important;
-  color: #4a5568 !important;
-  border: none !important;
-  text-decoration: underline !important;
-  padding: 0.5rem !important;
-}
-
-/* Tab styling */
 [data-amplify-theme] [data-amplify-authenticator] .amplify-tabs {
   background-color: white !important;
   border: none !important;
-  border-bottom: none !important;
-  border-top: none !important;
   margin-bottom: 1.5rem !important;
 }
 
@@ -600,7 +465,6 @@ body {
   background-color: transparent !important;
 }
 
-/* Error message styling - plain text without border */
 [data-amplify-theme] [data-amplify-authenticator] .amplify-alert--error {
   background-color: transparent !important;
   border: none !important;
@@ -611,47 +475,44 @@ body {
   box-shadow: none !important;
 }
 
-/* Hide close button (X) from error messages */
 [data-amplify-theme] [data-amplify-authenticator] .amplify-alert--error button,
 [data-amplify-theme] [data-amplify-authenticator] .amplify-alert--error .amplify-button,
 [data-amplify-theme] [data-amplify-authenticator] .amplify-alert__dismiss {
   display: none !important;
 }
 
-/* Admin dashboard card hover fixes */
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button--link,
+[data-amplify-theme] [data-amplify-authenticator] button[data-variation="link"] {
+  background-color: transparent !important;
+  color: #4a5568 !important;
+  border: none !important;
+  text-decoration: underline !important;
+  padding: 0.5rem !important;
+}
+
+/* Cards */
 [data-amplify-theme] .amplify-card,
 [data-amplify-theme] .amplify-card:hover {
   background-color: white !important;
   opacity: 1 !important;
   visibility: visible !important;
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+  padding: 2rem !important;
 }
 
-/* Admin dashboard button hover - light gray without blue highlights */
-[data-amplify-theme] .amplify-card button:not(.tag-chip-remove):hover {
+[data-amplify-theme] .amplify-card button {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid black !important;
+}
+
+[data-amplify-theme] .amplify-card button:hover {
   background-color: #f7fafc !important;
   color: black !important;
   outline: none !important;
   box-shadow: none !important;
-  border-color: inherit !important;
-}
-
-[data-amplify-theme] .amplify-card button:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: inherit !important;
-}
-
-[data-amplify-theme] .amplify-card button:active {
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: inherit !important;
-}
-
-/* Make all admin dashboard buttons use consistent white/black styling */
-[data-amplify-theme] .amplify-card button:not(.tag-chip-remove) {
-  background-color: white !important;
-  color: black !important;
-  border: 1px solid black !important;
 }
 
 [data-amplify-theme] button:not(.tag-chip-remove) {
@@ -660,446 +521,12 @@ body {
   border: 1px solid black !important;
 }
 
-[data-amplify-theme] button:not(.tag-chip-remove):hover {
-  background-color: #f7fafc !important;
-  color: black !important;
-  border: 1px solid black !important;
-}
-
-.halo-nav-icon,
-.halo-nav-icon:hover,
-.halo-nav-icon:focus,
-.halo-nav-icon:active,
-[data-amplify-theme] .halo-nav-icon,
-[data-amplify-theme] .halo-nav-icon:hover,
-[data-amplify-theme] .halo-nav-icon:focus,
-[data-amplify-theme] .halo-nav-icon:active {
-  border: none !important;
-}
-
-/* Style meatball dropdown buttons in Student Research Community */
-.meatball-dropdown-item {
-  background-color: white !important;
-  color: black !important;
-  border: none !important;
-  padding: 0.75rem 1rem !important;
-  text-align: left !important;
-  width: 100% !important;
-  cursor: pointer !important;
-}
-
-.meatball-dropdown-item:hover {
-  background-color: #f7fafc !important;
-  color: black !important;
-  border: none !important;
-}
-
-/* Ensure meatball dropdown styling applies to admin community section */
-.meatball-dropdown .meatball-dropdown-item {
-  background-color: white !important;
-  color: black !important;
-  border: none !important;
-  padding: 0.75rem 1rem !important;
-  text-align: left !important;
-  width: 100% !important;
-  cursor: pointer !important;
-  font-size: 0.9rem !important;
-}
-
-.meatball-dropdown .meatball-dropdown-item:hover {
-  background-color: #f7fafc !important;
-  color: black !important;
-  border: none !important;
-}
-
-/* Override any blue styling in community meatball buttons */
-[data-amplify-theme] .meatball-dropdown button {
-  background-color: white !important;
-  color: black !important;
-  border: none !important;
-}
-
-[data-amplify-theme] .meatball-dropdown button:hover {
-  background-color: #f7fafc !important;
-  color: black !important;
-  border: none !important;
-}
-
-/* Copy exact Faculty Dashboard meatball button styling for community section */
-.meatball-button {
-  background-color: transparent !important;
-  color: #4a5568 !important;
-  border: none !important;
-  border-width: 0 !important;
-  border-style: none !important;
-  padding: 0.5rem !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  font-size: 1.2rem !important;
-  transition: background-color 0.2s ease !important;
-  outline: none !important;
-  outline-width: 0 !important;
-  outline-style: none !important;
-  box-shadow: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  appearance: none !important;
-}
-
-.meatball-button:hover {
-  background-color: #f7fafc !important;
-  color: #2d3748 !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-.meatball-button:focus {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-.meatball-button:active {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Override Amplify UI button styling for meatball buttons */
-[data-amplify-theme] .meatball-button,
-[data-amplify-theme] button.meatball-button,
-[data-amplify-theme] .amplify-button.meatball-button {
-  border: none !important;
-  border-width: 0 !important;
-  outline: none !important;
-  outline-width: 0 !important;
-  box-shadow: none !important;
-  background-color: transparent !important;
-}
-
-[data-amplify-theme] .meatball-button:hover,
-[data-amplify-theme] button.meatball-button:hover,
-[data-amplify-theme] .amplify-button.meatball-button:hover {
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  background-color: #f7fafc !important;
-}
-
-[data-amplify-theme] .meatball-button:focus,
-[data-amplify-theme] button.meatball-button:focus,
-[data-amplify-theme] .amplify-button.meatball-button:focus {
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Tab styling for all dashboards - black text always, gray underline for inactive, black underline for active */
-[data-amplify-theme] [role="tab"] {
-  border-bottom: 2px solid #d1d5db !important;
-  color: black !important;
-  background-color: transparent !important;
-  padding: 1rem 0.5rem !important;
-  transition: all 0.2s ease !important;
-  position: relative !important;
-  overflow: visible !important;
-}
-
-[data-amplify-theme] [role="tab"]:hover {
-  border-bottom: 2px solid #9ca3af !important;
-  color: black !important;
-  background-color: #f7fafc !important;
-  overflow: visible !important;
-}
-
-[data-amplify-theme] [role="tab"][aria-selected="true"] {
-  border-bottom: 2px solid black !important;
-  color: black !important;
-  background-color: transparent !important;
-}
-
-/* Override any existing tab styling */
-[data-amplify-theme] .amplify-tabs [role="tab"] {
-  border-bottom: 2px solid #d1d5db !important;
-  color: black !important;
-}
-
-[data-amplify-theme] .amplify-tabs [role="tab"]:hover {
-  border-bottom: 2px solid #9ca3af !important;
-  color: black !important;
-}
-
-[data-amplify-theme] .amplify-tabs [role="tab"][aria-selected="true"] {
-  border-bottom: 2px solid black !important;
-  color: black !important;
-}
-
-/* Add gray underline to the right of the last tab for continuous appearance */
-[data-amplify-theme] .amplify-tabs {
-  border-bottom: 2px solid #d1d5db !important;
-}
-
-[data-amplify-theme] .amplify-tabs [role="tablist"] {
-  border-bottom: 2px solid #d1d5db !important;
-}
-
-/* Make header background black */
-header {
-  background-color: black !important;
-}
-
-/* Override inline styles for header */
-[style*="background-color: #552b9a"] {
-  background-color: black !important;
-}
-
-/* Make header text white */
-header h1,
-header h2,
-header h3,
-header p,
-header span {
-  color: white !important;
-}
-
-/* Force white text for Amplify UI components in header */
-[data-amplify-theme] header .amplify-text,
-[data-amplify-theme] header .amplify-heading,
-[data-amplify-theme] header [class*="amplify"] {
-  color: white !important;
-}
-
-/* Override any inline styles in header */
-header [style*="color"]:not(.header-search-field input) {
-  color: white !important;
-}
-
-/* Keep search field text black and visible */
-header .header-search-field input {
-  color: black !important;
-}
-
-header .amplify-searchfield input {
-  color: black !important;
-}
-
-/* Search field placeholder styling */
-header .header-search-field input::placeholder {
-  color: #9ca3af !important;
-  opacity: 1 !important;
-}
-
-header .amplify-searchfield input::placeholder {
-  color: #9ca3af !important;
-  opacity: 1 !important;
-}
-
-/* Search field clear button styling - minimal X button */
-header .header-search-field button[type="button"],
-header .amplify-searchfield button[type="button"] {
-  background: none !important;
-  background-color: transparent !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  color: black !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  width: auto !important;
-  height: 100% !important;
-  min-width: auto !important;
-  min-height: auto !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative !important;
-  top: 0 !important;
-}
-
-header .header-search-field button[type="button"]:hover,
-header .amplify-searchfield button[type="button"]:hover {
-  background: none !important;
-  background-color: transparent !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  color: black !important;
-}
-
-header .header-search-field button[type="button"]:focus,
-header .amplify-searchfield button[type="button"]:focus {
-  background: none !important;
-  background-color: transparent !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Force X button SVG to be black */
-header .header-search-field svg,
-header .amplify-searchfield svg,
-header .header-search-field button svg,
-header .amplify-searchfield button svg {
-  fill: black !important;
-  color: black !important;
-  stroke: none !important;
-  stroke-width: 0 !important;
-  outline: none !important;
-  border: none !important;
-}
-
-/* Force all elements inside clear button to be black */
-header .header-search-field button[type="button"] *,
-header .amplify-searchfield button[type="button"] * {
-  color: black !important;
-  fill: black !important;
-  stroke: none !important;
-  stroke-width: 0 !important;
-  outline: none !important;
-  border: none !important;
-}
-
-/* Target SVG paths specifically */
-header .header-search-field svg path,
-header .amplify-searchfield svg path,
-header .header-search-field button svg path,
-header .amplify-searchfield button svg path {
-  fill: black !important;
-  stroke: none !important;
-  stroke-width: 0 !important;
-  outline: none !important;
-}
-
-/* Search submit button styling - make it white */
-header .header-search-field button[type="submit"],
-header .amplify-searchfield button[type="submit"] {
-  color: white !important;
-  fill: white !important;
-}
-
-header .header-search-field button[type="submit"] svg,
-header .amplify-searchfield button[type="submit"] svg,
-header .header-search-field button[type="submit"] svg path,
-header .amplify-searchfield button[type="submit"] svg path {
-  fill: white !important;
-  color: white !important;
-  stroke: white !important;
-}
-
-/* Exception: Profile dropdown buttons should have black text */
-header .amplify-flex[style*="position: absolute"] button,
-header .amplify-flex[style*="position: absolute"] .amplify-text {
-  color: black !important;
-}
-
-/* Profile dropdown styling to match meatball dropdowns */
-header .amplify-flex[style*="position: absolute"] {
-  background-color: white !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  padding: 0.5rem 0 !important;
-}
-
-header .amplify-flex[style*="position: absolute"] button {
-  width: 100% !important;
-  padding: 0.75rem 1rem !important;
-  text-align: left !important;
-  background-color: white !important;
-  color: #2d3748 !important;
-  border: none !important;
-  border-radius: 0 !important;
-  font-size: 0.9rem !important;
-  cursor: pointer !important;
-  transition: background-color 0.2s ease !important;
-}
-
-header .amplify-flex[style*="position: absolute"] button:hover {
-  background-color: #f7fafc !important;
-  color: #2d3748 !important;
-}
-
-/* Ensure meatball dropdown has consistent styling */
-.meatball-dropdown {
-  position: absolute !important;
-  top: 100% !important;
-  right: 0 !important;
-  z-index: 100 !important;
-  min-width: 180px !important;
-  background-color: white !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  padding: 0.5rem 0 !important;
-}
-
-/* Success message styling */
-[data-amplify-theme] [data-amplify-authenticator] .amplify-alert--info {
-  background-color: #e6f3ff !important;
-  border: 1px solid #4299e1 !important;
-  color: #2b6cb0 !important;
-  border-radius: 4px !important;
-  padding: 1rem !important;
-  margin-bottom: 1rem !important;
-}
-
-/* Show email field explicitly to ensure it's visible */
-[data-amplify-theme] [data-amplify-authenticator] input[name="email"],
-[data-amplify-theme] [data-amplify-authenticator] input[type="email"],
-[data-amplify-theme] [data-amplify-authenticator] label[for*="email"] {
-  display: block !important;
-  visibility: visible !important;
-}
-
-/* Force form background to stay white on hover - comprehensive approach */
-[data-amplify-theme] [data-amplify-authenticator] form,
-[data-amplify-theme] [data-amplify-authenticator] form:hover,
-[data-amplify-theme] [data-amplify-authenticator] .amplify-card,
-[data-amplify-theme] [data-amplify-authenticator] .amplify-card:hover,
-[data-amplify-theme] [data-amplify-authenticator] form *,
-[data-amplify-theme] [data-amplify-authenticator] form *:hover,
-[data-amplify-theme] [data-amplify-authenticator] .amplify-card *,
-[data-amplify-theme] [data-amplify-authenticator] .amplify-card *:hover,
-[data-amplify-theme] [data-amplify-authenticator] div,
-[data-amplify-theme] [data-amplify-authenticator] div:hover {
-  background-color: white !important;
-  background: white !important;
-}
-
-/* Override any global hover effects */
-[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.halo-nav-icon):not(.halo-dropdown-item):not(.tag-chip-remove) {
+[data-amplify-theme] button:hover:not(.archive-button):not(.meatball-button):not(.user-icon-button):not([type="submit"]):not([role="tab"]) {
   background-color: #f7fafc !important;
   color: black !important;
 }
 
-/* Specific override for authenticator elements */
-[data-amplify-theme] [data-amplify-authenticator] *:hover {
-  background-color: white !important;
-  background: white !important;
-}
-
-/* Keep link buttons white background on hover */
-[data-amplify-theme] [data-amplify-authenticator] .amplify-button--link:hover,
-[data-amplify-theme] [data-amplify-authenticator] button[data-variation="link"]:hover {
-  background-color: white !important;
-  background: white !important;
-}
-
-/* Complete Profile Page Styling */
-[data-amplify-theme] .amplify-card {
-  background-color: white !important;
-  border: none !important;
-  border-radius: 8px !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
-  padding: 2rem !important;
-}
-
-[data-amplify-theme] .amplify-card:hover {
-  background-color: white !important;
-  opacity: 1 !important;
-}
-
-/* Complete Profile form styling */
+/* Form fields */
 [data-amplify-theme] .amplify-textfield,
 [data-amplify-theme] .amplify-selectfield,
 [data-amplify-theme] .amplify-textareafield {
@@ -1125,30 +552,6 @@ header .amplify-flex[style*="position: absolute"] button:hover {
   outline: none !important;
 }
 
-[data-amplify-theme] .student-profile-form .amplify-textfield,
-[data-amplify-theme] .student-profile-form .amplify-textareafield {
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-[data-amplify-theme] .student-profile-form .amplify-textfield input,
-[data-amplify-theme] .student-profile-form .amplify-textareafield textarea {
-  background-color: white !important;
-  border: 1px solid #b2becf !important;
-  border-radius: 6px !important;
-  color: #2d3748 !important;
-  padding: 0.55rem 0.7rem !important;
-}
-
-[data-amplify-theme] .student-profile-form .amplify-textfield input:focus,
-[data-amplify-theme] .student-profile-form .amplify-textareafield textarea:focus {
-  border-color: #0f62fe !important;
-  box-shadow: 0 0 0 1px #0f62fe !important;
-  outline: none !important;
-}
-
-/* Complete Profile button styling */
 [data-amplify-theme] .amplify-button--primary {
   background-color: white !important;
   color: black !important;
@@ -1164,93 +567,145 @@ header .amplify-flex[style*="position: absolute"] button:hover {
   border: 1px solid black !important;
 }
 
-/* Complete Profile heading styling */
 [data-amplify-theme] .amplify-heading {
   color: #2d3748 !important;
   font-weight: 600 !important;
 }
 
-/* Complete Profile text styling */
 [data-amplify-theme] .amplify-text {
   color: #4a5568 !important;
 }
 
-/* Complete Profile label styling */
 [data-amplify-theme] .amplify-label {
   color: #4a5568 !important;
   font-weight: 500 !important;
   margin-bottom: 0.5rem !important;
 }
 
-
-/* Make tabs flexible width based on content without scrolling */
-[data-amplify-theme] .amplify-tabs {
-  width: 100% !important;
-  overflow-x: visible !important;
+/* Header */
+header,
+header.amplify-flex,
+[as="header"],
+.amplify-flex[as="header"] {
+  background-color: #F0F0F0 !important;
 }
 
-[data-amplify-theme] .amplify-tabs [role="tablist"] {
-  display: flex !important;
-  width: 100% !important;
-  flex-wrap: nowrap !important;
-  overflow-x: visible !important;
+header .amplify-flex[style*="position: absolute"] {
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 0.5rem 0 !important;
 }
 
-[data-amplify-theme] .amplify-tabs [role="tab"] {
-  flex: 0 0 auto !important;
-  min-width: fit-content !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-  overflow: visible !important;
-  padding: 1rem 2.5rem !important;
+header .amplify-flex[style*="position: absolute"] button {
+  width: 100% !important;
+  padding: 0.75rem 1rem !important;
+  text-align: left !important;
+  background-color: white !important;
+  color: #2d3748 !important;
+  border: none !important;
+  border-radius: 0 !important;
   font-size: 0.9rem !important;
+  cursor: pointer !important;
 }
 
-/* Ensure tabs container doesn't overflow */
-[data-amplify-theme] .amplify-tabs__list,
-[data-amplify-theme] .amplify-tabs__item {
-  flex: 0 0 auto !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-  min-width: fit-content !important;
+header .amplify-flex[style*="position: absolute"] button:hover {
+  background-color: #f7fafc !important;
+  color: #2d3748 !important;
 }
 
-/* Force admin dashboard container to use 1320px width */
-[data-amplify-theme] .amplify-view > .amplify-flex[style*="max-width"] {
-  max-width: 1320px !important;
-  width: 100% !important;
+/* Search field in header */
+header .header-search-field button[type="button"],
+header .amplify-searchfield button[type="button"] {
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-/* Ensure tabs have proper width within the container */
-[data-amplify-theme] .amplify-tabs {
-  max-width: 1320px !important;
-  width: 100% !important;
+header .header-search-field button[type="submit"],
+header .amplify-searchfield button[type="submit"] {
+  background-color: transparent !important;
+  border: none !important;
+  transition: none !important;
 }
 
-/* Force specific 1400px width for dashboard container - aggressive overrides */
-[data-amplify-theme] .amplify-view > .amplify-flex,
-[data-amplify-theme] .amplify-view .amplify-flex[style*="max-width"],
+header .header-search-field button[type="submit"]:hover,
+header .amplify-searchfield button[type="submit"]:hover {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Authenticator form hover fix */
+[data-amplify-theme] [data-amplify-authenticator] form,
+[data-amplify-theme] [data-amplify-authenticator] form:hover,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-card,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-card:hover,
+[data-amplify-theme] [data-amplify-authenticator] div,
+[data-amplify-theme] [data-amplify-authenticator] div:hover {
+  background-color: white !important;
+  background: white !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] *:hover {
+  background-color: white !important;
+  background: white !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button--link:hover,
+[data-amplify-theme] [data-amplify-authenticator] button[data-variation="link"]:hover {
+  background-color: white !important;
+}
+
+/* Alert */
+[data-amplify-theme] [data-amplify-authenticator] .amplify-alert--info {
+  background-color: #e6f3ff !important;
+  border: 1px solid #4299e1 !important;
+  color: #2b6cb0 !important;
+  border-radius: 4px !important;
+  padding: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] input[name="email"],
+[data-amplify-theme] [data-amplify-authenticator] input[type="email"],
+[data-amplify-theme] [data-amplify-authenticator] label[for*="email"] {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Container widths */
+[data-amplify-theme] .amplify-view > .amplify-flex[style*="max-width"],
 [data-amplify-theme] .amplify-flex[style*="1400px"],
 .amplify-flex[style*="max-width"] {
   max-width: 1400px !important;
   width: 100% !important;
 }
 
-/* Override any container max-width constraints */
 [data-amplify-theme] .amplify-view {
   max-width: 1400px !important;
   width: 100% !important;
   margin: 0 auto !important;
 }
 
-/* Force dashboard tabs container width */
 [data-amplify-theme] .amplify-view .amplify-tabs,
 [data-amplify-theme] .amplify-view .amplify-tabs [role="tablist"] {
   max-width: 1400px !important;
   width: 100% !important;
 }
 
-/* Override main element max-width */
 main {
   max-width: 1250px !important;
+}
+/* Final override: kill all tab hover highlights */
+[role="tab"]:hover,
+[role="tab"]:hover *,
+[role="tablist"] button:hover,
+[role="tablist"] button:hover * {
+  background-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
 }

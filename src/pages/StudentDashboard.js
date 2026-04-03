@@ -468,6 +468,7 @@ const StudentDashboard = ({ user }) => {
             localStorage.setItem(`lastViewedApplications_${userId}`, new Date().toISOString());
           }
         }}
+        style={{ '--amplify-components-tabs-item-hover-background-color': 'transparent' }}
       >
         <TabItem title="Research Opportunities">
           {projects.length === 0 ? (

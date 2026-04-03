@@ -15,8 +15,8 @@ body {
 }
 
 header {
-  background-color: #9a4ad7;
-  color: white;
+  background-color: #F0F0F0;
+  color: black;
   padding: 1rem 2rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -66,31 +66,75 @@ button.amplify-button--primary:hover {
   background-color: #7a3ab0;
 }
 
-/* Light purple hover effect for all buttons */
-button:hover:not(:disabled):not(.tag-chip-remove) {
-  background-color: #f3e5f5 !important;
+button.amplify-button--primary:hover:not(:disabled) {
+  background-color: #7a3ab0 !important;
   transition: background-color 0.2s ease;
+  color: white !important;
 }
 
-/* Preserve text color on hover */
-button:hover:not(:disabled):not(.tag-chip-remove) {
-  color: #7b1fa2 !important;
+/* Tab base */
+.amplify-tabs-item,
+[role="tab"],
+[role="tablist"] button {
+  border-radius: 8px 8px 0 0 !important;
+  background-color: transparent !important;
+  transition: none !important;
+}
+
+.amplify-tabs-item:hover,
+[role="tab"]:hover,
+[role="tablist"] button:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.amplify-tabs-item--active,
+.amplify-tabs-item[data-state="active"],
+[role="tab"][aria-selected="true"],
+[role="tablist"] button[aria-selected="true"],
+[role="tab"][data-state="active"],
+[role="tablist"] button[data-state="active"] {
+  box-shadow: inset 0 -3px 0 0 #9a4ad7 !important;
+  color: #9a4ad7 !important;
 }
 
 /* ReactQuill HTML content normalization */
-.quill-content p:empty {
-  display: none;
+.quill-content p:empty { display: none; }
+.quill-content p { margin: 0 0 1rem 0; }
+.quill-content p:last-child { margin-bottom: 0; }
+.quill-content br { line-height: 1.5; }
+
+/* Accessibility: 3-level large text */
+html.font-level-1 { font-size: 112.5%; }
+html.font-level-2 { font-size: 125%; }
+html.font-level-3 { font-size: 137.5%; }
+
+/* Accessibility: 3-level line spacing (excludes header) */
+html.line-spacing-1 *:not(header):not(header *) { line-height: 1.75 !important; }
+html.line-spacing-2 *:not(header):not(header *) { line-height: 2.25 !important; }
+html.line-spacing-3 *:not(header):not(header *) { line-height: 3.0 !important; }
+
+/* Accessibility: freeze header against high-contrast, dyslexia-font, line-spacing */
+html.high-contrast header,
+html.high-contrast header * {
+  background-color: #F0F0F0 !important;
+  color: black !important;
+  border-color: transparent !important;
 }
 
-.quill-content p {
-  margin: 0 0 1rem 0;
+html.dyslexia-font header,
+html.dyslexia-font header * {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
 }
 
-.quill-content p:last-child {
-  margin-bottom: 0;
+html.line-spacing-1 header,
+html.line-spacing-1 header *,
+html.line-spacing-2 header,
+html.line-spacing-2 header *,
+html.line-spacing-3 header,
+html.line-spacing-3 header * {
+  line-height: normal !important;
 }
-
-.quill-content br {
-  line-height: 1.5;
-}
-
