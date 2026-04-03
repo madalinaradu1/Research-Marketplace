@@ -9,8 +9,7 @@ import {
   Button,
   useTheme,
   View,
-  SearchField,
-  Divider
+  SearchField
 } from '@aws-amplify/ui-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -31,6 +30,7 @@ const Header = ({ user, signOut }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
+  const [fontSizeLevel, setFontSizeLevel] = useState(() => parseInt(localStorage.getItem('fontSizeLevel') || '0'));
   const [dyslexiaFont, setDyslexiaFont] = useState(() => localStorage.getItem('dyslexiaFont') === 'on');
   const [highContrast, setHighContrast] = useState(() => localStorage.getItem('highContrast') === 'on');
   const [lineSpacingLevel, setLineSpacingLevel] = useState(() => parseInt(localStorage.getItem('lineSpacingLevel') || '0'));
@@ -308,66 +308,78 @@ const Header = ({ user, signOut }) => {
 
             {/* Accessibility Dropdown */}
             <View
+              className="halo-menu-anchor"
               style={{ position: 'relative' }}
               onMouseEnter={openAccessibilityMenu}
               onMouseLeave={scheduleAccessibilityClose}
             >
-              <div style={{
-                backgroundColor: 'white', borderRadius: '8px',
-                width: '40px', height: '40px', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', border: '1px solid white', cursor: 'pointer'
-              }}>
-                <img src="/accessibility-icon.png" alt="Accessibility" style={{ width: '28px', height: '28px' }} />
-              </div>
+              <button
+                type="button"
+                className="halo-nav-icon halo-accessibility-trigger"
+                aria-label="Accessibility options"
+                aria-haspopup="true"
+                aria-expanded={isAccessibilityOpen}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="4.5" r="2.5" />
+                  <path d="M12 7v5" />
+                  <path d="M8 11h8" />
+                  <path d="M10 22l2-8 2 8" />
+                </svg>
+              </button>
 
               {isAccessibilityOpen && (
-                <Flex direction="column" gap="0.5rem" backgroundColor="white" padding="0.5rem"
-                  style={{ position: 'absolute', top: '100%', right: '0', minWidth: '200px',
-                    zIndex: 1001, boxShadow: '0 4px 8px rgba(0,0,0,0.3)', border: '1px solid #ccc' }}
+                <div
+                  className="halo-dropdown"
                   onMouseEnter={() => clearCloseTimeout(accessibilityCloseTimeoutRef)}
                   onMouseLeave={scheduleAccessibilityClose}
                 >
-                  <Text fontSize="0.9rem" fontWeight="bold" color="black" padding="0.5rem">Accessibility</Text>
-                  <Button
+                  <div className="halo-dropdown-header">Accessibility</div>
+                  <button
+                    type="button"
+                    className="halo-dropdown-item"
                     onClick={() => {
                       const html = document.documentElement;
-                      const current = parseInt(localStorage.getItem('fontSizeLevel') || '0');
-                      const next = (current + 1) % 4;
+                      const next = (fontSizeLevel + 1) % 4;
                       html.classList.remove('font-level-1', 'font-level-2', 'font-level-3', 'large-font');
                       if (next > 0) html.classList.add(`font-level-${next}`);
                       localStorage.setItem('fontSizeLevel', next.toString());
                       localStorage.removeItem('fontSize');
+                      setFontSizeLevel(next);
                     }}
-                    backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start"
                   >
                     {(() => {
                       const level = parseInt(localStorage.getItem('fontSizeLevel') || '0');
                       return ['Large Text', '✓ Large Text (1/3)', '✓ Large Text (2/3)', '✓ Large Text (3/3)'][level];
                     })()}
-                  </Button>
-                  <Button
+                  </button>
+                  <button
+                    type="button"
+                    className="halo-dropdown-item"
                     onClick={() => {
                       const next = !dyslexiaFont;
                       document.documentElement.classList.toggle('dyslexia-font', next);
                       localStorage.setItem('dyslexiaFont', next ? 'on' : 'off');
                       setDyslexiaFont(next);
                     }}
-                    backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start"
                   >
                     {dyslexiaFont ? '✓ Dyslexia-Friendly Font' : 'Dyslexia-Friendly Font'}
-                  </Button>
-                  <Button
+                  </button>
+                  <button
+                    type="button"
+                    className="halo-dropdown-item"
                     onClick={() => {
                       const next = !highContrast;
                       document.documentElement.classList.toggle('high-contrast', next);
                       localStorage.setItem('highContrast', next ? 'on' : 'off');
                       setHighContrast(next);
                     }}
-                    backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start"
                   >
                     {highContrast ? '✓ High Contrast' : 'High Contrast'}
-                  </Button>
-                  <Button
+                  </button>
+                  <button
+                    type="button"
+                    className="halo-dropdown-item"
                     onClick={() => {
                       const next = (lineSpacingLevel + 1) % 4;
                       document.documentElement.classList.remove('line-spacing-1', 'line-spacing-2', 'line-spacing-3');
@@ -375,12 +387,12 @@ const Header = ({ user, signOut }) => {
                       localStorage.setItem('lineSpacingLevel', next.toString());
                       setLineSpacingLevel(next);
                     }}
-                    backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start"
                   >
                     {['Line Spacing', '✓ Line Spacing (1/3)', '✓ Line Spacing (2/3)', '✓ Line Spacing (3/3)'][lineSpacingLevel]}
-                  </Button>
-                  <Divider />
-                  <Button
+                  </button>
+                  <button
+                    type="button"
+                    className="halo-dropdown-item"
                     onClick={() => {
                       document.documentElement.classList.remove('font-level-1', 'font-level-2', 'font-level-3', 'large-font', 'dyslexia-font', 'high-contrast', 'line-spacing-1', 'line-spacing-2', 'line-spacing-3');
                       localStorage.removeItem('fontSizeLevel');
@@ -388,52 +400,67 @@ const Header = ({ user, signOut }) => {
                       localStorage.setItem('dyslexiaFont', 'off');
                       localStorage.setItem('highContrast', 'off');
                       localStorage.setItem('lineSpacingLevel', '0');
+                      setFontSizeLevel(0);
                       setDyslexiaFont(false);
                       setHighContrast(false);
                       setLineSpacingLevel(0);
                     }}
-                    backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start"
                   >
                     ↺ Reset to Default
-                  </Button>
-                </Flex>
+                  </button>
+                </div>
               )}
             </View>
 
             {/* User Menu */}
             <View
+              className="halo-menu-anchor"
               style={{ position: 'relative' }}
-              onMouseEnter={openProfileMenu}
+              onMouseEnter={() => clearCloseTimeout(profileCloseTimeoutRef)}
               onMouseLeave={scheduleProfileClose}
             >
-              <Button
+              <button
+                type="button"
+                className="halo-nav-icon"
                 onClick={() => { setIsMenuOpen(!isMenuOpen); setIsAccessibilityOpen(false); }}
-                backgroundColor="white" color="black" size="small"
-                style={{ borderRadius: '8px', width: '40px', height: '40px', padding: '0', outline: 'none', boxShadow: 'none', border: '1px solid white' }}
+                onMouseEnter={openProfileMenu}
+                aria-label="Profile menu"
+                aria-haspopup="true"
+                aria-expanded={isMenuOpen}
               >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="8" r="3.25" />
+                  <path d="M5 19a7 7 0 0 1 14 0" />
+                </svg>
                 👤
-              </Button>
+              </button>
 
               {isMenuOpen && (
-                <Flex direction="column" gap="0.5rem" backgroundColor="white" padding="0.5rem"
-                  style={{ position: 'absolute', top: '100%', right: '0', minWidth: '250px',
-                    zIndex: 1001, boxShadow: '0 4px 8px rgba(0,0,0,0.3)', border: '1px solid #ccc' }}
+                <Flex
+                  direction="column"
+                  className="halo-dropdown halo-profile-dropdown"
+                  style={{ position: 'absolute', zIndex: 1001 }}
                   onMouseEnter={() => clearCloseTimeout(profileCloseTimeoutRef)}
                   onMouseLeave={scheduleProfileClose}
                 >
-                  <Flex direction="row" alignItems="center" gap="1rem">
+                  <Flex direction="column" alignItems="stretch" gap="0.5rem">
                     <View style={{ width: '60px', height: '60px', backgroundColor: 'white', borderRadius: '8px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px' }}>
+                      display: 'none', alignItems: 'center', justifyContent: 'center', fontSize: '30px' }}>
                       👤
                     </View>
-                    <Flex direction="column" gap="0.5rem" flex="1">
-                      <Text fontSize="0.9rem" fontWeight="bold" color="black">
-                        Hello, {displayName}
-                      </Text>
+                    <Flex direction="column" gap="0.25rem" flex="1">
+                      <div className="halo-dropdown-header">Profile</div>
+                      <div className="halo-profile-greeting">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="12" cy="8" r="3.25" />
+                          <path d="M5 19a7 7 0 0 1 14 0" />
+                        </svg>
+                        <span>{displayName}</span>
+                      </div>
                       {user?.role === 'Student' && (
-                        <Button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Edit Profile</Button>
+                        <Button className="halo-dropdown-item halo-profile-action" onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Edit profile</Button>
                       )}
-                      <Button onClick={() => { handleSignOut(); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Sign Out</Button>
+                      <Button className="halo-dropdown-item halo-profile-action" onClick={() => { handleSignOut(); setIsMenuOpen(false); }} backgroundColor="white" color="black" border="none" size="small" justifyContent="flex-start">Sign out</Button>
                     </Flex>
                   </Flex>
                 </Flex>
