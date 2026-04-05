@@ -18,6 +18,7 @@ import { updateApplication } from '../graphql/operations';
 import EnhancedApplicationForm from './EnhancedApplicationForm';
 import EditApplicationForm from './EditApplicationForm';
 import { getStatusColorValue } from '../utils/statusColors';
+import buttonStyles from '../styles/dashboardButtons.module.css';
 
 const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturnedSection = true }) => {
   const [withdrawReason, setWithdrawReason] = useState('');
@@ -134,7 +135,8 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
             <Flex gap="0.5rem">
               {application.status === 'Returned' && showReturnedSection && (
                 <Button 
-                  size="small"
+                  data-dashboard-button="true"
+                  className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsEditing(true);
@@ -145,7 +147,8 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
               )}
             </Flex>
             <Button 
-              size="small"
+              data-dashboard-button="true"
+              className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`}
               onClick={(e) => {
                 e.stopPropagation();
                 setShowWithdrawModal(true);
@@ -197,7 +200,13 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                 <Flex direction="column" gap="1.5rem" padding="2rem">
                   <Flex justifyContent="space-between" alignItems="center">
                     <Heading level={3} color="#2d3748">Application Details</Heading>
-                    <Button size="small" onClick={() => setShowDetails(false)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                    <Button
+                      data-dashboard-button="true"
+                      className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`}
+                      onClick={() => setShowDetails(false)}
+                    >
+                      Close
+                    </Button>
                   </Flex>
                   
                   <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
@@ -254,9 +263,8 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                       <Heading level={5} color="#2d3748" marginBottom="1rem">Supporting Documents</Heading>
                       <Flex gap="0.75rem">
                         <Button 
-                          size="small" 
-                          backgroundColor="#4299e1" 
-                          color="white"
+                          data-dashboard-button="true"
+                          className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`}
                           onClick={async () => {
                             try {
                               const url = await Storage.get(application.documentKey, { 
@@ -273,10 +281,8 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                           View Document
                         </Button>
                         <Button 
-                          size="small" 
-                          backgroundColor="white" 
-                          color="#4a5568" 
-                          border="1px solid #e2e8f0"
+                          data-dashboard-button="true"
+                          className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`}
                           onClick={async () => {
                             try {
                               const url = await Storage.get(application.documentKey, { 
@@ -405,19 +411,31 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                   <Flex justifyContent="space-between" alignItems="center" padding="1rem">
                     <Heading level={4}>Supporting Document</Heading>
                     <Flex gap="0.5rem">
-                      <Button size="small" onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = documentUrl;
-                        link.download = 'supporting-document';
-                        link.target = '_blank';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                      }}>Download</Button>
-                      <Button size="small" onClick={() => {
-                        setViewingDocument(false);
-                        setDocumentUrl(null);
-                      }}>Close</Button>
+                      <Button
+                        data-dashboard-button="true"
+                        className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`}
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = documentUrl;
+                          link.download = 'supporting-document';
+                          link.target = '_blank';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                      >
+                        Download
+                      </Button>
+                      <Button
+                        data-dashboard-button="true"
+                        className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`}
+                        onClick={() => {
+                          setViewingDocument(false);
+                          setDocumentUrl(null);
+                        }}
+                      >
+                        Close
+                      </Button>
                     </Flex>
                   </Flex>
                   <Divider />
@@ -445,15 +463,21 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                     ) : (
                       <Flex direction="column" alignItems="center" justifyContent="center" height="100%" gap="1rem">
                         <Text>Document preview not available for this file type.</Text>
-                        <Button onClick={() => {
-                          const link = document.createElement('a');
-                          link.href = documentUrl;
-                          link.download = 'supporting-document';
-                          link.target = '_blank';
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                        }}>Download Document</Button>
+                        <Button
+                          data-dashboard-button="true"
+                          className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary}`}
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = documentUrl;
+                            link.download = 'supporting-document';
+                            link.target = '_blank';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                        >
+                          Download Document
+                        </Button>
                       </Flex>
                     )}
                   </View>
@@ -502,27 +526,25 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
                   
                   <Flex gap="1rem" justifyContent="flex-end">
                     <Button 
+                      data-dashboard-button="true"
+                      className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost}`}
                       onClick={() => {
                         setShowWithdrawModal(false);
                         setWithdrawReason('');
                         setError(null);
                       }}
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
                     >
                       Cancel
                     </Button>
                     <Button 
+                      data-dashboard-button="true"
+                      className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary}`}
                       onClick={async () => {
                         await handleWithdraw();
                         if (!error) {
                           setShowWithdrawModal(false);
                         }
                       }}
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
                       isLoading={isSubmitting}
                     >
                       Confirm Withdrawal

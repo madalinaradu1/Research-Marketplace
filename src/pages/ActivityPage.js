@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation, Auth } from 'aws-amplify';
-import { Flex, Heading, Tabs, TabItem, Card, Text, Collection, Loader, Badge, Button } from '@aws-amplify/ui-react';
+import { Flex, Heading, Card, Text, Collection, Loader, Badge, Button } from '@aws-amplify/ui-react';
 import { listApplications, listProjects, listUsers } from '../graphql/operations';
 import ApplicationStatus from '../components/ApplicationStatus';
+import SliderTabs from '../components/SliderTabs';
 
 const ActivityPage = ({ user }) => {
   const [applications, setApplications] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [applicationsPage, setApplicationsPage] = useState(1);
   const [projectsPage, setProjectsPage] = useState(1);
   const itemsPerPage = 10;
@@ -148,6 +150,133 @@ const ActivityPage = ({ user }) => {
       </Flex>
     );
   }
+
+  const applicationsContent = applications.length === 0 ? (
+    <Card
+      backgroundColor="#f8fafc"
+      padding="2rem"
+      textAlign="center"
+      style={{
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}
+    >
+      <Text color="#4a5568" fontSize="1.1rem">
+        {user.role === 'Faculty' ? 'No applications received yet.' : 'No applications submitted yet.'}
+      </Text>
+    </Card>
+  ) : (
+    <>
+      <Collection
+        items={getPaginatedItems(applications, applicationsPage)}
+        type="list"
+        gap="1rem"
+        wrap="nowrap"
+        direction="column"
+      >
+        {(application) => (
+          user.role === 'Faculty' ? (
+            <Card
+              key={application.id}
+              backgroundColor="white"
+              padding="1.5rem"
+              style={{
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
+            >
+              <Flex direction="column" gap="0.5rem">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Heading level={5} color="#2d3748">{application.project?.title}</Heading>
+                  <Badge
+                    backgroundColor={
+                      application.status === 'Faculty Review' ? 'orange' :
+                      application.status === 'Approved' ? '#4caf50' :
+                      application.status === 'Rejected' ? 'red' : 'gray'
+                    }
+                    color="white"
+                  >
+                    {application.status}
+                  </Badge>
+                </Flex>
+                <Text color="#4a5568"><strong>Student:</strong> {application.student?.name}</Text>
+                <Text color="#4a5568"><strong>Email:</strong> {application.student?.email}</Text>
+                <Text color="#4a5568"><strong>Submitted:</strong> {new Date(application.createdAt).toLocaleDateString()}</Text>
+              </Flex>
+            </Card>
+          ) : (
+            <ApplicationStatus
+              key={application.id}
+              application={application}
+              isStudent={true}
+              onUpdate={fetchData}
+            />
+          )
+        )}
+      </Collection>
+      {renderPagination(applications, applicationsPage, setApplicationsPage)}
+    </>
+  );
+
+  const projectsContent = projects.length === 0 ? (
+    <Card
+      backgroundColor="#f8fafc"
+      padding="2rem"
+      textAlign="center"
+      style={{
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}
+    >
+      <Text color="#4a5568" fontSize="1.1rem">
+        {user.role === 'Faculty' ? 'No projects created yet.' : 'No active projects.'}
+      </Text>
+    </Card>
+  ) : (
+    <>
+      <Collection
+        items={getPaginatedItems(projects, projectsPage)}
+        type="list"
+        gap="1rem"
+        wrap="nowrap"
+        direction="column"
+      >
+        {(project) => (
+          <Card
+            key={project.id}
+            backgroundColor="white"
+            padding="1.5rem"
+            style={{
+              borderRadius: '8px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+          >
+            <Flex direction="column" gap="0.5rem">
+              <Flex justifyContent="space-between" alignItems="center">
+                <Heading level={5} color="#2d3748">{project.title}</Heading>
+                <Badge backgroundColor={project.isActive ? 'green' : 'gray'} color="white">
+                  {project.isActive ? 'Active' : 'Inactive'}
+                </Badge>
+              </Flex>
+              <Text fontWeight="bold" color="#2d3748">Department: {project.department}</Text>
+              <div dangerouslySetInnerHTML={{ __html: project.description }} />
+              {user.role === 'Faculty' && (
+                <Text fontSize="0.9rem" color="#4a5568">
+                  <strong>Deadline:</strong> {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}
+                </Text>
+              )}
+            </Flex>
+          </Card>
+        )}
+      </Collection>
+      {renderPagination(projects, projectsPage, setProjectsPage)}
+    </>
+  );
+
+  const activityTabs = [
+    { label: 'Applications', content: applicationsContent },
+    { label: 'Projects', content: projectsContent }
+  ];
   
   return (
     <Flex direction="column" padding="2rem" gap="2rem">
@@ -172,142 +301,15 @@ const ActivityPage = ({ user }) => {
       
       {error && <Text color="red">{error}</Text>}
       
-      <Tabs
+      <SliderTabs
+        currentIndex={activeTabIndex}
         onChange={(index) => {
-          // Reset pagination when switching tabs
+          setActiveTabIndex(index);
           setApplicationsPage(1);
           setProjectsPage(1);
         }}
-      >
-        <TabItem title="Applications">
-          {applications.length === 0 ? (
-            <Card
-              backgroundColor="#f8fafc"
-              padding="2rem"
-              textAlign="center"
-              style={{
-                borderRadius: '8px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}
-            >
-              <Text color="#4a5568" fontSize="1.1rem">
-                {user.role === 'Faculty' ? 'No applications received yet.' : 'No applications submitted yet.'}
-              </Text>
-            </Card>
-          ) : (
-            <>
-              <Collection
-                items={getPaginatedItems(applications, applicationsPage)}
-                type="list"
-                gap="1rem"
-                wrap="nowrap"
-                direction="column"
-              >
-                {(application) => (
-                  user.role === 'Faculty' ? (
-                    <Card 
-                      key={application.id}
-                      backgroundColor="white"
-                      padding="1.5rem"
-                      style={{
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                      }}
-                    >
-                      <Flex direction="column" gap="0.5rem">
-                        <Flex justifyContent="space-between" alignItems="center">
-                          <Heading level={5} color="#2d3748">{application.project?.title}</Heading>
-                          <Badge 
-                            backgroundColor={
-                              application.status === 'Faculty Review' ? 'orange' :
-                              application.status === 'Approved' ? '#4caf50' :
-                              application.status === 'Rejected' ? 'red' : 'gray'
-                            }
-                            color="white"
-                          >
-                            {application.status}
-                          </Badge>
-                        </Flex>
-                        <Text color="#4a5568"><strong>Student:</strong> {application.student?.name}</Text>
-                        <Text color="#4a5568"><strong>Email:</strong> {application.student?.email}</Text>
-                        <Text color="#4a5568"><strong>Submitted:</strong> {new Date(application.createdAt).toLocaleDateString()}</Text>
-                      </Flex>
-                    </Card>
-                  ) : (
-                    <ApplicationStatus 
-                      key={application.id}
-                      application={application}
-                      isStudent={true}
-                      onUpdate={fetchData}
-                    />
-                  )
-                )}
-              </Collection>
-              {renderPagination(applications, applicationsPage, setApplicationsPage)}
-            </>
-          )}
-        </TabItem>
-        
-        <TabItem title="Projects">
-          {projects.length === 0 ? (
-            <Card
-              backgroundColor="#f8fafc"
-              padding="2rem"
-              textAlign="center"
-              style={{
-                borderRadius: '8px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}
-            >
-              <Text color="#4a5568" fontSize="1.1rem">
-                {user.role === 'Faculty' ? 'No projects created yet.' : 'No active projects.'}
-              </Text>
-            </Card>
-          ) : (
-            <>
-              <Collection
-                items={getPaginatedItems(projects, projectsPage)}
-                type="list"
-                gap="1rem"
-                wrap="nowrap"
-                direction="column"
-              >
-                {(project) => (
-                  <Card 
-                    key={project.id}
-                    backgroundColor="white"
-                    padding="1.5rem"
-                    style={{
-                      borderRadius: '8px',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                    }}
-                  >
-                    <Flex direction="column" gap="0.5rem">
-                      <Flex justifyContent="space-between" alignItems="center">
-                        <Heading level={5} color="#2d3748">{project.title}</Heading>
-                        <Badge 
-                          backgroundColor={project.isActive ? 'green' : 'gray'}
-                          color="white"
-                        >
-                          {project.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </Flex>
-                      <Text fontWeight="bold" color="#2d3748">Department: {project.department}</Text>
-                      <div dangerouslySetInnerHTML={{ __html: project.description }} />
-                      {user.role === 'Faculty' && (
-                        <Text fontSize="0.9rem" color="#4a5568">
-                          <strong>Deadline:</strong> {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}
-                        </Text>
-                      )}
-                    </Flex>
-                  </Card>
-                )}
-              </Collection>
-              {renderPagination(projects, projectsPage, setProjectsPage)}
-            </>
-          )}
-        </TabItem>
-      </Tabs>
+        tabs={activityTabs}
+      />
     </Flex>
   );
 };

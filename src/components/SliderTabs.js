@@ -1,81 +1,197 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react';
+import styles from './SliderTabs.module.css';
+
+const clampIndex = (index, maxIndex) => {
+  if (maxIndex < 0) return 0;
+  return Math.min(Math.max(index, 0), maxIndex);
+};
+
+const joinClassNames = (...classNames) => classNames.filter(Boolean).join(' ');
 
 /**
- * SliderTabs — drop-in replacement for Amplify <Tabs>.
+ * SliderTabs
  * Props:
  *   tabs: [{ label, content }]
  *   defaultIndex?: number
- *   currentIndex?: number        (controlled)
+ *   currentIndex?: number
  *   onChange?: (index) => void
+ *   className?: string
+ *   listClassName?: string
+ *   panelClassName?: string
+ *   renderPanel?: boolean
  */
-const SliderTabs = ({ tabs = [], defaultIndex = 0, currentIndex, onChange }) => {
+const SliderTabs = ({
+  tabs = [],
+  defaultIndex = 0,
+  currentIndex,
+  onChange,
+  className,
+  listClassName,
+  panelClassName,
+  renderPanel = true
+}) => {
   const isControlled = currentIndex !== undefined;
-  const [internalIndex, setInternalIndex] = useState(defaultIndex);
-  const activeIndex = isControlled ? currentIndex : internalIndex;
-
+  const maxIndex = tabs.length - 1;
+  const [internalIndex, setInternalIndex] = useState(() => clampIndex(defaultIndex, maxIndex));
+  const activeIndex = clampIndex(isControlled ? currentIndex : internalIndex, maxIndex);
   const tabRefs = useRef([]);
+  const tabListRef = useRef(null);
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const idBase = useId();
+
+  const updateIndicator = useCallback(() => {
+    const activeTab = tabRefs.current[activeIndex];
+    if (!activeTab) {
+      setIndicator({ left: 0, width: 0 });
+      return;
+    }
+
+    setIndicator({
+      left: activeTab.offsetLeft,
+      width: activeTab.offsetWidth
+    });
+  }, [activeIndex]);
 
   useEffect(() => {
-    const el = tabRefs.current[activeIndex];
-    if (el) {
-      setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
+    if (!isControlled) {
+      setInternalIndex((prevIndex) => clampIndex(prevIndex, maxIndex));
     }
-  }, [activeIndex, tabs.length]);
+  }, [isControlled, maxIndex]);
 
-  const handleClick = (index) => {
-    if (!isControlled) setInternalIndex(index);
-    if (onChange) onChange(index);
+  useLayoutEffect(() => {
+    updateIndicator();
+  }, [updateIndicator, tabs.length]);
+
+  useEffect(() => {
+    if (!tabs.length) return undefined;
+
+    const handleResize = () => updateIndicator();
+    window.addEventListener('resize', handleResize);
+
+    let resizeObserver;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => updateIndicator());
+
+      if (tabListRef.current) {
+        resizeObserver.observe(tabListRef.current);
+      }
+
+      tabRefs.current.forEach((tab) => {
+        if (tab) resizeObserver.observe(tab);
+      });
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (resizeObserver) resizeObserver.disconnect();
+    };
+  }, [tabs.length, updateIndicator]);
+
+  const handleSelect = useCallback((index) => {
+    if (index === activeIndex) return;
+
+    if (!isControlled) {
+      setInternalIndex(index);
+    }
+
+    if (onChange) {
+      onChange(index);
+    }
+  }, [activeIndex, isControlled, onChange]);
+
+  const handleKeyDown = (event, index) => {
+    let nextIndex = index;
+
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        nextIndex = (index + 1) % tabs.length;
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        nextIndex = (index - 1 + tabs.length) % tabs.length;
+        break;
+      case 'Home':
+        nextIndex = 0;
+        break;
+      case 'End':
+        nextIndex = tabs.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    handleSelect(nextIndex);
+    tabRefs.current[nextIndex]?.focus();
   };
 
-  return (
-    <div style={{ width: '100%' }}>
-      {/* Tab list */}
-      <div style={{ position: 'relative', borderBottom: '2px solid #d1d5db', display: 'flex' }}>
-        {tabs.map((tab, i) => (
-          <button
-            key={i}
-            ref={el => tabRefs.current[i] = el}
-            role="tab"
-            aria-selected={activeIndex === i}
-            onClick={() => handleClick(i)}
-            style={{
-              flex: '0 0 auto',
-              padding: '0.75rem 2.5rem',
-              fontSize: '0.9rem',
-              fontWeight: activeIndex === i ? '600' : '400',
-              color: activeIndex === i ? '#9a4ad7' : '#4a5568',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              outline: 'none',
-              whiteSpace: 'nowrap',
-              transition: 'color 0.2s ease',
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+  if (!tabs.length) {
+    return null;
+  }
 
-        {/* Sliding indicator */}
+  return (
+    <div className={joinClassNames(styles.root, className)} data-slider-tabs="true">
+      <div
+        ref={tabListRef}
+        className={joinClassNames(styles.list, listClassName)}
+        role="tablist"
+        aria-orientation="horizontal"
+      >
+        {tabs.map((tab, index) => {
+          const isActive = activeIndex === index;
+          const tabId = `${idBase}-tab-${index}`;
+          const panelId = `${idBase}-panel-${index}`;
+
+          return (
+            <button
+              key={tab.label || index}
+              ref={(element) => {
+                tabRefs.current[index] = element;
+              }}
+              type="button"
+              data-slider-tab="true"
+              role="tab"
+              id={tabId}
+              aria-selected={isActive}
+              aria-controls={renderPanel ? panelId : undefined}
+              tabIndex={isActive ? 0 : -1}
+              className={joinClassNames(styles.tab, isActive && styles.tabActive)}
+              onClick={() => handleSelect(index)}
+              onKeyDown={(event) => handleKeyDown(event, index)}
+            >
+              <span className={styles.tabLabel}>{tab.label}</span>
+            </button>
+          );
+        })}
+
         <div
+          className={styles.indicator}
           style={{
-            position: 'absolute',
-            bottom: '-2px',
-            height: '3px',
-            backgroundColor: '#9a4ad7',
-            borderRadius: '2px 2px 0 0',
-            left: indicator.left,
-            width: indicator.width,
-            transition: 'left 0.25s ease, width 0.25s ease',
+            transform: `translateX(${indicator.left}px)`,
+            width: indicator.width
           }}
+          aria-hidden="true"
         />
       </div>
 
-      {/* Tab panel */}
-      <div style={{ paddingTop: '1rem' }}>
-        {tabs[activeIndex]?.content}
-      </div>
+      {renderPanel && (
+        <div
+          id={`${idBase}-panel-${activeIndex}`}
+          role="tabpanel"
+          aria-labelledby={`${idBase}-tab-${activeIndex}`}
+          className={joinClassNames(styles.panel, panelClassName)}
+        >
+          {tabs[activeIndex]?.content}
+        </div>
+      )}
     </div>
   );
 };

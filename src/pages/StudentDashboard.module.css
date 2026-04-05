@@ -1,0 +1,215 @@
+.summaryBar {
+  position: relative;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+  padding: 1rem 1.25rem;
+}
+
+.summaryGrid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.summaryStat {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.summaryStatApproved {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.summaryLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.summaryValueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.summaryValue {
+  font-size: clamp(1.45rem, 2vw, 1.7rem);
+  font-weight: 700;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.summaryMeta {
+  font-size: 0.85rem;
+  line-height: 1.3;
+  color: #64748b;
+}
+
+.summaryMeterTrack {
+  width: min(100%, 18rem);
+  height: 0.45rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7ebf2;
+}
+
+.summaryMeterFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #111827 0%, #9a4ad7 100%);
+}
+
+.summaryDivider {
+  width: 1px;
+  align-self: stretch;
+  background: #e5e7eb;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.45rem;
+  padding: 0.6rem 0.95rem !important;
+  border-radius: 10px !important;
+  border: 1px solid transparent !important;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.actionButton:hover:not(:disabled),
+.actionButton:focus-visible:not(:disabled) {
+  transform: translateY(-0.5px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.actionButton:disabled {
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+.actionButtonPrimary {
+  background: #ffffff !important;
+  border-color: #cdb7ef !important;
+  color: #111827 !important;
+  box-shadow: 0 6px 16px rgba(154, 74, 215, 0.08);
+}
+
+.actionButtonPrimary:hover:not(:disabled),
+.actionButtonPrimary:focus-visible:not(:disabled) {
+  background: #faf7ff !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 20px rgba(154, 74, 215, 0.12);
+}
+
+.actionButtonApplied {
+  background: #f7f1ff !important;
+  border-color: #dccaf8 !important;
+  color: #111827 !important;
+  box-shadow: none;
+}
+
+.actionButtonApplied:hover:not(:disabled),
+.actionButtonApplied:focus-visible:not(:disabled) {
+  background: #f2eafe !important;
+  border-color: #d4bdf6 !important;
+  color: #6443a8 !important;
+  box-shadow: none;
+}
+
+.actionButtonMuted {
+  background: #f8fafc !important;
+  border-color: #dde5ee !important;
+  color: #6b7280 !important;
+  box-shadow: none;
+}
+
+.actionButtonMuted:hover:not(:disabled),
+.actionButtonMuted:focus-visible:not(:disabled) {
+  background: #f1f5f9 !important;
+  border-color: #d4dde8 !important;
+  color: #5b6472 !important;
+  box-shadow: none;
+}
+
+.actionButtonGhost {
+  background: #ffffff !important;
+  border-color: #d9e1eb !important;
+  color: #334155 !important;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+}
+
+.actionButtonGhost:hover:not(:disabled),
+.actionButtonGhost:focus-visible:not(:disabled) {
+  background: #f8fafc !important;
+  border-color: #cfd8e3 !important;
+  color: #1f2937 !important;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.07);
+}
+
+.actionButtonCompact {
+  min-height: 2.3rem;
+  padding: 0.55rem 0.9rem !important;
+  border-radius: 10px !important;
+}
+
+.actionButtonWide {
+  min-width: 11.5rem;
+}
+
+.paginationButton {
+  min-height: 2.25rem;
+  padding: 0.52rem 0.85rem !important;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.paginationNumber {
+  min-width: 2.25rem;
+  padding-left: 0.72rem !important;
+  padding-right: 0.72rem !important;
+}
+
+@media (max-width: 768px) {
+  .summaryGrid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .summaryDivider {
+    width: 100%;
+    height: 1px;
+  }
+
+  .actionButtonWide {
+    width: 100%;
+    min-width: 0;
+  }
+}

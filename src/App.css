@@ -14,41 +14,19 @@ body {
   min-height: 100vh;
 }
 
-header {
-  background-color: #F0F0F0;
-  color: black;
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-header h2 {
-  margin: 0.5rem 0 1rem;
-  font-size: 1rem;
-  font-weight: normal;
-}
-
-header button {
-  background-color: white;
-  color: #7a3ab0;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-main {
+.appMain {
   flex: 1;
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+}
+
+.appMainFullBleed {
+  max-width: none !important;
+  width: 100%;
+  padding: 0;
 }
 
 footer {
@@ -58,43 +36,43 @@ footer {
   text-align: center;
 }
 
-button.amplify-button--primary {
+.app button.amplify-button--primary {
   background-color: #9a4ad7;
 }
 
-button.amplify-button--primary:hover {
+.app button.amplify-button--primary:hover {
   background-color: #7a3ab0;
 }
 
-button.amplify-button--primary:hover:not(:disabled) {
+.app button.amplify-button--primary:hover:not(:disabled) {
   background-color: #7a3ab0 !important;
   transition: background-color 0.2s ease;
   color: white !important;
 }
 
 /* Tab base */
-.amplify-tabs-item,
-[role="tab"],
-[role="tablist"] button {
+.app .amplify-tabs-item,
+.app .amplify-tabs [role="tab"],
+.app .amplify-tabs [role="tablist"] button {
   border-radius: 8px 8px 0 0 !important;
   background-color: transparent !important;
   transition: none !important;
 }
 
-.amplify-tabs-item:hover,
-[role="tab"]:hover,
-[role="tablist"] button:hover {
+.app .amplify-tabs-item:hover,
+.app .amplify-tabs [role="tab"]:hover,
+.app .amplify-tabs [role="tablist"] button:hover {
   background-color: transparent !important;
   background: transparent !important;
   box-shadow: none !important;
 }
 
-.amplify-tabs-item--active,
-.amplify-tabs-item[data-state="active"],
-[role="tab"][aria-selected="true"],
-[role="tablist"] button[aria-selected="true"],
-[role="tab"][data-state="active"],
-[role="tablist"] button[data-state="active"] {
+.app .amplify-tabs-item--active,
+.app .amplify-tabs-item[data-state="active"],
+.app .amplify-tabs [role="tab"][aria-selected="true"],
+.app .amplify-tabs [role="tablist"] button[aria-selected="true"],
+.app .amplify-tabs [role="tab"][data-state="active"],
+.app .amplify-tabs [role="tablist"] button[data-state="active"] {
   box-shadow: inset 0 -3px 0 0 #9a4ad7 !important;
   color: #9a4ad7 !important;
 }
@@ -110,31 +88,60 @@ html.font-level-1 { font-size: 112.5%; }
 html.font-level-2 { font-size: 125%; }
 html.font-level-3 { font-size: 137.5%; }
 
-/* Accessibility: 3-level line spacing (excludes header) */
-html.line-spacing-1 *:not(header):not(header *) { line-height: 1.75 !important; }
-html.line-spacing-2 *:not(header):not(header *) { line-height: 2.25 !important; }
-html.line-spacing-3 *:not(header):not(header *) { line-height: 3.0 !important; }
-
-/* Accessibility: freeze header against high-contrast, dyslexia-font, line-spacing */
-html.high-contrast header,
-html.high-contrast header * {
-  background-color: #F0F0F0 !important;
-  color: black !important;
-  border-color: transparent !important;
+/* Accessibility: 3-level line spacing */
+html.line-spacing-1 body,
+html.line-spacing-1 p,
+html.line-spacing-1 span,
+html.line-spacing-1 label,
+html.line-spacing-1 li,
+html.line-spacing-1 a,
+html.line-spacing-1 button,
+html.line-spacing-1 input,
+html.line-spacing-1 textarea,
+html.line-spacing-1 select,
+html.line-spacing-1 h1,
+html.line-spacing-1 h2,
+html.line-spacing-1 h3,
+html.line-spacing-1 h4,
+html.line-spacing-1 h5,
+html.line-spacing-1 h6 {
+  line-height: 1.75 !important;
 }
 
-html.dyslexia-font header,
-html.dyslexia-font header * {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  letter-spacing: normal !important;
-  word-spacing: normal !important;
+html.line-spacing-2 body,
+html.line-spacing-2 p,
+html.line-spacing-2 span,
+html.line-spacing-2 label,
+html.line-spacing-2 li,
+html.line-spacing-2 a,
+html.line-spacing-2 button,
+html.line-spacing-2 input,
+html.line-spacing-2 textarea,
+html.line-spacing-2 select,
+html.line-spacing-2 h1,
+html.line-spacing-2 h2,
+html.line-spacing-2 h3,
+html.line-spacing-2 h4,
+html.line-spacing-2 h5,
+html.line-spacing-2 h6 {
+  line-height: 2.25 !important;
 }
 
-html.line-spacing-1 header,
-html.line-spacing-1 header *,
-html.line-spacing-2 header,
-html.line-spacing-2 header *,
-html.line-spacing-3 header,
-html.line-spacing-3 header * {
-  line-height: normal !important;
+html.line-spacing-3 body,
+html.line-spacing-3 p,
+html.line-spacing-3 span,
+html.line-spacing-3 label,
+html.line-spacing-3 li,
+html.line-spacing-3 a,
+html.line-spacing-3 button,
+html.line-spacing-3 input,
+html.line-spacing-3 textarea,
+html.line-spacing-3 select,
+html.line-spacing-3 h1,
+html.line-spacing-3 h2,
+html.line-spacing-3 h3,
+html.line-spacing-3 h4,
+html.line-spacing-3 h5,
+html.line-spacing-3 h6 {
+  line-height: 3 !important;
 }
