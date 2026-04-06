@@ -6,9 +6,14 @@ import PostCard from '../components/PostCard';
 import SearchFilterBar from '../components/SearchFilterBar';
 import PostDetailModal from '../components/PostDetailModal';
 import { useNavigate } from 'react-router-dom';
+import buttonStyles from '../styles/dashboardButtons.module.css';
+import '../styles/unifiedFormModal.css';
 
 const EnhancedStudentPostsPage = ({ user }) => {
   const navigate = useNavigate();
+  const primaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonIcon}`;
   const [posts, setPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -395,90 +400,119 @@ const EnhancedStudentPostsPage = ({ user }) => {
 
         {/* Create/Edit Modal */}
         {showCreateForm && (
-          <View
-            position="fixed"
-            top="0"
-            left="0"
-            width="100vw"
-            height="100vh"
-            backgroundColor="rgba(0, 0, 0, 0.6)"
-            style={{ zIndex: 1000, backdropFilter: 'blur(4px)' }}
-            onClick={() => {
-              setShowCreateForm(false);
-              setEditingPost(null);
-            }}
-          >
-            <Flex justifyContent="center" alignItems="center" height="100%" padding="2rem">
-              <Card
-                maxWidth="700px"
-                width="100%"
-                maxHeight="90vh"
-                backgroundColor="white"
-                borderRadius="16px"
-                style={{ overflow: 'auto', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Flex direction="column" gap="1.5rem" padding="2rem">
-                  <Flex justifyContent="space-between" alignItems="center">
-                    <Heading level={3} color="#111827">{editingPost ? 'Edit Post' : 'Create New Post'}</Heading>
-                    <Button
-                      size="small"
-                      backgroundColor="transparent"
-                      color="#6B7280"
-                      border="none"
-                      data-close-button="true"
-                      onClick={() => {
-                        setShowCreateForm(false);
-                        setEditingPost(null);
-                      }}
-                      style={{ fontSize: '1.5rem' }}
-                    >
-                      <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
-                    </Button>
-                  </Flex>
+          <div className="unified-form-modal" onClick={() => { setShowCreateForm(false); setEditingPost(null); }}>
+            <div className="ufm-card" onClick={(e) => e.stopPropagation()}>
+              <div className="ufm-body">
 
-                  <form onSubmit={handleSubmit}>
-                    <Flex direction="column" gap="1rem">
-                      {submitError && (
-                        <Card backgroundColor="#FEE2E2" padding="1rem" borderRadius="8px">
-                          <Text color="#DC2626">{submitError}</Text>
-                        </Card>
-                      )}
+                <div className="ufm-header">
+                  <div className="ufm-header-text">
+                    <h2 className="ufm-title">{editingPost ? 'Edit Post' : 'Create New Post'}</h2>
+                    {!editingPost && (
+                      <p className="ufm-subtitle">Share your research interests and connect with peers.</p>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    data-dashboard-button="true"
+                    data-close-button="true"
+                    className={iconActionButtonClassName}
+                    aria-label="Close post editor"
+                    onClick={() => { setShowCreateForm(false); setEditingPost(null); }}
+                  >
+                    <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                  </Button>
+                </div>
 
-                      <SelectField name="type" label="Post Type *" value={formData.type} onChange={handleFormChange} required>
+                <form onSubmit={handleSubmit} className="ufm-form">
+
+                  {submitError && (
+                    <div className="ufm-error-banner">{submitError}</div>
+                  )}
+
+                  {/* Section 1: Basic Information */}
+                  <div className="ufm-section">
+                    <div className="ufm-section-header">
+                      <p className="ufm-section-title">Basic Information</p>
+                      <p className="ufm-section-desc">Give your post a clear title and description.</p>
+                    </div>
+                    <div className="ufm-field">
+                      <label className="ufm-label">Post Type <span className="ufm-required">*</span></label>
+                      <select className="ufm-select" name="type" value={formData.type} onChange={handleFormChange} required>
                         {postTypes.map(type => (
                           <option key={type.value} value={type.value}>{type.label}</option>
                         ))}
-                      </SelectField>
+                      </select>
+                    </div>
+                    <div className="ufm-field">
+                      <label className="ufm-label">Title <span className="ufm-required">*</span></label>
+                      <input className="ufm-input" type="text" name="title" value={formData.title} onChange={handleFormChange} required placeholder="Brief, descriptive title" />
+                    </div>
+                    <div className="ufm-field">
+                      <label className="ufm-label">Description <span className="ufm-required">*</span></label>
+                      <textarea className="ufm-textarea" name="description" value={formData.description} onChange={handleFormChange} required rows={5} placeholder="Detailed description" />
+                    </div>
+                  </div>
 
-                      <TextField name="title" label="Title *" value={formData.title} onChange={handleFormChange} required placeholder="Brief, descriptive title" />
-                      <TextAreaField name="description" label="Description *" value={formData.description} onChange={handleFormChange} required rows={5} placeholder="Detailed description" />
-                      <SelectField name="department" label="College" value={formData.department} onChange={handleFormChange}>
+                  {/* Section 2: Details */}
+                  <div className="ufm-section">
+                    <div className="ufm-section-header">
+                      <p className="ufm-section-title">Post Details</p>
+                      <p className="ufm-section-desc">Help others find your post with relevant details.</p>
+                    </div>
+                    <div className="ufm-field">
+                      <label className="ufm-label">College</label>
+                      <select className="ufm-select" name="department" value={formData.department} onChange={handleFormChange}>
                         <option value="">Select College</option>
                         {colleges.map(college => (
                           <option key={college} value={college}>{college}</option>
                         ))}
-                      </SelectField>
+                      </select>
+                    </div>
+                    <div className="ufm-field">
+                      <label className="ufm-label">Research Areas</label>
+                      <p className="ufm-hint">Comma-separated, e.g. Machine Learning, Data Analysis</p>
+                      <input className="ufm-input" type="text" name="researchAreas" value={formData.researchAreas} onChange={handleFormChange} placeholder="e.g. Machine Learning, Data Analysis" />
+                    </div>
+                    <div className="ufm-row-2">
+                      <div className="ufm-field">
+                        <label className="ufm-label">Skills You Offer</label>
+                        <input className="ufm-input" type="text" name="skillsOffered" value={formData.skillsOffered} onChange={handleFormChange} placeholder="e.g. Python, Statistics" />
+                      </div>
+                      <div className="ufm-field">
+                        <label className="ufm-label">Skills You Need</label>
+                        <input className="ufm-input" type="text" name="skillsNeeded" value={formData.skillsNeeded} onChange={handleFormChange} placeholder="e.g. R Programming" />
+                      </div>
+                    </div>
+                    <div className="ufm-field">
+                      <label className="ufm-label">Time Commitment</label>
+                      <input className="ufm-input" type="text" name="timeCommitment" value={formData.timeCommitment} onChange={handleFormChange} placeholder="e.g. 10 hours/week" />
+                    </div>
+                  </div>
 
-                      <TextField name="researchAreas" label="Research Areas (comma-separated)" value={formData.researchAreas} onChange={handleFormChange} placeholder="e.g. Machine Learning, Data Analysis" />
-                      <TextField name="skillsOffered" label="Skills You Offer (comma-separated)" value={formData.skillsOffered} onChange={handleFormChange} placeholder="e.g. Python, Statistics" />
-                      <TextField name="skillsNeeded" label="Skills You Need (comma-separated)" value={formData.skillsNeeded} onChange={handleFormChange} placeholder="e.g. R Programming, Data Visualization" />
-                      <TextField name="timeCommitment" label="Time Commitment" value={formData.timeCommitment} onChange={handleFormChange} placeholder="e.g. 10 hours/week" />
+                  {/* Footer */}
+                  <div className="ufm-footer">
+                    <button
+                      type="button"
+                      data-dashboard-button="true"
+                      className={secondaryActionButtonClassName}
+                      onClick={() => { setShowCreateForm(false); setEditingPost(null); }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      data-dashboard-button="true"
+                      className={primaryActionButtonClassName}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Saving...' : (editingPost ? 'Update Post' : 'Create Post')}
+                    </button>
+                  </div>
 
-                      <Flex gap="1rem" marginTop="1rem" justifyContent="flex-end">
-                        <Button onClick={() => { setShowCreateForm(false); setEditingPost(null); }} backgroundColor="white" color="#6B7280" border="1px solid #E5E7EB" style={{ borderRadius: '8px' }}>
-                          Cancel
-                        </Button>
-                        <Button type="submit" backgroundColor="#3B82F6" color="white" isLoading={isSubmitting} style={{ borderRadius: '8px' }}>
-                          {editingPost ? 'Update Post' : 'Create Post'}
-                        </Button>
-                      </Flex>
-                    </Flex>
-                  </form>
-                </Flex>
-              </Card>
-            </Flex>
-          </View>
+                </form>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Detail Modal */}

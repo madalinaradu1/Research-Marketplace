@@ -26,6 +26,7 @@ import { useTags } from '../contexts/TagContext';
 import styles from './StudentDashboard.module.css';
 import buttonStyles from '../styles/dashboardButtons.module.css';
 import { tagPillProps } from '../styles/tagPills';
+import '../styles/unifiedFormModal.css';
 const APPLICATION_LIMIT = 3;
 
 const formatGraphQLError = (err) => {
@@ -857,48 +858,23 @@ const StudentDashboard = ({ user }) => {
       )}
       
       {showApplicationForm && selectedProject && (
-        <View
-          position="fixed"
-          top="0"
-          left="0"
-          width="100vw"
-          height="100vh"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          style={{ zIndex: 1000 }}
-          onClick={() => {
-            setShowApplicationForm(false);
-            setSelectedProject(null);
-          }}
-        >
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-            padding="2rem"
-          >
-            <Card
-              maxWidth="800px"
-              width="100%"
-              maxHeight="100vh"
-              style={{ overflow: 'auto' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <EnhancedApplicationForm 
-                project={selectedProject}
-                user={user}
-                onClose={() => {
-                  setShowApplicationForm(false);
-                  setSelectedProject(null);
-                }}
-                onSuccess={() => {
-                  setShowApplicationForm(false);
-                  setSelectedProject(null);
-                  fetchData();
-                }}
-              />
-            </Card>
-          </Flex>
-        </View>
+        <div className="unified-form-modal" onClick={() => { setShowApplicationForm(false); setSelectedProject(null); }}>
+          <div className="ufm-card" onClick={(e) => e.stopPropagation()}>
+            <EnhancedApplicationForm 
+              project={selectedProject}
+              user={user}
+              onClose={() => {
+                setShowApplicationForm(false);
+                setSelectedProject(null);
+              }}
+              onSuccess={() => {
+                setShowApplicationForm(false);
+                setSelectedProject(null);
+                fetchData();
+              }}
+            />
+          </div>
+        </div>
       )}
       
       {/* Legacy Application Form Overlay */}

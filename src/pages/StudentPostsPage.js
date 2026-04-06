@@ -23,6 +23,8 @@ import { useTags } from '../contexts/TagContext';
 import { tagIdsToDisplayNames, toStringArray } from '../components/TagSelector/tagHelpers';
 import { hasWordPrefixMatch } from '../lib/tags/normalize';
 import dashboardStyles from './StudentDashboard.module.css';
+import buttonStyles from '../styles/dashboardButtons.module.css';
+import '../styles/unifiedFormModal.css';
 
 const COLLEGE_OPTIONS = [
   'College of the Arts and Sciences',
@@ -370,10 +372,10 @@ const StudentPostsPage = ({ user }) => {
 
   const validPosts = posts.filter(post => post.student);
   const myPosts = getMyPosts().filter(post => post.student);
-  const createPostButtonClassName = `${dashboardStyles.actionButton} ${dashboardStyles.actionButtonPrimary} ${dashboardStyles.actionButtonWide}`;
-  const submitPostButtonClassName = `${dashboardStyles.actionButton} ${dashboardStyles.actionButtonPrimary} ${dashboardStyles.actionButtonCompact}`;
-  const secondaryActionButtonClassName = `${dashboardStyles.actionButton} ${dashboardStyles.actionButtonGhost} ${dashboardStyles.actionButtonCompact}`;
-  const iconActionButtonClassName = `${dashboardStyles.actionButton} ${dashboardStyles.actionButtonGhost} ${dashboardStyles.actionButtonCompact} ${dashboardStyles.actionButtonIcon}`;
+  const createPostButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonWide}`;
+  const submitPostButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonIcon}`;
 
   const allPostsContent = (
     <Card backgroundColor="white" padding="1.5rem">
@@ -865,175 +867,124 @@ const StudentPostsPage = ({ user }) => {
       
       {/* Create Post Modal */}
       {showCreateForm && (
-        <View
-          position="fixed"
-          top="0"
-          left="0"
-          width="100vw"
-          height="100vh"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          style={{ zIndex: 1000 }}
-          onClick={closeCreateForm}
-        >
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-            padding="2rem"
-          >
-            <Card
-              maxWidth="900px"
-              width="100%"
-              maxHeight="100vh"
-              backgroundColor="white"
-              style={{ overflow: 'auto' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Flex direction="column" gap="1.5rem" padding="2rem">
-                <Flex justifyContent="space-between" alignItems="center">
-                  <Heading level={3} color="#2d3748">{editingPost ? 'Edit Post' : 'Create New Post'}</Heading>
-                  <Button type="button" data-close-button="true" className={iconActionButtonClassName} onClick={closeCreateForm} aria-label="Close create post modal"><span className="closeButtonGlyph" aria-hidden="true">&times;</span></Button>
-                </Flex>
+        <div className="unified-form-modal" onClick={closeCreateForm}>
+          <div className="ufm-card" onClick={(e) => e.stopPropagation()}>
+            <div className="ufm-body">
 
-              <form onSubmit={handleSubmit}>
-                <Flex direction="column" gap="1rem">
-                  <SelectField
-                    name="type"
-                    label="Post Type *"
-                    value={formData.type}
-                    onChange={handleFormChange}
-                    required
-                  >
-                    {postTypes.map(type => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </SelectField>
+              <div className="ufm-header">
+                <div className="ufm-header-text">
+                  <h2 className="ufm-title">{editingPost ? 'Edit Post' : 'Create New Post'}</h2>
+                  {!editingPost && (
+                    <p className="ufm-subtitle">Share your research interests and connect with the community.</p>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  data-dashboard-button="true"
+                  data-close-button="true"
+                  className={iconActionButtonClassName}
+                  aria-label="Close create post modal"
+                  onClick={closeCreateForm}
+                >
+                  <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                </Button>
+              </div>
 
-                  <TextField
-                    name="title"
-                    label="Title *"
-                    value={formData.title}
-                    onChange={handleFormChange}
-                    required
-                    placeholder="Brief, descriptive title"
-                  />
+              <form onSubmit={handleSubmit} className="ufm-form">
 
-                  <TextAreaField
-                    name="description"
-                    label="Description *"
-                    value={formData.description}
-                    onChange={handleFormChange}
-                    required
-                    rows={5}
-                    placeholder="Detailed description of your research interest, mentor needs, or research idea"
-                  />
+                {/* Section 1: Basic Information */}
+                <div className="ufm-section">
+                  <div className="ufm-section-header">
+                    <p className="ufm-section-title">Basic Information</p>
+                    <p className="ufm-section-desc">Give your post a clear title and description so others know what you're looking for.</p>
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Post Type <span className="ufm-required">*</span></label>
+                    <select className="ufm-select" name="type" value={formData.type} onChange={handleFormChange} required>
+                      {postTypes.map(type => (
+                        <option key={type.value} value={type.value}>{type.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Title <span className="ufm-required">*</span></label>
+                    <input className="ufm-input" type="text" name="title" value={formData.title} onChange={handleFormChange} required placeholder="Brief, descriptive title" />
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Description <span className="ufm-required">*</span></label>
+                    <textarea className="ufm-textarea" name="description" value={formData.description} onChange={handleFormChange} required rows={5} placeholder="Detailed description of your research interest, mentor needs, or research idea" />
+                  </div>
+                </div>
 
-                  <View position="relative">
-                    <TextField
-                      name="department"
-                      label="College"
-                      value={formData.department}
-                      onChange={handleCollegeChange}
-                      onFocus={() => setShowCollegeDropdown(true)}
-                      onBlur={() => setTimeout(() => setShowCollegeDropdown(false), 120)}
-                      placeholder="Start typing to search..."
-                    />
+                {/* Section 2: Post Details */}
+                <div className="ufm-section">
+                  <div className="ufm-section-header">
+                    <p className="ufm-section-title">Post Details</p>
+                    <p className="ufm-section-desc">Specify the college, timeline, and other details for this post.</p>
+                  </div>
+                  <div className="ufm-field" style={{ position: 'relative' }}>
+                    <label className="ufm-label">College</label>
+                    <input className="ufm-input" type="text" name="department" value={formData.department} onChange={handleCollegeChange} onFocus={() => setShowCollegeDropdown(true)} onBlur={() => setTimeout(() => setShowCollegeDropdown(false), 120)} placeholder="Start typing to search..." />
                     {showCollegeDropdown && collegeSuggestions.length > 0 && (
                       <ul className="tag-dropdown" style={{ zIndex: 20, maxHeight: '220px', overflowY: 'auto' }}>
                         {collegeSuggestions.map((college) => (
-                          <li
-                            key={college}
-                            className="tag-dropdown-option"
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={() => handleCollegeSelect(college)}
-                          >
-                            {college}
-                          </li>
+                          <li key={college} className="tag-dropdown-option" onMouseDown={(e) => e.preventDefault()} onClick={() => handleCollegeSelect(college)}>{college}</li>
                         ))}
                       </ul>
                     )}
-                  </View>
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Time Commitment</label>
+                    <input className="ufm-input" type="text" name="timeCommitment" value={formData.timeCommitment} onChange={handleFormChange} placeholder="e.g. 10 hours/week, Flexible, Summer only" />
+                  </div>
+                </div>
 
-                  <Flex direction="column" gap="0.5rem">
-                    <Text fontWeight={600} color="#2d3748">Research Areas</Text>
-                    <Text fontSize="0.85rem" color="#718096">Type to search and add research areas from the shared tag library.</Text>
-                    <TagSelector
-                      selectedTagIds={researchAreaTagIds}
-                      onChange={handleResearchAreasChange}
-                      placeholder="Type to search and add research interests..."
-                      maxSelections={10}
-                    />
+                {/* Section 3: Research Profile */}
+                <div className="ufm-section">
+                  <div className="ufm-section-header">
+                    <p className="ufm-section-title">Research Profile</p>
+                    <p className="ufm-section-desc">Help others find your post by tagging relevant research areas and skills.</p>
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Research Areas</label>
+                    <p className="ufm-hint">Type to search and add research areas from the shared tag library.</p>
+                    <TagSelector selectedTagIds={researchAreaTagIds} onChange={handleResearchAreasChange} placeholder="Type to search and add research interests..." maxSelections={10} />
                     {legacyResearchAreas.length > 0 && (
-                      <Text fontSize="0.8rem" color="#8a6d3b">
-                        Existing values not in the tag library: {legacyResearchAreas.join(', ')}
-                      </Text>
+                      <p className="ufm-hint" style={{ color: '#8a6d3b' }}>Existing values not in the tag library: {legacyResearchAreas.join(', ')}</p>
                     )}
-                  </Flex>
-
-                  <Flex direction="column" gap="0.5rem">
-                    <Text fontWeight={600} color="#2d3748">Skills You Offer</Text>
-                    <Text fontSize="0.85rem" color="#718096">Add skills you can contribute using the same tag autocomplete as faculty projects.</Text>
-                    <TagSelector
-                      selectedTagIds={skillsOfferedTagIds}
-                      onChange={handleSkillsOfferedChange}
-                      placeholder="Type to search and add offered skills..."
-                      maxSelections={15}
-                    />
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Skills You Offer</label>
+                    <p className="ufm-hint">Add skills you can contribute using the same tag autocomplete as faculty projects.</p>
+                    <TagSelector selectedTagIds={skillsOfferedTagIds} onChange={handleSkillsOfferedChange} placeholder="Type to search and add offered skills..." maxSelections={15} />
                     {legacySkillsOffered.length > 0 && (
-                      <Text fontSize="0.8rem" color="#8a6d3b">
-                        Existing values not in the tag library: {legacySkillsOffered.join(', ')}
-                      </Text>
+                      <p className="ufm-hint" style={{ color: '#8a6d3b' }}>Existing values not in the tag library: {legacySkillsOffered.join(', ')}</p>
                     )}
-                  </Flex>
-
-                  <Flex direction="column" gap="0.5rem">
-                    <Text fontWeight={600} color="#2d3748">Skills You Need</Text>
-                    <Text fontSize="0.85rem" color="#718096">Add the skills or experience you want collaborators to bring.</Text>
-                    <TagSelector
-                      selectedTagIds={skillsNeededTagIds}
-                      onChange={handleSkillsNeededChange}
-                      placeholder="Type to search and add needed skills..."
-                      maxSelections={15}
-                    />
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Skills You Need</label>
+                    <p className="ufm-hint">Add the skills or experience you want collaborators to bring.</p>
+                    <TagSelector selectedTagIds={skillsNeededTagIds} onChange={handleSkillsNeededChange} placeholder="Type to search and add needed skills..." maxSelections={15} />
                     {legacySkillsNeeded.length > 0 && (
-                      <Text fontSize="0.8rem" color="#8a6d3b">
-                        Existing values not in the tag library: {legacySkillsNeeded.join(', ')}
-                      </Text>
+                      <p className="ufm-hint" style={{ color: '#8a6d3b' }}>Existing values not in the tag library: {legacySkillsNeeded.join(', ')}</p>
                     )}
-                  </Flex>
+                  </div>
+                </div>
 
-                  <TextField
-                    name="timeCommitment"
-                    label="Time Commitment"
-                    value={formData.timeCommitment}
-                    onChange={handleFormChange}
-                    placeholder="e.g. 10 hours/week, Flexible, Summer only"
-                  />
+                {/* Footer */}
+                <div className="ufm-footer">
+                  <button type="button" data-dashboard-button="true" className={secondaryActionButtonClassName} onClick={closeCreateForm}>
+                    Cancel
+                  </button>
+                  <button type="submit" data-dashboard-button="true" className={submitPostButtonClassName} disabled={isSubmitting}>
+                    {isSubmitting ? 'Saving...' : (editingPost ? 'Update Post' : 'Create Post')}
+                  </button>
+                </div>
 
-                  <Flex gap="1rem" marginTop="1rem" justifyContent="flex-end">
-                    <Button
-                      type="button"
-                      className={secondaryActionButtonClassName}
-                      onClick={closeCreateForm}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      className={submitPostButtonClassName}
-                      isLoading={isSubmitting}
-                    >
-                      {editingPost ? 'Update Post' : 'Create Post'}
-                    </Button>
-                  </Flex>
-                </Flex>
               </form>
-              </Flex>
-            </Card>
-          </Flex>
-        </View>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}

@@ -30,6 +30,7 @@ import DashboardPageShell from '../components/DashboardPageShell';
 import { getStatusColorValue } from '../utils/statusColors';
 import '../components/TagSelector/tagSelector.css';
 import '../styles/facultyCreateProjectModal.css';
+import '../styles/unifiedFormModal.css';
 import buttonStyles from '../styles/dashboardButtons.module.css';
 import { tagPillProps } from '../styles/tagPills';
 import TagSelector from '../components/TagSelector';
@@ -1932,71 +1933,60 @@ const FacultyDashboard = ({ user }) => {
       
       {/* Message Student Modal */}
       {messagingStudent && (
-        <View
-          position="fixed"
-          top="0"
-          left="0"
-          width="100vw"
-          height="100vh"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          style={{ zIndex: 1000 }}
-          onClick={() => setMessagingStudent(null)}
-        >
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-            padding="2rem"
-          >
-            <Card
-              maxWidth="900px"
-              width="100%"
-              maxHeight="100vh"
-              backgroundColor="white"
-              style={{ overflow: 'auto' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Flex direction="column" gap="1.5rem" padding="2rem">
-                <Flex justifyContent="space-between" alignItems="center">
-                  <Heading level={3} color="#2d3748">Send Message</Heading>
-                  <Button
-                    size="small"
-                    data-close-button="true"
-                    className={iconActionButtonClassName}
-                    aria-label="Close send message modal"
-                    onClick={() => {
-                      setMessagingStudent(null);
-                      setMessageText('');
-                    }}
-                  >
-                    <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
-                  </Button>
-                </Flex>
-                
-                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
-                  <Heading level={5} color="#2d3748" marginBottom="1rem">Message Details</Heading>
-                  <Flex direction="column" gap="0.75rem">
-                    <Flex justifyContent="space-between">
-                      <Text fontWeight="600" color="#4a5568">To:</Text>
-                      <Text color="#2d3748">{messagingStudent.student?.name} ({messagingStudent.student?.email})</Text>
-                    </Flex>
-                    <Flex justifyContent="space-between">
-                      <Text fontWeight="600" color="#4a5568">Regarding:</Text>
-                      <Text color="#2d3748">{messagingStudent.application?.project?.title}</Text>
-                    </Flex>
-                  </Flex>
-                </Card>
-                
-                <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
-                  <Heading level={5} color="#2d3748" marginBottom="1rem">Your Message</Heading>
-                  <div style={{ height: '400px' }}>
+        <div className="unified-form-modal" onClick={() => setMessagingStudent(null)}>
+          <div className="ufm-card" style={{ maxWidth: '700px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="ufm-body">
+
+              <div className="ufm-header">
+                <div className="ufm-header-text">
+                  <h2 className="ufm-title">Send Message</h2>
+                  <p className="ufm-subtitle">Send a message to the student about their application.</p>
+                </div>
+                <Button
+                  type="button"
+                  data-dashboard-button="true"
+                  data-close-button="true"
+                  className={iconActionButtonClassName}
+                  aria-label="Close send message modal"
+                  onClick={() => {
+                    setMessagingStudent(null);
+                    setMessageText('');
+                  }}
+                >
+                  <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                </Button>
+              </div>
+
+              <div className="ufm-form">
+                {/* Message Details Section */}
+                <div className="ufm-section">
+                  <div className="ufm-section-header">
+                    <p className="ufm-section-title">Message Details</p>
+                  </div>
+                  <div className="ufm-row-2">
+                    <div className="ufm-field">
+                      <label className="ufm-label">To</label>
+                      <p className="ufm-meta">{messagingStudent.student?.name} ({messagingStudent.student?.email})</p>
+                    </div>
+                    <div className="ufm-field">
+                      <label className="ufm-label">Regarding</label>
+                      <p className="ufm-meta">{messagingStudent.application?.project?.title}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Message Body Section */}
+                <div className="ufm-section">
+                  <div className="ufm-section-header">
+                    <p className="ufm-section-title">Your Message</p>
+                  </div>
+                  <div className="ufm-editor-wrap">
                     <ReactQuill
                       ref={messageQuillRef}
                       value={messageText}
                       onChange={(value) => {
                         if (value !== messageText) {
                           setMessageText(value);
-                          // Auto-save message draft
                           try {
                             const draftKey = `faculty_message_draft_${user.id || user.username}_${messagingStudent?.student?.id}`;
                             localStorage.setItem(draftKey, value);
@@ -2013,13 +2003,15 @@ const FacultyDashboard = ({ user }) => {
                           ['clean']
                         ]
                       }}
-                      style={{ height: '350px' }}
                     />
                   </div>
-                </Card>
-                
-                <Flex gap="1rem" justifyContent="flex-end">
-                  <Button 
+                </div>
+
+                {/* Footer */}
+                <div className="ufm-footer">
+                  <button
+                    type="button"
+                    data-dashboard-button="true"
                     className={secondaryActionButtonClassName}
                     onClick={() => {
                       setMessagingStudent(null);
@@ -2029,10 +2021,12 @@ const FacultyDashboard = ({ user }) => {
                     }}
                   >
                     Cancel
-                  </Button>
-                  <Button 
+                  </button>
+                  <button
+                    type="button"
+                    data-dashboard-button="true"
                     className={primaryActionButtonClassName}
-                    isLoading={isSendingMessage}
+                    disabled={isSendingMessage || !messageText.trim()}
                     onClick={async () => {
                       if (!messageText.trim()) return;
                       
@@ -2067,7 +2061,6 @@ const FacultyDashboard = ({ user }) => {
                       } catch (err) {
                         console.error('Error sending message:', err);
                         
-                        // Log detailed GraphQL error information
                         if (err.errors && err.errors.length > 0) {
                           console.error('GraphQL Error Details:');
                           err.errors.forEach((error, index) => {
@@ -2086,13 +2079,14 @@ const FacultyDashboard = ({ user }) => {
                       }
                     }}
                   >
-                    Send Message
-                  </Button>
-                </Flex>
-              </Flex>
-            </Card>
-          </Flex>
-        </View>
+                    {isSendingMessage ? 'Sending...' : 'Send Message'}
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
       )}
       
       {/* Create/Edit Project Modal */}
