@@ -32,9 +32,13 @@ import { syncProjectTagIndex } from '../lib/recommendations/projectTagIndexSync'
 import SliderTabs from '../components/SliderTabs';
 import DashboardPageShell from '../components/DashboardPageShell';
 import DashboardPagination from '../components/DashboardPagination';
+import buttonStyles from '../styles/dashboardButtons.module.css';
 
 const CoordinatorDashboard = ({ user }) => {
   const { tokens } = useTheme();
+  const primaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonIcon}`;
   const [projects, setProjects] = useState({ pending: [], approved: [], rejected: [] });
   const [applications, setApplications] = useState([]);
   const [approvedApplications, setApprovedApplications] = useState([]);
@@ -1149,10 +1153,19 @@ const CoordinatorDashboard = ({ user }) => {
               style={{ overflow: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Flex direction="column" gap="1.5rem" padding="2rem">
+                <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Application Details</Heading>
-                  <Button size="small" data-close-button="true" onClick={() => setViewingApplication(null)} backgroundColor="#f7fafc" color="#4a5568"><span className="closeButtonGlyph" aria-hidden="true">&times;</span></Button>
+                  <Button
+                    size="small"
+                    data-dashboard-button="true"
+                    data-close-button="true"
+                    className={iconActionButtonClassName}
+                    aria-label="Close application details"
+                    onClick={() => setViewingApplication(null)}
+                  >
+                    <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                  </Button>
                 </Flex>
                 
                 <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
@@ -1245,10 +1258,10 @@ const CoordinatorDashboard = ({ user }) => {
                   <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Supporting Documents</Heading>
                     <Flex gap="0.75rem">
-                      <Button 
-                        size="small" 
-                        backgroundColor="#4299e1" 
-                        color="white"
+                      <Button
+                        size="small"
+                        data-dashboard-button="true"
+                        className={primaryActionButtonClassName}
                         onClick={async () => {
                           try {
                             const url = await Storage.get(viewingApplication.documentKey, { 
@@ -1263,11 +1276,10 @@ const CoordinatorDashboard = ({ user }) => {
                       >
                         View Document
                       </Button>
-                      <Button 
-                        size="small" 
-                        backgroundColor="white" 
-                        color="#4a5568" 
-                        border="1px solid #e2e8f0"
+                      <Button
+                        size="small"
+                        data-dashboard-button="true"
+                        className={secondaryActionButtonClassName}
                         onClick={async () => {
                           try {
                             const url = await Storage.get(viewingApplication.documentKey, { 
@@ -1327,14 +1339,21 @@ const CoordinatorDashboard = ({ user }) => {
               height="100%"
               onClick={(e) => e.stopPropagation()}
             >
-              <Flex direction="column" height="100%">
-                <Flex justifyContent="space-between" alignItems="center" padding="1rem">
-                  <Heading level={4}>Supporting Document</Heading>
-                  <Button size="small" onClick={() => {
-                    setViewingDocument(false);
-                    setDocumentUrl(null);
-                  }}>Close</Button>
-                </Flex>
+                <Flex direction="column" height="100%">
+                  <Flex justifyContent="space-between" alignItems="center" padding="1rem">
+                    <Heading level={4}>Supporting Document</Heading>
+                    <Button
+                      size="small"
+                      data-dashboard-button="true"
+                      className={secondaryActionButtonClassName}
+                      onClick={() => {
+                        setViewingDocument(false);
+                        setDocumentUrl(null);
+                      }}
+                    >
+                      Close
+                    </Button>
+                  </Flex>
                 <Divider />
                 <View flex="1" style={{ overflow: 'auto', padding: '1rem' }}>
                   {viewingApplication?.documentKey && viewingApplication.documentKey.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i) ? (
@@ -1357,20 +1376,26 @@ const CoordinatorDashboard = ({ user }) => {
                       style={{ border: 'none', minHeight: '500px' }}
                       title="Supporting Document"
                     />
-                  ) : (
-                    <Flex direction="column" alignItems="center" justifyContent="center" height="100%" gap="1rem">
-                      <Text>Document preview not available for this file type.</Text>
-                      <Button onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = documentUrl;
-                        link.download = 'supporting-document';
-                        link.target = '_blank';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                      }}>Download Document</Button>
-                    </Flex>
-                  )}
+                    ) : (
+                      <Flex direction="column" alignItems="center" justifyContent="center" height="100%" gap="1rem">
+                        <Text>Document preview not available for this file type.</Text>
+                        <Button
+                          data-dashboard-button="true"
+                          className={primaryActionButtonClassName}
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = documentUrl;
+                            link.download = 'supporting-document';
+                            link.target = '_blank';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                        >
+                          Download Document
+                        </Button>
+                      </Flex>
+                    )}
                 </View>
               </Flex>
             </Card>
@@ -1411,7 +1436,16 @@ const CoordinatorDashboard = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Project Details</Heading>
-                  <Button size="small" data-close-button="true" onClick={() => setViewingProject(null)} backgroundColor="#f7fafc" color="#4a5568"><span className="closeButtonGlyph" aria-hidden="true">&times;</span></Button>
+                  <Button
+                    size="small"
+                    data-dashboard-button="true"
+                    data-close-button="true"
+                    className={iconActionButtonClassName}
+                    aria-label="Close project details"
+                    onClick={() => setViewingProject(null)}
+                  >
+                    <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                  </Button>
                 </Flex>
                 
                 {/* Rejection Reason Banner */}
@@ -1574,27 +1608,25 @@ const CoordinatorDashboard = ({ user }) => {
                 />
                 <Flex gap="1rem" justifyContent="flex-end">
                   <Button
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
                     onClick={() => {
                       setShowRejectConfirm(false);
                       setApplicationToReject(null);
                       setRejectionReason('');
                     }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                   >
                     Cancel
                   </Button>
                   <Button
+                    data-dashboard-button="true"
+                    className={primaryActionButtonClassName}
                     onClick={async () => {
                       await handleApplicationAction(applicationToReject, 'reject');
                       setShowRejectConfirm(false);
                       setApplicationToReject(null);
                       setRejectionReason('');
                     }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                     isDisabled={!rejectionReason.trim()}
                   >
                     Reject
@@ -1642,27 +1674,25 @@ const CoordinatorDashboard = ({ user }) => {
                 />
                 <Flex gap="1rem" justifyContent="flex-end">
                   <Button
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
                     onClick={() => {
                       setShowApproveConfirm(false);
                       setApplicationToApprove(null);
                       setApprovalReason('');
                     }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                   >
                     Cancel
                   </Button>
                   <Button
+                    data-dashboard-button="true"
+                    className={primaryActionButtonClassName}
                     onClick={async () => {
                       await handleApplicationAction(applicationToApprove, 'approve');
                       setShowApproveConfirm(false);
                       setApplicationToApprove(null);
                       setApprovalReason('');
                     }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                     isDisabled={!approvalReason.trim()}
                   >
                     Approve
@@ -1710,27 +1740,25 @@ const CoordinatorDashboard = ({ user }) => {
                 />
                 <Flex gap="1rem" justifyContent="flex-end">
                   <Button
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
                     onClick={() => {
                       setShowProjectApproveConfirm(false);
                       setProjectToApprove(null);
                       setApprovalReason('');
                     }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                   >
                     Cancel
                   </Button>
                   <Button
+                    data-dashboard-button="true"
+                    className={primaryActionButtonClassName}
                     onClick={async () => {
                       await handleProjectAction(projectToApprove, 'approve');
                       setShowProjectApproveConfirm(false);
                       setProjectToApprove(null);
                       setApprovalReason('');
                     }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                     isDisabled={!approvalReason.trim()}
                   >
                     Approve
@@ -1778,27 +1806,25 @@ const CoordinatorDashboard = ({ user }) => {
                 />
                 <Flex gap="1rem" justifyContent="flex-end">
                   <Button
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
                     onClick={() => {
                       setShowProjectRejectConfirm(false);
                       setProjectToReject(null);
                       setRejectionReason('');
                     }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                   >
                     Cancel
                   </Button>
                   <Button
+                    data-dashboard-button="true"
+                    className={primaryActionButtonClassName}
                     onClick={async () => {
                       await handleProjectAction(projectToReject, 'reject');
                       setShowProjectRejectConfirm(false);
                       setProjectToReject(null);
                       setRejectionReason('');
                     }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                     isDisabled={!rejectionReason.trim()}
                   >
                     Reject

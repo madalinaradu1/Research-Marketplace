@@ -105,6 +105,13 @@
   border-radius: 10px !important;
 }
 
+.actionButtonTight {
+  min-height: 2.1rem;
+  padding: 0.45rem 0.75rem !important;
+  border-radius: 9px !important;
+  font-size: 0.82rem;
+}
+
 .actionButtonWide {
   min-width: 11.5rem;
 }

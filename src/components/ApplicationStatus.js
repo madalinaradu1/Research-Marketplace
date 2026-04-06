@@ -148,7 +148,7 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
             </Flex>
             <Button 
               data-dashboard-button="true"
-              className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`}
+              className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonTight}`}
               onClick={(e) => {
                 e.stopPropagation();
                 setShowWithdrawModal(true);

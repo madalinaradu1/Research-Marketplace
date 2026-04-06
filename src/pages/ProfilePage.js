@@ -5,11 +5,15 @@ import { updateUser, listApplications, listProjects, updateApplication } from '.
 import { useNavigate } from 'react-router-dom';
 import TagSelector from '../components/TagSelector';
 import { useTags } from '../contexts/TagContext';
+import buttonStyles from '../styles/dashboardButtons.module.css';
 
 
 const ProfilePage = ({ user, refreshProfile }) => {
   const { tokens } = useTheme();
   const navigate = useNavigate();
+  const primaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonIcon}`;
   const fieldLabelProps = {
     fontSize: tokens.fontSizes.medium,
     fontWeight: tokens.fontWeights.medium,
@@ -359,10 +363,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
             
             <Flex justifyContent="flex-end">
               <Button 
-                type="submit" 
-                backgroundColor="white"
-                color="black"
-                border="1px solid black"
+                type="submit"
+                data-dashboard-button="true"
+                className={primaryActionButtonClassName}
                 size="small"
                 isLoading={isSubmitting}
                 loadingText="Saving..."
@@ -389,10 +392,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
             <Flex justifyContent="space-between" alignItems="center">
               <Heading level={4} color="#2d3748">My Calendar</Heading>
               <Button
+                data-dashboard-button="true"
+                className={secondaryActionButtonClassName}
                 size="small"
-                backgroundColor="white"
-                color="black"
-                border="1px solid black"
                 onClick={() => setShowCalendarModal(true)}
               >
                 View Full Calendar
@@ -404,10 +406,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
             <Card variation="outlined" padding="1rem">
               <Flex justifyContent="space-between" alignItems="center" marginBottom="0.5rem">
                 <Button
+                  data-dashboard-button="true"
+                  className={iconActionButtonClassName}
                   size="small"
-                  backgroundColor="white"
-                  color="black"
-                  border="1px solid black"
                   onClick={() => {
                     const newDate = new Date(miniCalendarDate);
                     newDate.setMonth(newDate.getMonth() - 1);
@@ -420,10 +421,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                   {miniCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </Text>
                 <Button
+                  data-dashboard-button="true"
+                  className={iconActionButtonClassName}
                   size="small"
-                  backgroundColor="white"
-                  color="black"
-                  border="1px solid black"
                   onClick={() => {
                     const newDate = new Date(miniCalendarDate);
                     newDate.setMonth(newDate.getMonth() + 1);
@@ -543,12 +543,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                           <Text fontSize="0.7rem" color="green">Research Project</Text>
                         </Flex>
                         <Button
+                          data-dashboard-button="true"
+                          className={secondaryActionButtonClassName}
                           size="small"
-                          backgroundColor="white"
-                          color="black"
-                          border="1px solid black"
-                          fontSize="0.7rem"
-                          padding="0.25rem 0.5rem"
                           onClick={() => {
                             setDeleteAction(() => async () => {
                               try {
@@ -598,12 +595,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                         </Flex>
                         <Flex direction="column" gap="0.25rem">
                           <Button
+                            data-dashboard-button="true"
+                            className={secondaryActionButtonClassName}
                             size="small"
-                            backgroundColor="white"
-                            color="black"
-                            border="1px solid black"
-                            fontSize="0.7rem"
-                            padding="0.25rem 0.5rem"
                             onClick={() => {
                               setEditingEvent(event);
                               setEventForm({ title: event.title, description: event.description, startDate: event.startDate, endDate: event.endDate, allDay: event.allDay });
@@ -614,12 +608,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                             Edit
                           </Button>
                           <Button
+                            data-dashboard-button="true"
+                            className={secondaryActionButtonClassName}
                             size="small"
-                            backgroundColor="white"
-                            color="black"
-                            border="1px solid black"
-                            fontSize="0.7rem"
-                            padding="0.25rem 0.5rem"
                             onClick={() => {
                               setDeleteAction(() => () => {
                                 const updatedEvents = scheduledEvents.filter(e => e.id !== event.id);
@@ -674,10 +665,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3}>My Academic Calendar</Heading>
                   <Button 
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
                     onClick={() => setShowCalendarModal(false)}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                   >
                     Close
                   </Button>
@@ -690,19 +680,17 @@ const ProfilePage = ({ user, refreshProfile }) => {
                   <Flex justifyContent="space-between" alignItems="center" marginBottom="1rem">
                     <Flex gap="0.5rem">
                       <Button 
+                        data-dashboard-button="true"
+                        className={iconActionButtonClassName}
                         onClick={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear() - 1, currentCalendarDate.getMonth(), 1))}
-                        backgroundColor="white"
-                        color="black"
-                        border="1px solid black"
                         size="small"
                       >
                         ««
                       </Button>
                       <Button 
+                        data-dashboard-button="true"
+                        className={iconActionButtonClassName}
                         onClick={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() - 1, 1))}
-                        backgroundColor="white"
-                        color="black"
-                        border="1px solid black"
                         size="small"
                       >
                         ←
@@ -713,19 +701,17 @@ const ProfilePage = ({ user, refreshProfile }) => {
                     </Text>
                     <Flex gap="0.5rem">
                       <Button 
+                        data-dashboard-button="true"
+                        className={iconActionButtonClassName}
                         onClick={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + 1, 1))}
-                        backgroundColor="white"
-                        color="black"
-                        border="1px solid black"
                         size="small"
                       >
                         →
                       </Button>
                       <Button 
+                        data-dashboard-button="true"
+                        className={iconActionButtonClassName}
                         onClick={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear() + 1, currentCalendarDate.getMonth(), 1))}
-                        backgroundColor="white"
-                        color="black"
-                        border="1px solid black"
                         size="small"
                       >
                         »»
@@ -924,10 +910,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                     })}
                   </Heading>
                   <Button 
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
                     onClick={() => setShowDayModal(false)}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                     size="small"
                   >
                     Close
@@ -947,27 +932,25 @@ const ProfilePage = ({ user, refreshProfile }) => {
                         <Text fontSize="0.8rem" color="gray">Duration: Active during this period</Text>
                         <Flex gap="0.5rem">
                           <Button 
+                            data-dashboard-button="true"
+                            className={secondaryActionButtonClassName}
                             onClick={() => {
                               setShowDayModal(false);
                               navigate('/messages');
                             }}
-                            backgroundColor="white"
-                            color="black"
-                            border="1px solid black"
                             size="small"
                           >
                             Message Faculty
                           </Button>
                           <Button 
+                            data-dashboard-button="true"
+                            className={primaryActionButtonClassName}
                             onClick={() => {
                               setSelectedDate(selectedDayEvents.date);
                               setEventForm({ title: '', description: '', startDate: selectedDayEvents.date.toISOString().split('T')[0], endDate: selectedDayEvents.date.toISOString().split('T')[0], allDay: true });
                               setShowDayModal(false);
                               setShowScheduleForm(true);
                             }}
-                            backgroundColor="white"
-                            color="black"
-                            border="1px solid black"
                             size="small"
                           >
                             Schedule Research Opportunity
@@ -1069,9 +1052,8 @@ const ProfilePage = ({ user, refreshProfile }) => {
                   
                   <Flex gap="0.5rem" justifyContent="flex-end">
                     <Button 
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
+                      data-dashboard-button="true"
+                      className={primaryActionButtonClassName}
                       size="small"
                       onClick={() => {
                         const newEvent = {
@@ -1107,10 +1089,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                       {editingEvent ? 'Update Event' : 'Add to Calendar'}
                     </Button>
                     <Button 
+                      data-dashboard-button="true"
+                      className={secondaryActionButtonClassName}
                       onClick={() => setShowScheduleForm(false)}
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
                       size="small"
                     >
                       Close
@@ -1174,10 +1155,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                   
                   <Flex gap="0.5rem" justifyContent="flex-end">
                     <Button 
+                      data-dashboard-button="true"
+                      className={secondaryActionButtonClassName}
                       onClick={() => setShowProjectEditModal(false)}
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
                       size="small"
                     >
                       Close
@@ -1220,15 +1200,16 @@ const ProfilePage = ({ user, refreshProfile }) => {
                 
                 <Flex gap="0.5rem" justifyContent="flex-end">
                   <Button 
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
                     onClick={() => setShowDeleteConfirm(false)}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                     size="small"
                   >
                     No
                   </Button>
                   <Button 
+                    data-dashboard-button="true"
+                    className={primaryActionButtonClassName}
                     onClick={() => {
                       if (deleteAction) {
                         deleteAction();
@@ -1236,9 +1217,6 @@ const ProfilePage = ({ user, refreshProfile }) => {
                       setShowDeleteConfirm(false);
                       setDeleteAction(null);
                     }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                     size="small"
                   >
                     Yes

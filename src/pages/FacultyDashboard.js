@@ -1282,8 +1282,9 @@ const FacultyDashboard = ({ user }) => {
           style={{
             position: 'relative',
             width: '100%',
-            height: '450px',
-            overflow: 'hidden'
+            aspectRatio: '5 / 1',
+            overflow: 'hidden',
+            lineHeight: 0
           }}
         >
           <img
@@ -1312,68 +1313,70 @@ const FacultyDashboard = ({ user }) => {
       {error && <Text color="red">{error}</Text>}
       {successMessage && <Text color="green">{successMessage}</Text>}
       
-      <Flex justifyContent="space-between" alignItems="center" marginBottom="2rem">
-        <Button
-          type="button"
-          data-dashboard-button="true"
-          className={primaryActionButtonClassName}
-          onClick={() => {
-            setIsCreatingProject(true);
-            setSelectedProject(null);
-            setIsEditingProject(false);
-            
-            // Load cached draft data if available
-            const loadCachedDraftData = () => {
-              try {
-                const cacheKey = `project_draft_${user.id || user.username}`;
-                const cached = localStorage.getItem(cacheKey);
-                if (cached) {
-                  const data = JSON.parse(cached);
-                  return {
-                    title: data.title || '',
-                    description: data.description || '',
-                    department: data.department || user.department || '',
-                    skillsRequired: data.skillsRequired || '',
-                    tags: data.tags || '',
-                    qualifications: data.qualifications || '',
-                    duration: data.duration || '',
-                    applicationDeadline: data.applicationDeadline || '',
-                    requiresTranscript: data.requiresTranscript || false,
-                    isActive: data.isActive !== undefined ? data.isActive : true
-                  };
+      <Flex direction="column" gap="0.75rem">
+        <Flex justifyContent="space-between" alignItems="center">
+          <Button
+            type="button"
+            data-dashboard-button="true"
+            className={primaryActionButtonClassName}
+            onClick={() => {
+              setIsCreatingProject(true);
+              setSelectedProject(null);
+              setIsEditingProject(false);
+              
+              // Load cached draft data if available
+              const loadCachedDraftData = () => {
+                try {
+                  const cacheKey = `project_draft_${user.id || user.username}`;
+                  const cached = localStorage.getItem(cacheKey);
+                  if (cached) {
+                    const data = JSON.parse(cached);
+                    return {
+                      title: data.title || '',
+                      description: data.description || '',
+                      department: data.department || user.department || '',
+                      skillsRequired: data.skillsRequired || '',
+                      tags: data.tags || '',
+                      qualifications: data.qualifications || '',
+                      duration: data.duration || '',
+                      applicationDeadline: data.applicationDeadline || '',
+                      requiresTranscript: data.requiresTranscript || false,
+                      isActive: data.isActive !== undefined ? data.isActive : true
+                    };
+                  }
+                } catch (e) {
+                  console.error('Error loading cached draft data:', e);
                 }
-              } catch (e) {
-                console.error('Error loading cached draft data:', e);
-              }
-              return {
-                title: '',
-                description: '',
-                department: user.department || '',
-                skillsRequired: '',
-                tags: '',
-                qualifications: '',
-                duration: '',
-                applicationDeadline: '',
-                requiresTranscript: false,
-                isActive: true
+                return {
+                  title: '',
+                  description: '',
+                  department: user.department || '',
+                  skillsRequired: '',
+                  tags: '',
+                  qualifications: '',
+                  duration: '',
+                  applicationDeadline: '',
+                  requiresTranscript: false,
+                  isActive: true
+                };
               };
-            };
-            
-            const newForm = loadCachedDraftData();
-            setProjectForm(newForm);
-            hydrateProjectTagSelections(newForm);
-            saveProjectToDraft(newForm);
-          }}
-        >
-          + Create Project
-        </Button>
+              
+              const newForm = loadCachedDraftData();
+              setProjectForm(newForm);
+              hydrateProjectTagSelections(newForm);
+              saveProjectToDraft(newForm);
+            }}
+          >
+            + Create Project
+          </Button>
+        </Flex>
+        
+        <SliderTabs
+          currentIndex={activeTabIndex}
+          onChange={handleDashboardTabChange}
+          tabs={dashboardTabs}
+        />
       </Flex>
-      
-      <SliderTabs
-        currentIndex={activeTabIndex}
-        onChange={handleDashboardTabChange}
-        tabs={dashboardTabs}
-      />
       {/* Legacy Amplify tab block kept commented during SliderTabs migration.
         <TabItem title="Posted Opportunities">
           <Flex direction="column" gap="2rem">
@@ -1920,6 +1923,8 @@ const FacultyDashboard = ({ user }) => {
                 }}
               />
               <Button 
+                data-dashboard-button="true"
+                className={secondaryActionButtonClassName}
                 onClick={() => setReviewingApplication(null)}
                 marginTop="1rem"
               >

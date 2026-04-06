@@ -264,8 +264,11 @@
 }
 
 .iconButton:hover,
-.iconButton:focus {
-  background-color: #f8fafc;
+.iconButton:focus,
+.iconButton:focus-visible,
+.iconButton:active,
+.iconButton[aria-expanded="true"] {
+  background-color: #ffffff;
   color: #111827;
   border-color: rgba(255, 255, 255, 0.36);
   box-shadow: none;
@@ -278,15 +281,21 @@
 
 .accessibilityTrigger,
 .accessibilityTrigger:hover,
-.accessibilityTrigger:focus {
+.accessibilityTrigger:focus,
+.accessibilityTrigger:focus-visible,
+.accessibilityTrigger:active,
+.accessibilityTrigger[aria-expanded="true"] {
   background-color: #ffffff;
   color: #6b7280;
   box-shadow: none;
 }
 
 .accessibilityTrigger:hover,
-.accessibilityTrigger:focus {
-  background-color: #f8fafc;
+.accessibilityTrigger:focus,
+.accessibilityTrigger:focus-visible,
+.accessibilityTrigger:active,
+.accessibilityTrigger[aria-expanded="true"] {
+  background-color: #ffffff;
   color: #111827;
 }
 
