@@ -1,5 +1,26 @@
 import { API, graphqlOperation } from 'aws-amplify';
 
+//Email Students on Status of Application
+const STATUS_DESCRIPTIONS = {
+  'Coordinator Review': 'Your application has been submitted and is currently being reviewed by the UROP Coordinator for approval.',
+  'Faculty Review': 'Your application has been approved by the Coordinator and is now available for the faculty member to review and select students for their research project.',
+  'Approved': 'Congratulations! You have been selected by the faculty member for this research opportunity. The faculty member will contact you to begin the project.',
+  'Returned': 'Your application has been returned and requires additional information or corrections before it can be approved.',
+  'Rejected': 'Your application was not approved for this research opportunity.',
+  'Cancelled': 'Your application has been cancelled.',
+  'Expired': 'Your application expired because it did not reach a final status by the deadline.'
+};
+
+const SUB_REASON_DESCRIPTIONS = {
+  'Missing Information': 'Your application is missing required information. Please review the coordinator\'s notes and provide the requested details.',
+  'Incomplete Documentation': 'Additional documents or clarifications are needed to complete your application.',
+  'Does not meet requirements': 'Your application does not meet the minimum requirements for this research project.',
+  'Project capacity reached': 'The research project has reached its maximum number of participants.',
+  'Application received late': 'Your application was received after the deadline.',
+  'Cancelled by Student': 'You cancelled your application.',
+  'Project Cancelled': 'The research project was cancelled by the faculty member.'
+};
+
 // Email notification service ready for integration with AWS SES
 export const sendEmailNotification = async (recipientEmail, recipientName, senderName, messageSubject, messageBody, projectTitle) => {
   try {
@@ -203,3 +224,113 @@ Review this ${itemType.toLowerCase()} at: https://master.d33ubw0r59z0k8.amplifya
     throw error;
   }
 };
+
+export const sendApplicationSubmissionEmail = async (studentEmail, studentName, projectTitle, applicationId) => {
+  try {
+    const verifiedEmails = ['madalina.radu1@gcu.edu', 'dlemus4@my.gcu.edu', 'ldycus@my.gcu.edu', 'OFusco@my.gcu.edu', 'bberger7@my.gcu.edu', 'ABrajovic@my.gcu.edu'];
+    const isVerified = verifiedEmails.includes(studentEmail);
+    const recipientEmail = isVerified ? studentEmail : 'madalina.radu1@gcu.edu';
+    
+    const emailData = {
+      to: recipientEmail,
+      originalRecipient: studentEmail,
+      toName: studentName,
+      from: 'madalina.radu1@gcu.edu',
+      fromName: 'GCU Research Marketplace',
+      subject: 'Application Submitted Successfully',
+      htmlBody: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          ${!isVerified ? '<p style="background-color: #fff3cd; padding: 10px; border-radius: 4px;"><strong>Note:</strong> This email was intended for ' + studentEmail + ' but sent to your verified address for testing.</p>' : ''}
+          <h2 style="color: #552b9a;">Application Submitted Successfully</h2>
+          <p>Dear ${studentName},</p>
+          <p>Thank you for submitting your application for the research opportunity:</p>
+          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Project:</strong> ${projectTitle}</p>
+            <p><strong>Application ID:</strong> ${applicationId}</p>
+            <p><strong>Status:</strong> Coordinator Review</p>
+          </div>
+          <div style="background-color: #e7f3ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0;"><strong>What's Next?</strong></p>
+            <p style="margin: 10px 0 0 0;">${STATUS_DESCRIPTIONS['Coordinator Review']}</p>
+          </div>
+          <div style="margin-top: 20px; padding: 15px; background-color: #f0f8f0; border-radius: 8px;">
+            <p style="margin: 0; font-size: 14px;">
+              <a href="https://master.d33ubw0r59z0k8.amplifyapp.com/?from=email" style="color: #552b9a; text-decoration: none;">
+                View your application status in the Research Marketplace
+              </a>
+            </p>
+          </div>
+          <p style="margin-top: 20px;">Best regards,<br>GCU Research Team</p>
+        </div>
+      `,
+      textBody: `Application Submitted Successfully\n\nDear ${studentName},\n\nThank you for submitting your application for: ${projectTitle}\nApplication ID: ${applicationId}\nStatus: Coordinator Review\n\nWhat's Next?\n${STATUS_DESCRIPTIONS['Coordinator Review']}\n\nView at: https://master.d33ubw0r59z0k8.amplifyapp.com/?from=email\n\nBest regards,\nGCU Research Team`
+    };
+
+    await sendSESEmail(emailData);
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending application submission email:', error);
+    throw error;
+  }
+};
+
+export const sendApplicationStatusChangeEmail = async (studentEmail, studentName, projectTitle, applicationId, newStatus, statusDetail = null, notes = '') => {
+  try {
+    const verifiedEmails = ['madalina.radu1@gcu.edu', 'dlemus4@my.gcu.edu', 'ldycus@my.gcu.edu', 'OFusco@my.gcu.edu', 'bberger7@my.gcu.edu', 'ABrajovic@my.gcu.edu'];
+    const isVerified = verifiedEmails.includes(studentEmail);
+    const recipientEmail = isVerified ? studentEmail : 'madalina.radu1@gcu.edu';
+    
+    const statusDescription = STATUS_DESCRIPTIONS[newStatus] || '';
+    const subReasonDescription = statusDetail ? SUB_REASON_DESCRIPTIONS[statusDetail] || statusDetail : '';
+    
+    const statusColor = newStatus === 'Approved' ? '#48bb78' : 
+                       newStatus === 'Rejected' ? '#f56565' : 
+                       newStatus === 'Returned' ? '#ed8936' : 
+                       newStatus === 'Cancelled' ? '#718096' : 
+                       newStatus === 'Expired' ? '#a0aec0' : '#552b9a';
+    
+    const emailData = {
+      to: recipientEmail,
+      originalRecipient: studentEmail,
+      toName: studentName,
+      from: 'madalina.radu1@gcu.edu',
+      fromName: 'GCU Research Marketplace',
+      subject: `Application Status Update: ${newStatus}`,
+      htmlBody: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          ${!isVerified ? '<p style="background-color: #fff3cd; padding: 10px; border-radius: 4px;"><strong>Note:</strong> This email was intended for ' + studentEmail + ' but sent to your verified address for testing.</p>' : ''}
+          <h2 style="color: #552b9a;">Application Status Update</h2>
+          <p>Dear ${studentName},</p>
+          <p>Your application status has been updated:</p>
+          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Project:</strong> ${projectTitle}</p>
+            <p><strong>Application ID:</strong> ${applicationId}</p>
+            <p><strong>New Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${newStatus}</span></p>
+          </div>
+          <div style="background-color: #e7f3ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; font-weight: bold;">Status Description:</p>
+            <p style="margin: 10px 0 0 0;">${statusDescription}</p>
+            ${subReasonDescription ? `<p style="margin: 10px 0 0 0; padding-top: 10px; border-top: 1px solid #bee3f8;"><strong>Reason:</strong> ${subReasonDescription}</p>` : ''}
+          </div>
+          ${notes ? `<div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0;"><p style="margin: 0; font-weight: bold;">Additional Notes:</p><p style="margin: 10px 0 0 0; white-space: pre-wrap;">${notes}</p></div>` : ''}
+          <div style="margin-top: 20px; padding: 15px; background-color: #f0f8f0; border-radius: 8px;">
+            <p style="margin: 0; font-size: 14px;">
+              <a href="https://master.d33ubw0r59z0k8.amplifyapp.com/?from=email" style="color: #552b9a; text-decoration: none;">
+                View your application in the Research Marketplace
+              </a>
+            </p>
+          </div>
+          <p style="margin-top: 20px;">Best regards,<br>GCU Research Team</p>
+        </div>
+      `,
+      textBody: `Application Status Update\n\nDear ${studentName},\n\nYour application status has been updated:\n\nProject: ${projectTitle}\nApplication ID: ${applicationId}\nNew Status: ${newStatus}\n\nStatus Description:\n${statusDescription}\n${subReasonDescription ? '\nReason: ' + subReasonDescription : ''}\n\n${notes ? 'Additional Notes:\n' + notes + '\n\n' : ''}View at: https://master.d33ubw0r59z0k8.amplifyapp.com/?from=email\n\nBest regards,\nGCU Research Team`
+    };
+
+    await sendSESEmail(emailData);
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending application status change email:', error);
+    throw error;
+  }
+};
+

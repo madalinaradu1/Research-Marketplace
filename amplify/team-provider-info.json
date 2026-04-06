@@ -43,6 +43,13 @@
       },
       "storage": {
         "researchFiles": {}
+      },
+      "api": {
+        "emailapi": {},
+        "researchmarketplace": {}
+      },
+      "customResources": {
+        "TagsTable": {}
       }
     }
   }
