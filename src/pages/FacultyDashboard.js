@@ -24,11 +24,14 @@ import { createMessage, createNotification } from '../graphql/message-operations
 import { sendEmailNotification, sendNewItemNotification } from '../utils/emailNotifications';
 import ApplicationReview from '../components/ApplicationReview';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
+import DashboardPagination from '../components/DashboardPagination';
 import SliderTabs from '../components/SliderTabs';
 import DashboardPageShell from '../components/DashboardPageShell';
 import { getStatusColorValue } from '../utils/statusColors';
 import '../components/TagSelector/tagSelector.css';
 import '../styles/facultyCreateProjectModal.css';
+import buttonStyles from '../styles/dashboardButtons.module.css';
+import { tagPillProps } from '../styles/tagPills';
 import TagSelector from '../components/TagSelector';
 import { useTags } from '../contexts/TagContext';
 import { toResolvedTagIds, tagIdsToDisplayNames } from '../components/TagSelector/tagHelpers';
@@ -67,6 +70,9 @@ function matchesCollegeByWordPrefix(college, query) {
 const FacultyDashboard = ({ user }) => {
   const { tokens } = useTheme();
   const { tagsById, resolveTagIds } = useTags();
+  const primaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonIcon}`;
   const fieldLabelProps = {
     fontSize: tokens.fontSizes.medium,
     fontWeight: tokens.fontWeights.medium,
@@ -733,23 +739,12 @@ const FacultyDashboard = ({ user }) => {
   // Pagination helper function
   const renderPagination = (items, currentPage, setPage) => {
     const totalPages = Math.ceil(items.length / itemsPerPage);
-    if (totalPages <= 1) return null;
-    
     return (
-      <Flex justifyContent="flex-end" alignItems="center" gap="0.5rem" marginTop="1rem">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-          <Button
-            key={page}
-            size="small"
-            backgroundColor={page === currentPage ? "#552b9a" : "white"}
-            color={page === currentPage ? "white" : "black"}
-            border="1px solid #552b9a"
-            onClick={() => setPage(page)}
-          >
-            {page}
-          </Button>
-        ))}
-      </Flex>
+      <DashboardPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     );
   };
   
@@ -917,21 +912,25 @@ const FacultyDashboard = ({ user }) => {
                             {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : (project.projectStatus || 'Draft')}
                           </Badge>
                           <View position="relative">
-                            <Button
-                              className="meatball-button"
+                            <button
+                              type="button"
+                              className="meatball-button faculty-meatball-button"
+                              aria-label={`Open actions for ${project.title}`}
+                              aria-expanded={openKebabMenu === project.id}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
                               }}
                             >
-                              ...
-                            </Button>
+                              <span aria-hidden="true">&#8942;</span>
+                            </button>
                             {openKebabMenu === project.id && (
                               <div
                                 className="meatball-dropdown"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <button
+                                  type="button"
                                   className="meatball-dropdown-item"
                                   onClick={() => {
                                     editProject(project);
@@ -941,6 +940,7 @@ const FacultyDashboard = ({ user }) => {
                                   Edit
                                 </button>
                                 <button
+                                  type="button"
                                   className="meatball-dropdown-item"
                                   onClick={() => handleDeleteProject(project)}
                                   style={{ color: '#e53e3e' }}
@@ -950,6 +950,7 @@ const FacultyDashboard = ({ user }) => {
                                 </button>
                                 {project.projectStatus === 'Returned' && (
                                   <button
+                                    type="button"
                                     className="meatball-dropdown-item"
                                     onClick={() => {
                                       editProject(project);
@@ -1044,14 +1045,14 @@ const FacultyDashboard = ({ user }) => {
                       <Text fontSize="1rem" color="#2d3748" fontWeight="500">{application.project?.title || 'Unknown Project'}</Text>
                       <Flex alignItems="center" gap="2rem">
                         <Text fontSize="0.9rem" color="#4a5568">
-                          ðŸ“§ {application.student?.email || 'No email'}
+                          <span aria-hidden="true">&#128231;</span> {application.student?.email || 'No email'}
                         </Text>
                         <Text fontSize="0.9rem" color="#4a5568">
-                          ðŸ“… Applied: {new Date(application.createdAt).toLocaleDateString()}
+                          <span aria-hidden="true">&#128197;</span> Applied: {new Date(application.createdAt).toLocaleDateString()}
                         </Text>
                         {application.student?.gpa && (
                           <Text fontSize="0.9rem" color="#4a5568">
-                            ðŸŽ“ GPA: {application.student.gpa}
+                            <span aria-hidden="true">&#127891;</span> GPA: {application.student.gpa}
                           </Text>
                         )}
                       </Flex>
@@ -1060,9 +1061,8 @@ const FacultyDashboard = ({ user }) => {
                     <Flex gap="0.5rem" alignItems="center">
                       {application.status === 'Approved' && (
                         <Button
+                          className={primaryActionButtonClassName}
                           size="small"
-                          backgroundColor="#4299e1"
-                          color="white"
                           onClick={(e) => {
                             e.stopPropagation();
                             setMessagingStudent({ application, student: application.student });
@@ -1147,21 +1147,25 @@ const FacultyDashboard = ({ user }) => {
                     </Flex>
 
                     <View position="relative">
-                      <Button
-                        className="meatball-button"
+                      <button
+                        type="button"
+                        className="meatball-button faculty-meatball-button"
+                        aria-label={`Open actions for ${application.student?.name || 'this application'}`}
+                        aria-expanded={openKebabMenu === application.id}
                         onClick={(e) => {
                           e.stopPropagation();
                           setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
                         }}
                       >
-                        ...
-                      </Button>
+                        <span aria-hidden="true">&#8942;</span>
+                      </button>
                       {openKebabMenu === application.id && (
                         <div
                           className="meatball-dropdown"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button
+                            type="button"
                             className="meatball-dropdown-item"
                             onClick={() => {
                               setReviewingApplication(application);
@@ -1204,7 +1208,7 @@ const FacultyDashboard = ({ user }) => {
                     </Flex>
                   </Flex>
                   <Flex justifyContent="space-between" alignItems="center">
-                    <Text fontSize="0.9rem">{project.department} â€¢ Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
+                    <Text fontSize="0.9rem">{project.department} <span aria-hidden="true">&middot;</span> Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
                   </Flex>
                 </Flex>
               </Card>
@@ -1231,7 +1235,7 @@ const FacultyDashboard = ({ user }) => {
                     </Flex>
                   </Flex>
                   <Flex justifyContent="space-between" alignItems="center">
-                    <Text fontSize="0.9rem">{application.student?.name} â€¢ Rejected: {new Date(application.updatedAt).toLocaleDateString()}</Text>
+                    <Text fontSize="0.9rem">{application.student?.name} <span aria-hidden="true">&middot;</span> Rejected: {new Date(application.updatedAt).toLocaleDateString()}</Text>
                   </Flex>
                   {application.rejectionReason && (
                     <Text fontSize="0.8rem" color="red">
@@ -1309,11 +1313,10 @@ const FacultyDashboard = ({ user }) => {
       {successMessage && <Text color="green">{successMessage}</Text>}
       
       <Flex justifyContent="space-between" alignItems="center" marginBottom="2rem">
-        <Button 
-          backgroundColor="white"
-          color="black"
-          border="1px solid black"
-          size="small"
+        <Button
+          type="button"
+          data-dashboard-button="true"
+          className={primaryActionButtonClassName}
           onClick={() => {
             setIsCreatingProject(true);
             setSelectedProject(null);
@@ -1519,21 +1522,25 @@ const FacultyDashboard = ({ user }) => {
                               {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : (project.projectStatus || 'Draft')}
                             </Badge>
                             <View position="relative">
-                              <Button 
-                                className="meatball-button"
+                              <button
+                                type="button"
+                                className="meatball-button faculty-meatball-button"
+                                aria-label={`Open actions for ${project.title}`}
+                                aria-expanded={openKebabMenu === project.id}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
                                 }}
                               >
-                                ⋯
-                              </Button>
+                                <span aria-hidden="true">&#8942;</span>
+                              </button>
                               {openKebabMenu === project.id && (
                                 <div
                                   className="meatball-dropdown"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                     <button
+                                      type="button"
                                       className="meatball-dropdown-item"
                                       onClick={() => {
                                         editProject(project);
@@ -1543,6 +1550,7 @@ const FacultyDashboard = ({ user }) => {
                                       Edit
                                     </button>
                                     <button
+                                      type="button"
                                       className="meatball-dropdown-item"
                                       onClick={() => handleDeleteProject(project)}
                                       style={{ color: '#e53e3e' }}
@@ -1552,6 +1560,7 @@ const FacultyDashboard = ({ user }) => {
                                     </button>
                                     {project.projectStatus === 'Returned' && (
                                       <button
+                                        type="button"
                                         className="meatball-dropdown-item"
                                         onClick={() => {
                                           editProject(project);
@@ -1649,14 +1658,14 @@ const FacultyDashboard = ({ user }) => {
                             <Text fontSize="1rem" color="#2d3748" fontWeight="500">{application.project?.title || 'Unknown Project'}</Text>
                             <Flex alignItems="center" gap="2rem">
                               <Text fontSize="0.9rem" color="#4a5568">
-                                📧 {application.student?.email || 'No email'}
+                                <span aria-hidden="true">&#128231;</span> {application.student?.email || 'No email'}
                               </Text>
                               <Text fontSize="0.9rem" color="#4a5568">
-                                📅 Applied: {new Date(application.createdAt).toLocaleDateString()}
+                                <span aria-hidden="true">&#128197;</span> Applied: {new Date(application.createdAt).toLocaleDateString()}
                               </Text>
                               {application.student?.gpa && (
                                 <Text fontSize="0.9rem" color="#4a5568">
-                                  🎓 GPA: {application.student.gpa}
+                                  <span aria-hidden="true">&#127891;</span> GPA: {application.student.gpa}
                                 </Text>
                               )}
                             </Flex>
@@ -1665,9 +1674,8 @@ const FacultyDashboard = ({ user }) => {
                           <Flex gap="0.5rem" alignItems="center">
                             {application.status === 'Approved' && (
                               <Button
+                                className={primaryActionButtonClassName}
                                 size="small"
-                                backgroundColor="#4299e1"
-                                color="white"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setMessagingStudent({ application, student: application.student });
@@ -1754,21 +1762,25 @@ const FacultyDashboard = ({ user }) => {
                             </Flex>
                             
                             <View position="relative">
-                              <Button 
-                                className="meatball-button"
+                              <button
+                                type="button"
+                                className="meatball-button faculty-meatball-button"
+                                aria-label={`Open actions for ${application.student?.name || 'this application'}`}
+                                aria-expanded={openKebabMenu === application.id}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
                                 }}
                               >
-                                ⋯
-                              </Button>
+                                <span aria-hidden="true">&#8942;</span>
+                              </button>
                               {openKebabMenu === application.id && (
                                 <div
                                   className="meatball-dropdown"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                     <button
+                                      type="button"
                                       className="meatball-dropdown-item"
                                       onClick={() => {
                                         setReviewingApplication(application);
@@ -1814,7 +1826,7 @@ const FacultyDashboard = ({ user }) => {
                             </Flex>
                           </Flex>
                           <Flex justifyContent="space-between" alignItems="center">
-                            <Text fontSize="0.9rem">{project.department} • Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
+                            <Text fontSize="0.9rem">{project.department} <span aria-hidden="true">&middot;</span> Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
                           </Flex>
                         </Flex>
                       </Card>
@@ -1843,7 +1855,7 @@ const FacultyDashboard = ({ user }) => {
                           </Flex>
                         </Flex>
                         <Flex justifyContent="space-between" alignItems="center">
-                          <Text fontSize="0.9rem">{application.student?.name} • Rejected: {new Date(application.updatedAt).toLocaleDateString()}</Text>
+                          <Text fontSize="0.9rem">{application.student?.name} <span aria-hidden="true">&middot;</span> Rejected: {new Date(application.updatedAt).toLocaleDateString()}</Text>
                         </Flex>
                         {application.rejectionReason && (
                           <Text fontSize="0.8rem" color="red">
@@ -1947,10 +1959,18 @@ const FacultyDashboard = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Send Message</Heading>
-                  <Button size="small" onClick={() => {
-                    setMessagingStudent(null);
-                    setMessageText('');
-                  }} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  <Button
+                    size="small"
+                    data-close-button="true"
+                    className={iconActionButtonClassName}
+                    aria-label="Close send message modal"
+                    onClick={() => {
+                      setMessagingStudent(null);
+                      setMessageText('');
+                    }}
+                  >
+                    <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                  </Button>
                 </Flex>
                 
                 <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
@@ -2000,21 +2020,18 @@ const FacultyDashboard = ({ user }) => {
                 
                 <Flex gap="1rem" justifyContent="flex-end">
                   <Button 
+                    className={secondaryActionButtonClassName}
                     onClick={() => {
                       setMessagingStudent(null);
                       setMessageText('');
                       setProjectResearchTagIds([]);
                       setProjectSkillTagIds([]);
                     }}
-                    backgroundColor="white"
-                    color="#4a5568"
-                    border="1px solid #e2e8f0"
                   >
                     Cancel
                   </Button>
                   <Button 
-                    backgroundColor="#4299e1"
-                    color="white"
+                    className={primaryActionButtonClassName}
                     isLoading={isSendingMessage}
                     onClick={async () => {
                       if (!messageText.trim()) return;
@@ -2093,12 +2110,21 @@ const FacultyDashboard = ({ user }) => {
                     <p className="fcpm-subtitle">Post a new research opportunity for students to discover and apply to.</p>
                   )}
                 </div>
-                <button className="fcpm-close" onClick={() => { setIsCreatingProject(false); setSelectedProject(null); setIsEditingProject(false); setViewingReturnReason(null); }}>✕</button>
+                <Button
+                  type="button"
+                  data-dashboard-button="true"
+                  data-close-button="true"
+                  className={iconActionButtonClassName}
+                  aria-label="Close project editor"
+                  onClick={() => { setIsCreatingProject(false); setSelectedProject(null); setIsEditingProject(false); setViewingReturnReason(null); }}
+                >
+                  <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                </Button>
               </div>
 
               {viewingReturnReason?.coordinatorNotes && (
                 <div className="fcpm-return-banner">
-                  <strong>⚠ Coordinator Notes</strong>
+                  <strong><span aria-hidden="true">&#9888;</span> Coordinator Notes</strong>
                   <span>{viewingReturnReason.coordinatorNotes}</span>
                   <br />
                   <span style={{ fontStyle: 'italic', opacity: 0.8 }}>Please address these concerns and resubmit your project.</span>
@@ -2203,9 +2229,21 @@ const FacultyDashboard = ({ user }) => {
 
                 {/* Footer */}
                 <div className="fcpm-footer">
-                  <button type="button" className="fcpm-btn-cancel" onClick={() => { setIsCreatingProject(false); setSelectedProject(null); setIsEditingProject(false); setViewingReturnReason(null); }}>Cancel</button>
-                  <button type="submit" className="fcpm-btn-submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Saving…' : (selectedProject ? 'Update Project' : 'Create Project')}
+                  <button
+                    type="button"
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
+                    onClick={() => { setIsCreatingProject(false); setSelectedProject(null); setIsEditingProject(false); setViewingReturnReason(null); }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    data-dashboard-button="true"
+                    className={primaryActionButtonClassName}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Saving...' : (selectedProject ? 'Update Project' : 'Create Project')}
                   </button>
                 </div>
 
@@ -2249,10 +2287,19 @@ const FacultyDashboard = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">{selectedProject.title}</Heading>
-                  <Button size="small" onClick={() => {
-                    setSelectedProject(null);
-                    setViewingReturnReason(null);
-                  }} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  <Button
+                    type="button"
+                    data-dashboard-button="true"
+                    data-close-button="true"
+                    className={iconActionButtonClassName}
+                    aria-label="Close project details"
+                    onClick={() => {
+                      setSelectedProject(null);
+                      setViewingReturnReason(null);
+                    }}
+                  >
+                    <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                  </Button>
                 </Flex>
                 
                 {/* Rejection Reason Banner */}
@@ -2319,7 +2366,7 @@ const FacultyDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Skills Required</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.skillsRequired.map((skill, index) => (
-                        <Badge key={index} backgroundColor="#4299e1" color="white" padding="0.5rem 1rem">
+                        <Badge key={index} {...tagPillProps}>
                           {skill}
                         </Badge>
                       ))}
@@ -2332,7 +2379,7 @@ const FacultyDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Research Tags</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.tags.map((tag, index) => (
-                        <Badge key={index} backgroundColor="#38b2ac" color="white" padding="0.5rem 1rem">
+                        <Badge key={index} {...tagPillProps}>
                           {tag}
                         </Badge>
                       ))}

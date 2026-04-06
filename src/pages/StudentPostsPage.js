@@ -373,12 +373,13 @@ const StudentPostsPage = ({ user }) => {
   const createPostButtonClassName = `${dashboardStyles.actionButton} ${dashboardStyles.actionButtonPrimary} ${dashboardStyles.actionButtonWide}`;
   const submitPostButtonClassName = `${dashboardStyles.actionButton} ${dashboardStyles.actionButtonPrimary} ${dashboardStyles.actionButtonCompact}`;
   const secondaryActionButtonClassName = `${dashboardStyles.actionButton} ${dashboardStyles.actionButtonGhost} ${dashboardStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${dashboardStyles.actionButton} ${dashboardStyles.actionButtonGhost} ${dashboardStyles.actionButtonCompact} ${dashboardStyles.actionButtonIcon}`;
 
   const allPostsContent = (
     <Card backgroundColor="white" padding="1.5rem">
       {validPosts.length === 0 ? (
         <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
-          <Text fontSize="3rem">ðŸ’¬</Text>
+          <Text fontSize="3rem" aria-hidden="true">&#128172;</Text>
           <Text fontSize="1.1rem" color="#4a5568">No posts yet</Text>
           <Text fontSize="0.9rem" color="#718096">Be the first to share your research interests!</Text>
         </Flex>
@@ -396,7 +397,7 @@ const StudentPostsPage = ({ user }) => {
                     <Text fontSize="0.9rem" color="#4a5568">
                       {(user.id || user.username) === post.student?.id || ['Admin', 'Faculty', 'Coordinator'].includes(user.role)
                         ? post.student?.name
-                        : 'GCU Student'} â€¢ {post.department || 'No College'}
+                        : 'GCU Student'} <span aria-hidden="true">&middot;</span> {post.department || 'No College'}
                     </Text>
                   </Flex>
                   <Flex alignItems="center" gap="1rem">
@@ -416,7 +417,7 @@ const StudentPostsPage = ({ user }) => {
                           }}
                           style={{ padding: '0.75rem' }}
                         >
-                          â‹¯
+                          <span aria-hidden="true">&#8942;</span>
                         </Button>
                         {openKebabMenu === post.id && (
                           <Card
@@ -541,7 +542,7 @@ const StudentPostsPage = ({ user }) => {
                           }}
                           style={{ padding: '0.75rem' }}
                         >
-                          â‹¯
+                          <span aria-hidden="true">&#8942;</span>
                         </Button>
                         {openKebabMenu === post.id && (
                           <Card
@@ -622,7 +623,7 @@ const StudentPostsPage = ({ user }) => {
                 setShowCreateForm(true);
               }}
             >
-              ➕ Create Post
+              Create Post
             </Button>
           </Flex>
         </Card>
@@ -641,7 +642,7 @@ const StudentPostsPage = ({ user }) => {
               const validPosts = posts.filter(post => post.student);
               return validPosts.length === 0 ? (
                 <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
-                  <Text fontSize="3rem">💬</Text>
+                  <Text fontSize="3rem" aria-hidden="true">&#128172;</Text>
                   <Text fontSize="1.1rem" color="#4a5568">No posts yet</Text>
                   <Text fontSize="0.9rem" color="#718096">Be the first to share your research interests!</Text>
                 </Flex>
@@ -659,7 +660,7 @@ const StudentPostsPage = ({ user }) => {
                           <Text fontSize="0.9rem" color="#4a5568">
                             {(user.id || user.username) === post.student?.id || ['Admin', 'Faculty', 'Coordinator'].includes(user.role) 
                               ? post.student?.name 
-                              : 'GCU Student'} • {post.department || 'No College'}
+                              : 'GCU Student'} <span aria-hidden="true">&middot;</span> {post.department || 'No College'}
                           </Text>
                         </Flex>
                       <Flex alignItems="center" gap="1rem">
@@ -679,7 +680,7 @@ const StudentPostsPage = ({ user }) => {
                               }}
                               style={{ padding: '0.75rem' }}
                             >
-                              ⋯
+                              <span aria-hidden="true">&#8942;</span>
                             </Button>
                             {openKebabMenu === post.id && (
                               <Card
@@ -803,7 +804,7 @@ const StudentPostsPage = ({ user }) => {
                               }}
                               style={{ padding: '0.75rem' }}
                             >
-                              ⋯
+                              <span aria-hidden="true">&#8942;</span>
                             </Button>
                             {openKebabMenu === post.id && (
                               <Card
@@ -891,10 +892,7 @@ const StudentPostsPage = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">{editingPost ? 'Edit Post' : 'Create New Post'}</Heading>
-                  <Button size="small" onClick={closeCreateForm} backgroundColor="#f7fafc" color="#4a5568">X</Button>{/*
-                  <Button size="small" onClick={closeCreateForm} backgroundColor="#f7fafc" color="#4a5568">×</Button>
-                  }} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
-                  */}
+                  <Button type="button" data-close-button="true" className={iconActionButtonClassName} onClick={closeCreateForm} aria-label="Close create post modal"><span className="closeButtonGlyph" aria-hidden="true">&times;</span></Button>
                 </Flex>
 
               <form onSubmit={handleSubmit}>
@@ -1099,3 +1097,4 @@ const StudentPostsPage = ({ user }) => {
 };
 
 export default StudentPostsPage;
+

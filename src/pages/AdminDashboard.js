@@ -33,6 +33,7 @@ import { syncUserGroupsToRole } from '../utils/syncUserGroups';
 import { deleteUserCompletely, bulkDeleteUsers, canDeleteUser } from '../utils/adminUserManagement';
 import SliderTabs from '../components/SliderTabs';
 import DashboardPageShell from '../components/DashboardPageShell';
+import DashboardPagination from '../components/DashboardPagination';
 
 // GraphQL queries for audit logs
 const createAuditLogMutation = `
@@ -1079,8 +1080,8 @@ const AdminDashboard = ({ user }) => {
         renderPanel={false}
       />
 
+      <View className="contentOnlyTabs" width="100%">
       <Tabs
-        className="contentOnlyTabs"
         currentIndex={activeTabIndex}
         onChange={(index) => setActiveTabIndex(index)}
         style={{ width: '100%', '--amplify-components-tabs-item-hover-background-color': 'transparent' }}
@@ -1410,26 +1411,14 @@ const AdminDashboard = ({ user }) => {
                         Page {currentPage} of {totalPages} 
                         ({filteredCount} {searchTerm ? 'filtered' : 'total'} users)
                       </Text>
-                      <Button
-                        size="small"
-                        onClick={() => {
-                          if (currentPage > 1) {
-                            setCurrentPage(prev => prev - 1);
-                          }
-                        }}
-                      >
-                        Previous
-                      </Button>
-                      <Button
-                        size="small"
-                        onClick={() => {
-                          if (currentPage < totalPages) {
-                            setCurrentPage(prev => prev + 1);
-                          }
-                        }}
-                      >
-                        Next
-                      </Button>
+                      <DashboardPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        showPageNumbers={false}
+                        justifyContent="flex-start"
+                        marginTop="0"
+                      />
                     </>
                   );
                 })()}
@@ -1513,26 +1502,14 @@ const AdminDashboard = ({ user }) => {
                           <Text fontSize="0.9rem">
                             Page {auditCurrentPage} of {totalPages} ({auditLogs.length} total logs)
                           </Text>
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              if (auditCurrentPage > 1) {
-                                setAuditCurrentPage(prev => prev - 1);
-                              }
-                            }}
-                          >
-                            Previous
-                          </Button>
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              if (auditCurrentPage < totalPages) {
-                                setAuditCurrentPage(prev => prev + 1);
-                              }
-                            }}
-                          >
-                            Next
-                          </Button>
+                          <DashboardPagination
+                            currentPage={auditCurrentPage}
+                            totalPages={totalPages}
+                            onPageChange={setAuditCurrentPage}
+                            showPageNumbers={false}
+                            justifyContent="flex-start"
+                            marginTop="0"
+                          />
                         </>
                       );
                     })()}
@@ -1779,6 +1756,7 @@ const AdminDashboard = ({ user }) => {
         
 
       </Tabs>
+      </View>
       
       {showDeleteConfirm && (
         <View

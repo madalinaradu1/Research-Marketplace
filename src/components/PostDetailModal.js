@@ -80,10 +80,11 @@ const PostDetailModal = ({ post, user, onClose, onEdit, onDelete }) => {
                 backgroundColor="transparent"
                 color="#6B7280"
                 border="none"
+                data-close-button="true"
                 onClick={onClose}
                 style={{ fontSize: '1.5rem', padding: '0.5rem' }}
               >
-                ✕
+                <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
               </Button>
             </Flex>
 

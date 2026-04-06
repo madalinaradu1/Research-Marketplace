@@ -426,13 +426,14 @@ const EnhancedStudentPostsPage = ({ user }) => {
                       backgroundColor="transparent"
                       color="#6B7280"
                       border="none"
+                      data-close-button="true"
                       onClick={() => {
                         setShowCreateForm(false);
                         setEditingPost(null);
                       }}
                       style={{ fontSize: '1.5rem' }}
                     >
-                      ✕
+                      <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
                     </Button>
                   </Flex>
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation, Auth } from 'aws-amplify';
-import { Flex, Heading, Card, Text, Collection, Loader, Badge, Button } from '@aws-amplify/ui-react';
+import { Flex, Heading, Card, Text, Collection, Loader, Badge } from '@aws-amplify/ui-react';
 import { listApplications, listProjects, listUsers } from '../graphql/operations';
 import ApplicationStatus from '../components/ApplicationStatus';
+import DashboardPagination from '../components/DashboardPagination';
 import SliderTabs from '../components/SliderTabs';
 
 const ActivityPage = ({ user }) => {
@@ -22,23 +23,12 @@ const ActivityPage = ({ user }) => {
   // Pagination helper function
   const renderPagination = (items, currentPage, setPage) => {
     const totalPages = Math.ceil(items.length / itemsPerPage);
-    if (totalPages <= 1) return null;
-    
     return (
-      <Flex justifyContent="flex-end" alignItems="center" gap="0.5rem" marginTop="1rem">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-          <Button
-            key={page}
-            size="small"
-            backgroundColor={page === currentPage ? "#552b9a" : "white"}
-            color={page === currentPage ? "white" : "black"}
-            border="1px solid #552b9a"
-            onClick={() => setPage(page)}
-          >
-            {page}
-          </Button>
-        ))}
-      </Flex>
+      <DashboardPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     );
   };
   

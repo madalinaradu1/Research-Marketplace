@@ -14,6 +14,7 @@ import {
 import { listUsers } from '../graphql/operations';
 import { listMessages } from '../graphql/message-operations';
 import { useNavigate } from 'react-router-dom';
+import buttonStyles from '../styles/dashboardButtons.module.css';
 
 // Clean HTML content to remove excessive spacing
 const cleanHtmlContent = (html) => {
@@ -39,6 +40,8 @@ const getConversationColor = (conversationId) => {
 
 
 const OldMessagesPage = ({ user }) => {
+  const primaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -148,13 +151,13 @@ const OldMessagesPage = ({ user }) => {
             <Heading level={2} color="#2d3748">Old Messages</Heading>
             <Text color="#4a5568">View your past conversations</Text>
           </Flex>
-          <Button 
-            backgroundColor="#6b7280"
-            color="white"
-            size="small"
+          <Button
+            type="button"
+            data-dashboard-button="true"
+            className={primaryActionButtonClassName}
             onClick={() => navigate('/messages')}
           >
-            ← Back to Messages
+            <span aria-hidden="true">&larr;</span> Back to Messages
           </Button>
         </Flex>
       </Card>
@@ -285,13 +288,13 @@ const OldMessagesPage = ({ user }) => {
                   <Flex justifyContent="space-between" alignItems="center">
                     <Flex alignItems="center" gap="1rem">
                       <Button
-                        size="small"
-                        backgroundColor="transparent"
-                        color="#4a5568"
+                        type="button"
+                        data-dashboard-button="true"
+                        className={secondaryActionButtonClassName}
                         onClick={() => setSelectedConversation(null)}
                         display={{ base: 'block', large: 'none' }}
                       >
-                        ← Back
+                        <span aria-hidden="true">&larr;</span> Back
                       </Button>
                       <Flex direction="column">
                         <Text fontWeight="600" fontSize="1rem" color="#2d3748">

@@ -23,6 +23,16 @@ const PostCard = ({ post, user, onEdit, onDelete, onExpand }) => {
     return labels[type] || type;
   };
 
+  const getTypeIcon = (type) => {
+    const icons = {
+      RESEARCH_INTEREST: <span aria-hidden="true">&#128300;</span>,
+      MENTOR_WANTED: <span aria-hidden="true">&#128105;&#8205;&#127979;</span>,
+      RESEARCH_IDEA: <span aria-hidden="true">&#128161;</span>
+    };
+
+    return icons[type] || <span aria-hidden="true">&#128196;</span>;
+  };
+
   const canEdit = (user.id || user.username) === post.student?.id || ['Admin', 'Coordinator'].includes(user.role);
 
   return (
@@ -58,7 +68,7 @@ const PostCard = ({ post, user, onEdit, onDelete, onExpand }) => {
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <Text color="white" fontSize="1.2rem">
-                  {post.type === 'RESEARCH_INTEREST' ? '🔬' : post.type === 'MENTOR_WANTED' ? '👨‍🏫' : '💡'}
+                  {getTypeIcon(post.type)}
                 </Text>
               </View>
               <Flex direction="column" gap="0.25rem">
@@ -68,7 +78,7 @@ const PostCard = ({ post, user, onEdit, onDelete, onExpand }) => {
                 <Text fontSize="0.85rem" color="#6B7280">
                   {(user.id || user.username) === post.student?.id || ['Admin', 'Faculty', 'Coordinator'].includes(user.role)
                     ? post.student?.name
-                    : 'GCU Student'} • {new Date(post.createdAt).toLocaleDateString()}
+                    : 'GCU Student'} {new Date(post.createdAt).toLocaleDateString()}
                 </Text>
               </Flex>
             </Flex>
@@ -89,13 +99,14 @@ const PostCard = ({ post, user, onEdit, onDelete, onExpand }) => {
                     backgroundColor="transparent"
                     color="#6B7280"
                     border="none"
+                    aria-label="Post actions"
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowMenu(!showMenu);
                     }}
                     style={{ padding: '0.5rem', fontSize: '1.2rem' }}
                   >
-                    ⋮
+                    <span aria-hidden="true">&#8942;</span>
                   </Button>
                   {showMenu && (
                     <View
@@ -123,7 +134,7 @@ const PostCard = ({ post, user, onEdit, onDelete, onExpand }) => {
                         }}
                         style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75rem' }}
                       >
-                        ✏️ Edit
+                        Edit
                       </Button>
                       <Button
                         size="small"
@@ -137,7 +148,7 @@ const PostCard = ({ post, user, onEdit, onDelete, onExpand }) => {
                         }}
                         style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75rem' }}
                       >
-                        🗑️ Delete
+                        Delete
                       </Button>
                     </View>
                   )}
@@ -155,7 +166,7 @@ const PostCard = ({ post, user, onEdit, onDelete, onExpand }) => {
           <Flex gap="0.5rem" wrap="wrap">
             {post.department && (
               <Badge backgroundColor="#F3F4F6" color="#374151" fontSize="0.8rem" padding="0.25rem 0.75rem" borderRadius="12px">
-                🏛️ {post.department}
+                {post.department}
               </Badge>
             )}
             {post.researchAreas?.slice(0, 2).map((area, idx) => (

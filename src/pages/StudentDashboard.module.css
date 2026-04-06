@@ -98,20 +98,27 @@
   cursor: pointer;
   appearance: none;
   outline: none;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  background: #ffffff !important;
+  border-color: #cdb7ef !important;
+  color: #111827 !important;
+  box-shadow: 0 6px 16px rgba(154, 74, 215, 0.08);
   transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .actionButton:hover:not(:disabled),
 .actionButton:focus-visible:not(:disabled) {
   transform: translateY(-0.5px);
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  background: #faf7ff !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 20px rgba(154, 74, 215, 0.12);
 }
 
 .actionButton:disabled {
   cursor: default;
   transform: none;
   box-shadow: none;
+  opacity: 0.7;
 }
 
 .actionButtonPrimary {
@@ -130,48 +137,48 @@
 }
 
 .actionButtonApplied {
-  background: #f7f1ff !important;
-  border-color: #dccaf8 !important;
+  background: #ffffff !important;
+  border-color: #cdb7ef !important;
   color: #111827 !important;
-  box-shadow: none;
+  box-shadow: 0 6px 16px rgba(154, 74, 215, 0.08);
 }
 
 .actionButtonApplied:hover:not(:disabled),
 .actionButtonApplied:focus-visible:not(:disabled) {
-  background: #f2eafe !important;
-  border-color: #d4bdf6 !important;
-  color: #6443a8 !important;
-  box-shadow: none;
+  background: #faf7ff !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 20px rgba(154, 74, 215, 0.12);
 }
 
 .actionButtonMuted {
-  background: #f8fafc !important;
-  border-color: #dde5ee !important;
-  color: #6b7280 !important;
-  box-shadow: none;
+  background: #ffffff !important;
+  border-color: #cdb7ef !important;
+  color: #111827 !important;
+  box-shadow: 0 6px 16px rgba(154, 74, 215, 0.08);
 }
 
 .actionButtonMuted:hover:not(:disabled),
 .actionButtonMuted:focus-visible:not(:disabled) {
-  background: #f1f5f9 !important;
-  border-color: #d4dde8 !important;
-  color: #5b6472 !important;
-  box-shadow: none;
+  background: #faf7ff !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 20px rgba(154, 74, 215, 0.12);
 }
 
 .actionButtonGhost {
   background: #ffffff !important;
-  border-color: #d9e1eb !important;
-  color: #334155 !important;
-  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+  border-color: #cdb7ef !important;
+  color: #111827 !important;
+  box-shadow: 0 6px 16px rgba(154, 74, 215, 0.08);
 }
 
 .actionButtonGhost:hover:not(:disabled),
 .actionButtonGhost:focus-visible:not(:disabled) {
-  background: #f8fafc !important;
-  border-color: #cfd8e3 !important;
-  color: #1f2937 !important;
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.07);
+  background: #faf7ff !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 20px rgba(154, 74, 215, 0.12);
 }
 
 .actionButtonCompact {
@@ -182,6 +189,15 @@
 
 .actionButtonWide {
   min-width: 11.5rem;
+}
+
+.actionButtonIcon {
+  min-width: 2.3rem;
+  padding-left: 0.55rem !important;
+  padding-right: 0.55rem !important;
+  font-size: 1.3rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
 }
 
 .paginationButton {

@@ -237,15 +237,16 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
           <Heading level={3}>{project.title}</Heading>
           <button
             type="button"
+            data-close-button="true"
             onClick={onClose}
             aria-label="Close application form"
             style={{
               width: '2rem',
               height: '2rem',
               borderRadius: '0.5rem',
-              border: '3px solid #e2e8fa', 
+              border: '1px solid #cdb7ef',
               backgroundColor: '#ffffff',
-              color: '#4a5568',
+              color: '#111827',
               fontSize: '1.1rem',
               lineHeight: 1,
               display: 'inline-flex',
@@ -253,19 +254,11 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
               justifyContent: 'center',
               cursor: 'pointer',
               flexShrink: 0,
-              boxShadow: '0 1px 2px rgba(15, 23, 42, 0.06)'
+              boxShadow: '0 6px 16px rgba(154, 74, 215, 0.08)'
             }}
           >
-            <span
-              style={{
-                display: 'inline-block',
-                fontSize: '1.rem',
-                fontWeight: 500,
-                lineHeight: 1,
-                transform: 'translateY(-1px)'
-              }}
-           >
-              x
+            <span className="closeButtonGlyph" aria-hidden="true">
+              &times;
             </span>
           </button>
         </Flex>

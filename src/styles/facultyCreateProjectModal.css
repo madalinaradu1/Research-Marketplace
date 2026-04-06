@@ -8,13 +8,13 @@
    bleeding into the modal.  Every button inside the modal
    wrapper resets to transparent so the scoped rules below win.
    ──────────────────────────────────────────────────────────── */
-.faculty-create-project-modal button,
-.faculty-create-project-modal button:hover,
-.faculty-create-project-modal button:focus,
-.faculty-create-project-modal button:active,
-[data-amplify-theme] .faculty-create-project-modal button,
-[data-amplify-theme] .faculty-create-project-modal button:hover,
-[data-amplify-theme] .faculty-create-project-modal button:focus {
+.faculty-create-project-modal button:not([data-dashboard-button="true"]),
+.faculty-create-project-modal button:not([data-dashboard-button="true"]):hover,
+.faculty-create-project-modal button:not([data-dashboard-button="true"]):focus,
+.faculty-create-project-modal button:not([data-dashboard-button="true"]):active,
+[data-amplify-theme] .faculty-create-project-modal button:not([data-dashboard-button="true"]),
+[data-amplify-theme] .faculty-create-project-modal button:not([data-dashboard-button="true"]):hover,
+[data-amplify-theme] .faculty-create-project-modal button:not([data-dashboard-button="true"]):focus {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -127,7 +127,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;
+  font-size: 1.2rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
@@ -562,6 +563,7 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.75rem;
   padding-top: 1.25rem;
   border-top: 1px solid #edf2f7;

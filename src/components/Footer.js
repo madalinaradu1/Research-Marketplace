@@ -13,10 +13,10 @@ const Footer = () => {
           {/* Left - Logo and Contact */}
           <Flex direction="column" gap="1.5rem">
             <Image alt="GCU Logo" src="/GCU_WHITE.png" height="60px" objectFit="contain" />
-            <button style={{ backgroundColor: 'white', color: '#522398', padding: '0.75rem 1.5rem', border: 'none', borderRadius: '25px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button style={{ backgroundColor: '#ffffff', color: '#111827', padding: '0.75rem 1.5rem', border: '1px solid #cdb7ef', borderRadius: '25px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 6px 16px rgba(154, 74, 215, 0.08)' }}>
               1-855-GCU-LOPE
             </button>
-            <button style={{ backgroundColor: 'white', color: '#522398', padding: '0.75rem 1.5rem', border: 'none', borderRadius: '25px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button style={{ backgroundColor: '#ffffff', color: '#111827', padding: '0.75rem 1.5rem', border: '1px solid #cdb7ef', borderRadius: '25px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 6px 16px rgba(154, 74, 215, 0.08)' }}>
               💬 Live Chat
             </button>
             <Text fontSize="0.9rem">3300 West Camelback Road - Phoenix, AZ 85017</Text>

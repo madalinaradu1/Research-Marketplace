@@ -31,6 +31,7 @@ import { tagIdsToDisplayNames } from '../components/TagSelector/tagHelpers';
 import { syncProjectTagIndex } from '../lib/recommendations/projectTagIndexSync';
 import SliderTabs from '../components/SliderTabs';
 import DashboardPageShell from '../components/DashboardPageShell';
+import DashboardPagination from '../components/DashboardPagination';
 
 const CoordinatorDashboard = ({ user }) => {
   const { tokens } = useTheme();
@@ -388,23 +389,12 @@ const CoordinatorDashboard = ({ user }) => {
   // Pagination helper function
   const renderPagination = (items, currentPage, setPage) => {
     const totalPages = Math.ceil(items.length / itemsPerPage);
-    if (totalPages <= 1) return null;
-    
     return (
-      <Flex justifyContent="flex-end" alignItems="center" gap="0.5rem" marginTop="1rem">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-          <Button
-            key={page}
-            size="small"
-            backgroundColor={page === currentPage ? "#552b9a" : "white"}
-            color={page === currentPage ? "white" : "black"}
-            border="1px solid #552b9a"
-            onClick={() => setPage(page)}
-          >
-            {page}
-          </Button>
-        ))}
-      </Flex>
+      <DashboardPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     );
   };
   
@@ -435,7 +425,7 @@ const CoordinatorDashboard = ({ user }) => {
                 <Flex justifyContent="space-between" alignItems="center">
                   <Flex direction="column" gap="0.5rem" flex="1">
                     <Text fontWeight="bold">{project.title}</Text>
-                    <Text fontSize="0.9rem">{project.faculty?.name} â€¢ {project.department}</Text>
+                    <Text fontSize="0.9rem">{project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
                   </Flex>
                   <View position="relative">
                     <Button
@@ -445,7 +435,7 @@ const CoordinatorDashboard = ({ user }) => {
                         setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
                       }}
                     >
-                      â‹¯
+                      <span aria-hidden="true">&#8942;</span>
                     </Button>
                     {openKebabMenu === project.id && (
                       <div
@@ -545,7 +535,7 @@ const CoordinatorDashboard = ({ user }) => {
                         setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
                       }}
                     >
-                      â‹¯
+                      <span aria-hidden="true">&#8942;</span>
                     </Button>
                     {openKebabMenu === application.id && (
                       <div
@@ -620,7 +610,7 @@ const CoordinatorDashboard = ({ user }) => {
                 <Flex justifyContent="space-between" alignItems="center">
                   <Flex direction="column" gap="0.5rem" flex="1">
                     <Text fontWeight="bold">{application.project?.title}</Text>
-                    <Text fontSize="0.9rem">{application.student?.name} â€¢ {application.status}</Text>
+                    <Text fontSize="0.9rem">{application.student?.name} <span aria-hidden="true">&middot;</span> {application.status}</Text>
                   </Flex>
                 </Flex>
               </Card>
@@ -639,7 +629,7 @@ const CoordinatorDashboard = ({ user }) => {
                 <Flex justifyContent="space-between" alignItems="center">
                   <Flex direction="column" gap="0.5rem" flex="1">
                     <Text fontWeight="bold">{project.title}</Text>
-                    <Text fontSize="0.9rem">{project.faculty?.name} â€¢ {project.department}</Text>
+                    <Text fontSize="0.9rem">{project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
                   </Flex>
                 </Flex>
               </Card>
@@ -668,7 +658,7 @@ const CoordinatorDashboard = ({ user }) => {
                 <Flex justifyContent="space-between" alignItems="center">
                   <Flex direction="column" gap="0.5rem" flex="1">
                     <Text fontWeight="bold">{project.title}</Text>
-                    <Text fontSize="0.9rem">Faculty: {project.faculty?.name} â€¢ {project.department}</Text>
+                    <Text fontSize="0.9rem">Faculty: {project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
                     <Text fontSize="0.8rem" color="gray">
                       Rejected: {new Date(project.updatedAt).toLocaleDateString()}
                     </Text>
@@ -761,7 +751,7 @@ const CoordinatorDashboard = ({ user }) => {
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{project.title}</Text>
-                          <Text fontSize="0.9rem">{project.faculty?.name} • {project.department}</Text>
+                          <Text fontSize="0.9rem">{project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
                         </Flex>
                         <View position="relative">
                           <Button 
@@ -771,7 +761,7 @@ const CoordinatorDashboard = ({ user }) => {
                               setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
                             }}
                           >
-                            ⋯
+                            <span aria-hidden="true">&#8942;</span>
                           </Button>
                           {openKebabMenu === project.id && (
                             <div
@@ -872,7 +862,7 @@ const CoordinatorDashboard = ({ user }) => {
                               setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
                             }}
                           >
-                            ⋯
+                            <span aria-hidden="true">&#8942;</span>
                           </Button>
                           {openKebabMenu === application.id && (
                             <div
@@ -948,7 +938,7 @@ const CoordinatorDashboard = ({ user }) => {
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{application.project?.title}</Text>
-                          <Text fontSize="0.9rem">{application.student?.name} • {application.status}</Text>
+                          <Text fontSize="0.9rem">{application.student?.name} <span aria-hidden="true">&middot;</span> {application.status}</Text>
                         </Flex>
                       </Flex>
                     </Card>
@@ -968,7 +958,7 @@ const CoordinatorDashboard = ({ user }) => {
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{project.title}</Text>
-                          <Text fontSize="0.9rem">{project.faculty?.name} • {project.department}</Text>
+                          <Text fontSize="0.9rem">{project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
                         </Flex>
                       </Flex>
                     </Card>
@@ -998,7 +988,7 @@ const CoordinatorDashboard = ({ user }) => {
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{project.title}</Text>
-                          <Text fontSize="0.9rem">Faculty: {project.faculty?.name} • {project.department}</Text>
+                          <Text fontSize="0.9rem">Faculty: {project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
                           <Text fontSize="0.8rem" color="gray">
                             Rejected: {new Date(project.updatedAt).toLocaleDateString()}
                           </Text>
@@ -1162,7 +1152,7 @@ const CoordinatorDashboard = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Application Details</Heading>
-                  <Button size="small" onClick={() => setViewingApplication(null)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  <Button size="small" data-close-button="true" onClick={() => setViewingApplication(null)} backgroundColor="#f7fafc" color="#4a5568"><span className="closeButtonGlyph" aria-hidden="true">&times;</span></Button>
                 </Flex>
                 
                 <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
@@ -1421,7 +1411,7 @@ const CoordinatorDashboard = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Project Details</Heading>
-                  <Button size="small" onClick={() => setViewingProject(null)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  <Button size="small" data-close-button="true" onClick={() => setViewingProject(null)} backgroundColor="#f7fafc" color="#4a5568"><span className="closeButtonGlyph" aria-hidden="true">&times;</span></Button>
                 </Flex>
                 
                 {/* Rejection Reason Banner */}

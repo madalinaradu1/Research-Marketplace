@@ -20,12 +20,12 @@ import DashboardPageShell from '../components/DashboardPageShell';
 import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 import ApplicationStatus from '../components/ApplicationStatus';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
+import DashboardPagination from '../components/DashboardPagination';
 import { getRecommendedProjects } from '../graphql/recommendation-operations';
 import { useTags } from '../contexts/TagContext';
 import styles from './StudentDashboard.module.css';
 import buttonStyles from '../styles/dashboardButtons.module.css';
-
-const TAG_PILL_COLOR = '#c7b3ef';
+import { tagPillProps } from '../styles/tagPills';
 const APPLICATION_LIMIT = 3;
 
 const formatGraphQLError = (err) => {
@@ -354,23 +354,12 @@ const StudentDashboard = ({ user }) => {
   // Pagination helper function
   const renderPagination = (items, currentPage, setPage) => {
     const totalPages = Math.ceil(items.length / itemsPerPage);
-    if (totalPages <= 1) return null;
-    
     return (
-      <Flex justifyContent="flex-end" alignItems="center" gap="0.5rem" marginTop="1rem">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-          <Button
-            key={page}
-            size="small"
-            backgroundColor={page === currentPage ? "#552b9a" : "white"}
-            color={page === currentPage ? "white" : "black"}
-            border="1px solid #552b9a"
-            onClick={() => setPage(page)}
-          >
-            {page}
-          </Button>
-        ))}
-      </Flex>
+      <DashboardPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     );
   };
   
@@ -441,7 +430,7 @@ const StudentDashboard = ({ user }) => {
                     <Text fontWeight="bold" fontSize="0.9rem">Skills Required:</Text>
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.skillsRequired.map((skill, index) => (
-                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white">
+                        <Badge key={index} {...tagPillProps}>
                           Skills: {skill}
                         </Badge>
                       ))}
@@ -454,7 +443,7 @@ const StudentDashboard = ({ user }) => {
                     <Text fontWeight="bold" fontSize="0.9rem">Research Tags:</Text>
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.tags.map((tag, index) => (
-                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white">
+                        <Badge key={index} {...tagPillProps}>
                           {tag}
                         </Badge>
                       ))}
@@ -487,41 +476,12 @@ const StudentDashboard = ({ user }) => {
       </Collection>
 
       {projects.length > projectsPerPage && (
-        <Flex justifyContent="flex-end" alignItems="center" gap="1rem" marginTop="2rem">
-          <button
-            type="button"
-            data-dashboard-button="true"
-            className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.paginationButton}`}
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </button>
-
-          {Array.from({ length: Math.ceil(projects.length / projectsPerPage) }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              type="button"
-              data-dashboard-button="true"
-              className={`${buttonStyles.actionButton} ${
-                currentPage === page ? buttonStyles.actionButtonPrimary : buttonStyles.actionButtonGhost
-              } ${buttonStyles.paginationButton} ${buttonStyles.paginationNumber}`}
-              onClick={() => setCurrentPage(page)}
-            >
-              {page}
-            </button>
-          ))}
-
-          <button
-            type="button"
-            data-dashboard-button="true"
-            className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.paginationButton}`}
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(projects.length / projectsPerPage)))}
-            disabled={currentPage === Math.ceil(projects.length / projectsPerPage)}
-          >
-            Next
-          </button>
-        </Flex>
+        <DashboardPagination
+          currentPage={currentPage}
+          totalPages={Math.ceil(projects.length / projectsPerPage)}
+          onPageChange={setCurrentPage}
+          marginTop="2rem"
+        />
       )}
     </>
   );
@@ -681,7 +641,7 @@ const StudentDashboard = ({ user }) => {
                               Matched tags:
                             </Text>
                             {reasonLabels.map((label) => (
-                              <Badge key={label} backgroundColor={TAG_PILL_COLOR} color="white">
+                              <Badge key={label} {...tagPillProps}>
                                 {label}
                               </Badge>
                             ))}
@@ -766,7 +726,7 @@ const StudentDashboard = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Project Details</Heading>
-                  <Button size="small" onClick={() => setSelectedProject(null)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  <Button size="small" data-close-button="true" onClick={() => setSelectedProject(null)} backgroundColor="#f7fafc" color="#4a5568"><span className="closeButtonGlyph" aria-hidden="true">&times;</span></Button>
                 </Flex>
                 
                 <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
@@ -818,7 +778,7 @@ const StudentDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Skills Required</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.skillsRequired.map((skill, index) => (
-                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white" padding="0.5rem 1rem">
+                        <Badge key={index} {...tagPillProps}>
                           {skill}
                         </Badge>
                       ))}
@@ -831,7 +791,7 @@ const StudentDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Research Tags</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.tags.map((tag, index) => (
-                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white" padding="0.5rem 1rem">
+                        <Badge key={index} {...tagPillProps}>
                           {tag}
                         </Badge>
                       ))}

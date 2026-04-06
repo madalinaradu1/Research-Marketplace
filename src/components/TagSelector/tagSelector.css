@@ -30,18 +30,19 @@
 [data-amplify-theme] button.tag-chip-remove,
 [data-amplify-theme] .amplify-card .tag-chip-remove,
 [data-amplify-theme] .amplify-card button.tag-chip-remove {
+  all: unset;
   border: none;
   background: transparent !important;
   background-color: transparent !important;
-  color: #ffffff;
+  color: inherit !important;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 0.95rem;
-  height: 0.95rem;
+  width: 1.2rem;
+  height: 1.2rem;
   padding: 0;
-  margin-left: -0.05rem;
+  margin-left: 0.05rem;
   line-height: 1;
   flex-shrink: 0;
   border-radius: 0 !important;
@@ -50,29 +51,31 @@
   appearance: none;
   -webkit-appearance: none;
   border: none !important;
-}
-
-.tag-chip-remove-icon {
-  width: 1rem;
-  height: 1rem;
-  display: block;
-  color: #ffffff !important;
-  opacity: 0.9;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  font: inherit;
+  font-size: 1em;
+  font-weight: 600;
 }
 
 .tag-chip-remove-glyph {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  left: -1px;
-  top: 1px;
-  color: #ffffff !important;
-  opacity: 0.9;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: currentColor !important;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.92;
 }
 
-.tag-chip-remove-icon path {
-  stroke: currentColor;
+.tag-chip-remove-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: block;
 }
 
 .tag-chip-remove:hover,
@@ -93,11 +96,8 @@
 
 .tag-chip-remove:hover .tag-chip-remove-glyph,
 .tag-chip-remove:focus .tag-chip-remove-glyph,
-.tag-chip-remove:active .tag-chip-remove-glyph,
-.tag-chip-remove:hover .tag-chip-remove-icon,
-.tag-chip-remove:focus .tag-chip-remove-icon,
-.tag-chip-remove:active .tag-chip-remove-icon {
-  opacity: 0.9;
+.tag-chip-remove:active .tag-chip-remove-glyph {
+  opacity: 1;
 }
 
 .tag-selector-input {

@@ -18,8 +18,8 @@ import {
 } from '@aws-amplify/ui-react';
 import { listProjects, listUsers } from '../graphql/operations';
 import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
-
-const TAG_PILL_COLOR = '#c7b3ef';
+import DashboardPagination from '../components/DashboardPagination';
+import { tagPillProps } from '../styles/tagPills';
 
 const SearchPage = ({ user }) => {
   const [searchParams] = useSearchParams();
@@ -420,7 +420,7 @@ const SearchPage = ({ user }) => {
                     <Text fontWeight="bold" fontSize="0.9rem" color="#2d3748">Skills Required:</Text>
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.skillsRequired.map((skill, index) => (
-                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white">
+                        <Badge key={index} {...tagPillProps}>
                           {skill}
                         </Badge>
                       ))}
@@ -433,7 +433,7 @@ const SearchPage = ({ user }) => {
                     <Text fontWeight="bold" fontSize="0.9rem" color="#2d3748">Research Tags:</Text>
                     <Flex wrap="wrap" gap="0.5rem">
                       {project.tags.map((tag, index) => (
-                        <Badge key={index} backgroundColor={TAG_PILL_COLOR} color="white">
+                        <Badge key={index} {...tagPillProps}>
                           {tag}
                         </Badge>
                       ))}
@@ -479,48 +479,14 @@ const SearchPage = ({ user }) => {
         
         {/* Pagination */}
         {totalPages > 1 && (
-          <Flex justifyContent="center" alignItems="center" gap="0.5rem" marginTop="2rem">
-            <Button 
-              size="small" 
-              onClick={() => goToPage(currentPage - 1)}
-              isDisabled={currentPage === 1}
-            >
-              Previous
-            </Button>
-            
-            {/* Page Numbers */}
-            {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => {
-              let pageNum;
-              if (totalPages <= 10) {
-                pageNum = i + 1;
-              } else if (currentPage <= 5) {
-                pageNum = i + 1;
-              } else if (currentPage >= totalPages - 4) {
-                pageNum = totalPages - 9 + i;
-              } else {
-                pageNum = currentPage - 4 + i;
-              }
-              
-              return (
-                <Button
-                  key={pageNum}
-                  size="small"
-                  variation={currentPage === pageNum ? "primary" : "link"}
-                  onClick={() => goToPage(pageNum)}
-                >
-                  {pageNum}
-                </Button>
-              );
-            })}
-            
-            <Button 
-              size="small" 
-              onClick={() => goToPage(currentPage + 1)}
-              isDisabled={currentPage === totalPages}
-            >
-              Next
-            </Button>
-          </Flex>
+          <DashboardPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={goToPage}
+            justifyContent="center"
+            marginTop="2rem"
+            maxVisiblePages={10}
+          />
         )}
         </>
       )}
