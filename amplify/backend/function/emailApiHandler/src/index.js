@@ -12,7 +12,7 @@ export const handler = async (event) => {
     const headers = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT"
     };
 
     if (event.httpMethod === 'OPTIONS') {
@@ -21,7 +21,7 @@ export const handler = async (event) => {
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT"
             }
         };
     }
