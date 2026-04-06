@@ -1,0 +1,476 @@
+/* ══════════════════════════════════════════════════════════════
+   Unified Form Modal
+   Mirrors .faculty-create-project-modal styling for all
+   create/submit forms across the app.
+   Scoped to .unified-form-modal (.ufm-*)
+   ══════════════════════════════════════════════════════════════ */
+
+/* ─── Hover / whitewash fix ─────────────────────────────────── */
+.unified-form-modal button:not([data-dashboard-button="true"]),
+.unified-form-modal button:not([data-dashboard-button="true"]):hover,
+.unified-form-modal button:not([data-dashboard-button="true"]):focus,
+.unified-form-modal button:not([data-dashboard-button="true"]):active,
+[data-amplify-theme] .unified-form-modal button:not([data-dashboard-button="true"]),
+[data-amplify-theme] .unified-form-modal button:not([data-dashboard-button="true"]):hover,
+[data-amplify-theme] .unified-form-modal button:not([data-dashboard-button="true"]):focus {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: inherit !important;
+}
+
+.unified-form-modal,
+.unified-form-modal:hover,
+.unified-form-modal:focus,
+.unified-form-modal:focus-within,
+.unified-form-modal .ufm-card,
+.unified-form-modal .ufm-card:hover,
+.unified-form-modal .ufm-card:focus-within,
+.unified-form-modal .ufm-body:hover,
+.unified-form-modal .ufm-section,
+.unified-form-modal .ufm-section:hover,
+.unified-form-modal .ufm-section:focus-within {
+  opacity: 1 !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* ─── Backdrop ─────────────────────────────────────────────── */
+.unified-form-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(15, 23, 42, 0.45) !important;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3vh 1rem;
+  overflow-y: auto;
+}
+
+/* ─── Card ─────────────────────────────────────────────────── */
+.unified-form-modal .ufm-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 960px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.14), 0 4px 12px rgba(15, 23, 42, 0.06);
+  animation: ufm-slideIn 0.2s ease-out;
+}
+
+@keyframes ufm-slideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.unified-form-modal .ufm-body {
+  padding: 2rem 2.5rem 1.75rem;
+}
+
+@media (max-width: 700px) {
+  .unified-form-modal .ufm-body { padding: 1.25rem 1rem; }
+  .unified-form-modal .ufm-card { border-radius: 12px; }
+}
+
+/* ─── Header ─────────────────────────────────────────────── */
+.unified-form-modal .ufm-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #edf2f7;
+  margin-bottom: 1.5rem;
+}
+
+.unified-form-modal .ufm-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.unified-form-modal .ufm-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1a202c !important;
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.unified-form-modal .ufm-subtitle {
+  font-size: 0.85rem;
+  color: #718096 !important;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ─── Form ─────────────────────────────────────────────────── */
+.unified-form-modal .ufm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ─── Section card ─────────────────────────────────────────── */
+.unified-form-modal .ufm-section {
+  background: #f8fafc !important;
+  border: 1px solid #edf2f7 !important;
+  border-radius: 12px;
+  padding: 1.35rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.unified-form-modal .ufm-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.1rem;
+}
+
+.unified-form-modal .ufm-section-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #2d3748 !important;
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.unified-form-modal .ufm-section-desc {
+  font-size: 0.78rem;
+  color: #94a3b8 !important;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ─── Field ────────────────────────────────────────────────── */
+.unified-form-modal .ufm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.unified-form-modal .ufm-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569 !important;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.unified-form-modal .ufm-label .ufm-required {
+  color: #ef4444 !important;
+  font-weight: 500;
+}
+
+.unified-form-modal .ufm-hint {
+  font-size: 0.76rem;
+  color: #94a3b8 !important;
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* ─── Inputs ───────────────────────────────────────────────── */
+.unified-form-modal .ufm-input,
+.unified-form-modal .ufm-textarea,
+.unified-form-modal .ufm-select {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px;
+  color: #1e293b !important;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  padding: 0.55rem 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+.unified-form-modal .ufm-input:hover,
+.unified-form-modal .ufm-textarea:hover,
+.unified-form-modal .ufm-select:hover {
+  border-color: #cbd5e0 !important;
+}
+
+.unified-form-modal .ufm-input:focus,
+.unified-form-modal .ufm-textarea:focus,
+.unified-form-modal .ufm-select:focus {
+  outline: none !important;
+  border-color: #64748b !important;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1) !important;
+}
+
+.unified-form-modal .ufm-input::placeholder,
+.unified-form-modal .ufm-textarea::placeholder {
+  color: #a0aec0;
+}
+
+.unified-form-modal .ufm-textarea {
+  resize: vertical;
+  min-height: 84px;
+}
+
+.unified-form-modal .ufm-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.7rem center !important;
+  padding-right: 2.25rem;
+  cursor: pointer;
+}
+
+.unified-form-modal .ufm-input[type="date"] {
+  color-scheme: light;
+}
+
+.unified-form-modal .ufm-input[type="file"] {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+/* ─── Grid rows ────────────────────────────────────────────── */
+.unified-form-modal .ufm-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.unified-form-modal .ufm-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .unified-form-modal .ufm-row-2,
+  .unified-form-modal .ufm-row-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Info banner (like return banner) ─────────────────────── */
+.unified-form-modal .ufm-info-banner {
+  background: #eff6ff !important;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.unified-form-modal .ufm-info-banner strong {
+  display: block;
+  color: #1e40af !important;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.unified-form-modal .ufm-info-banner span {
+  color: #1e3a5f !important;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+/* ─── Error banner ─────────────────────────────────────────── */
+.unified-form-modal .ufm-error-banner {
+  background: #fef2f2 !important;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 0.85rem 1.25rem;
+  color: #dc2626 !important;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* ─── Word count / meta text ───────────────────────────────── */
+.unified-form-modal .ufm-meta {
+  font-size: 0.76rem;
+  color: #94a3b8 !important;
+  margin: 0;
+}
+
+/* ─── Rich text editor ─────────────────────────────────────── */
+.unified-form-modal .ufm-editor-wrap {
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.unified-form-modal .ufm-editor-wrap:hover {
+  border-color: #cbd5e0 !important;
+}
+.unified-form-modal .ufm-editor-wrap:focus-within {
+  border-color: #64748b !important;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1) !important;
+}
+
+.unified-form-modal .ufm-editor-wrap .ql-toolbar.ql-snow {
+  background: #f8fafc !important;
+  border: none !important;
+  border-bottom: 1px solid #edf2f7 !important;
+  padding: 5px 8px !important;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.unified-form-modal .ufm-editor-wrap .ql-toolbar .ql-formats {
+  margin-right: 6px !important;
+  padding-right: 6px;
+  border-right: 1px solid #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+.unified-form-modal .ufm-editor-wrap .ql-toolbar .ql-formats:last-child {
+  border-right: none;
+  margin-right: 0 !important;
+  padding-right: 0;
+}
+
+.unified-form-modal .ufm-editor-wrap .ql-toolbar button,
+[data-amplify-theme] .unified-form-modal .ufm-editor-wrap .ql-toolbar button {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 4px !important;
+  border: none !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  color: #64748b !important;
+}
+
+.unified-form-modal .ufm-editor-wrap .ql-toolbar button:hover,
+[data-amplify-theme] .unified-form-modal .ufm-editor-wrap .ql-toolbar button:hover {
+  background: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+.unified-form-modal .ufm-editor-wrap .ql-toolbar button.ql-active,
+[data-amplify-theme] .unified-form-modal .ufm-editor-wrap .ql-toolbar button.ql-active {
+  background: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+.unified-form-modal .ufm-editor-wrap .ql-toolbar .ql-stroke {
+  stroke: #64748b !important;
+}
+.unified-form-modal .ufm-editor-wrap .ql-toolbar .ql-fill {
+  fill: #64748b !important;
+}
+.unified-form-modal .ufm-editor-wrap .ql-toolbar .ql-picker-label {
+  color: #64748b !important;
+}
+
+.unified-form-modal .ufm-editor-wrap .ql-toolbar button:hover .ql-stroke,
+.unified-form-modal .ufm-editor-wrap .ql-toolbar button.ql-active .ql-stroke {
+  stroke: #1e293b !important;
+}
+.unified-form-modal .ufm-editor-wrap .ql-toolbar button:hover .ql-fill,
+.unified-form-modal .ufm-editor-wrap .ql-toolbar button.ql-active .ql-fill {
+  fill: #1e293b !important;
+}
+
+.unified-form-modal .ufm-editor-wrap .ql-toolbar button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.unified-form-modal .ufm-editor-wrap .ql-container.ql-snow {
+  border: none !important;
+  color: #1e293b;
+  font-size: 0.875rem;
+  font-family: inherit;
+}
+.unified-form-modal .ufm-editor-wrap .ql-editor {
+  min-height: 140px;
+  padding: 0.6rem 0.75rem;
+  line-height: 1.6;
+}
+.unified-form-modal .ufm-editor-wrap .ql-editor.ql-blank::before {
+  color: #a0aec0;
+  font-style: normal;
+}
+
+/* ─── Course card (application form) ───────────────────────── */
+.unified-form-modal .ufm-course-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+
+.unified-form-modal .ufm-course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.unified-form-modal .ufm-course-header span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569 !important;
+}
+
+/* ─── Add link button ──────────────────────────────────────── */
+.unified-form-modal .ufm-add-link,
+[data-amplify-theme] .unified-form-modal .ufm-add-link {
+  background: transparent !important;
+  border: none !important;
+  color: #64748b !important;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.3rem 0 !important;
+}
+.unified-form-modal .ufm-add-link:hover,
+[data-amplify-theme] .unified-form-modal .ufm-add-link:hover {
+  color: #475569 !important;
+}
+
+/* ─── Remove button (small) ────────────────────────────────── */
+.unified-form-modal .ufm-remove-btn,
+[data-amplify-theme] .unified-form-modal .ufm-remove-btn {
+  background: transparent !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #94a3b8 !important;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem !important;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.unified-form-modal .ufm-remove-btn:hover,
+[data-amplify-theme] .unified-form-modal .ufm-remove-btn:hover {
+  border-color: #cbd5e0 !important;
+  color: #64748b !important;
+}
+
+/* ─── File selected text ───────────────────────────────────── */
+.unified-form-modal .ufm-file-selected {
+  font-size: 0.82rem;
+  color: #059669 !important;
+  font-weight: 500;
+}
+
+/* ─── Footer ───────────────────────────────────────────────── */
+.unified-form-modal .ufm-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #edf2f7;
+}

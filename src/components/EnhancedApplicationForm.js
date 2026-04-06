@@ -19,8 +19,13 @@ import { createApplication, updateUser, listApplications } from '../graphql/oper
 import { sendNewItemNotification } from '../utils/emailNotifications';
 import { useTags } from '../contexts/TagContext';
 import { mapTagIdsToDisplayNames } from '../lib/tags/tagDisplay';
+import buttonStyles from '../styles/dashboardButtons.module.css';
+import '../styles/unifiedFormModal.css';
 
 const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
+  const primaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonIcon}`;
   const cacheKey = `application_draft_${user.id || user.username}_${project.id}`;
   
   // Load cached data on component mount
@@ -231,277 +236,230 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
   };
 
   return (
-    <Card>
-      <Flex direction="column" gap="1rem">
-        <Flex justifyContent="space-between" alignItems="center" gap="1rem">
-          <Heading level={3}>{project.title}</Heading>
+    <div className="ufm-body">
+
+      <div className="ufm-header">
+        <div className="ufm-header-text">
+          <h2 className="ufm-title">Apply to {project.title}</h2>
+          <p className="ufm-subtitle">Complete the form below to submit your application.</p>
+        </div>
+        <Button
+          type="button"
+          data-dashboard-button="true"
+          data-close-button="true"
+          className={iconActionButtonClassName}
+          aria-label="Close application form"
+          onClick={onClose}
+        >
+          <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+        </Button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="ufm-form">
+
+        {/* Guidelines */}
+        <div className="ufm-info-banner">
+          <strong>Application Guidelines</strong>
+          <span>
+            • Up to 3 applications total &nbsp;• Statement ~450 words &nbsp;• Up to 10 courses &nbsp;• Auto-saved as you type
+          </span>
+        </div>
+
+        {error && <div className="ufm-error-banner">{error}</div>}
+
+        {/* Section 1: Project Info */}
+        <div className="ufm-section">
+          <div className="ufm-section-header">
+            <p className="ufm-section-title">Research Project</p>
+          </div>
+          <div dangerouslySetInnerHTML={{ __html: project.description }} style={{ fontSize: '0.875rem', lineHeight: 1.6, color: '#1e293b' }} />
+          {project.department && <p className="ufm-meta">College: {project.department}</p>}
+          {project.faculty?.name && <p className="ufm-meta">Faculty: {project.faculty.name}</p>}
+          {project.duration && <p className="ufm-meta">Duration: {project.duration}</p>}
+        </div>
+
+        {/* Section 2: Student Profile */}
+        <div className="ufm-section">
+          <div className="ufm-section-header">
+            <p className="ufm-section-title">Your Profile</p>
+            <p className="ufm-section-desc">This information is pulled from your profile.</p>
+          </div>
+          <div className="ufm-row-2">
+            <p className="ufm-meta">Program: {user.major || 'Not specified'}</p>
+            <p className="ufm-meta">Degree: {user.academicYear || 'Not specified'}</p>
+          </div>
+          <div className="ufm-row-2">
+            <p className="ufm-meta">Expected Graduation: {user.expectedGraduation || 'Not specified'}</p>
+            <p className="ufm-meta">Availability: {user.availability || 'Not specified'}</p>
+          </div>
+          <p className="ufm-meta">Research Interests: {researchInterestNames.join(', ') || 'Not specified'}</p>
+          <p className="ufm-meta">Skills: {skillNames.join(', ') || 'Not specified'}</p>
+          <p className="ufm-meta">Certificates: {certificateNames.join(', ') || 'Not specified'}</p>
+        </div>
+
+        {/* Section 3: Statement */}
+        <div className="ufm-section">
+          <div className="ufm-section-header">
+            <p className="ufm-section-title">Statement of Interest <span style={{ color: '#ef4444' }}>*</span></p>
+            <p className="ufm-section-desc">Why are you interested? What skills can you bring? What do you hope to gain?</p>
+          </div>
+          <div className="ufm-editor-wrap">
+            <ReactQuill
+              value={statement}
+              onChange={(value) => {
+                setStatement(value);
+                saveToDraft(value, courses);
+              }}
+              placeholder="Why are you interested in this project? Why are you qualified? What skills can you bring? What classes have you taken that relate? What do you hope to get out of this experience?"
+              modules={{
+                toolbar: [
+                  ['bold', 'italic', 'underline'],
+                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                  ['clean']
+                ]
+              }}
+            />
+          </div>
+          <p className="ufm-meta">
+            Word count: {statement.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(word => word).length} (aim for ~450 words)
+          </p>
+        </div>
+
+        {/* Section 4: Coursework */}
+        <div className="ufm-section">
+          <div className="ufm-section-header">
+            <p className="ufm-section-title">Relevant Coursework</p>
+            <p className="ufm-section-desc">Include college-level courses relevant to this project (up to 10). Do NOT include AP or high school courses.</p>
+          </div>
+
+          {courses.map((course, index) => (
+            <div key={index} className="ufm-course-card">
+              <div className="ufm-course-header">
+                <span>Course {index + 1}</span>
+                {courses.length > 1 && (
+                  <button type="button" data-dashboard-button="true" className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`} onClick={() => removeCourse(index)} style={{ fontSize: '0.78rem', padding: '0.25rem 0.6rem' }}>
+                    Remove
+                  </button>
+                )}
+              </div>
+              <div className="ufm-row-2">
+                <div className="ufm-field">
+                  <label className="ufm-label">Course Name</label>
+                  <input className="ufm-input" value={course.courseName} onChange={(e) => updateCourse(index, 'courseName', e.target.value)} placeholder="e.g. Introduction to Psychology" />
+                </div>
+                <div className="ufm-field">
+                  <label className="ufm-label">Course Number</label>
+                  <input className="ufm-input" value={course.courseNumber} onChange={(e) => updateCourse(index, 'courseNumber', e.target.value)} placeholder="e.g. PSYC 101" />
+                </div>
+              </div>
+              <div className="ufm-row-3" style={{ marginTop: '0.75rem' }}>
+                <div className="ufm-field">
+                  <label className="ufm-label">Grade</label>
+                  <select className="ufm-select" value={course.grade} onChange={(e) => updateCourse(index, 'grade', e.target.value)}>
+                    <option value="">Select Grade</option>
+                    <option value="A+">A+</option>
+                    <option value="A">A</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="B-">B-</option>
+                    <option value="C+">C+</option>
+                    <option value="C">C</option>
+                    <option value="C-">C-</option>
+                    <option value="D">D</option>
+                    <option value="P">P (Pass)</option>
+                    <option value="IP">IP (In Progress)</option>
+                  </select>
+                </div>
+                <div className="ufm-field">
+                  <label className="ufm-label">Semester</label>
+                  <select className="ufm-select" value={course.semester} onChange={(e) => updateCourse(index, 'semester', e.target.value)}>
+                    <option value="">Select Semester</option>
+                    <option value="Fall">Fall</option>
+                    <option value="Spring">Spring</option>
+                    <option value="Summer">Summer</option>
+                  </select>
+                </div>
+                <div className="ufm-field">
+                  <label className="ufm-label">Year</label>
+                  <input className="ufm-input" type="text" value={course.year} onChange={(e) => { const value = e.target.value; if (/^\d{0,4}$/.test(value)) { updateCourse(index, 'year', value); } }} placeholder="e.g. 2024" />
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {courses.length < 10 && (
+            <button type="button" className="ufm-add-link" onClick={addCourse}>+ Add Another Course</button>
+          )}
+        </div>
+
+        {/* Section 5: Documents */}
+        <div className="ufm-section">
+          <div className="ufm-section-header">
+            <p className="ufm-section-title">
+              Supporting Documents {project.requiresTranscript ? <span style={{ color: '#ef4444' }}>* (Transcript Required)</span> : '(Optional)'}
+            </p>
+            <p className="ufm-section-desc">
+              {project.requiresTranscript
+                ? 'Please upload your official or unofficial transcript.'
+                : 'Upload additional documents that support your application (resume, portfolio, etc.)'}
+            </p>
+          </div>
+          <input
+            className="ufm-input"
+            type="file"
+            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const allowedExts = ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'];
+                const fileExt = file.name.split('.').pop().toLowerCase();
+                if (!allowedExts.includes(fileExt)) {
+                  setError('Invalid file type. Only PDF, DOC, DOCX, TXT, JPG, JPEG, and PNG files are allowed.');
+                  e.target.value = '';
+                  setUploadedFile(null);
+                  return;
+                }
+                const maxSize = 5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                  setError('File size exceeds 5MB limit. Please select a smaller file.');
+                  e.target.value = '';
+                  setUploadedFile(null);
+                  return;
+                }
+                setError(null);
+                setUploadedFile(file);
+              }
+            }}
+            required={project.requiresTranscript}
+          />
+          {uploadedFile && (
+            <p className="ufm-file-selected">Selected: {uploadedFile.name}</p>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="ufm-footer">
           <button
             type="button"
-            data-close-button="true"
+            data-dashboard-button="true"
+            className={secondaryActionButtonClassName}
             onClick={onClose}
-            aria-label="Close application form"
-            style={{
-              width: '2rem',
-              height: '2rem',
-              borderRadius: '0.5rem',
-              border: '1px solid #cdb7ef',
-              backgroundColor: '#ffffff',
-              color: '#111827',
-              fontSize: '1.1rem',
-              lineHeight: 1,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              flexShrink: 0,
-              boxShadow: '0 6px 16px rgba(154, 74, 215, 0.08)'
-            }}
           >
-            <span className="closeButtonGlyph" aria-hidden="true">
-              &times;
-            </span>
+            Cancel
           </button>
-        </Flex>
-        
-        <Alert variation="info">
-          <Text>
-            <strong>Application Guidelines:</strong><br/>
-            • You can apply for up to 3 projects total<br/>
-            • Your statement should be around 450 words<br/>
-            • Address why you're interested and qualified<br/>
-            • Include relevant coursework (up to 10 courses)<br/>
-            • Your progress is automatically saved as you type
-          </Text>
-        </Alert>
-        
-        <Card variation="outlined" backgroundColor="#f8f9fa">
-          <Flex direction="column" gap="0.5rem">
-            <Text fontWeight="bold">Research Project Description:</Text>
-            <div dangerouslySetInnerHTML={{ __html: project.description }} />
-            {project.department && <Text><strong>College:</strong> {project.department}</Text>}
-            {project.faculty?.name && <Text><strong>Faculty:</strong> {project.faculty.name}</Text>}
-            {project.duration && <Text><strong>Duration:</strong> {project.duration}</Text>}
-          </Flex>
-        </Card>
-        
-        <Card variation="outlined">
-          <Text fontWeight="bold">Student Profile Information:</Text>
-          <Text>Student ID: {user.id || user.username}</Text>
-          <Text>Program: {user.major || 'Not specified'}</Text>
-          <Text>Degree: {user.academicYear || 'Not specified'}</Text>
-          <Text>Expected Graduation: {user.expectedGraduation || 'Not specified'}</Text>
-          <Text>Research Interests: {researchInterestNames.join(', ') || 'Not specified'}</Text>
-          <Text>Skills: {skillNames.join(', ') || 'Not specified'}</Text>
-          <Text>Certificates: {certificateNames.join(', ') || 'Not specified'}</Text>
+          <button
+            type="submit"
+            data-dashboard-button="true"
+            className={primaryActionButtonClassName}
+            disabled={isSubmitting || uploading}
+          >
+            {uploading ? 'Uploading Document...' : 'Submit Application'}
+          </button>
+        </div>
 
-          <Text>Availability: {user.availability || 'Not specified'}</Text>
-        </Card>
-
-        <Divider />
-
-        <form onSubmit={handleSubmit}>
-          <Flex direction="column" gap="1rem">
-            <Text fontWeight="bold">Statement of Interest *</Text>
-            <div style={{ marginBottom: '1rem' }}>
-              <ReactQuill
-                value={statement}
-                onChange={(value) => {
-                  setStatement(value);
-                  saveToDraft(value, courses);
-                }}
-                placeholder="Why are you interested in this project? Why are you qualified? What skills can you bring? What classes have you taken that relate? What do you hope to get out of this experience?"
-                modules={{
-                  toolbar: [
-                    ['bold', 'italic', 'underline'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['clean']
-                  ]
-                }}
-                style={{ minHeight: '380px', height: '380px' }}
-              />
-            </div>
-            <div style={{ marginTop: '1rem', clear: 'both' }}>
-              <Text fontSize="0.9rem" color="gray">
-                Word count: {statement.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(word => word).length} (aim for ~450 words)
-              </Text>
-            </div>
-
-            <Divider />
-
-            <Heading level={4}>Relevant Coursework (up to 10 courses)</Heading>
-            <Text fontSize="0.9rem">
-              Include college-level courses relevant to this project. Do NOT include AP or high school courses.
-            </Text>
-
-            <Collection
-              items={courses}
-              type="list"
-              gap="1rem"
-              direction="column"
-            >
-              {(course, index) => (
-                <Card key={index} variation="outlined">
-                  <Flex direction="column" gap="0.5rem">
-                    <Flex justifyContent="space-between" alignItems="center">
-                      <Text fontWeight="bold">Course {index + 1}</Text>
-                      {courses.length > 1 && (
-                        <Button size="small" onClick={() => removeCourse(index)}>
-                          Remove
-                        </Button>
-                      )}
-                    </Flex>
-                    
-                    <Flex direction={{ base: 'column', large: 'row' }} gap="0.5rem">
-                      <TextField
-                        label="Course Name"
-                        value={course.courseName}
-                        onChange={(e) => updateCourse(index, 'courseName', e.target.value)}
-                        placeholder="e.g. Introduction to Psychology"
-                        flex="2"
-                      />
-                      <TextField
-                        label="Course Number"
-                        value={course.courseNumber}
-                        onChange={(e) => updateCourse(index, 'courseNumber', e.target.value)}
-                        placeholder="e.g. PSYC 101"
-                        flex="1"
-                      />
-                    </Flex>
-                    
-                    <Flex direction={{ base: 'column', large: 'row' }} gap="0.5rem">
-                      <SelectField
-                        label="Grade"
-                        value={course.grade}
-                        onChange={(e) => updateCourse(index, 'grade', e.target.value)}
-                        flex="1"
-                      >
-                        <option value="">Select Grade</option>
-                        <option value="A+">A+</option>
-                        <option value="A">A</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B">B</option>
-                        <option value="B-">B-</option>
-                        <option value="C+">C+</option>
-                        <option value="C">C</option>
-                        <option value="C-">C-</option>
-                        <option value="D">D</option>
-                        <option value="P">P (Pass)</option>
-                        <option value="IP">IP (In Progress)</option>
-                      </SelectField>
-                      
-                      <SelectField
-                        label="Semester"
-                        value={course.semester}
-                        onChange={(e) => updateCourse(index, 'semester', e.target.value)}
-                        flex="1"
-                      >
-                        <option value="">Select Semester</option>
-                        <option value="Fall">Fall</option>
-                        <option value="Spring">Spring</option>
-                        <option value="Summer">Summer</option>
-                      </SelectField>
-                      
-                      <TextField
-                        label="Year"
-                        type="text"
-                        value={course.year}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^\d{0,4}$/.test(value)) {
-                            updateCourse(index, 'year', value);
-                          }
-                        }}
-                        placeholder="e.g. 2024"
-                        flex="1"
-                      />
-                    </Flex>
-                  </Flex>
-                </Card>
-              )}
-            </Collection>
-
-            {courses.length < 10 && (
-              <Button onClick={addCourse} variation="link">
-                + Add Another Course
-              </Button>
-            )}
-            
-            <Divider />
-            
-            <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">
-                Supporting Documents {project.requiresTranscript ? '(Required - Transcript)' : '(Optional)'}
-              </Text>
-              <Text fontSize="0.9rem" color="gray">
-                {project.requiresTranscript 
-                  ? 'This project requires transcript upload. Please upload your official or unofficial transcript.'
-                  : 'Upload additional documents that support your application (resume, portfolio, etc.)'}
-              </Text>
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    const allowedExts = ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'];
-                    const fileExt = file.name.split('.').pop().toLowerCase();
-                    
-                    if (!allowedExts.includes(fileExt)) {
-                      setError('Invalid file type. Only PDF, DOC, DOCX, TXT, JPG, JPEG, and PNG files are allowed.');
-                      e.target.value = '';
-                      setUploadedFile(null);
-                      return;
-                    }
-                    
-                    const maxSize = 5 * 1024 * 1024;
-                    if (file.size > maxSize) {
-                      setError('File size exceeds 5MB limit. Please select a smaller file.');
-                      e.target.value = '';
-                      setUploadedFile(null);
-                      return;
-                    }
-                    setError(null);
-                    setUploadedFile(file);
-                  }
-                }}
-                style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
-                required={project.requiresTranscript}
-              />
-              {uploadedFile && (
-                <Text fontSize="0.9rem" color="green">
-                  Selected: {uploadedFile.name}
-                </Text>
-              )}
-            </Flex>
-
-            {error && <Text color="red">{error}</Text>}
-
-            <Divider />
-
-            <Flex gap="1rem">
-              <Button 
-                onClick={onClose} 
-                backgroundColor="white"
-                color="black"
-                border="1px solid black"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                backgroundColor="white"
-                color="black"
-                border="1px solid black"
-                isLoading={isSubmitting || uploading}
-              >
-                {uploading ? 'Uploading Document...' : 'Submit Application'}
-              </Button>
-            </Flex>
-          </Flex>
-        </form>
-      </Flex>
-    </Card>
+      </form>
+    </div>
   );
 };
 
