@@ -2,10 +2,6 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Lambda function for application email notifications",
   "Parameters": {
-    "CloudWatchRule": {
-      "Type": "String",
-      "Default": "NONE"
-    },
     "deploymentBucketName": {
       "Type": "String"
     },
