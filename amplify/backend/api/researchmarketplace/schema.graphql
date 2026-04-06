@@ -187,6 +187,74 @@ type AuditLog @model @auth(rules: [
   updatedAt: AWSDateTime!
 }
 
+enum ProjectTagType {
+  REQUIRED 
+  OPTIONAL
+}
+
+enum RecommendationMatchKind {
+  DIRECT
+  RELATED
+}
+
+type ProjectTagIndex {
+  PK: String!
+  SK: String!
+  projectId: ID!
+  tagId: String!
+  tagType: ProjectTagType!
+  createdAt: AWSDateTime
+}
+
+type RecommendationMatchDetail {
+  matchedTagId: String!
+  projectTagType: ProjectTagType!
+  matchKind: RecommendationMatchKind!
+  directUserTagIds: [String!]!
+  relatedSourceUserTagIds: [String!]!
+  relationWeight: Float
+  scoreContribution: Float!
+}
+
+type RecommendationExplanation {
+  directMatchedTagIds: [String!]!
+  relatedMatchedTagIds: [String!]!
+  directMatches: Int!
+  relatedMatches: Int!
+  directScore: Float!
+  relatedScore: Float!
+  matchDetails: [RecommendationMatchDetail!]!
+}
+
+type RecommendedProject {
+  projectId: ID!
+  score: Float!
+  requiredMatches: Int!
+  optionalMatches: Int!
+  directMatches: Int!
+  relatedMatches: Int!
+  directScore: Float!
+  relatedScore: Float!
+  matchedTagIds: [String!]!
+  reasons: [String!]!
+  explanation: RecommendationExplanation
+  project: Project
+}
+
+input PutProjectTagIndexInput {
+  PK: String!
+  SK: String!
+  projectId: ID!
+  tagId: String!
+  tagType: ProjectTagType!
+  createdAt: AWSDateTime
+}
+
+input DeleteProjectTagIndexInput {
+  PK: String!
+  SK: String!
+}
+
 type Tag {
   tag_id: ID!
   display_name: String!
@@ -204,6 +272,12 @@ type TagConnection {
   nextToken: String
 }
 
+type Mutation {
+  putProjectTagIndexMapping(input: PutProjectTagIndexInput!): Boolean!
+
+  deleteProjectTagIndexMapping(input: DeleteProjectTagIndexInput!): Boolean!
+}
+
 type Query {
   getTagById(tag_id: ID!): Tag
 
@@ -212,4 +286,7 @@ type Query {
   listChildTags(parent_tag_id: ID!): [Tag]
 
   listAllTags(limit: Int, nextToken: String): TagConnection
+
+  getRecommendedProjects(limit: Int, userId: ID, userTagIds: [String!]): [RecommendedProject!]!
+    @function(name: "projectRecommendations-${env}")
 }

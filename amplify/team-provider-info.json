@@ -29,7 +29,16 @@
         },
         "researchmarketplace2a916c6aPostConfirmation": {
           "deploymentBucketName": "amplify-research-marketplace-devtwo-0aa72-deployment",
-          "s3Key": "amplify-builds/researchmarketplace2a916c6aPostConfirmation-38654963324a6a2b5444-build.zip"
+          "s3Key": "amplify-builds/researchmarketplace2a916c6aPostConfirmation-6c327575594f4a436b2f-build.zip"
+        },
+        "researchmarketplace": {},
+        "researchmarketplace2a916c6a": {},
+        "projectRecommendations": {
+          "deploymentBucketName": "amplify-research-marketplace-devtwo-0aa72-deployment",
+          "s3Key": "amplify-builds/projectRecommendations-74384271694830345075-build.zip",
+          "projectTable": "Project-3fvzogkphbcx7hvq7p7ge3fxom-devtwo",
+          "userTable": "User-3fvzogkphbcx7hvq7p7ge3fxom-devtwo",
+          "indexTable": "ProjectTagIndex-devtwo"
         }
       },
       "hosting": {

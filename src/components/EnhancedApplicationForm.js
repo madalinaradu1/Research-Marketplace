@@ -130,7 +130,7 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       setError('This project requires transcript upload. Please upload your transcript.');
       setIsSubmitting(false);
       return;
-    }
+    } 
 
     try {
       // Check application limit by counting current applications
@@ -233,7 +233,35 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
   return (
     <Card>
       <Flex direction="column" gap="1rem">
-        <Heading level={3}>Apply to: {project.title}</Heading>
+        <Flex justifyContent="space-between" alignItems="center" gap="1rem">
+          <Heading level={3}>{project.title}</Heading>
+          <button
+            type="button"
+            data-close-button="true"
+            onClick={onClose}
+            aria-label="Close application form"
+            style={{
+              width: '2rem',
+              height: '2rem',
+              borderRadius: '0.5rem',
+              border: '1px solid #cdb7ef',
+              backgroundColor: '#ffffff',
+              color: '#111827',
+              fontSize: '1.1rem',
+              lineHeight: 1,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+              boxShadow: '0 6px 16px rgba(154, 74, 215, 0.08)'
+            }}
+          >
+            <span className="closeButtonGlyph" aria-hidden="true">
+              &times;
+            </span>
+          </button>
+        </Flex>
         
         <Alert variation="info">
           <Text>
@@ -376,8 +404,14 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
                       
                       <TextField
                         label="Year"
+                        type="text"
                         value={course.year}
-                        onChange={(e) => updateCourse(index, 'year', e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d{0,4}$/.test(value)) {
+                            updateCourse(index, 'year', value);
+                          }
+                        }}
                         placeholder="e.g. 2024"
                         flex="1"
                       />
@@ -407,7 +441,30 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
               <input
                 type="file"
                 accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                onChange={(e) => setUploadedFile(e.target.files[0])}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const allowedExts = ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'];
+                    const fileExt = file.name.split('.').pop().toLowerCase();
+                    
+                    if (!allowedExts.includes(fileExt)) {
+                      setError('Invalid file type. Only PDF, DOC, DOCX, TXT, JPG, JPEG, and PNG files are allowed.');
+                      e.target.value = '';
+                      setUploadedFile(null);
+                      return;
+                    }
+                    
+                    const maxSize = 5 * 1024 * 1024;
+                    if (file.size > maxSize) {
+                      setError('File size exceeds 5MB limit. Please select a smaller file.');
+                      e.target.value = '';
+                      setUploadedFile(null);
+                      return;
+                    }
+                    setError(null);
+                    setUploadedFile(file);
+                  }
+                }}
                 style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
                 required={project.requiresTranscript}
               />

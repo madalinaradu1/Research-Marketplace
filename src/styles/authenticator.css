@@ -1,0 +1,319 @@
+[data-amplify-theme] [data-amplify-authenticator] {
+  --auth-accent: #9a4ad7;
+  --auth-border: #e2e8f0;
+  --auth-border-strong: #64748b;
+  --auth-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --auth-control-radius: 8px;
+  --auth-filled-bg: #edf2ff;
+  --auth-muted: #4a5568;
+  --auth-rail: #d1d5db;
+  --auth-shell-end: rgb(255, 255, 255);
+  --auth-shell-start: rgb(117, 81, 194);
+  --auth-text: #2d3748;
+  background: linear-gradient(180deg, var(--auth-shell-start), var(--auth-shell-end)) !important;
+  font-family: inherit !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-authenticator {
+  background: linear-gradient(180deg, var(--auth-shell-start), var(--auth-shell-end)) !important;
+  padding: 2rem !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] [data-amplify-container] {
+  width: min(100%, 520px) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] [data-amplify-router] {
+  background-color: white !important;
+  border: none !important;
+  border-radius: 18px !important;
+  box-shadow: var(--auth-card-shadow) !important;
+  max-width: 520px !important;
+  overflow: hidden !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] form,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-card {
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] [data-amplify-form] {
+  background-color: transparent !important;
+  padding: 1.25rem 2rem 0 !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] [data-amplify-footer] {
+  background-color: transparent !important;
+  padding: 0 2rem 1.75rem !important;
+  text-align: center !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] h1,
+[data-amplify-theme] [data-amplify-authenticator] h2,
+[data-amplify-theme] [data-amplify-authenticator] h3 {
+  color: var(--auth-text) !important;
+  font-weight: 600 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] label {
+  color: var(--auth-muted) !important;
+  font-weight: 500 !important;
+  margin-bottom: 0.2rem !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field {
+  gap: 0.35rem !important;
+  margin-bottom: 1rem !important;
+  width: 100% !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group__field-wrapper,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group__field-wrapper--vertical {
+  gap: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group .amplify-input {
+  border-radius: var(--auth-control-radius) !important;
+  border-left: 1px solid var(--auth-border) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group :not(:first-child) .amplify-input {
+  border-start-start-radius: var(--auth-control-radius) !important;
+  border-end-start-radius: var(--auth-control-radius) !important;
+  border-inline-start-color: var(--auth-border) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-input,
+[data-amplify-theme] [data-amplify-authenticator] input,
+[data-amplify-theme] [data-amplify-authenticator] select {
+  background-color: white !important;
+  border: 1px solid var(--auth-border) !important;
+  border-radius: var(--auth-control-radius) !important;
+  box-shadow: none !important;
+  color: var(--auth-text) !important;
+  display: block !important;
+  font-size: 1rem !important;
+  min-height: 3.35rem !important;
+  padding: 0.75rem 1rem !important;
+  width: 100% !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-input::placeholder,
+[data-amplify-theme] [data-amplify-authenticator] input::placeholder {
+  color: #718096 !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] input:focus,
+[data-amplify-theme] [data-amplify-authenticator] select:focus {
+  background-color: var(--auth-filled-bg) !important;
+  border-color: var(--auth-border-strong) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] input:not(:placeholder-shown) {
+  background-color: var(--auth-filled-bg) !important;
+  border-color: var(--auth-border-strong) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] input:-webkit-autofill,
+[data-amplify-theme] [data-amplify-authenticator] input:-webkit-autofill:hover,
+[data-amplify-theme] [data-amplify-authenticator] input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--auth-filled-bg) inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  border-color: var(--auth-border-strong) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group--has-inner-end .amplify-input {
+  border-right: 0 !important;
+  border-left: 1px solid var(--auth-border) !important;
+  border-radius: var(--auth-control-radius) 0 0 var(--auth-control-radius) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group__inner-end .amplify-button,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field__show-password,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group__control {
+  background-color: white !important;
+  border: 1px solid var(--auth-border) !important;
+  border-left: 0 !important;
+  border-radius: 0 var(--auth-control-radius) var(--auth-control-radius) 0 !important;
+  box-shadow: none !important;
+  color: var(--auth-muted) !important;
+  min-height: 3.35rem !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group__inner-end .amplify-button:hover,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field__show-password:hover,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group__control:hover {
+  background-color: white !important;
+  color: var(--auth-text) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group:focus-within .amplify-input,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group:focus-within .amplify-field__show-password,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group:focus-within .amplify-field-group__inner-end .amplify-button,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group:focus-within .amplify-field-group__control {
+  background-color: var(--auth-filled-bg) !important;
+  border-color: var(--auth-border-strong) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group:has(input:not(:placeholder-shown)) .amplify-field__show-password,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group:has(input:not(:placeholder-shown)) .amplify-field-group__inner-end .amplify-button,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group:has(input:not(:placeholder-shown)) .amplify-field-group__control,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group:has(input:-webkit-autofill) .amplify-field__show-password,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group:has(input:-webkit-autofill) .amplify-field-group__inner-end .amplify-button,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-field-group:has(input:-webkit-autofill) .amplify-field-group__control {
+  background-color: var(--auth-filled-bg) !important;
+  border-color: var(--auth-border-strong) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] button[type="submit"],
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button--primary {
+  background-color: white !important;
+  border: 1px solid var(--auth-border) !important;
+  border-radius: var(--auth-control-radius) !important;
+  box-shadow: none !important;
+  color: var(--auth-text) !important;
+  cursor: pointer !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  margin-top: 0.45rem !important;
+  margin-bottom: 2.0rem !important;
+  min-height: 3.35rem !important;
+  padding: 0.9rem 1.5rem !important;
+  width: 100% !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] button[type="submit"]:hover,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button--primary:hover {
+  background-color: var(--auth-filled-bg) !important;
+  border-color: var(--auth-border-strong) !important;
+  color: var(--auth-text) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-verifyuser] button[type="submit"],
+[data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-confirmverifyuser] button[type="submit"],
+[data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-verifyuser] .amplify-button--primary,
+[data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-confirmverifyuser] .amplify-button--primary {
+  margin-top: 0rem !important;
+  margin-bottom: 0rem !important;
+  padding: 0rem !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs {
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid var(--auth-rail) !important;
+  margin-bottom: 0 !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs [role="tablist"] {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 0.25rem !important;
+  border-bottom: none !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs button,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs [role="tab"],
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs-item,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs__item {
+  position: relative !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: 3px solid transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: #6b7280 !important;
+  font-weight: 600 !important;
+  margin-bottom: -1px !important;
+  padding: 0.95rem 1.75rem 1rem !important;
+  text-decoration: none !important;
+  transition: color 0.18s ease !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs button:hover,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs button:focus,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs [role="tab"]:hover,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs [role="tab"]:focus,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs-item:hover,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs__item:hover {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: #111827 !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs button[aria-selected="true"],
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs [role="tab"][aria-selected="true"],
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs-item--active,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs-item[data-state="active"],
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs__item--active,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs__item[data-state="active"] {
+  background-color: transparent !important;
+  border-bottom-color: var(--auth-accent) !important;
+  box-shadow: none !important;
+  color: var(--auth-accent) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs button[aria-selected="true"]:hover,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-tabs [role="tab"][aria-selected="true"]:hover {
+  color: var(--auth-accent) !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button--link,
+[data-amplify-theme] [data-amplify-authenticator] button[data-variation="link"] {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--auth-muted) !important;
+  padding: 0rem 0 0 !important;
+  text-decoration: underline !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-button--link:hover,
+[data-amplify-theme] [data-amplify-authenticator] button[data-variation="link"]:hover {
+  background-color: transparent !important;
+  color: #111827 !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-alert--error {
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: #c53030 !important;
+  margin-bottom: 1rem !important;
+  padding: 0.5rem 0 !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-alert--error button,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-alert--error .amplify-button,
+[data-amplify-theme] [data-amplify-authenticator] .amplify-alert__dismiss {
+  display: none !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] .amplify-alert--info {
+  background-color: #e6f3ff !important;
+  border: 1px solid #4299e1 !important;
+  border-radius: 4px !important;
+  color: #2b6cb0 !important;
+  margin-bottom: 1rem !important;
+  padding: 1rem !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] input[name="email"],
+[data-amplify-theme] [data-amplify-authenticator] input[type="email"],
+[data-amplify-theme] [data-amplify-authenticator] label[for*="email"] {
+  display: block !important;
+  visibility: visible !important;
+}

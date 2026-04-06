@@ -31,6 +31,9 @@ import { listApplications, listProjects, listUsers, deleteUser, updateUser, crea
 import { updateUserRole } from '../utils/updateUserRole';
 import { syncUserGroupsToRole } from '../utils/syncUserGroups';
 import { deleteUserCompletely, bulkDeleteUsers, canDeleteUser } from '../utils/adminUserManagement';
+import SliderTabs from '../components/SliderTabs';
+import DashboardPageShell from '../components/DashboardPageShell';
+import DashboardPagination from '../components/DashboardPagination';
 
 // GraphQL queries for audit logs
 const createAuditLogMutation = `
@@ -1017,10 +1020,19 @@ const AdminDashboard = ({ user }) => {
       }
     }
     
-    // Fallback to stored user field or Unknown User
-    return log.user || 'Unknown User';
-  };
-  
+  // Fallback to stored user field or Unknown User
+  return log.user || 'Unknown User';
+};
+
+  const adminTabs = [
+    { label: 'Dashboard' },
+    { label: 'User Management' },
+    { label: 'Data Management' },
+    { label: 'Audit Logs' },
+    { label: 'Analytics' },
+    { label: 'Communication' }
+  ];
+
 
   
 
@@ -1034,10 +1046,7 @@ const AdminDashboard = ({ user }) => {
   }
   
   return (
-    <>
-
-      <View width="100%" backgroundColor="#f5f5f5" style={{ overflowX: 'hidden' }}>
-      <Flex direction="column" padding="1rem" gap="1rem" maxWidth="1400px" width="100%" margin="0 auto">
+    <DashboardPageShell contentPadding="1rem" contentGap="1rem" pageStyle={{ overflowX: 'hidden' }}>
       <Card backgroundColor="white" padding="1.5rem">
         <Flex direction="column" gap="0.5rem">
           <Heading level={2} color="#2d3748">Admin Dashboard</Heading>
@@ -1064,10 +1073,18 @@ const AdminDashboard = ({ user }) => {
         return null;
       })()}
       
+      <SliderTabs
+        currentIndex={activeTabIndex}
+        onChange={setActiveTabIndex}
+        tabs={adminTabs}
+        renderPanel={false}
+      />
+
+      <View className="contentOnlyTabs" width="100%">
       <Tabs
         currentIndex={activeTabIndex}
         onChange={(index) => setActiveTabIndex(index)}
-        style={{ width: '100%' }}
+        style={{ width: '100%', '--amplify-components-tabs-item-hover-background-color': 'transparent' }}
       >
         <TabItem title="Dashboard">
           <Flex direction="column" gap="2rem">
@@ -1394,26 +1411,14 @@ const AdminDashboard = ({ user }) => {
                         Page {currentPage} of {totalPages} 
                         ({filteredCount} {searchTerm ? 'filtered' : 'total'} users)
                       </Text>
-                      <Button
-                        size="small"
-                        onClick={() => {
-                          if (currentPage > 1) {
-                            setCurrentPage(prev => prev - 1);
-                          }
-                        }}
-                      >
-                        Previous
-                      </Button>
-                      <Button
-                        size="small"
-                        onClick={() => {
-                          if (currentPage < totalPages) {
-                            setCurrentPage(prev => prev + 1);
-                          }
-                        }}
-                      >
-                        Next
-                      </Button>
+                      <DashboardPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        showPageNumbers={false}
+                        justifyContent="flex-start"
+                        marginTop="0"
+                      />
                     </>
                   );
                 })()}
@@ -1497,26 +1502,14 @@ const AdminDashboard = ({ user }) => {
                           <Text fontSize="0.9rem">
                             Page {auditCurrentPage} of {totalPages} ({auditLogs.length} total logs)
                           </Text>
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              if (auditCurrentPage > 1) {
-                                setAuditCurrentPage(prev => prev - 1);
-                              }
-                            }}
-                          >
-                            Previous
-                          </Button>
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              if (auditCurrentPage < totalPages) {
-                                setAuditCurrentPage(prev => prev + 1);
-                              }
-                            }}
-                          >
-                            Next
-                          </Button>
+                          <DashboardPagination
+                            currentPage={auditCurrentPage}
+                            totalPages={totalPages}
+                            onPageChange={setAuditCurrentPage}
+                            showPageNumbers={false}
+                            justifyContent="flex-start"
+                            marginTop="0"
+                          />
                         </>
                       );
                     })()}
@@ -1763,6 +1756,7 @@ const AdminDashboard = ({ user }) => {
         
 
       </Tabs>
+      </View>
       
       {showDeleteConfirm && (
         <View
@@ -2084,9 +2078,7 @@ const AdminDashboard = ({ user }) => {
         </View>
       )}
 
-    </Flex>
-    </View>
-    </>
+    </DashboardPageShell>
   );
 };
 

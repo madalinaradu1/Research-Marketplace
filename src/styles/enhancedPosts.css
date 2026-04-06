@@ -1,0 +1,181 @@
+/* Enhanced Student Posts Page Animations & Styles */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: all 0.2s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9CA3AF;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6B7280;
+}
+
+/* Grid responsive adjustments */
+@media (max-width: 1200px) {
+  .posts-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .posts-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Badge hover effects */
+.badge-hover:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+/* Button hover effects */
+button:hover:not(:disabled):not(.tag-chip-remove) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button:active:not(:disabled):not(.tag-chip-remove) {
+  transform: translateY(0);
+}
+
+/* Card entrance animation */
+.post-card {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* Modal backdrop animation */
+.modal-backdrop {
+  animation: fadeIn 0.2s ease;
+}
+
+/* Tooltip styles */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 0.75rem;
+  background: #111827;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+}
+
+/* Empty state animation */
+.empty-state {
+  animation: fadeIn 0.5s ease;
+}
+
+/* Tag chip animations */
+.tag-chip {
+  animation: slideIn 0.3s ease;
+  animation-fill-mode: backwards;
+}
+
+.tag-chip:nth-child(1) { animation-delay: 0.05s; }
+.tag-chip:nth-child(2) { animation-delay: 0.1s; }
+.tag-chip:nth-child(3) { animation-delay: 0.15s; }
+.tag-chip:nth-child(4) { animation-delay: 0.2s; }
+.tag-chip:nth-child(5) { animation-delay: 0.25s; }
+
+/* Search bar focus effect */
+input[type="text"]:focus,
+input[type="search"]:focus {
+  border-color: #3B82F6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Notification badge pulse */
+.notification-badge {
+  animation: pulse 2s infinite;
+}
+
+/* Smooth page transitions */
+.page-transition {
+  animation: fadeIn 0.4s ease;
+}

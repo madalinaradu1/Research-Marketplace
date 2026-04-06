@@ -19,6 +19,7 @@ import { listUsers, listApplications, listProjects } from '../graphql/operations
 import { listMessages, createMessage, getMessageThread, updateMessage, deleteMessage } from '../graphql/message-operations';
 import { sendEmailNotification } from '../utils/emailNotifications';
 import { useNavigate } from 'react-router-dom';
+import buttonStyles from '../styles/dashboardButtons.module.css';
 
 
 // Clean HTML content to remove excessive spacing
@@ -45,6 +46,9 @@ const getConversationColor = (conversationId) => {
 
 
 const MessagesPage = ({ user }) => {
+  const primaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonIcon}`;
   const [locallyReadMessages, setLocallyReadMessages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
@@ -512,8 +516,7 @@ const saveEdit = async (messageId) => {
           </Flex>
           {(user.role === 'Admin' || user.role === 'Faculty') && (
             <Button 
-              backgroundColor="#4299e1"
-              color="white"
+              className={primaryActionButtonClassName}
               size="small"
               onClick={() => setShowNewMessage(true)}
               isDisabled={availableRecipients.length === 0}
@@ -991,7 +994,15 @@ const saveEdit = async (messageId) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Send New Message</Heading>
-                  <Button size="small" onClick={() => setShowNewMessage(false)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  <Button
+                    size="small"
+                    data-close-button="true"
+                    className={iconActionButtonClassName}
+                    aria-label="Close new message modal"
+                    onClick={() => setShowNewMessage(false)}
+                  >
+                    <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                  </Button>
                 </Flex>
                 
                 <Flex direction="column" gap="1rem">
@@ -1036,17 +1047,16 @@ const saveEdit = async (messageId) => {
                 
                 <Flex gap="1rem" justifyContent="flex-end" marginTop="1rem">
                   <Button 
+                    className={secondaryActionButtonClassName}
                     onClick={() => {
                       setShowNewMessage(false);
                       setNewMessage({ recipient: '', subject: '', body: '' });
                     }}
-                    backgroundColor="white"
-                    color="#4a5568"
-                    border="1px solid #e2e8f0"
                   >
                     Cancel
                   </Button>
                   <Button 
+                    className={primaryActionButtonClassName}
                     onClick={async () => {
                       if (!newMessage.recipient || !newMessage.subject || !newMessage.body) return;
                       
@@ -1090,8 +1100,6 @@ const saveEdit = async (messageId) => {
                         setIsSendingNew(false);
                       }
                     }}
-                    backgroundColor="#4299e1"
-                    color="white"
                     isLoading={isSendingNew}
                     isDisabled={!newMessage.recipient || !newMessage.subject || !newMessage.body}
                   >

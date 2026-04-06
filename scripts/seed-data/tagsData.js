@@ -1916,6 +1916,13 @@ export const CANONICAL_TAGS = [
     description: 'Building systems that learn from data'
   },
   {
+    display_name: 'Artificial Intelligence',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['ai'],
+    description: 'Study and development of systems that perform tasks requiring human-like intelligence'
+  },
+  {
     display_name: 'Deep Learning',
     tag_type: 'SKILL',
     parent_tag_id: null,
@@ -3498,5 +3505,461 @@ export const CANONICAL_TAGS = [
     parent_tag_id: null,
     aliases: ['cph'],
     description: 'Public health professional certification'
+  },
+  // Formerly seeded through seed-additional-tags.js. Merged here so tagsData.js is the single source of truth.
+  {
+    display_name: 'Propulsion',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['propulsion systems', 'aerospace propulsion'],
+    description: 'Study and design of systems that generate thrust for air and space vehicles'
+  },
+  {
+    display_name: 'Fluid Dynamics',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['fluid flow', 'aerodynamics'],
+    description: 'Study of fluid motion and the forces acting on liquids and gases'
+  },
+  {
+    display_name: 'Thermodynamics',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['thermal systems', 'heat transfer'],
+    description: 'Study of energy, heat, work, and their transformations in physical systems'
+  },
+  {
+    display_name: 'Instrumentation',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['lab instrumentation', 'sensor instrumentation'],
+    description: 'Using measurement tools and sensors to collect and interpret experimental data'
+  },
+  {
+    display_name: 'Experimental Testing',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['bench testing', 'test execution'],
+    description: 'Planning and running controlled tests to evaluate system performance and behavior'
+  },
+  {
+    display_name: 'Data Analysis',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['data analytics', 'analytical interpretation'],
+    description: 'Inspecting, summarizing, and interpreting data to support evidence-based conclusions'
+  },
+  {
+    display_name: 'Medical Devices',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['medical device design', 'clinical devices'],
+    description: 'Design, evaluation, and regulation of devices used in healthcare and medicine'
+  },
+  {
+    display_name: 'Biosensors',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['biological sensors', 'bio-sensors'],
+    description: 'Sensors that detect biological signals, analytes, or processes for analysis and monitoring'
+  },
+  {
+    display_name: 'Embedded Systems',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['embedded computing', 'firmware systems'],
+    description: 'Building and programming dedicated hardware-software systems for specific functions'
+  },
+  {
+    display_name: 'Calibration',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['sensor calibration', 'instrument calibration'],
+    description: 'Adjusting and validating measurement systems to ensure accurate and reliable output'
+  },
+  {
+    display_name: 'Radar Systems',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['radar', 'radar engineering'],
+    description: 'Use of radio-frequency sensing systems for detection, ranging, and tracking'
+  },
+  {
+    display_name: 'Autonomous Vehicles',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['self-driving vehicles', 'autonomous driving'],
+    description: 'Vehicles that use sensing, computation, and control to operate with limited human input'
+  },
+  {
+    display_name: 'Signal Processing',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['signals processing', 'signal analysis'],
+    description: 'Analysis, transformation, and interpretation of signals for communication, sensing, and control'
+  },
+  {
+    display_name: 'Sensors',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['sensor systems', 'sensing technologies'],
+    description: 'Devices and methods used to detect physical, chemical, or biological conditions'
+  },
+  {
+    display_name: 'Digital Signal Processing',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['dsp', 'digital signals'],
+    description: 'Processing signals in digital form for filtering, detection, estimation, and interpretation'
+  },
+  {
+    display_name: 'Numerical Methods',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['numerical analysis', 'computational methods'],
+    description: 'Using computational techniques to approximate solutions to mathematical problems'
+  },
+  {
+    display_name: 'Algorithms',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['algorithm design', 'algorithmic thinking'],
+    description: 'Designing and applying step-by-step computational procedures to solve problems'
+  },
+  {
+    display_name: 'Monte Carlo Simulation',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['monte carlo methods', 'stochastic simulation'],
+    description: 'Using repeated random sampling to model uncertainty and estimate system behavior'
+  },
+  {
+    display_name: 'Differential Equations',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['ode', 'differential equation modeling'],
+    description: 'Modeling dynamic systems with equations that relate rates of change'
+  },
+  {
+    display_name: 'AI Security',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['ml security', 'machine learning security'],
+    description: 'Security risks, controls, and evaluation methods specific to AI-enabled systems'
+  },
+  {
+    display_name: 'Adversarial ML',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['adversarial machine learning', 'adversarial ai'],
+    description: 'Study of attacks and defenses involving machine learning models and data pipelines'
+  },
+  {
+    display_name: 'Privacy',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['data privacy', 'information privacy'],
+    description: 'Protection of sensitive information and responsible handling of personal or confidential data'
+  },
+  {
+    display_name: 'Prompt Injection',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['llm prompt injection', 'prompt attack'],
+    description: 'Understanding and evaluating attacks that manipulate model behavior through crafted prompts'
+  },
+  {
+    display_name: 'Data Poisoning',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['training data poisoning', 'poisoned data attacks'],
+    description: 'Analyzing and defending against malicious manipulation of training or evaluation data'
+  },
+  {
+    display_name: 'Electronics',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['electronic systems', 'electronic circuits'],
+    description: 'Design and study of circuits, components, and electronic systems'
+  },
+  {
+    display_name: 'Hardware Testing',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['device testing', 'hardware validation'],
+    description: 'Evaluating physical devices and subsystems for performance, reliability, and defects'
+  },
+  {
+    display_name: 'Printed Electronics',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['printed circuits', 'additively manufactured electronics'],
+    description: 'Fabrication of electronic components and circuits using printing-based manufacturing methods'
+  },
+  {
+    display_name: 'Rocketry',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['rockets', 'rocket systems'],
+    description: 'Design, testing, and operation of rocket systems and related subsystems'
+  },
+  {
+    display_name: 'Safety Engineering',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['engineering safety', 'system safety'],
+    description: 'Applying engineering methods to reduce hazards, manage risk, and improve system safety'
+  },
+  {
+    display_name: 'Automation',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['automated systems', 'industrial automation'],
+    description: 'Use of control systems and software to perform tasks with reduced manual intervention'
+  },
+  {
+    display_name: 'ROS',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['robot operating system', 'ros development'],
+    description: 'Using the Robot Operating System framework for robotics integration and experimentation'
+  },
+  {
+    display_name: 'Anomaly Detection',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['outlier detection', 'novelty detection'],
+    description: 'Identifying unusual patterns or events in data that may indicate faults, threats, or rare behavior'
+  },
+  {
+    display_name: 'Engineering Design',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['design engineering', 'engineering innovation'],
+    description: 'Structured development of engineering concepts into feasible, testable solutions'
+  },
+  {
+    display_name: 'Product Development',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['product design and development', 'new product development'],
+    description: 'Process of turning ideas into usable products through design, prototyping, and iteration'
+  },
+  {
+    display_name: 'STEM Education',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['science education', 'engineering education'],
+    description: 'Teaching, learning, and program development in science, technology, engineering, and mathematics'
+  },
+  {
+    display_name: 'Program Evaluation',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['program assessment', 'impact evaluation'],
+    description: 'Assessing whether a program is effective using data, feedback, and outcome measures'
+  },
+  {
+    display_name: 'Student Success',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['academic success', 'student outcomes'],
+    description: 'Research and practice focused on student persistence, achievement, and educational support'
+  },
+  {
+    display_name: 'Mentorship',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['mentoring', 'student mentorship'],
+    description: 'Guiding and supporting learners or peers through coaching, feedback, and professional development'
+  },
+  {
+    display_name: 'Survey Research',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['survey methods', 'questionnaire research'],
+    description: 'Designing, administering, and analyzing surveys to collect structured information'
+  },
+  {
+    display_name: 'Biostatistics',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['biostats', 'biomedical statistics'],
+    description: 'Application of statistical methods to biological, medical, and health-related data'
+  },
+  {
+    display_name: 'Mental Health',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['behavioral health', 'psychological health'],
+    description: 'Study and support of psychological well-being, emotional health, and mental disorders'
+  },
+  {
+    display_name: 'Wearables',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['wearable devices', 'wearable technology'],
+    description: 'Body-worn devices used for sensing, health monitoring, and interactive computing'
+  },
+  {
+    display_name: 'Cancer Biology',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['tumor biology', 'oncology research'],
+    description: 'Study of the molecular and cellular mechanisms that drive cancer development and progression'
+  },
+  {
+    display_name: 'Microbiome',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['microbiome research', 'host microbiome'],
+    description: 'Study of microbial communities and their interactions with hosts and environments'
+  },
+  {
+    display_name: 'Neurodegeneration',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['neurodegenerative disease', 'degenerative neuroscience'],
+    description: 'Study of progressive loss of neuronal structure and function in disease'
+  },
+  {
+    display_name: 'Inflammation',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['inflammatory response', 'neuroinflammation'],
+    description: 'Biological response to injury or disease involving immune signaling and tissue changes'
+  },
+  {
+    display_name: 'Translational Research',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['bench to bedside', 'translational science'],
+    description: 'Research that connects laboratory findings to clinical or practical applications'
+  },
+  {
+    display_name: 'Histology',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['tissue histology', 'microscopic tissue analysis'],
+    description: 'Preparation and analysis of tissue samples to study cellular and structural features'
+  },
+  {
+    display_name: 'Organic Chemistry',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['organic chem', 'organic synthesis chemistry'],
+    description: 'Study of carbon-based compounds, their reactions, and synthetic methods'
+  },
+  {
+    display_name: 'Drug Discovery',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['therapeutic discovery', 'small molecule discovery'],
+    description: 'Identifying and optimizing compounds for potential therapeutic use'
+  },
+  {
+    display_name: 'Medicinal Chemistry',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['medicinal chem', 'drug chemistry'],
+    description: 'Chemical design and optimization of compounds for biological activity and therapeutic use'
+  },
+  {
+    display_name: 'Solid-Phase Synthesis',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['solid phase chemistry', 'bead-based synthesis'],
+    description: 'Carrying out synthesis on a solid support to streamline purification and modular assembly'
+  },
+  {
+    display_name: 'Synthesis',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['chemical synthesis', 'synthetic methods'],
+    description: 'Planning and executing procedures to create target compounds or materials'
+  },
+  {
+    display_name: 'Cancer Therapeutics',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['cancer treatment', 'oncology therapeutics'],
+    description: 'Development and study of therapies used to prevent, manage, or treat cancer'
+  },
+  {
+    display_name: 'Antibiotic Resistance',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['antimicrobial resistance', 'drug resistant infection'],
+    description: 'Study of how microorganisms resist antimicrobial treatment and how to counter that resistance'
+  },
+  {
+    display_name: 'Clinical Research',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['clinical studies', 'human subjects research'],
+    description: 'Research involving human participants, clinical outcomes, and healthcare interventions'
+  },
+  {
+    display_name: 'Evidence-Based Practice',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['ebp', 'evidence informed practice'],
+    description: 'Applying the best available evidence to guide decisions in healthcare and professional practice'
+  },
+  {
+    display_name: 'Interprofessional Collaboration',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['interdisciplinary collaboration', 'team-based care'],
+    description: 'Working effectively across professional roles to coordinate services, research, or care'
+  },
+  {
+    display_name: 'Bioremediation',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['environmental bioremediation', 'microbial remediation'],
+    description: 'Using biological processes to remove, degrade, or neutralize environmental contaminants'
+  },
+  {
+    display_name: 'Environmental Modeling',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['environmental simulation', 'ecosystem modeling'],
+    description: 'Modeling environmental systems to understand processes, impacts, and outcomes'
+  },
+  {
+    display_name: 'Electrochemistry',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['electrochemical analysis', 'electrochemical sensing'],
+    description: 'Study of chemical processes involving charge transfer and electrical measurements'
+  },
+  {
+    display_name: 'Lab Research',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['laboratory research', 'wet lab research'],
+    description: 'Conducting structured experimental work in a laboratory setting using documented methods'
+  },
+  {
+    display_name: 'Environmental Monitoring',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['environmental sensing', 'contaminant monitoring'],
+    description: 'Observing and measuring environmental conditions and contaminants over time'
+  },
+  {
+    display_name: 'Nanomaterials',
+    tag_type: 'DOMAIN',
+    parent_tag_id: null,
+    aliases: ['nanomaterial science', 'nano materials'],
+    description: 'Study and application of materials with nanoscale structures and properties'
+  },
+  {
+    display_name: 'Sensor Fabrication',
+    tag_type: 'SKILL',
+    parent_tag_id: null,
+    aliases: ['sensor prototyping', 'sensor manufacturing'],
+    description: 'Building and assembling sensing devices for testing, calibration, and deployment'
   },
 ]
