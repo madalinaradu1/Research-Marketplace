@@ -39,7 +39,7 @@ const TagInput = ({
               onClick={() => onRemove(tag)}
               aria-label={`Remove ${tag}`}
             >
-              x
+              <span className="tag-chip-remove-glyph" aria-hidden="true">×</span>
             </button>
           </span>
         ))}

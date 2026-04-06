@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { API, graphqlOperation, Auth } from 'aws-amplify';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -11,15 +11,12 @@ import {
   Divider,
   Collection,
   Loader,
-  Tabs,
-  TabItem,
   TextField,
   TextAreaField,
   SelectField,
   CheckboxField,
   Badge,
   View,
-  Image,
   useTheme
 } from '@aws-amplify/ui-react';
 import { listProjects, listApplications, createProject, updateProject, deleteProject, getUser, listUsers } from '../graphql/operations';
@@ -27,10 +24,60 @@ import { createMessage, createNotification } from '../graphql/message-operations
 import { sendEmailNotification, sendNewItemNotification } from '../utils/emailNotifications';
 import ApplicationReview from '../components/ApplicationReview';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
+import DashboardPagination from '../components/DashboardPagination';
+import SliderTabs from '../components/SliderTabs';
+import DashboardPageShell from '../components/DashboardPageShell';
 import { getStatusColorValue } from '../utils/statusColors';
+import '../components/TagSelector/tagSelector.css';
+import '../styles/facultyCreateProjectModal.css';
+import buttonStyles from '../styles/dashboardButtons.module.css';
+import { tagPillProps } from '../styles/tagPills';
+import TagSelector from '../components/TagSelector';
+import { useTags } from '../contexts/TagContext';
+import { toResolvedTagIds, tagIdsToDisplayNames } from '../components/TagSelector/tagHelpers';
+import { syncProjectTagIndex, removeProjectTagIndexMappings } from '../lib/recommendations/projectTagIndexSync';
+import { hasWordPrefixMatch } from '../lib/tags/normalize';
+
+
+const COLLEGE_OPTIONS = [
+  'College of the Arts and Sciences',
+  'Collangelo College of Business',
+  'College of Education',
+  'College of Nursing and Health Care Professions',
+  'College of Science, Engineering, and Technology',
+  'College of Theology',
+  'College of Doctoral Studies',
+  'College of Health Sciences',
+  'College of Graduate Studies'
+];
+
+function normalizeWords(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function matchesCollegeByWordPrefix(college, query) {
+  const qWords = normalizeWords(query);
+  if (!qWords.length) return true;
+
+  const cWords = normalizeWords(college);
+  return qWords.every((qWord) => cWords.some((cWord) => cWord.startsWith(qWord)));
+}
 
 const FacultyDashboard = ({ user }) => {
   const { tokens } = useTheme();
+  const { tagsById, resolveTagIds } = useTags();
+  const primaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonIcon}`;
+  const fieldLabelProps = {
+    fontSize: tokens.fontSizes.medium,
+    fontWeight: tokens.fontWeights.medium,
+    color: tokens.colors.font.primary
+  };
   const [projects, setProjects] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,6 +141,8 @@ const FacultyDashboard = ({ user }) => {
   const [deletingProject, setDeletingProject] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [applicationSearchTerm, setApplicationSearchTerm] = useState('');
+  const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
+  const [debouncedCollegeQuery, setDebouncedCollegeQuery] = useState(projectForm.department || '');
   const [viewingProject, setViewingProject] = useState(null);
   const [sortOptions, setSortOptions] = useState({
     newest: true,
@@ -102,10 +151,38 @@ const FacultyDashboard = ({ user }) => {
     department: false,
     deadline: false
   });
-  
+  const [projectResearchTagIds, setProjectResearchTagIds] = useState([]);
+  const [projectSkillTagIds, setProjectSkillTagIds] = useState([]);
 
-  
 
+  const handleCollegeChange = (e) => {
+    const value = e.target.value;
+    const newForm = { ...projectForm, department: value };
+    setProjectForm(newForm);
+    saveProjectToDraft(newForm);
+    setShowCollegeDropdown(true);
+  };
+
+  const handleCollegeSelect = (college) => {
+    const newForm = { ...projectForm, department: college };
+    setProjectForm(newForm);
+    saveProjectToDraft(newForm);
+    setShowCollegeDropdown(false);
+  };
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedCollegeQuery(projectForm.department || '');
+    }, 250);
+    return () => clearTimeout(t);
+  }, [projectForm.department]);
+
+  const collegeSuggestions = useMemo(() => {
+    const query = (debouncedCollegeQuery || '').trim();
+    return COLLEGE_OPTIONS
+      .filter((college) => !query || hasWordPrefixMatch(college, query))
+      .slice(0, 8);
+  }, [debouncedCollegeQuery]);
   
   // Refs for ReactQuill components to suppress findDOMNode warnings
   const messageQuillRef = useRef(null);
@@ -293,18 +370,35 @@ const FacultyDashboard = ({ user }) => {
     }
   };
   
+  const hydrateProjectTagSelections = useCallback((formLike) => {
+  setProjectResearchTagIds(toResolvedTagIds(formLike?.tags, resolveTagIds));
+  setProjectSkillTagIds(toResolvedTagIds(formLike?.skillsRequired, resolveTagIds));
+}, [resolveTagIds]);
+
+  const handleResearchTagsChange = useCallback((nextIds) => {
+    setProjectResearchTagIds(nextIds);
+    const names = tagIdsToDisplayNames(nextIds, tagsById);
+    const newForm = { ...projectForm, tags: names.join(', ') };
+    setProjectForm(newForm);
+    saveProjectToDraft(newForm);
+  }, [projectForm, saveProjectToDraft, tagsById]);
+
+  const handleSkillsTagsChange = useCallback((nextIds) => {
+    setProjectSkillTagIds(nextIds);
+    const names = tagIdsToDisplayNames(nextIds, tagsById);
+    const newForm = { ...projectForm, skillsRequired: names.join(', ') };
+    setProjectForm(newForm);
+    saveProjectToDraft(newForm);
+  }, [projectForm, saveProjectToDraft, tagsById]);
+
+  useEffect(() => {
+    hydrateProjectTagSelections(projectForm);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleProjectFormChange = (e) => {
     const { name, value } = e.target;
     const newForm = { ...projectForm, [name]: value };
-    setProjectForm(newForm);
-    saveProjectToDraft(newForm);
-  };
-  
-  const handleSkillsChange = (e) => {
-    const newForm = { 
-      ...projectForm, 
-      skillsRequired: e.target.value 
-    };
     setProjectForm(newForm);
     saveProjectToDraft(newForm);
   };
@@ -340,27 +434,26 @@ const FacultyDashboard = ({ user }) => {
       const userId = currentUser.username;
       console.log('Current authenticated user ID:', userId);
       
-      // Convert skills and tags strings to arrays
-      const skillsArray = projectForm.skillsRequired
-        ? projectForm.skillsRequired
-            .split(',')
-            .map(skill => skill.trim())
-            .filter(skill => skill)
-        : [];
-      
-      const tagsArray = projectForm.tags
-        ? projectForm.tags
-            .split(',')
-            .map(tag => tag.trim())
-            .filter(tag => tag)
-        : [];
-      
+      // Convert tag IDs to display names for API input
+      const skillsArray = tagIdsToDisplayNames(projectSkillTagIds, tagsById);
+      const tagsArray = tagIdsToDisplayNames(projectResearchTagIds, tagsById);
+
       // Format the date properly for GraphQL
       // Use UTC date to avoid timezone issues
       const deadline = projectForm.applicationDeadline 
         ? new Date(projectForm.applicationDeadline + 'T00:00:00Z').toISOString() 
         : null;
-      
+      const isFutureDeadline = Boolean(deadline && new Date(deadline) > new Date());
+      const wasExpired = Boolean(
+        selectedProject?.applicationDeadline &&
+        new Date(selectedProject.applicationDeadline) < new Date()
+      );
+      const shouldReactivateProject = Boolean(
+        selectedProject &&
+        (wasExpired || selectedProject.isActive === false) &&
+        isFutureDeadline
+      );
+
       console.log('Original date input:', projectForm.applicationDeadline);
       console.log('Formatted deadline for API:', deadline);
       
@@ -376,7 +469,9 @@ const FacultyDashboard = ({ user }) => {
         applicationDeadline: deadline,
         requiresTranscript: projectForm.requiresTranscript,
         facultyID: userId,
-        isActive: projectForm.isActive === true || projectForm.isActive === 'true',
+        isActive: shouldReactivateProject
+          ? true
+          : (projectForm.isActive === true || projectForm.isActive === 'true'),
         projectStatus: (selectedProject && selectedProject.projectStatus === 'Returned' && viewingReturnReason) ? 'Coordinator Review' : (selectedProject ? selectedProject.projectStatus : 'Pending')
       };
       
@@ -442,13 +537,31 @@ const FacultyDashboard = ({ user }) => {
         description: '',
         department: user.department || '',
         skillsRequired: '',
+        tags: '',
         qualifications: '',
         duration: '',
         applicationDeadline: '',
         requiresTranscript: false,
         isActive: true
       });
+
+      const savedProject = selectedProject ? result.data.updateProject : result.data.createProject;
+      const projectId = savedProject.id;
+      const oldRequiredTagIds = selectedProject ? resolveTagIds(selectedProject.skillsRequired || []) : [];
+      const oldOptionalTagIds = selectedProject ? resolveTagIds(selectedProject.tags || []) : [];
+      const newRequiredTagIds = resolveTagIds(projectSkillTagIds);
+      const newOptionalTagIds = resolveTagIds(projectResearchTagIds);
       
+      await syncProjectTagIndex({
+        projectId,
+        oldRequiredTagIds,
+        oldOptionalTagIds,
+        newRequiredTagIds,
+        newOptionalTagIds
+      });
+      setProjectResearchTagIds([]);
+      setProjectSkillTagIds([]);
+
       // Clear draft after successful submission
       clearProjectDraft();
       
@@ -480,14 +593,24 @@ const FacultyDashboard = ({ user }) => {
     
     setDeletingProject(project.id);
     setError(null);
+    const requiredTagIds = resolveTagIds(project.skillsRequired || []);
+    const optionalTagIds = resolveTagIds(project.tags || []);
     
     try {
       await API.graphql(graphqlOperation(deleteProject, { 
         input: { id: project.id } 
       }));
-      
-      setSuccessMessage('Project deleted successfully!');
-      fetchData(); // Refresh the data
+
+      try {
+        await removeProjectTagIndexMappings({ projectId: project.id, requiredTagIds, optionalTagIds });
+        setSuccessMessage('Project deleted successfully!');
+      } catch (syncError) {
+        console.error('ProjectTagIndex cleanup failed after project deletion:', syncError);
+        setSuccessMessage('Project deleted, but tag index cleanup failed. Rebuild recommendations before relying on them.');
+      }
+
+      fetchData();
+
     } catch (err) {
       console.error('Error deleting project:', err);
       setError('Failed to delete project. Please try again.');
@@ -537,7 +660,9 @@ const FacultyDashboard = ({ user }) => {
     
     setSelectedProject(project);
     setIsEditingProject(true);
-    setProjectForm(loadCachedEditData());
+    const editForm = loadCachedEditData();
+    setProjectForm(editForm);
+    hydrateProjectTagSelections(editForm);
     setIsCreatingProject(true);
     setActiveTabIndex(0);
   };
@@ -614,23 +739,12 @@ const FacultyDashboard = ({ user }) => {
   // Pagination helper function
   const renderPagination = (items, currentPage, setPage) => {
     const totalPages = Math.ceil(items.length / itemsPerPage);
-    if (totalPages <= 1) return null;
-    
     return (
-      <Flex justifyContent="flex-end" alignItems="center" gap="0.5rem" marginTop="1rem">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-          <Button
-            key={page}
-            size="small"
-            backgroundColor={page === currentPage ? "#552b9a" : "white"}
-            color={page === currentPage ? "white" : "black"}
-            border="1px solid #552b9a"
-            onClick={() => setPage(page)}
-          >
-            {page}
-          </Button>
-        ))}
-      </Flex>
+      <DashboardPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     );
   };
   
@@ -639,6 +753,519 @@ const FacultyDashboard = ({ user }) => {
     const startIndex = (page - 1) * itemsPerPage;
     return items.slice(startIndex, startIndex + itemsPerPage);
   };
+
+  const handleDashboardTabChange = (index) => {
+    setActiveTabIndex(index);
+    setProjectsPage(1);
+    setApplicationsPage(1);
+    setPendingPage(1);
+
+    if (index === 1 || index === 2) {
+      setHasUnseenApplications(false);
+      const userId = user.id || user.username;
+      localStorage.setItem(`lastViewedFacultyApplications_${userId}`, new Date().toISOString());
+    }
+  };
+
+  const postedOpportunitiesContent = (
+    <Flex direction="column" gap="2rem">
+      {projects.length === 0 ? (
+        <Card backgroundColor="white" padding="2rem" textAlign="center">
+          <Text fontSize="1.1rem" color="#4a5568">No projects created yet</Text>
+          <Text fontSize="0.9rem" color="#718096" marginTop="0.5rem">Create your first research project to get started</Text>
+        </Card>
+      ) : (
+        <>
+          <Flex direction="column">
+            <Card backgroundColor="white" padding="1rem">
+              <Flex direction="column" gap="1rem">
+                <Flex alignItems="center" gap="0.5rem">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                  </svg>
+                  <TextField
+                    placeholder="Search by title, department, skills, or research tags..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    width="400px"
+                    size="small"
+                  />
+                </Flex>
+
+                <Flex alignItems="center" gap="2rem" wrap="wrap">
+                  <Text fontSize="0.9rem" fontWeight="bold" color="#666">Sort by:</Text>
+                  <Flex alignItems="center" gap="1.5rem" wrap="wrap">
+                    <Flex alignItems="center" gap="0.4rem">
+                      <input
+                        type="checkbox"
+                        checked={sortOptions.newest}
+                        onChange={(e) => setSortOptions((prev) => ({ ...prev, newest: e.target.checked }))}
+                        onClick={() => setSortOptions((prev) => ({ ...prev, newest: !prev.newest }))}
+                      />
+                      <Text fontSize="0.9rem">Newest First</Text>
+                    </Flex>
+                    <Flex alignItems="center" gap="0.4rem">
+                      <input
+                        type="checkbox"
+                        checked={sortOptions.oldest}
+                        onChange={(e) => setSortOptions((prev) => ({ ...prev, oldest: e.target.checked }))}
+                        onClick={() => setSortOptions((prev) => ({ ...prev, oldest: !prev.oldest }))}
+                      />
+                      <Text fontSize="0.9rem">Oldest First</Text>
+                    </Flex>
+                    <Flex alignItems="center" gap="0.4rem">
+                      <input
+                        type="checkbox"
+                        checked={sortOptions.title}
+                        onChange={(e) => setSortOptions((prev) => ({ ...prev, title: e.target.checked }))}
+                        onClick={() => setSortOptions((prev) => ({ ...prev, title: !prev.title }))}
+                      />
+                      <Text fontSize="0.9rem">Alphabetical</Text>
+                    </Flex>
+                    <Flex alignItems="center" gap="0.4rem">
+                      <input
+                        type="checkbox"
+                        checked={sortOptions.department}
+                        onChange={(e) => setSortOptions((prev) => ({ ...prev, department: e.target.checked }))}
+                        onClick={() => setSortOptions((prev) => ({ ...prev, department: !prev.department }))}
+                      />
+                      <Text fontSize="0.9rem">By Department</Text>
+                    </Flex>
+                    <Flex alignItems="center" gap="0.4rem">
+                      <input
+                        type="checkbox"
+                        checked={sortOptions.deadline}
+                        onChange={(e) => setSortOptions((prev) => ({ ...prev, deadline: e.target.checked }))}
+                        onClick={() => setSortOptions((prev) => ({ ...prev, deadline: !prev.deadline }))}
+                      />
+                      <Text fontSize="0.9rem">By Deadline</Text>
+                    </Flex>
+                  </Flex>
+                </Flex>
+              </Flex>
+            </Card>
+            <Flex direction="column" gap="0.5rem">
+              {(() => {
+                const filteredProjects = projects.filter((project) => {
+                  const title = (project.title || '').toLowerCase();
+                  const department = (project.department || '').toLowerCase();
+                  const skillsRequired = (project.skillsRequired || []).join(' ').toLowerCase();
+                  const tags = (project.tags || []).join(' ').toLowerCase();
+                  const search = searchTerm.toLowerCase();
+                  return title.includes(search) || department.includes(search) || skillsRequired.includes(search) || tags.includes(search);
+                });
+
+                if (filteredProjects.length === 0 && searchTerm) {
+                  return (
+                    <Card backgroundColor="white" padding="2rem" textAlign="center">
+                      <Text fontSize="1.1rem" color="#4a5568">No projects match your search criteria.</Text>
+                      <Text fontSize="0.9rem" color="#718096" marginTop="0.5rem">Try adjusting your search terms or clear the search to see all projects.</Text>
+                    </Card>
+                  );
+                }
+
+                return getPaginatedItems(filteredProjects.sort((a, b) => {
+                  if (sortOptions.newest) {
+                    const dateCompare = new Date(b.createdAt) - new Date(a.createdAt);
+                    if (dateCompare !== 0) return dateCompare;
+                  }
+                  if (sortOptions.oldest) {
+                    const dateCompare = new Date(a.createdAt) - new Date(b.createdAt);
+                    if (dateCompare !== 0) return dateCompare;
+                  }
+                  if (sortOptions.title) {
+                    const titleCompare = (a.title || '').localeCompare(b.title || '');
+                    if (titleCompare !== 0) return titleCompare;
+                  }
+                  if (sortOptions.department) {
+                    const deptCompare = (a.department || '').localeCompare(b.department || '');
+                    if (deptCompare !== 0) return deptCompare;
+                  }
+                  if (sortOptions.deadline) {
+                    const aDeadline = a.applicationDeadline ? new Date(a.applicationDeadline) : new Date('9999-12-31');
+                    const bDeadline = b.applicationDeadline ? new Date(b.applicationDeadline) : new Date('9999-12-31');
+                    const deadlineCompare = aDeadline - bDeadline;
+                    if (deadlineCompare !== 0) return deadlineCompare;
+                  }
+                  return 0;
+                }), projectsPage).map((project) => (
+                  <Card key={project.id} backgroundColor="white" padding="1rem" style={{ cursor: 'pointer' }} onClick={() => {
+                    setSelectedProject(project);
+                    setIsEditingProject(false);
+                  }}>
+                    <Flex direction="column" gap="0.5rem">
+                      <Flex justifyContent="space-between" alignItems="flex-start">
+                        <Flex direction="column" gap="0.25rem" flex="1">
+                          <Text fontWeight="bold" fontSize="1.1rem">{project.title}</Text>
+                          <Text fontSize="0.9rem" color="#666">{project.department}</Text>
+                          <Text fontSize="0.9rem" color="#666">Faculty: {user?.name}</Text>
+                        </Flex>
+                        <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
+                          <Badge
+                            backgroundColor={
+                              project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'gray' :
+                              getStatusColorValue(project.projectStatus, tokens)
+                            }
+                            color="white"
+                          >
+                            {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : (project.projectStatus || 'Draft')}
+                          </Badge>
+                          <View position="relative">
+                            <button
+                              type="button"
+                              className="meatball-button faculty-meatball-button"
+                              aria-label={`Open actions for ${project.title}`}
+                              aria-expanded={openKebabMenu === project.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
+                              }}
+                            >
+                              <span aria-hidden="true">&#8942;</span>
+                            </button>
+                            {openKebabMenu === project.id && (
+                              <div
+                                className="meatball-dropdown"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  type="button"
+                                  className="meatball-dropdown-item"
+                                  onClick={() => {
+                                    editProject(project);
+                                    setOpenKebabMenu(null);
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  className="meatball-dropdown-item"
+                                  onClick={() => handleDeleteProject(project)}
+                                  style={{ color: '#e53e3e' }}
+                                  disabled={deletingProject === project.id}
+                                >
+                                  {deletingProject === project.id ? 'Deleting...' : 'Delete'}
+                                </button>
+                                {project.projectStatus === 'Returned' && (
+                                  <button
+                                    type="button"
+                                    className="meatball-dropdown-item"
+                                    onClick={() => {
+                                      editProject(project);
+                                      setViewingReturnReason(project);
+                                      setOpenKebabMenu(null);
+                                    }}
+                                  >
+                                    Edit and Resubmit
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </View>
+                        </Flex>
+                      </Flex>
+                      <Flex justifyContent="space-between" alignItems="center">
+                        <Text fontSize="0.9rem" color="#666">Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not set'}</Text>
+                      </Flex>
+                    </Flex>
+                  </Card>
+                ));
+              })()}
+            </Flex>
+          </Flex>
+          {renderPagination(projects, projectsPage, setProjectsPage)}
+        </>
+      )}
+    </Flex>
+  );
+
+  const applicationsContent = (
+    <Flex direction="column" gap="1.5rem">
+      <Card backgroundColor="white" padding="1.5rem">
+        <Flex alignItems="center" gap="0.5rem" marginBottom="1rem">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <TextField
+            placeholder="Search by student name, email, project title, or status..."
+            value={applicationSearchTerm}
+            onChange={(e) => setApplicationSearchTerm(e.target.value)}
+            width="400px"
+            size="small"
+          />
+        </Flex>
+      </Card>
+
+      {applications.length === 0 ? (
+        <Card backgroundColor="white" padding="2rem" textAlign="center">
+          <Text fontSize="1.1rem" color="#4a5568">No applications received yet.</Text>
+          <Text fontSize="0.9rem" color="#718096" marginTop="0.5rem">Applications will appear here once students apply to your projects.</Text>
+        </Card>
+      ) : (
+        (() => {
+          const filteredApplications = applications.filter((app) => {
+            const studentName = (app.student?.name || '').toLowerCase();
+            const studentEmail = (app.student?.email || '').toLowerCase();
+            const projectTitle = (app.project?.title || '').toLowerCase();
+            const status = (app.status || '').toLowerCase();
+            const search = applicationSearchTerm.toLowerCase();
+            return studentName.includes(search) || studentEmail.includes(search) || projectTitle.includes(search) || status.includes(search);
+          });
+
+          if (filteredApplications.length === 0 && applicationSearchTerm) {
+            return (
+              <Card backgroundColor="white" padding="2rem" textAlign="center">
+                <Text fontSize="1.1rem" color="#4a5568">No applications match your search criteria.</Text>
+                <Text fontSize="0.9rem" color="#718096" marginTop="0.5rem">Try adjusting your search terms or clear the search to see all applications.</Text>
+              </Card>
+            );
+          }
+
+          return (
+            <Flex direction="column" gap="0.75rem">
+              {getPaginatedItems(filteredApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage).map((application) => (
+                <Card key={application.id} backgroundColor="white" padding="1.5rem" style={{ cursor: 'pointer' }} onClick={() => {
+                  setReviewingApplication(application);
+                }}>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Flex direction="column" gap="0.75rem" flex="1">
+                      <Flex alignItems="center" gap="1rem">
+                        <Text fontWeight="600" fontSize="1.1rem" color="#2d3748">{application.student?.name || 'Unknown Student'}</Text>
+                        <Badge
+                          backgroundColor={getStatusColorValue(application.status, tokens)}
+                          color="white"
+                          fontSize="0.8rem"
+                        >
+                          {application.status}
+                        </Badge>
+                      </Flex>
+                      <Text fontSize="1rem" color="#2d3748" fontWeight="500">{application.project?.title || 'Unknown Project'}</Text>
+                      <Flex alignItems="center" gap="2rem">
+                        <Text fontSize="0.9rem" color="#4a5568">
+                          <span aria-hidden="true">&#128231;</span> {application.student?.email || 'No email'}
+                        </Text>
+                        <Text fontSize="0.9rem" color="#4a5568">
+                          <span aria-hidden="true">&#128197;</span> Applied: {new Date(application.createdAt).toLocaleDateString()}
+                        </Text>
+                        {application.student?.gpa && (
+                          <Text fontSize="0.9rem" color="#4a5568">
+                            <span aria-hidden="true">&#127891;</span> GPA: {application.student.gpa}
+                          </Text>
+                        )}
+                      </Flex>
+                    </Flex>
+
+                    <Flex gap="0.5rem" alignItems="center">
+                      {application.status === 'Approved' && (
+                        <Button
+                          className={primaryActionButtonClassName}
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMessagingStudent({ application, student: application.student });
+                          }}
+                        >
+                          Message
+                        </Button>
+                      )}
+                    </Flex>
+                  </Flex>
+                </Card>
+              ))}
+              {renderPagination(filteredApplications, applicationsPage, setApplicationsPage)}
+            </Flex>
+          );
+        })()
+      )}
+    </Flex>
+  );
+
+  const pendingReviewContent = getReviewNeededApplications().length === 0 && getProjectsNeedingAttention().length === 0 ? (
+    <Card backgroundColor="white" padding="2rem" textAlign="center">
+      <Text fontSize="1.1rem" color="#4a5568">No items need your review at this time</Text>
+      <Text fontSize="0.9rem" color="#718096" marginTop="0.5rem">Items requiring your attention will appear here</Text>
+    </Card>
+  ) : (
+    <Flex direction="column" gap="2rem">
+      {getProjectsNeedingAttention().length > 0 && (
+        <Card>
+          <Heading level={4} marginBottom="1rem">Projects ({getProjectsNeedingAttention().length})</Heading>
+          <Collection items={getPaginatedItems(getProjectsNeedingAttention(), pendingPage)} type="list" gap="1rem">
+            {(project) => (
+              <Card key={project.id} backgroundColor="white" padding="1rem" style={{ cursor: 'pointer' }} onClick={() => {
+                setViewingProject(project);
+              }}>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Flex direction="column" gap="0.5rem" flex="1">
+                    <Text fontWeight="bold">{project.title}</Text>
+                    <Text fontSize="0.9rem">{project.department}</Text>
+                  </Flex>
+                  <Flex gap="0.5rem">
+                    <Button size="small" onClick={() => {
+                      editProject(project);
+                      setViewingReturnReason(project);
+                    }}>Edit and Resubmit</Button>
+                  </Flex>
+                </Flex>
+              </Card>
+            )}
+          </Collection>
+          {renderPagination(getProjectsNeedingAttention(), pendingPage, setPendingPage)}
+        </Card>
+      )}
+      {projects.map((project) => {
+        const projectApplications = getReviewNeededApplications().filter((app) => app.projectID === project.id);
+        if (projectApplications.length === 0) return null;
+
+        return (
+          <Card key={project.id}>
+            <Heading level={4}>{project.title}</Heading>
+            <Divider margin="1rem 0" />
+            <Collection
+              items={getPaginatedItems(projectApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), pendingPage)}
+              type="list"
+              gap="1rem"
+              wrap="nowrap"
+              direction="column"
+            >
+              {(application) => (
+                <Card key={application.id}>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Flex direction="row" gap="2rem" alignItems="center" flex="1">
+                      <Text fontWeight="bold" width="180px">{application.student?.name || 'Unknown Student'}</Text>
+                      <Text fontSize="0.9rem" width="220px">{application.student?.email}</Text>
+                      <Text fontSize="0.9rem" width="120px">{new Date(application.createdAt).toLocaleDateString()}</Text>
+                      <Badge
+                        backgroundColor={getStatusColorValue(application.status, tokens)}
+                        color="white"
+                      >
+                        {application.status}
+                      </Badge>
+                    </Flex>
+
+                    <View position="relative">
+                      <button
+                        type="button"
+                        className="meatball-button faculty-meatball-button"
+                        aria-label={`Open actions for ${application.student?.name || 'this application'}`}
+                        aria-expanded={openKebabMenu === application.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
+                        }}
+                      >
+                        <span aria-hidden="true">&#8942;</span>
+                      </button>
+                      {openKebabMenu === application.id && (
+                        <div
+                          className="meatball-dropdown"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            className="meatball-dropdown-item"
+                            onClick={() => {
+                              setReviewingApplication(application);
+                              setOpenKebabMenu(null);
+                            }}
+                          >
+                            Review Now
+                          </button>
+                        </div>
+                      )}
+                    </View>
+                  </Flex>
+                </Card>
+              )}
+            </Collection>
+            {renderPagination(projectApplications, pendingPage, setPendingPage)}
+          </Card>
+        );
+      })}
+    </Flex>
+  );
+
+  const rejectedItemsContent = (
+    <Flex direction="column" gap="2rem">
+      {getRejectedProjects().length > 0 && (
+        <>
+          <Collection items={getPaginatedItems(getRejectedProjects().sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), projectsPage)} type="list" gap="1rem">
+            {(project) => (
+              <Card key={project.id} backgroundColor="white" padding="1rem" minHeight="120px" style={{ cursor: 'pointer' }} onClick={() => {
+                setSelectedProject(project);
+                setIsEditingProject(false);
+              }}>
+                <Flex direction="column" gap="0.5rem">
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontWeight="bold">{project.title}</Text>
+                    <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
+                      <Badge backgroundColor={getStatusColorValue('Rejected', tokens)} color="white">
+                        Rejected
+                      </Badge>
+                    </Flex>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontSize="0.9rem">{project.department} <span aria-hidden="true">&middot;</span> Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
+                  </Flex>
+                </Flex>
+              </Card>
+            )}
+          </Collection>
+          {renderPagination(getRejectedProjects(), projectsPage, setProjectsPage)}
+        </>
+      )}
+
+      {getRejectedApplications().length > 0 && (
+        <>
+          <Collection items={getPaginatedItems(getRejectedApplications().sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage)} type="list" gap="1rem">
+            {(application) => (
+              <Card key={application.id} backgroundColor="white" padding="1rem" minHeight="120px" style={{ cursor: 'pointer' }} onClick={() => {
+                setReviewingApplication(application);
+              }}>
+                <Flex direction="column" gap="0.5rem">
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontWeight="bold">{application.project?.title}</Text>
+                    <Flex direction="column" alignItems="flex-end" gap="0.5rem" minWidth="150px">
+                      <Badge backgroundColor={getStatusColorValue('Rejected', tokens)} color="white">
+                        Rejected
+                      </Badge>
+                    </Flex>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontSize="0.9rem">{application.student?.name} <span aria-hidden="true">&middot;</span> Rejected: {new Date(application.updatedAt).toLocaleDateString()}</Text>
+                  </Flex>
+                  {application.rejectionReason && (
+                    <Text fontSize="0.8rem" color="red">
+                      Reason: {application.rejectionReason}
+                    </Text>
+                  )}
+                </Flex>
+              </Card>
+            )}
+          </Collection>
+          {renderPagination(getRejectedApplications(), applicationsPage, setApplicationsPage)}
+        </>
+      )}
+
+      {getRejectedProjects().length === 0 && getRejectedApplications().length === 0 && (
+        <Card backgroundColor="white" padding="2rem" textAlign="center">
+          <Text fontSize="1.1rem" color="#4a5568">No rejected items</Text>
+          <Text fontSize="0.9rem" color="#718096" marginTop="0.5rem">Rejected projects and applications will appear here</Text>
+        </Card>
+      )}
+    </Flex>
+  );
+
+  const dashboardTabs = [
+    { label: 'Posted Opportunities', content: postedOpportunitiesContent },
+    { label: 'Applications', content: applicationsContent },
+    { label: 'Pending Review', content: pendingReviewContent },
+    { label: 'Rejected Items', content: rejectedItemsContent },
+    { label: 'Status Guide', content: <ApplicationStatusGuide /> }
+  ];
   
   if (loading) {
     return (
@@ -649,23 +1276,30 @@ const FacultyDashboard = ({ user }) => {
   }
   
   return (
-    <View width="100%" backgroundColor="#f5f5f5">
-      <View
-        position="relative"
-        width="100vw"
-        height="450px"
-        style={{ left: '50%', marginLeft: '-50vw', marginTop: '-2rem' }}
-      >
-        <Image
-          alt="Faculty Banner"
-          src="/Faculty.jpg"
-          width="100%"
-          height="100%"
-          objectFit="cover"
-          objectPosition="center"
-        />
-      </View>
-      <Flex direction="column" padding="2rem" gap="2rem">
+    <DashboardPageShell
+      hero={(
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '450px',
+            overflow: 'hidden'
+          }}
+        >
+          <img
+            alt="Faculty Banner"
+            src="/Faculty.jpg"
+            style={{
+              display: 'block',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center'
+            }}
+          />
+        </div>
+      )}
+    >
       <Card backgroundColor="white" padding="1.5rem">
         <Flex direction="column" gap="0.5rem">
           <Heading level={2} color="#2d3748">Faculty Dashboard</Heading>
@@ -679,11 +1313,10 @@ const FacultyDashboard = ({ user }) => {
       {successMessage && <Text color="green">{successMessage}</Text>}
       
       <Flex justifyContent="space-between" alignItems="center" marginBottom="2rem">
-        <Button 
-          backgroundColor="white"
-          color="black"
-          border="1px solid black"
-          size="small"
+        <Button
+          type="button"
+          data-dashboard-button="true"
+          className={primaryActionButtonClassName}
           onClick={() => {
             setIsCreatingProject(true);
             setSelectedProject(null);
@@ -728,6 +1361,7 @@ const FacultyDashboard = ({ user }) => {
             
             const newForm = loadCachedDraftData();
             setProjectForm(newForm);
+            hydrateProjectTagSelections(newForm);
             saveProjectToDraft(newForm);
           }}
         >
@@ -735,24 +1369,15 @@ const FacultyDashboard = ({ user }) => {
         </Button>
       </Flex>
       
-      <Tabs
+      <SliderTabs
         currentIndex={activeTabIndex}
-        onChange={(index) => {
-          setActiveTabIndex(index);
-          // Reset pagination when switching tabs
-          setProjectsPage(1);
-          setApplicationsPage(1);
-          setPendingPage(1);
-          if (index === 1 || index === 2) { // All Applications or Pending Review tab
-            setHasUnseenApplications(false);
-            const userId = user.id || user.username;
-            localStorage.setItem(`lastViewedFacultyApplications_${userId}`, new Date().toISOString());
-          }
-        }}
-      >
+        onChange={handleDashboardTabChange}
+        tabs={dashboardTabs}
+      />
+      {/* Legacy Amplify tab block kept commented during SliderTabs migration.
         <TabItem title="Posted Opportunities">
           <Flex direction="column" gap="2rem">
-            {/* Projects Section */}
+            Projects Section
               {projects.length === 0 ? (
                 <Card backgroundColor="white" padding="2rem" textAlign="center">
                   <Text fontSize="1.1rem" color="#4a5568">No projects created yet</Text>
@@ -832,21 +1457,6 @@ const FacultyDashboard = ({ user }) => {
                   <Flex direction="column" gap="0.5rem">
                     {(() => {
                       const filteredProjects = projects.filter(project => {
-                        // Filter out deactivated projects
-                        if (project.isActive === false) {
-                          return false;
-                        }
-                        
-                        // Filter out projects expired for more than 14 days
-                        if (project.applicationDeadline) {
-                          const deadline = new Date(project.applicationDeadline);
-                          const now = new Date();
-                          const daysSinceExpired = (now - deadline) / (1000 * 60 * 60 * 24);
-                          if (daysSinceExpired > 14) {
-                            return false; // Hide projects expired for more than 14 days
-                          }
-                        }
-                        
                         const title = (project.title || '').toLowerCase();
                         const department = (project.department || '').toLowerCase();
                         const skillsRequired = (project.skillsRequired || []).join(' ').toLowerCase();
@@ -911,34 +1521,36 @@ const FacultyDashboard = ({ user }) => {
                             >
                               {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : (project.projectStatus || 'Draft')}
                             </Badge>
-                            {/* Only show meatball menu for non-expired projects */}
-                            {(!project.applicationDeadline || new Date(project.applicationDeadline) >= new Date()) && (
-                              <View position="relative">
-                              <Button 
-                                className="meatball-button"
+                            <View position="relative">
+                              <button
+                                type="button"
+                                className="meatball-button faculty-meatball-button"
+                                aria-label={`Open actions for ${project.title}`}
+                                aria-expanded={openKebabMenu === project.id}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
                                 }}
                               >
-                                ⋯
-                              </Button>
+                                <span aria-hidden="true">&#8942;</span>
+                              </button>
                               {openKebabMenu === project.id && (
                                 <div
                                   className="meatball-dropdown"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                     <button
+                                      type="button"
                                       className="meatball-dropdown-item"
                                       onClick={() => {
                                         editProject(project);
                                         setOpenKebabMenu(null);
                                       }}
-                                      disabled={project.applicationDeadline && new Date(project.applicationDeadline) < new Date()}
                                     >
-                                      {project.applicationDeadline && new Date(project.applicationDeadline) < new Date() ? 'Expired' : 'Edit'}
+                                      Edit
                                     </button>
                                     <button
+                                      type="button"
                                       className="meatball-dropdown-item"
                                       onClick={() => handleDeleteProject(project)}
                                       style={{ color: '#e53e3e' }}
@@ -948,6 +1560,7 @@ const FacultyDashboard = ({ user }) => {
                                     </button>
                                     {project.projectStatus === 'Returned' && (
                                       <button
+                                        type="button"
                                         className="meatball-dropdown-item"
                                         onClick={() => {
                                           editProject(project);
@@ -961,8 +1574,7 @@ const FacultyDashboard = ({ user }) => {
 
                                 </div>
                               )}
-                              </View>
-                            )}
+                            </View>
                           </Flex>
                         </Flex>
                         <Flex justifyContent="space-between" alignItems="center">
@@ -1046,14 +1658,14 @@ const FacultyDashboard = ({ user }) => {
                             <Text fontSize="1rem" color="#2d3748" fontWeight="500">{application.project?.title || 'Unknown Project'}</Text>
                             <Flex alignItems="center" gap="2rem">
                               <Text fontSize="0.9rem" color="#4a5568">
-                                📧 {application.student?.email || 'No email'}
+                                <span aria-hidden="true">&#128231;</span> {application.student?.email || 'No email'}
                               </Text>
                               <Text fontSize="0.9rem" color="#4a5568">
-                                📅 Applied: {new Date(application.createdAt).toLocaleDateString()}
+                                <span aria-hidden="true">&#128197;</span> Applied: {new Date(application.createdAt).toLocaleDateString()}
                               </Text>
                               {application.student?.gpa && (
                                 <Text fontSize="0.9rem" color="#4a5568">
-                                  🎓 GPA: {application.student.gpa}
+                                  <span aria-hidden="true">&#127891;</span> GPA: {application.student.gpa}
                                 </Text>
                               )}
                             </Flex>
@@ -1062,9 +1674,8 @@ const FacultyDashboard = ({ user }) => {
                           <Flex gap="0.5rem" alignItems="center">
                             {application.status === 'Approved' && (
                               <Button
+                                className={primaryActionButtonClassName}
                                 size="small"
-                                backgroundColor="#4299e1"
-                                color="white"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setMessagingStudent({ application, student: application.student });
@@ -1093,7 +1704,7 @@ const FacultyDashboard = ({ user }) => {
             </Card>
           ) : (
             <Flex direction="column" gap="2rem">
-              {/* Returned Projects Section */}
+              Returned Projects Section
               {getProjectsNeedingAttention().length > 0 && (
                 <Card>
                   <Heading level={4} marginBottom="1rem">Projects ({getProjectsNeedingAttention().length})</Heading>
@@ -1151,21 +1762,25 @@ const FacultyDashboard = ({ user }) => {
                             </Flex>
                             
                             <View position="relative">
-                              <Button 
-                                className="meatball-button"
+                              <button
+                                type="button"
+                                className="meatball-button faculty-meatball-button"
+                                aria-label={`Open actions for ${application.student?.name || 'this application'}`}
+                                aria-expanded={openKebabMenu === application.id}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
                                 }}
                               >
-                                ⋯
-                              </Button>
+                                <span aria-hidden="true">&#8942;</span>
+                              </button>
                               {openKebabMenu === application.id && (
                                 <div
                                   className="meatball-dropdown"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                     <button
+                                      type="button"
                                       className="meatball-dropdown-item"
                                       onClick={() => {
                                         setReviewingApplication(application);
@@ -1191,7 +1806,7 @@ const FacultyDashboard = ({ user }) => {
         
         <TabItem title="Rejected Items">
           <Flex direction="column" gap="2rem">
-            {/* Rejected Projects */}
+            Rejected Projects
             {getRejectedProjects().length > 0 && (
               <>
                 <Collection items={getPaginatedItems(getRejectedProjects().sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), projectsPage)} type="list" gap="1rem">
@@ -1211,7 +1826,7 @@ const FacultyDashboard = ({ user }) => {
                             </Flex>
                           </Flex>
                           <Flex justifyContent="space-between" alignItems="center">
-                            <Text fontSize="0.9rem">{project.department} • Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
+                            <Text fontSize="0.9rem">{project.department} <span aria-hidden="true">&middot;</span> Rejected: {new Date(project.updatedAt).toLocaleDateString()}</Text>
                           </Flex>
                         </Flex>
                       </Card>
@@ -1221,7 +1836,7 @@ const FacultyDashboard = ({ user }) => {
                 </>
             )}
             
-            {/* Rejected Applications */}
+            Rejected Applications
             {getRejectedApplications().length > 0 && (
               <>
                 <Collection items={getPaginatedItems(getRejectedApplications().sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), applicationsPage)} type="list" gap="1rem">
@@ -1240,7 +1855,7 @@ const FacultyDashboard = ({ user }) => {
                           </Flex>
                         </Flex>
                         <Flex justifyContent="space-between" alignItems="center">
-                          <Text fontSize="0.9rem">{application.student?.name} • Rejected: {new Date(application.updatedAt).toLocaleDateString()}</Text>
+                          <Text fontSize="0.9rem">{application.student?.name} <span aria-hidden="true">&middot;</span> Rejected: {new Date(application.updatedAt).toLocaleDateString()}</Text>
                         </Flex>
                         {application.rejectionReason && (
                           <Text fontSize="0.8rem" color="red">
@@ -1268,6 +1883,7 @@ const FacultyDashboard = ({ user }) => {
           <ApplicationStatusGuide />
         </TabItem>
       </Tabs>
+      */}
       
       {/* View Application Details Modal */}
       {reviewingApplication && (
@@ -1343,10 +1959,18 @@ const FacultyDashboard = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Send Message</Heading>
-                  <Button size="small" onClick={() => {
-                    setMessagingStudent(null);
-                    setMessageText('');
-                  }} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  <Button
+                    size="small"
+                    data-close-button="true"
+                    className={iconActionButtonClassName}
+                    aria-label="Close send message modal"
+                    onClick={() => {
+                      setMessagingStudent(null);
+                      setMessageText('');
+                    }}
+                  >
+                    <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                  </Button>
                 </Flex>
                 
                 <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
@@ -1396,19 +2020,18 @@ const FacultyDashboard = ({ user }) => {
                 
                 <Flex gap="1rem" justifyContent="flex-end">
                   <Button 
+                    className={secondaryActionButtonClassName}
                     onClick={() => {
                       setMessagingStudent(null);
                       setMessageText('');
+                      setProjectResearchTagIds([]);
+                      setProjectSkillTagIds([]);
                     }}
-                    backgroundColor="white"
-                    color="#4a5568"
-                    border="1px solid #e2e8f0"
                   >
                     Cancel
                   </Button>
                   <Button 
-                    backgroundColor="#4299e1"
-                    color="white"
+                    className={primaryActionButtonClassName}
                     isLoading={isSendingMessage}
                     onClick={async () => {
                       if (!messageText.trim()) return;
@@ -1474,182 +2097,160 @@ const FacultyDashboard = ({ user }) => {
       
       {/* Create/Edit Project Modal */}
       {isCreatingProject && (
-        <View
-          position="fixed"
-          top="0"
-          left="0"
-          width="100vw"
-          height="100vh"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          style={{ zIndex: 1000 }}
-          onClick={() => setIsCreatingProject(false)}
-        >
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-            padding="2rem"
-          >
-            <Card
-              maxWidth="900px"
-              width="100%"
-              maxHeight="100vh"
-              backgroundColor="white"
-              style={{ overflow: 'auto' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Flex direction="column" gap="1.5rem" padding="2rem">
-                <Flex justifyContent="space-between" alignItems="center">
-                  <Heading level={3} color="#2d3748">
-                    {viewingReturnReason ? 'Project Returned - Edit & Resubmit' : (selectedProject ? 'Edit Project' : 'Create New Project')}
-                  </Heading>
-                  <Button size="small" onClick={() => {
-                    setIsCreatingProject(false);
-                    setSelectedProject(null);
-                    setIsEditingProject(false);
-                    setViewingReturnReason(null);
-                  }} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
-                </Flex>
-              
-                {viewingReturnReason?.coordinatorNotes && (
-                  <Card backgroundColor="#fff3cd" padding="1.5rem" border="1px solid #ffeaa7">
-                    <Text fontWeight="bold" color="#856404">Coordinator Notes:</Text>
-                    <Text color="#856404" marginTop="0.5rem">{viewingReturnReason.coordinatorNotes}</Text>
-                    <Text fontSize="0.9rem" color="#856404" marginTop="0.5rem" fontStyle="italic">
-                      Please address these concerns and resubmit your project.
-                    </Text>
-                  </Card>
-                )}
-                
-                <form onSubmit={handleSubmitProject}>
-                  <Flex direction="column" gap="1.5rem">
-                    <TextField
-                      name="title"
-                      label="Project Title *"
-                      value={projectForm.title}
-                      onChange={handleProjectFormChange}
-                      required
-                    />
-                    <div>
-                      <Text fontWeight="bold" marginBottom="0.5rem">Project Description *</Text>
-                      <div style={{ height: '300px' }}>
-                        <ReactQuill
-                          ref={createProjectQuillRef}
-                          value={projectForm.description}
-                          onChange={(value) => {
-                            if (value !== projectForm.description) {
-                              const newForm = { ...projectForm, description: value };
-                              setProjectForm(newForm);
-                              saveProjectToDraft(newForm);
-                            }
-                          }}
-                          placeholder="Describe the research project, objectives, and what students will learn..."
-                          modules={{
-                            toolbar: [
-                              ['bold', 'italic', 'underline'],
-                              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                              ['clean']
-                            ]
-                          }}
-                          style={{ height: '250px' }}
-                        />
-                      </div>
+        <div className="faculty-create-project-modal" onClick={() => { setIsCreatingProject(false); setProjectResearchTagIds([]); setProjectSkillTagIds([]); }}>
+          <div className="fcpm-card" onClick={(e) => e.stopPropagation()}>
+            <div className="fcpm-body">
+
+              <div className="fcpm-header">
+                <div className="fcpm-header-text">
+                  <h2 className="fcpm-title">
+                    {viewingReturnReason ? 'Edit & Resubmit Project' : (selectedProject ? 'Edit Project' : 'Create New Project')}
+                  </h2>
+                  {!viewingReturnReason && !selectedProject && (
+                    <p className="fcpm-subtitle">Post a new research opportunity for students to discover and apply to.</p>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  data-dashboard-button="true"
+                  data-close-button="true"
+                  className={iconActionButtonClassName}
+                  aria-label="Close project editor"
+                  onClick={() => { setIsCreatingProject(false); setSelectedProject(null); setIsEditingProject(false); setViewingReturnReason(null); }}
+                >
+                  <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                </Button>
+              </div>
+
+              {viewingReturnReason?.coordinatorNotes && (
+                <div className="fcpm-return-banner">
+                  <strong><span aria-hidden="true">&#9888;</span> Coordinator Notes</strong>
+                  <span>{viewingReturnReason.coordinatorNotes}</span>
+                  <br />
+                  <span style={{ fontStyle: 'italic', opacity: 0.8 }}>Please address these concerns and resubmit your project.</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmitProject} className="fcpm-form">
+
+                {/* Section 1: Basic Information */}
+                <div className="fcpm-section">
+                  <div className="fcpm-section-header">
+                    <p className="fcpm-section-title">Basic Information</p>
+                    <p className="fcpm-section-desc">Give your project a clear title and description so students know what to expect.</p>
+                  </div>
+                  <div className="fcpm-field">
+                    <label className="fcpm-label">Project Title <span className="fcpm-required">*</span></label>
+                    <input className="fcpm-input" type="text" name="title" value={projectForm.title} onChange={handleProjectFormChange} required placeholder="Enter a clear, descriptive project title" />
+                  </div>
+                  <div className="fcpm-field">
+                    <label className="fcpm-label">Project Description <span className="fcpm-required">*</span></label>
+                    <p className="fcpm-hint">Summarize the project goals, responsibilities, and what students will learn.</p>
+                    <div className="fcpm-editor-wrap">
+                      <ReactQuill
+                        ref={createProjectQuillRef}
+                        value={projectForm.description}
+                        onChange={(value) => { if (value !== projectForm.description) { const newForm = { ...projectForm, description: value }; setProjectForm(newForm); saveProjectToDraft(newForm); } }}
+                        placeholder="Describe the research project, its objectives, methodology, and expected outcomes..."
+                        modules={{ toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['clean']] }}
+                      />
                     </div>
-                    <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
-                      <TextField
-                        name="department"
-                        label="College *"
-                        value={projectForm.department}
-                        onChange={handleProjectFormChange}
-                        required
-                        flex="1"
-                      />
-                      <TextField
-                        name="applicationDeadline"
-                        label="Application Deadline *"
-                        type="date"
-                        value={projectForm.applicationDeadline}
-                        onChange={handleProjectFormChange}
-                        required
-                        flex="1"
-                      />
-                    </Flex>
-                    <TextField
-                      name="skillsRequired"
-                      label="Skills Required (comma-separated)"
-                      value={projectForm.skillsRequired}
-                      onChange={handleSkillsChange}
-                      placeholder="e.g. Python, Data Analysis, Machine Learning"
-                    />
-                    <TextField
-                      name="tags"
-                      label="Research Tags (comma-separated)"
-                      value={projectForm.tags}
-                      onChange={(e) => {
-                        const newForm = { ...projectForm, tags: e.target.value };
-                        setProjectForm(newForm);
-                        saveProjectToDraft(newForm);
-                      }}
-                      placeholder="e.g. lab, field, geology, code, clinical"
-                    />
-                    <TextAreaField
-                      name="qualifications"
-                      label="Required Qualifications/Prerequisites"
-                      value={projectForm.qualifications}
-                      onChange={handleProjectFormChange}
-                      placeholder="e.g. Completion of PSYC 101, minimum GPA of 3.0, upper-division standing"
-                      rows={4}
-                    />
-                    <TextField
-                      name="duration"
-                      label="Project Duration"
-                      value={projectForm.duration}
-                      onChange={handleProjectFormChange}
-                      placeholder="e.g. 3 months, Fall Semester"
-                    />
-                    <SelectField
-                      name="requiresTranscript"
-                      label="Requires Transcript Upload"
-                      value={(projectForm.requiresTranscript || false).toString()}
-                      onChange={(e) => setProjectForm(prev => ({ 
-                        ...prev, 
-                        requiresTranscript: e.target.value === 'true' 
-                      }))}
-                    >
+                  </div>
+                </div>
+
+                {/* Section 2: Project Details */}
+                <div className="fcpm-section">
+                  <div className="fcpm-section-header">
+                    <p className="fcpm-section-title">Project Details</p>
+                    <p className="fcpm-section-desc">Specify the college, timeline, and duration for this opportunity.</p>
+                  </div>
+                  <div className="fcpm-row-3">
+                    <div className="fcpm-field" style={{ position: 'relative' }}>
+                      <label className="fcpm-label">College <span className="fcpm-required">*</span></label>
+                      <input className="fcpm-input" type="text" name="department" value={projectForm.department} onChange={handleCollegeChange} onFocus={() => setShowCollegeDropdown(true)} onBlur={() => setTimeout(() => setShowCollegeDropdown(false), 120)} required placeholder="Start typing to search..." />
+                      {showCollegeDropdown && collegeSuggestions.length > 0 && (
+                        <ul className="tag-dropdown" style={{ zIndex: 20, maxHeight: '220px', overflowY: 'auto' }}>
+                          {collegeSuggestions.map((college) => (
+                            <li key={college} className="tag-dropdown-option" onMouseDown={(e) => e.preventDefault()} onClick={() => handleCollegeSelect(college)}>{college}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <div className="fcpm-field">
+                      <label className="fcpm-label">Application Deadline <span className="fcpm-required">*</span></label>
+                      <input className="fcpm-input" type="date" name="applicationDeadline" value={projectForm.applicationDeadline} onChange={handleProjectFormChange} required />
+                    </div>
+                    <div className="fcpm-field">
+                      <label className="fcpm-label">Project Duration</label>
+                      <input className="fcpm-input" type="text" name="duration" value={projectForm.duration} onChange={handleProjectFormChange} placeholder="e.g. 3 months" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 3: Research Profile */}
+                <div className="fcpm-section">
+                  <div className="fcpm-section-header">
+                    <p className="fcpm-section-title">Research Profile</p>
+                    <p className="fcpm-section-desc">Help students find this project by tagging relevant research areas and skills.</p>
+                  </div>
+                  <div className="fcpm-field">
+                    <label className="fcpm-label">Research Interests <span className="fcpm-required">*</span></label>
+                    <p className="fcpm-hint">e.g., Machine Learning, Neuroscience, Public Health</p>
+                    <TagSelector selectedTagIds={projectResearchTagIds} onChange={handleResearchTagsChange} placeholder="Type to search and add research interests..." maxSelections={10} />
+                  </div>
+                  <div className="fcpm-field">
+                    <label className="fcpm-label">Skills and Experience <span className="fcpm-required">*</span></label>
+                    <p className="fcpm-hint">e.g., Python, Data Analysis, Literature Review, Lab Experience</p>
+                    <TagSelector selectedTagIds={projectSkillTagIds} onChange={handleSkillsTagsChange} placeholder="Type to search and add required skills..." maxSelections={15} />
+                  </div>
+                </div>
+
+                {/* Section 4: Requirements */}
+                <div className="fcpm-section">
+                  <div className="fcpm-section-header">
+                    <p className="fcpm-section-title">Requirements</p>
+                    <p className="fcpm-section-desc">Set any prerequisites or application requirements for this project.</p>
+                  </div>
+                  <div className="fcpm-field">
+                    <label className="fcpm-label">Qualifications & Prerequisites</label>
+                    <textarea className="fcpm-textarea" name="qualifications" value={projectForm.qualifications} onChange={handleProjectFormChange} placeholder="List any coursework, GPA expectations, class standing, or prior experience required" rows={3} />
+                  </div>
+                  <div className="fcpm-toggle-row">
+                    <div className="fcpm-toggle-label">
+                      <span>Transcript Upload</span>
+                      <span>Require applicants to upload an unofficial transcript</span>
+                    </div>
+                    <select className="fcpm-toggle-select" name="requiresTranscript" value={(projectForm.requiresTranscript || false).toString()} onChange={(e) => setProjectForm(prev => ({ ...prev, requiresTranscript: e.target.value === 'true' }))}>
                       <option value="false">No</option>
                       <option value="true">Yes</option>
-                    </SelectField>
-                    
-                    <Flex gap="1rem" justifyContent="flex-end">
-                      <Button 
-                        onClick={() => {
-                          setIsCreatingProject(false);
-                          setSelectedProject(null);
-                          setIsEditingProject(false);
-                          setViewingReturnReason(null);
-                        }} 
-                        backgroundColor="white"
-                        color="#4a5568"
-                        border="1px solid #e2e8f0"
-                      >
-                        Cancel
-                      </Button>
-                      <Button 
-                        type="submit" 
-                        backgroundColor="white"
-                        color="black"
-                        border="1px solid black"
-                        isLoading={isSubmitting}
-                      >
-                        {selectedProject ? 'Update Project' : 'Create Project'}
-                      </Button>
-                    </Flex>
-                  </Flex>
-                </form>
-              </Flex>
-            </Card>
-          </Flex>
-        </View>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="fcpm-footer">
+                  <button
+                    type="button"
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
+                    onClick={() => { setIsCreatingProject(false); setSelectedProject(null); setIsEditingProject(false); setViewingReturnReason(null); }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    data-dashboard-button="true"
+                    className={primaryActionButtonClassName}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Saving...' : (selectedProject ? 'Update Project' : 'Create Project')}
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
       )}
       
 
@@ -1686,10 +2287,19 @@ const FacultyDashboard = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">{selectedProject.title}</Heading>
-                  <Button size="small" onClick={() => {
-                    setSelectedProject(null);
-                    setViewingReturnReason(null);
-                  }} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  <Button
+                    type="button"
+                    data-dashboard-button="true"
+                    data-close-button="true"
+                    className={iconActionButtonClassName}
+                    aria-label="Close project details"
+                    onClick={() => {
+                      setSelectedProject(null);
+                      setViewingReturnReason(null);
+                    }}
+                  >
+                    <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                  </Button>
                 </Flex>
                 
                 {/* Rejection Reason Banner */}
@@ -1756,7 +2366,7 @@ const FacultyDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Skills Required</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.skillsRequired.map((skill, index) => (
-                        <Badge key={index} backgroundColor="#4299e1" color="white" padding="0.5rem 1rem">
+                        <Badge key={index} {...tagPillProps}>
                           {skill}
                         </Badge>
                       ))}
@@ -1769,7 +2379,7 @@ const FacultyDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Research Tags</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.tags.map((tag, index) => (
-                        <Badge key={index} backgroundColor="#38b2ac" color="white" padding="0.5rem 1rem">
+                        <Badge key={index} {...tagPillProps}>
                           {tag}
                         </Badge>
                       ))}
@@ -1787,8 +2397,7 @@ const FacultyDashboard = ({ user }) => {
           </Flex>
         </View>
       )}
-      </Flex>
-    </View>
+    </DashboardPageShell>
   );
 };
 

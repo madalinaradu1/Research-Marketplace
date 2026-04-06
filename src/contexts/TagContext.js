@@ -8,14 +8,24 @@ const TagContext = createContext(null);
 function buildIndexes(tags) {
   const tagsById = new Map();
   const tagsByNormalizedName = new Map();
+  const tagsByNormalizedAlias = new Map();
   
   tags.forEach((tag) => {
     if (!tag?.tag_id) return;
     tagsById.set(tag.tag_id, tag);
     if (tag.normalized_name) tagsByNormalizedName.set(tag.normalized_name, tag);
+
+    (tag.aliases || []).forEach((alias) => {
+      const normalizedAlias = normalizeTagName(alias);
+      if (!normalizedAlias) return;
+
+      const matches = tagsByNormalizedAlias.get(normalizedAlias) || [];
+      matches.push(tag);
+      tagsByNormalizedAlias.set(normalizedAlias, matches);
+    });
   });
 
-  return { tagsById, tagsByNormalizedName };
+  return { tagsById, tagsByNormalizedName, tagsByNormalizedAlias };
 
 }
 
@@ -23,15 +33,21 @@ export function TagProvider({ children }) {
   const [allActiveTags, setAllActiveTags] = useState([]);
   const [tagsById, setTagsById] = useState(new Map());
   const [tagsByNormalizedName, setTagsByNormalizedName] = useState(new Map());
+  const [tagsByNormalizedAlias, setTagsByNormalizedAlias] = useState(new Map());
   const [lastFetchedAt, setLastFetchedAt] = useState(0);
   const [isHydrating, setIsHydrating] = useState(true);
   const [error, setError] = useState(null);
 
   const applyTags = useCallback((tags, fetchedAt) => {
-    const { tagsById: idMap, tagsByNormalizedName: normalizedMap } = buildIndexes(tags);
+    const {
+      tagsById: idMap,
+      tagsByNormalizedName: normalizedMap,
+      tagsByNormalizedAlias: aliasMap
+    } = buildIndexes(tags);
     setAllActiveTags(tags);
     setTagsById(idMap);
     setTagsByNormalizedName(normalizedMap);
+    setTagsByNormalizedAlias(aliasMap);
     setLastFetchedAt(fetchedAt || Date.now());
   }, []);
 
@@ -109,25 +125,37 @@ export function TagProvider({ children }) {
 
       if (fromName?.tag_id) {
         resolved.push(fromName.tag_id);
+        return;
+      }
+
+      const fromAlias = tagsByNormalizedAlias.get(normalized) || [];
+      if (fromAlias.length === 1 && fromAlias[0]?.tag_id) {
+        resolved.push(fromAlias[0].tag_id);
+        return;
+      }
+
+      if (fromAlias.length > 1) {
+        console.warn(`Ambiguous alias ignored: "${trimmed}"`);
       } else {
         console.warn(`Unknown tag value ignored: "${trimmed}"`);
       }
     });
 
     return Array.from(new Set(resolved));
-  }, [tagsById, tagsByNormalizedName]);
+  }, [tagsById, tagsByNormalizedName, tagsByNormalizedAlias]);
 
   const value = useMemo(() => ({
     allActiveTags,
     tagsById,
     tagsByNormalizedName,
+    tagsByNormalizedAlias,
     lastFetchedAt,
     isHydrating,
     error,
     searchByPrefix,
     resolveTagIds,
     refreshTagsInBackground
-  }), [allActiveTags, tagsById, tagsByNormalizedName, lastFetchedAt, isHydrating, error, searchByPrefix, resolveTagIds, refreshTagsInBackground]);
+  }), [allActiveTags, tagsById, tagsByNormalizedName, tagsByNormalizedAlias, lastFetchedAt, isHydrating, error, searchByPrefix, resolveTagIds, refreshTagsInBackground]);
 
   return <TagContext.Provider value={value}>{children}</TagContext.Provider>;
 }

@@ -30,13 +30,13 @@ export const cardStyles = {
 export const buttonStyles = {
   primary: {
     backgroundColor: 'white',
-    color: 'black',
-    border: '1px solid black'
+    color: '#111827',
+    border: '1px solid #cdb7ef'
   },
   secondary: {
-    backgroundColor: '#f7fafc',
-    color: '#4a5568',
-    border: '1px solid #e2e8f0'
+    backgroundColor: 'white',
+    color: '#111827',
+    border: '1px solid #cdb7ef'
   }
 };
 
@@ -68,14 +68,18 @@ export const paginationStyles = {
   },
   button: {
     size: 'small',
-    border: '1px solid #552b9a'
+    backgroundColor: 'white',
+    color: '#111827',
+    border: '1px solid #cdb7ef'
   },
   activeButton: {
-    backgroundColor: '#552b9a',
-    color: 'white'
+    backgroundColor: 'white',
+    color: '#111827',
+    border: '1px solid #bc9ce9'
   },
   inactiveButton: {
     backgroundColor: 'white',
-    color: 'black'
+    color: '#111827',
+    border: '1px solid #cdb7ef'
   }
 };

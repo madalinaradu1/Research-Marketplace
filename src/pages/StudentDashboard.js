@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation } from 'aws-amplify';
-import { useNavigate } from 'react-router-dom';
 import { 
   Flex, 
   Heading, 
@@ -11,20 +10,44 @@ import {
   Collection,
   Loader,
   View,
-  Tabs,
-  TabItem,
   TextField,
   TextAreaField,
-  Image,
   Badge
 } from '@aws-amplify/ui-react';
 import { listApplications, listProjects, createApplication } from '../graphql/operations';
+import SliderTabs from '../components/SliderTabs';
+import DashboardPageShell from '../components/DashboardPageShell';
 import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 import ApplicationStatus from '../components/ApplicationStatus';
 import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
+import DashboardPagination from '../components/DashboardPagination';
+import { getRecommendedProjects } from '../graphql/recommendation-operations';
+import { useTags } from '../contexts/TagContext';
+import styles from './StudentDashboard.module.css';
+import buttonStyles from '../styles/dashboardButtons.module.css';
+import { tagPillProps } from '../styles/tagPills';
+const APPLICATION_LIMIT = 3;
+
+const formatGraphQLError = (err) => {
+  if (!err) return null;
+
+  return {
+    name: err.name || null,
+    message: err.message || null,
+    errors: err.errors || null,
+    data: err.data || null,
+    graphQLErrors: err.graphQLErrors || null,
+    networkError: err.networkError
+      ? {
+          name: err.networkError.name || null,
+          message: err.networkError.message || null
+        }
+      : null,
+    stack: err.stack || null
+  };
+};
 
 const StudentDashboard = ({ user }) => {
-  const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,11 +63,14 @@ const StudentDashboard = ({ user }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnseenChanges, setHasUnseenChanges] = useState(false);
-  const [lastViewedTime, setLastViewedTime] = useState(null);
   const [applicationsPage, setApplicationsPage] = useState(1);
   const [returnedPage, setReturnedPage] = useState(1);
+  const [recommendedProjects, setRecommendedProjects] = useState([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false);
+  const { tagsById } = useTags();
   const itemsPerPage = 10;
   
+
   useEffect(() => {
     fetchData();
   }, [user]);
@@ -97,7 +123,35 @@ const StudentDashboard = ({ user }) => {
           // Set approved/published projects for display (coordinator-approved projects)
           const filteredProjects = allProjects.filter(p => p.isActive && (p.projectStatus === 'Approved' || p.projectStatus === 'Published'));
           setProjects(filteredProjects);
-          
+
+          try {
+            setRecommendationsLoading(true);
+            const recResult = await API.graphql(graphqlOperation(getRecommendedProjects, { userId, limit: 10 }));
+            setRecommendedProjects(recResult.data?.getRecommendedProjects || []);
+          } catch (recErr) {
+            console.error('Recommendation query failed:', formatGraphQLError(recErr));
+            const fallback = [...filteredProjects]
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              .slice(0,10)
+              .map((p) => ({
+                projectId: p.id,
+                score: 0,
+                requiredMatches: 0,
+                optionalMatches: 0,
+                matchedTagIds: [],
+                reasons: ['Newly added project'],
+                project: p 
+              }));
+            console.warn('Using recommendation fallback projects:', {
+              fallbackCount: fallback.length,
+              approvedProjectCount: filteredProjects.length,
+              userId
+            });
+            setRecommendedProjects(fallback);
+          } finally {
+            setRecommendationsLoading(false);
+          }
+
           // Use all projects for enriching applications
           const enrichedApplications = userApplications.map(app => {
             const project = allProjects.find(p => p.id === app.projectID);
@@ -112,7 +166,6 @@ const StudentDashboard = ({ user }) => {
           // Check for unseen changes
           const storedLastViewed = localStorage.getItem(`lastViewedApplications_${userId}`);
           const lastViewed = storedLastViewed ? new Date(storedLastViewed) : new Date(0);
-          setLastViewedTime(lastViewed);
           
           const hasChanges = enrichedApplications.some(app => {
             const updatedAt = new Date(app.updatedAt);
@@ -142,10 +195,6 @@ const StudentDashboard = ({ user }) => {
   
   const handleApplicationUpdate = () => {
     fetchData();
-  };
-  
-  const handleViewDetails = (project) => {
-    setSelectedProject(project);
   };
   
   const handleApply = (project) => {
@@ -213,27 +262,104 @@ const StudentDashboard = ({ user }) => {
   };
   
   const statusCounts = getStatusCounts();
+  const activeApplicationsCount = applications.filter(
+    (app) => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)
+  ).length;
+  const remainingApplicationSlots = Math.max(APPLICATION_LIMIT - activeApplicationsCount, 0);
+  const applicationUsagePercent = Math.min((activeApplicationsCount / APPLICATION_LIMIT) * 100, 100);
+  const applicationsSummaryBar = (
+    <div className={styles.summaryBar}>
+      <div className={styles.summaryGrid}>
+        <div className={styles.summaryStat}>
+          <span className={styles.summaryLabel}>Applications Used</span>
+          <div className={styles.summaryValueRow}>
+            <span className={styles.summaryValue}>{activeApplicationsCount}/{APPLICATION_LIMIT}</span>
+            <span className={styles.summaryMeta}>
+              {remainingApplicationSlots === 0
+                ? 'Limit reached'
+                : `${remainingApplicationSlots} slot${remainingApplicationSlots === 1 ? '' : 's'} left`}
+            </span>
+          </div>
+          <div className={styles.summaryMeterTrack} aria-hidden="true">
+            <div
+              className={styles.summaryMeterFill}
+              style={{ width: `${applicationUsagePercent}%` }}
+            />
+          </div>
+        </div>
+
+        <div className={styles.summaryDivider} aria-hidden="true" />
+
+        <div className={styles.summaryStatApproved}>
+          <span className={styles.summaryLabel}>Approved</span>
+          <div className={styles.summaryValueRow}>
+            <span className={styles.summaryValue}>
+              {statusCounts.approved}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const hasActiveApplicationForProject = (projectId) =>
+    applications.some(
+      (app) =>
+        app.projectID === projectId &&
+        !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)
+    );
+
+  const isProjectExpired = (project) =>
+    Boolean(project?.applicationDeadline && new Date(project.applicationDeadline) < new Date());
+
+  const getProjectActionState = (project) => {
+    if (!project) return 'unavailable';
+    if (hasActiveApplicationForProject(project.id)) return 'applied';
+    if (isProjectExpired(project)) return 'expired';
+    if (activeApplicationsCount >= APPLICATION_LIMIT) return 'limit';
+    return 'apply';
+  };
+
+  const getApplyButtonLabel = (project) => {
+    switch (getProjectActionState(project)) {
+      case 'applied':
+        return 'Already Applied';
+      case 'expired':
+        return 'Expired';
+      case 'limit':
+        return 'Limit Reached';
+      case 'apply':
+        return 'Apply';
+      default:
+        return 'Unavailable';
+    }
+  };
+
+  const isApplyDisabled = (project) => getProjectActionState(project) !== 'apply';
+
+  const getProjectActionButtonClassName = (project) => {
+    const state = getProjectActionState(project);
+
+    if (state === 'apply') {
+      return `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary}`;
+    }
+
+    if (state === 'applied') {
+      return `${buttonStyles.actionButton} ${buttonStyles.actionButtonApplied}`;
+    }
+
+    return `${buttonStyles.actionButton} ${buttonStyles.actionButtonMuted}`;
+  };
   
   // Pagination helper function
   const renderPagination = (items, currentPage, setPage) => {
     const totalPages = Math.ceil(items.length / itemsPerPage);
-    if (totalPages <= 1) return null;
-    
     return (
-      <Flex justifyContent="flex-end" alignItems="center" gap="0.5rem" marginTop="1rem">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-          <Button
-            key={page}
-            size="small"
-            backgroundColor={page === currentPage ? "#552b9a" : "white"}
-            color={page === currentPage ? "white" : "black"}
-            border="1px solid #552b9a"
-            onClick={() => setPage(page)}
-          >
-            {page}
-          </Button>
-        ))}
-      </Flex>
+      <DashboardPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     );
   };
   
@@ -242,6 +368,204 @@ const StudentDashboard = ({ user }) => {
     const startIndex = (page - 1) * itemsPerPage;
     return items.slice(startIndex, startIndex + itemsPerPage);
   };
+
+  const handleDashboardTabChange = (index) => {
+    setActiveTabIndex(index);
+    setApplicationsPage(1);
+    setReturnedPage(1);
+
+    if (index === 1) {
+      setHasUnseenChanges(false);
+      const userId = user.id || user.username;
+      localStorage.setItem(`lastViewedApplications_${userId}`, new Date().toISOString());
+    }
+  };
+
+  const returnedApplications = applications.filter((app) => app.status === 'Returned');
+
+  const researchOpportunitiesContent = projects.length === 0 ? (
+    <Card backgroundColor="white">
+      <Text>No active research opportunities available at this time.</Text>
+    </Card>
+  ) : (
+    <>
+      <Collection
+        items={projects.slice((currentPage - 1) * projectsPerPage, currentPage * projectsPerPage)}
+        type="list"
+        gap="1rem"
+        wrap="nowrap"
+        direction="column"
+      >
+        {(project) => {
+          return (
+            <Card key={project.id} backgroundColor="white">
+              <Flex direction="column" gap="0.5rem">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Heading level={4}>{project.title}</Heading>
+                  <Badge
+                    backgroundColor={isProjectExpired(project) ? 'gray' : 'green'}
+                    color="white"
+                  >
+                    {isProjectExpired(project) ? 'Expired' : 'Active'}
+                  </Badge>
+                </Flex>
+
+                <Text fontWeight="bold">{project.department}</Text>
+                <div dangerouslySetInnerHTML={{ __html: project.description }} />
+
+                {project.qualifications && (
+                  <Text><strong>Required Qualifications/Prerequisites:</strong> {project.qualifications}</Text>
+                )}
+
+                {project.duration && (
+                  <Text><strong>Project Duration:</strong> {project.duration}</Text>
+                )}
+
+                <Text><strong>Requires Transcript Upload:</strong> {project.requiresTranscript ? 'Yes' : 'No'}</Text>
+
+                <Divider />
+
+                {project.skillsRequired && project.skillsRequired.length > 0 && (
+                  <Flex direction="column" gap="0.5rem">
+                    <Text fontWeight="bold" fontSize="0.9rem">Skills Required:</Text>
+                    <Flex wrap="wrap" gap="0.5rem">
+                      {project.skillsRequired.map((skill, index) => (
+                        <Badge key={index} {...tagPillProps}>
+                          Skills: {skill}
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </Flex>
+                )}
+
+                {project.tags && project.tags.length > 0 && (
+                  <Flex direction="column" gap="0.5rem">
+                    <Text fontWeight="bold" fontSize="0.9rem">Research Tags:</Text>
+                    <Flex wrap="wrap" gap="0.5rem">
+                      {project.tags.map((tag, index) => (
+                        <Badge key={index} {...tagPillProps}>
+                          {tag}
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </Flex>
+                )}
+
+                <Divider />
+
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Text fontSize="0.9rem">
+                    Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}
+                  </Text>
+                  <Flex gap="0.5rem">
+                    <button
+                      type="button"
+                      data-dashboard-button="true"
+                      className={`${getProjectActionButtonClassName(project)} ${buttonStyles.actionButtonCompact}`}
+                      onClick={() => handleApply(project)}
+                      disabled={isApplyDisabled(project)}
+                    >
+                      {getApplyButtonLabel(project)}
+                    </button>
+                  </Flex>
+                </Flex>
+              </Flex>
+            </Card>
+          );
+        }}
+      </Collection>
+
+      {projects.length > projectsPerPage && (
+        <DashboardPagination
+          currentPage={currentPage}
+          totalPages={Math.ceil(projects.length / projectsPerPage)}
+          onPageChange={setCurrentPage}
+          marginTop="2rem"
+        />
+      )}
+    </>
+  );
+
+  const myApplicationsContent = (
+    <>
+      {applicationsSummaryBar}
+      {applications.length === 0 ? (
+        <Card backgroundColor="white">
+          <Text>You haven't submitted any applications yet.</Text>
+          <button
+            type="button"
+            data-dashboard-button="true"
+            className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonWide}`}
+            onClick={() => setActiveTabIndex(0)}
+            style={{ marginTop: '1rem' }}
+          >
+            Browse Opportunities
+          </button>
+        </Card>
+      ) : (
+        <>
+          <Collection
+            items={getPaginatedItems(applications, applicationsPage)}
+            type="list"
+            gap="1rem"
+            wrap="nowrap"
+            direction="column"
+          >
+            {(application) => (
+              <ApplicationStatus
+                key={application.id}
+                application={{
+                  ...application,
+                  student: user
+                }}
+                isStudent={true}
+                onUpdate={handleApplicationUpdate}
+                showReturnedSection={false}
+              />
+            )}
+          </Collection>
+          {renderPagination(applications, applicationsPage, setApplicationsPage)}
+        </>
+      )}
+    </>
+  );
+
+  const returnedApplicationsContent = returnedApplications.length === 0 ? (
+    <Card backgroundColor="white">
+      <Text>No returned applications.</Text>
+    </Card>
+  ) : (
+    <>
+      <Collection
+        items={getPaginatedItems(returnedApplications.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), returnedPage)}
+        type="list"
+        gap="1rem"
+        wrap="nowrap"
+        direction="column"
+      >
+        {(application) => (
+          <ApplicationStatus
+            key={application.id}
+            application={{
+              ...application,
+              student: user
+            }}
+            isStudent={true}
+            onUpdate={handleApplicationUpdate}
+            showReturnedSection={true}
+          />
+        )}
+      </Collection>
+      {renderPagination(returnedApplications, returnedPage, setReturnedPage)}
+    </>
+  );
+
+  const dashboardTabs = [
+    { label: 'Research Opportunities', content: researchOpportunitiesContent },
+    { label: 'My Applications', content: myApplicationsContent },
+    { label: 'Returned Applications', content: returnedApplicationsContent },
+    { label: 'Status Guide', content: <ApplicationStatusGuide /> }
+  ];
   
   if (loading) {
     return (
@@ -252,23 +576,28 @@ const StudentDashboard = ({ user }) => {
   }
   
   return (
-    <View width="100%" backgroundColor="#f5f5f5">
-      <Flex
-        position="relative"
-        width="100vw"
-        height="400px"
-        style={{ left: '50%', marginLeft: '-50vw', marginTop: '-2rem' }}
-      >
-        <Image
-          alt="Library Banner"
-          src="/Library.jpg"
-          width="100%"
-          height="100%"
-          objectFit="cover"
-          objectPosition="center"
-        />
-      </Flex>
-      <Flex direction="column" padding="2rem" gap="2rem">
+    <DashboardPageShell
+      hero={(
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            overflow: 'hidden',
+            lineHeight: 0
+          }}
+        >
+          <img
+            alt="Library Banner"
+            src="/Library_banner.jpg"
+            style={{
+              display: 'block',
+              width: '100%',
+              height: 'auto'
+            }}
+          />
+        </div>
+      )}
+    >
         <Card backgroundColor="white" padding="1.5rem">
           <Flex direction="column" gap="0.5rem">
             <Heading level={2} color="#2d3748">Student Dashboard</Heading>
@@ -280,270 +609,90 @@ const StudentDashboard = ({ user }) => {
       
       {error && <Text color="red">{error}</Text>}
       
-      <Flex direction={{ base: 'column', large: 'row' }} gap="1rem">
-        <Card variation="elevated" flex="1">
-          <Heading level={4}>My Applications</Heading>
-          <Flex wrap="wrap" gap="1rem" marginTop="1rem">
-            <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5}>{applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length}/3</Heading>
-              <Text>Applications Used</Text>
-            </Card>
-            <Card variation="outlined" padding="1rem" flex="1">
-              <Heading level={5} color={statusCounts.approved > 0 ? "green" : "black"}>{statusCounts.approved}</Heading>
-              <Text>Approved</Text>
-            </Card>
-          </Flex>
-        </Card>
-        
-        <Card variation="elevated" flex="1">
-          <Heading level={4}>Quick Links</Heading>
-          <Flex direction="column" gap="0.5rem" marginTop="1rem">
-            <Button backgroundColor="white" color="black" border="1px solid black" onClick={() => navigate('/search')}>
-              Browse Research Opportunities
-            </Button>
-            <Button onClick={() => setActiveTabIndex(1)}>
-              View My Applications
-            </Button>
-            <Button onClick={() => setActiveTabIndex(3)}>
-              Application Status Guide
-            </Button>
-          </Flex>
-        </Card>
-      </Flex>
-      
-      <Tabs
-        currentIndex={activeTabIndex}
-        onChange={(index) => {
-          setActiveTabIndex(index);
-          // Reset pagination when switching tabs
-          setApplicationsPage(1);
-          setReturnedPage(1);
-          if (index === 1) { // My Applications tab
-            setHasUnseenChanges(false);
-            const userId = user.id || user.username;
-            localStorage.setItem(`lastViewedApplications_${userId}`, new Date().toISOString());
-          }
-        }}
-      >
-        <TabItem title="Research Opportunities">
-          {projects.length === 0 ? (
-            <Card backgroundColor="white">
-              <Text>No active research opportunities available at this time.</Text>
-            </Card>
-          ) : (
-            <>
-              <Collection
-                items={projects.slice((currentPage - 1) * projectsPerPage, currentPage * projectsPerPage)}
-                type="list"
-                gap="1rem"
-                wrap="nowrap"
-              direction="column"
-            >
-              {(project) => {
-                const hasApplied = applications.some(app => app.projectID === project.id && !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status));
-                const isExpired = project.applicationDeadline && new Date(project.applicationDeadline) < new Date();
-                
-                return (
-                <Card key={project.id} backgroundColor="white">
-                  <Flex direction="column" gap="0.5rem">
-                    <Flex justifyContent="space-between" alignItems="center">
-                      <Heading level={4}>{project.title}</Heading>
-                      <Badge 
-                        backgroundColor={isExpired ? "gray" : "green"}
-                        color="white"
-                      >
-                        {isExpired ? "Expired" : "Active"}
-                      </Badge>
-                    </Flex>
-                    
-                    <Text fontWeight="bold">College: {project.department}</Text>
-                    <div dangerouslySetInnerHTML={{ __html: project.description }} />
-                    
-                    {project.qualifications && (
-                      <Text><strong>Required Qualifications/Prerequisites:</strong> {project.qualifications}</Text>
-                    )}
-                    
-                    {project.duration && (
-                      <Text><strong>Project Duration:</strong> {project.duration}</Text>
-                    )}
-                    
-                    <Text><strong>Requires Transcript Upload:</strong> {project.requiresTranscript ? 'Yes' : 'No'}</Text>
-                    
-                    <Divider />
-                    
-                    {project.skillsRequired && project.skillsRequired.length > 0 && (
-                      <Flex direction="column" gap="0.5rem">
-                        <Text fontWeight="bold" fontSize="0.9rem">Skills Required:</Text>
-                        <Flex wrap="wrap" gap="0.5rem">
-                          {project.skillsRequired.map((skill, index) => (
-                            <Badge key={index} backgroundColor="lightgray" color="white">
-                              Skills: {skill}
-                            </Badge>
-                          ))}
-                        </Flex>
-                      </Flex>
-                    )}
-                    
-                    {project.tags && project.tags.length > 0 && (
-                      <Flex direction="column" gap="0.5rem">
-                        <Text fontWeight="bold" fontSize="0.9rem">Research Tags:</Text>
-                        <Flex wrap="wrap" gap="0.5rem">
-                          {project.tags.map((tag, index) => (
-                            <Badge key={index} backgroundColor="lightgray" color="white">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </Flex>
-                      </Flex>
-                    )}
-                    
-                    <Divider />
-                    
-                    <Flex justifyContent="space-between" alignItems="center">
-                      <Text fontSize="0.9rem">
-                        Deadline: {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}
+      <Card variation="elevated" backgroundColor="white" padding="1rem 1.5rem">
+        <Heading level={4} marginBottom="1.5rem">
+          Recommended for You
+        </Heading>
+        {recommendationsLoading ? (
+          <Loader size="small" />
+        ) : (
+          <Collection items={recommendedProjects.slice(0, 5)} type="list" gap="0.5rem" direction="column">
+            {(rec) => {
+              const project = rec.project;
+              const reasonLabels = rec.reasons?.slice(0, 4).map((reason) =>
+                tagsById.get(reason)?.display_name || reason
+              );
+
+              return (
+                <Card key={rec.projectId} variation="outlined" backgroundColor="white" padding="0.9rem">
+                  <Flex direction="column" gap="0.55rem">
+                    <Flex direction="column" gap="0.55rem">
+                      <Heading level={5}>{project?.title || 'Project'}</Heading>
+                      <Text fontSize="0.9rem">{project?.department}</Text>
+                      <Text fontSize="0.8rem" color="#4a5568">
+                        Deadline: {project?.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}
                       </Text>
-                      <Flex gap="0.5rem">
-                        <Button 
-                          backgroundColor="white"
-                          color="black"
-                          border="1px solid black"
-                          size="small" 
-                          onClick={() => handleApply(project)}
-                          isDisabled={hasApplied || isExpired || applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3}
-                        >
-                          {hasApplied ? 'Already Applied' : 
-                           isExpired ? 'Expired' :
-                           applications.filter(app => !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status)).length >= 3 ? 'Limit Reached' : 'Apply'}
-                        </Button>
+                    </Flex>
+                    <Flex alignItems="flex-start" justifyContent="space-between" gap="0.75rem">
+                      <Flex flex="1" alignItems="center" gap="0.5rem" wrap="wrap">
+                        {reasonLabels?.length ? (
+                          <>
+                            <Text fontSize="0.8rem" color="#4a5568">
+                              Matched tags:
+                            </Text>
+                            {reasonLabels.map((label) => (
+                              <Badge key={label} {...tagPillProps}>
+                                {label}
+                              </Badge>
+                            ))}
+                          </>
+                        ) : (
+                          <Text fontSize="0.8rem" color="#4a5568">
+                            Recommended by recency
+                          </Text>
+                        )}
                       </Flex>
+                      <button
+                        type="button"
+                        data-dashboard-button="true"
+                        className={`${getProjectActionButtonClassName(project)} ${buttonStyles.actionButtonCompact}`}
+                        onClick={() => handleApply(project)}
+                        disabled={isApplyDisabled(project)}
+                      >
+                        {getApplyButtonLabel(project)}
+                      </button>
                     </Flex>
                   </Flex>
                 </Card>
-                );
-              }}
-            </Collection>
-            
-            {projects.length > projectsPerPage && (
-              <Flex justifyContent="flex-end" alignItems="center" gap="1rem" marginTop="2rem">
-                <Button 
-                  size="small"
-                  backgroundColor="white"
-                  color="black"
-                  border="1px solid black"
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  isDisabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-                
-                {Array.from({ length: Math.ceil(projects.length / projectsPerPage) }, (_, i) => i + 1).map(page => (
-                  <Button
-                    key={page}
-                    size="small"
-                    backgroundColor={currentPage === page ? "black" : "white"}
-                    color={currentPage === page ? "white" : "black"}
-                    border="1px solid black"
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </Button>
-                ))}
-                
-                <Button 
-                  size="small"
-                  backgroundColor="white"
-                  color="black"
-                  border="1px solid black"
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(projects.length / projectsPerPage)))}
-                  isDisabled={currentPage === Math.ceil(projects.length / projectsPerPage)}
-                >
-                  Next
-                </Button>
-              </Flex>
-            )}
-            </>
-          )}
-        </TabItem>
-        
-        <TabItem title="My Applications">
-          {applications.length === 0 ? (
-            <Card backgroundColor="white">
-              <Text>You haven't submitted any applications yet.</Text>
-              <Button 
-                backgroundColor="white"
-                color="black"
-                border="1px solid black"
-                onClick={() => setActiveTabIndex(0)}
-                marginTop="1rem"
-              >
-                Browse Opportunities
-              </Button>
-            </Card>
-          ) : (
-            <>
-            <Collection
-              items={getPaginatedItems(applications, applicationsPage)}
-              type="list"
-              gap="1rem"
-              wrap="nowrap"
-              direction="column"
-            >
-              {(application) => (
-                <ApplicationStatus 
-                  key={application.id}
-                  application={{
-                    ...application,
-                    student: user
-                  }}
-                  isStudent={true}
-                  onUpdate={handleApplicationUpdate}
-                  showReturnedSection={false}
-                />
-              )}
-            </Collection>
-            {renderPagination(applications, applicationsPage, setApplicationsPage)}
-            </>
-          )}
-        </TabItem>
-        
-        <TabItem title="Returned Applications">
-          {applications.filter(app => app.status === 'Returned').length === 0 ? (
-            <Card backgroundColor="white">
-              <Text>No returned applications.</Text>
-            </Card>
-          ) : (
-            <>
-            <Collection
-              items={getPaginatedItems(applications.filter(app => app.status === 'Returned').sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)), returnedPage)}
-              type="list"
-              gap="1rem"
-              wrap="nowrap"
-              direction="column"
-            >
-              {(application) => (
-                <ApplicationStatus 
-                  key={application.id}
-                  application={{
-                    ...application,
-                    student: user
-                  }}
-                  isStudent={true}
-                  onUpdate={handleApplicationUpdate}
-                  showReturnedSection={true}
-                />
-              )}
-            </Collection>
-            {renderPagination(applications.filter(app => app.status === 'Returned'), returnedPage, setReturnedPage)}
-            </>
-          )}
-        </TabItem>
-        
-        <TabItem title="Status Guide">
-          <ApplicationStatusGuide />
-        </TabItem>
-      </Tabs>
-      </Flex>
+              );
+            }}
+          </Collection>
+        )}
+      </Card>
+
+      {/* Quick Links kept here for possible reuse.
+      Restore the useNavigate import and const navigate = useNavigate(); before uncommenting.
+      <Card variation="elevated" flex="1">
+        <Heading level={4}>Quick Links</Heading>
+        <Flex direction="column" gap="0.5rem" marginTop="1rem">
+          <Button backgroundColor="white" color="black" border="1px solid black" onClick={() => navigate('/search')}>
+            Browse Research Opportunities
+          </Button>
+          <Button onClick={() => setActiveTabIndex(1)}>
+            View My Applications
+          </Button>
+          <Button onClick={() => setActiveTabIndex(3)}>
+            Application Status Guide
+          </Button>
+        </Flex>
+      </Card>
+      */}
+      
+      <SliderTabs
+        currentIndex={activeTabIndex}
+        onChange={handleDashboardTabChange}
+        tabs={dashboardTabs}
+      />
       
 
       
@@ -577,7 +726,7 @@ const StudentDashboard = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Project Details</Heading>
-                  <Button size="small" onClick={() => setSelectedProject(null)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  <Button size="small" data-close-button="true" onClick={() => setSelectedProject(null)} backgroundColor="#f7fafc" color="#4a5568"><span className="closeButtonGlyph" aria-hidden="true">&times;</span></Button>
                 </Flex>
                 
                 <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
@@ -629,7 +778,7 @@ const StudentDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Skills Required</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.skillsRequired.map((skill, index) => (
-                        <Badge key={index} backgroundColor="#4299e1" color="white" padding="0.5rem 1rem">
+                        <Badge key={index} {...tagPillProps}>
                           {skill}
                         </Badge>
                       ))}
@@ -642,7 +791,7 @@ const StudentDashboard = ({ user }) => {
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Research Tags</Heading>
                     <Flex wrap="wrap" gap="0.75rem">
                       {selectedProject.tags.map((tag, index) => (
-                        <Badge key={index} backgroundColor="#38b2ac" color="white" padding="0.5rem 1rem">
+                        <Badge key={index} {...tagPillProps}>
                           {tag}
                         </Badge>
                       ))}
@@ -652,43 +801,51 @@ const StudentDashboard = ({ user }) => {
                 
                 <Flex gap="0.5rem" justifyContent="flex-start">
                   {(() => {
-                    const hasApplied = applications.some(app => app.projectID === selectedProject.id && !['Rejected', 'Cancelled', 'Expired', 'Withdrawn'].includes(app.status));
-                    const isExpired = selectedProject.applicationDeadline && new Date(selectedProject.applicationDeadline) < new Date();
-                    
-                    if (isExpired) {
+                    if (isProjectExpired(selectedProject)) {
                       return (
-                        <Button 
-                          backgroundColor="white"
-                          color="black"
-                          border="1px solid black"
-                          isDisabled={true}
+                        <button
+                          type="button"
+                          data-dashboard-button="true"
+                          className={getProjectActionButtonClassName(selectedProject)}
+                          disabled
                         >
                           Expired
-                        </Button>
+                        </button>
                       );
-                    } else if (hasApplied) {
+                    } else if (hasActiveApplicationForProject(selectedProject.id)) {
                       return (
-                        <Button 
-                          backgroundColor="white"
-                          color="black"
-                          border="1px solid black"
-                          isDisabled={true}
+                        <button
+                          type="button"
+                          data-dashboard-button="true"
+                          className={getProjectActionButtonClassName(selectedProject)}
+                          disabled
                         >
                           Already Applied
-                        </Button>
+                        </button>
+                      );
+                    } else if (activeApplicationsCount >= APPLICATION_LIMIT) {
+                      return (
+                        <button
+                          type="button"
+                          data-dashboard-button="true"
+                          className={getProjectActionButtonClassName(selectedProject)}
+                          disabled
+                        >
+                          Limit Reached
+                        </button>
                       );
                     } else {
                       return (
-                        <Button 
-                          backgroundColor="white"
-                          color="black"
-                          border="1px solid black"
+                        <button
+                          type="button"
+                          data-dashboard-button="true"
+                          className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary}`}
                           onClick={() => {
                             setShowApplicationForm(true);
                           }}
                         >
                           Apply
-                        </Button>
+                        </button>
                       );
                     }
                   })()}
@@ -729,7 +886,10 @@ const StudentDashboard = ({ user }) => {
               <EnhancedApplicationForm 
                 project={selectedProject}
                 user={user}
-                onClose={() => setShowApplicationForm(false)}
+                onClose={() => {
+                  setShowApplicationForm(false);
+                  setSelectedProject(null);
+                }}
                 onSuccess={() => {
                   setShowApplicationForm(false);
                   setSelectedProject(null);
@@ -813,7 +973,7 @@ const StudentDashboard = ({ user }) => {
           </Flex>
         </View>
       )}
-    </View>
+    </DashboardPageShell>
   );
 };
 

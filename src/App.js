@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Amplify, Hub, Auth, API, graphqlOperation } from 'aws-amplify';
 import { withAuthenticator, Authenticator, SelectField, useAuthenticator, ThemeProvider } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
 import { theme } from './theme';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './App.css';
 import './styles/globalStyles.css';
+import './styles/authenticator.css';
 
 // Import components
 // import MFASetup from './components/MFASetup';
@@ -32,10 +32,89 @@ import { getUser, listUsers } from './graphql/operations';
 import { testApiAccess } from './utils/testApi';
 import { debugAuth } from './utils/debugAuth';
 import { isUserAdmin } from './utils/isUserAdmin';
+import { syncAccessibilityRootClasses } from './utils/accessibilitySettings';
 
 // Import AWS configuration
 import awsconfig from './aws-exports';
 Amplify.configure(awsconfig);
+
+function AppShell({
+  signOut,
+  user,
+  userProfile,
+  shouldCompleteProfile,
+  isAdmin,
+  refreshUserProfile
+}) {
+  const location = useLocation();
+  const isFullBleedMain = location.pathname === '/dashboard';
+
+  return (
+    <div className="app">
+      <Header user={userProfile || user} signOut={signOut} />
+
+      <main className={isFullBleedMain ? 'appMain appMainFullBleed' : 'appMain'}>
+        <Routes>
+          <Route
+            path="/complete-profile"
+            element={
+              (userProfile?.role === 'Student' || userProfile?.role === 'Faculty')
+                ? <CompleteProfilePage user={userProfile || user} />
+                : <Navigate to="/dashboard" replace />
+            }
+          />
+          <Route path="/" element={
+            shouldCompleteProfile ?
+            <Navigate to="/complete-profile" /> :
+            <Navigate to="/dashboard" />} />
+          <Route path="/complete-profile" element={
+            (userProfile || user)?.role === 'Student' ?
+              <CompleteProfilePage user={userProfile || user} /> :
+              <Navigate to="/dashboard" replace />
+          } />
+          <Route path="/dashboard" element={
+            new URLSearchParams(window.location.search).get('from') === 'email' ?
+            <Navigate to="/dashboard" replace /> :
+            shouldCompleteProfile ?
+            <Navigate to="/complete-profile" /> :
+            <Dashboard user={userProfile || user} />} />
+          <Route path="/search" element={shouldCompleteProfile ?
+            <Navigate to="/complete-profile" /> :
+            <SearchPage user={userProfile || user} />} />
+          <Route path="/profile" element={userProfile?.role === 'Student' ?
+            <ProfilePage user={userProfile || user} refreshProfile={refreshUserProfile} /> :
+            <Navigate to="/dashboard" />} />
+          <Route path="/activity" element={shouldCompleteProfile ?
+            <Navigate to="/complete-profile" /> :
+            <ActivityPage user={userProfile || user} />} />
+          <Route path="/opportunity/:id" element={shouldCompleteProfile ?
+            <Navigate to="/complete-profile" /> :
+            <ProjectDetailsPage user={userProfile || user} />} />
+          <Route path="/applications" element={shouldCompleteProfile ?
+            <Navigate to="/complete-profile" /> :
+            <ApplicationsPage user={userProfile || user} />} />
+          <Route path="/messages" element={shouldCompleteProfile ?
+            <Navigate to="/complete-profile" /> :
+            <MessagesPage user={userProfile || user} />} />
+          <Route path="/old-messages" element={shouldCompleteProfile ?
+            <Navigate to="/complete-profile" /> :
+            <OldMessagesPage user={userProfile || user} />} />
+          <Route path="/apply/:projectId" element={shouldCompleteProfile ?
+            <Navigate to="/complete-profile" /> :
+            <ApplicationPage user={userProfile || user} />} />
+          <Route path="/community" element={shouldCompleteProfile ?
+            <Navigate to="/complete-profile" /> :
+            <StudentPostsPage user={userProfile || user} />} />
+          <Route path="/admin" element={isAdmin ?
+            <AdminDashboard user={userProfile || user} /> :
+            <Navigate to="/dashboard" />} />
+        </Routes>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
 
 function App({ signOut, user }) {
   const [userProfile, setUserProfile] = useState(null);
@@ -50,12 +129,9 @@ function App({ signOut, user }) {
   };
   
   useEffect(() => {
-  // Initialize font size from localStorage
-  const savedFontSize = localStorage.getItem('fontSize');
-  if (savedFontSize === 'large') {
-    document.documentElement.classList.add('large-font');
-  }    
-  // Check for email link access and clean URL parameter
+    syncAccessibilityRootClasses();
+
+    // Check for email link access and clean URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('from') === 'email') {
       // Clear the URL parameter immediately
@@ -208,73 +284,16 @@ function App({ signOut, user }) {
 
   return (
     <ThemeProvider theme={theme}>
-        <Router>
-          <div className="app">
-          <Header user={userProfile || user} signOut={signOut} />
-
-        
-        <main>
-          <Routes>
-            <Route 
-              path="/complete-profile" 
-              element={
-                (userProfile?.role === 'Student' || userProfile?.role === 'Faculty')
-                  ? <CompleteProfilePage user={userProfile || user} />
-                  : <Navigate to="/dashboard" replace />
-              } 
-            />
-            <Route path="/" element={
-              shouldCompleteProfile ?
-              <Navigate to="/complete-profile" /> : 
-              <Navigate to="/dashboard" />} />
-            <Route path="/complete-profile" element={
-              (userProfile || user)?.role === 'Student' ? 
-                <CompleteProfilePage user={userProfile || user} /> : 
-                <Navigate to="/dashboard" replace />
-            } />
-            <Route path="/dashboard" element={
-              new URLSearchParams(window.location.search).get('from') === 'email' ? 
-              <Navigate to="/dashboard" replace /> :
-              shouldCompleteProfile ? 
-              <Navigate to="/complete-profile" /> : 
-              <Dashboard user={userProfile || user} />} />
-            <Route path="/search" element={shouldCompleteProfile ? 
-              <Navigate to="/complete-profile" /> : 
-              <SearchPage user={userProfile || user} />} />
-            <Route path="/profile" element={userProfile?.role === 'Student' ? 
-              <ProfilePage user={userProfile || user} refreshProfile={refreshUserProfile} /> : 
-              <Navigate to="/dashboard" />} />
-            <Route path="/activity" element={shouldCompleteProfile ? 
-              <Navigate to="/complete-profile" /> : 
-              <ActivityPage user={userProfile || user} />} />
-            <Route path="/opportunity/:id" element={shouldCompleteProfile ? 
-              <Navigate to="/complete-profile" /> : 
-              <ProjectDetailsPage user={userProfile || user} />} />
-            <Route path="/applications" element={shouldCompleteProfile ? 
-              <Navigate to="/complete-profile" /> : 
-              <ApplicationsPage user={userProfile || user} />} />
-            <Route path="/messages" element={shouldCompleteProfile ? 
-              <Navigate to="/complete-profile" /> : 
-              <MessagesPage user={userProfile || user} />} />
-            <Route path="/old-messages" element={shouldCompleteProfile ? 
-              <Navigate to="/complete-profile" /> : 
-              <OldMessagesPage user={userProfile || user} />} />
-            <Route path="/apply/:projectId" element={shouldCompleteProfile ? 
-              <Navigate to="/complete-profile" /> : 
-              <ApplicationPage user={userProfile || user} />} />
-
-            <Route path="/community" element={shouldCompleteProfile ? 
-              <Navigate to="/complete-profile" /> : 
-              <StudentPostsPage user={userProfile || user} />} />
-            <Route path="/admin" element={isAdmin ? 
-              <AdminDashboard user={userProfile || user} /> : 
-              <Navigate to="/dashboard" />} />
-          </Routes>
-        </main>
-        
-          <Footer />
-          </div>
-        </Router>
+      <Router>
+        <AppShell
+          signOut={signOut}
+          user={user}
+          userProfile={userProfile}
+          shouldCompleteProfile={shouldCompleteProfile}
+          isAdmin={isAdmin}
+          refreshUserProfile={refreshUserProfile}
+        />
+      </Router>
     </ThemeProvider>
   );
 }

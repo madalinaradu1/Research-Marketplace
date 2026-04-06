@@ -1,0 +1,78 @@
+.root {
+  width: 100%;
+}
+
+.list {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid #d1d5db;
+  padding: 0 0.25rem;
+  scrollbar-width: none;
+}
+
+.list::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 0.95rem 1.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: #6b7280;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  white-space: nowrap;
+  transition: color 0.18s ease;
+  margin-bottom: 0;
+}
+
+.tab:hover,
+.tab:focus-visible {
+  color: #111827;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.tabActive {
+  color: #9a4ad7;
+  font-weight: 700;
+}
+
+.tabActive:hover,
+.tabActive:focus-visible {
+  color: #9a4ad7;
+  background-color: transparent;
+}
+
+.tabLabel {
+  position: relative;
+  z-index: 1;
+}
+
+.indicator {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 3px;
+  background-color: #9a4ad7;
+  border-radius: 999px 999px 0 0;
+  transition: transform 0.25s ease, width 0.25s ease;
+  pointer-events: none;
+}
+
+.panel {
+  width: 100%;
+  padding-top: 1.25rem;
+}

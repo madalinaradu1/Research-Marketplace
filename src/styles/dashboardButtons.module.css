@@ -1,0 +1,183 @@
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.45rem;
+  padding: 0.6rem 0.95rem !important;
+  border-radius: 10px !important;
+  border: 1px solid transparent !important;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  background: #ffffff !important;
+  border-color: #cdb7ef !important;
+  color: #111827 !important;
+  box-shadow: 0 6px 16px rgba(154, 74, 215, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.actionButton:hover:not(:disabled),
+.actionButton:focus-visible:not(:disabled) {
+  transform: translateY(-0.5px);
+  background: #faf7ff !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 20px rgba(154, 74, 215, 0.12);
+}
+
+.actionButton:disabled {
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.actionButtonPrimary {
+  background: #ffffff !important;
+  border-color: #cdb7ef !important;
+  color: #111827 !important;
+  box-shadow: 0 6px 16px rgba(154, 74, 215, 0.08);
+}
+
+.actionButtonPrimary:hover:not(:disabled),
+.actionButtonPrimary:focus-visible:not(:disabled) {
+  background: #faf7ff !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 20px rgba(154, 74, 215, 0.12);
+}
+
+.actionButtonApplied {
+  background: #ffffff !important;
+  border-color: #cdb7ef !important;
+  color: #111827 !important;
+  box-shadow: 0 6px 16px rgba(154, 74, 215, 0.08);
+}
+
+.actionButtonApplied:hover:not(:disabled),
+.actionButtonApplied:focus-visible:not(:disabled) {
+  background: #faf7ff !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 20px rgba(154, 74, 215, 0.12);
+}
+
+.actionButtonMuted {
+  background: #ffffff !important;
+  border-color: #cdb7ef !important;
+  color: #111827 !important;
+  box-shadow: 0 6px 16px rgba(154, 74, 215, 0.08);
+}
+
+.actionButtonMuted:hover:not(:disabled),
+.actionButtonMuted:focus-visible:not(:disabled) {
+  background: #faf7ff !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 20px rgba(154, 74, 215, 0.12);
+}
+
+.actionButtonGhost {
+  background: #ffffff !important;
+  border-color: #cdb7ef !important;
+  color: #111827 !important;
+  box-shadow: 0 6px 16px rgba(154, 74, 215, 0.08);
+}
+
+.actionButtonGhost:hover:not(:disabled),
+.actionButtonGhost:focus-visible:not(:disabled) {
+  background: #faf7ff !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: 0 9px 20px rgba(154, 74, 215, 0.12);
+}
+
+.actionButtonCompact {
+  min-height: 2.3rem;
+  padding: 0.55rem 0.9rem !important;
+  border-radius: 10px !important;
+}
+
+.actionButtonWide {
+  min-width: 11.5rem;
+}
+
+.actionButtonIcon {
+  min-width: 2.3rem;
+  padding-left: 0.55rem !important;
+  padding-right: 0.55rem !important;
+  font-size: 1.3rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+.paginationButton {
+  min-height: 2.35rem;
+  padding: 0.46rem 0.72rem !important;
+  border-radius: 8px !important;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.paginationNumber {
+  min-width: 2.35rem;
+  padding-left: 0.68rem !important;
+  padding-right: 0.68rem !important;
+}
+
+.paginationButtonPrimary {
+  background: #cdb7ef !important;
+  border-color: #cdb7ef !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+.paginationButtonPrimary:hover:not(:disabled),
+.paginationButtonPrimary:focus-visible:not(:disabled) {
+  background: #bc9ce9 !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+.paginationButtonSecondary {
+  background: #ffffff !important;
+  border-color: #5b2ca0 !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+.paginationButtonSecondary:hover:not(:disabled),
+.paginationButtonSecondary:focus-visible:not(:disabled) {
+  background: #faf7ff !important;
+  border-color: #bc9ce9 !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+.paginationButton:disabled,
+.paginationButton:disabled:hover,
+.paginationButton:disabled:focus-visible {
+  background: #ffffff !important;
+  border-color: #d5c6ee !important;
+  color: #9ca3af !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+@media (max-width: 768px) {
+  .actionButtonWide {
+    width: 100%;
+    min-width: 0;
+  }
+}

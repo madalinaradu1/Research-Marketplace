@@ -8,8 +8,6 @@ import {
   Text, 
   Button, 
   Card, 
-  Tabs,
-  TabItem,
   Collection,
   Badge,
   TextField,
@@ -18,13 +16,22 @@ import {
   useTheme,
   View,
   Divider,
-  Loader
+  Loader,
+  Tabs,
+  TabItem
 } from '@aws-amplify/ui-react';
 import { Storage } from 'aws-amplify';
 import { listProjects, listApplications, listUsers, updateProject, updateApplication } from '../graphql/operations';
 import { createMessage } from '../graphql/message-operations';
 import { sendStatusChangeNotification, sendEmailNotification } from '../utils/emailNotifications';
 import { getStatusColorValue } from '../utils/statusColors';
+import TagSelector from '../components/TagSelector';
+import { useTags } from '../contexts/TagContext';
+import { tagIdsToDisplayNames } from '../components/TagSelector/tagHelpers';
+import { syncProjectTagIndex } from '../lib/recommendations/projectTagIndexSync';
+import SliderTabs from '../components/SliderTabs';
+import DashboardPageShell from '../components/DashboardPageShell';
+import DashboardPagination from '../components/DashboardPagination';
 
 const CoordinatorDashboard = ({ user }) => {
   const { tokens } = useTheme();
@@ -33,6 +40,7 @@ const CoordinatorDashboard = ({ user }) => {
   const [approvedApplications, setApprovedApplications] = useState([]);
   const [rejectedApplications, setRejectedApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
   const [applicationToReject, setApplicationToReject] = useState(null);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
@@ -57,6 +65,9 @@ const CoordinatorDashboard = ({ user }) => {
   const itemsPerPage = 10;
   const [openKebabMenu, setOpenKebabMenu] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
+  const { tagsById, resolveTagIds } = useTags();
+  const [projectResearchTagIds, setProjectResearchTagIds] = useState([]);
+  const [projectSkillTagIds, setProjectSkillTagIds] = useState([]);
   const [projectForm, setProjectForm] = useState({
     title: '',
     description: '',
@@ -251,16 +262,27 @@ const CoordinatorDashboard = ({ user }) => {
     setProjectForm(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSkillsTagsChange = (nextIds) => {
+    setProjectSkillTagIds(nextIds);
+    setProjectForm((prev) => ({
+      ...prev,
+      skillsRequired: tagIdsToDisplayNames(nextIds, tagsById).join(', ')
+    }));
+  };
+
+  const handleResearchTagsChange = (nextIds) => {
+    setProjectResearchTagIds(nextIds);
+    setProjectForm((prev) => ({
+      ...prev,
+      tags: tagIdsToDisplayNames(nextIds, tagsById).join(', ')
+    }));
+  };
+
   const handleUpdateProject = async (e) => {
     e.preventDefault();
     try {
-      const skillsArray = projectForm.skillsRequired
-        ? projectForm.skillsRequired.split(',').map(skill => skill.trim()).filter(skill => skill)
-        : [];
-      
-      const tagsArray = projectForm.tags
-        ? projectForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
-        : [];
+      const skillsArray = tagIdsToDisplayNames(projectSkillTagIds, tagsById);
+      const tagsArray = tagIdsToDisplayNames(projectResearchTagIds, tagsById);
       
       const deadline = projectForm.applicationDeadline 
         ? new Date(projectForm.applicationDeadline + 'T00:00:00Z').toISOString() 
@@ -280,9 +302,24 @@ const CoordinatorDashboard = ({ user }) => {
         isActive: projectForm.isActive
       };
       
+      const oldRequiredTagIds = resolveTagIds(editingProject.skillsRequired || []);
+      const oldOptionalTagIds = resolveTagIds(editingProject.tags || []);
+      const newRequiredTagIds = resolveTagIds(skillsArray);
+      const newOptionalTagIds = resolveTagIds(tagsArray);
+
       await API.graphql(graphqlOperation(updateProject, { input }));
+      await syncProjectTagIndex({
+        projectId: editingProject.id,
+        oldRequiredTagIds,
+        oldOptionalTagIds,
+        newRequiredTagIds,
+        newOptionalTagIds
+      });
       setEditingProject(null);
+      setProjectResearchTagIds([]);
+      setProjectSkillTagIds([]);
       fetchData();
+
     } catch (error) {
       console.error('Error updating project:', error);
     }
@@ -352,23 +389,12 @@ const CoordinatorDashboard = ({ user }) => {
   // Pagination helper function
   const renderPagination = (items, currentPage, setPage) => {
     const totalPages = Math.ceil(items.length / itemsPerPage);
-    if (totalPages <= 1) return null;
-    
     return (
-      <Flex justifyContent="flex-end" alignItems="center" gap="0.5rem" marginTop="1rem">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-          <Button
-            key={page}
-            size="small"
-            backgroundColor={page === currentPage ? "#552b9a" : "white"}
-            color={page === currentPage ? "white" : "black"}
-            border="1px solid #552b9a"
-            onClick={() => setPage(page)}
-          >
-            {page}
-          </Button>
-        ))}
-      </Flex>
+      <DashboardPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     );
   };
   
@@ -388,9 +414,301 @@ const CoordinatorDashboard = ({ user }) => {
   );
 }
 
+  const pendingReviewsContent = (
+    <Flex direction="column" gap="2rem">
+      {projects.pending && projects.pending.length > 0 && (
+        <Card backgroundColor="white">
+          <Heading level={4} marginBottom="1rem">Projects ({projects.pending.length})</Heading>
+          <Collection items={getPaginatedItems(projects.pending, pendingPage)} type="list" gap="1rem">
+            {(project) => (
+              <Card key={project.id} variation="outlined" style={{ cursor: 'pointer' }} onClick={() => setViewingProject(project)}>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Flex direction="column" gap="0.5rem" flex="1">
+                    <Text fontWeight="bold">{project.title}</Text>
+                    <Text fontSize="0.9rem">{project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
+                  </Flex>
+                  <View position="relative">
+                    <Button
+                      className="meatball-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
+                      }}
+                    >
+                      <span aria-hidden="true">&#8942;</span>
+                    </Button>
+                    {openKebabMenu === project.id && (
+                      <div
+                        className="meatball-dropdown"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          className="meatball-dropdown-item"
+                          onClick={() => {
+                            setViewingProject(project);
+                            setOpenKebabMenu(null);
+                          }}
+                        >
+                          View
+                        </button>
+                        <button
+                          className="meatball-dropdown-item"
+                          onClick={() => {
+                            const skillIds = resolveTagIds(project.skillsRequired || []);
+                            const researchIds = resolveTagIds(project.tags || []);
+                            setEditingProject(project);
+                            setProjectSkillTagIds(skillIds);
+                            setProjectResearchTagIds(researchIds);
+                            setProjectForm({
+                              title: project.title || '',
+                              description: project.description || '',
+                              department: project.department || '',
+                              skillsRequired: tagIdsToDisplayNames(skillIds, tagsById).join(', '),
+                              tags: tagIdsToDisplayNames(researchIds, tagsById).join(', '),
+                              qualifications: project.qualifications || '',
+                              duration: project.duration || '',
+                              applicationDeadline: project.applicationDeadline ? new Date(project.applicationDeadline).toISOString().split('T')[0] : '',
+                              requiresTranscript: project.requiresTranscript || false,
+                              isActive: project.isActive !== undefined ? project.isActive : true
+                            });
+                            setOpenKebabMenu(null);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="meatball-dropdown-item"
+                          onClick={() => {
+                            setProjectToApprove(project);
+                            setShowProjectApproveConfirm(true);
+                            setOpenKebabMenu(null);
+                          }}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="meatball-dropdown-item"
+                          onClick={() => {
+                            setSelectedProject(project);
+                            setOpenKebabMenu(null);
+                          }}
+                        >
+                          Return
+                        </button>
+                        <button
+                          className="meatball-dropdown-item"
+                          onClick={() => {
+                            setProjectToReject(project);
+                            setShowProjectRejectConfirm(true);
+                            setOpenKebabMenu(null);
+                          }}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </View>
+                </Flex>
+              </Card>
+            )}
+          </Collection>
+          {renderPagination(projects.pending, pendingPage, setPendingPage)}
+        </Card>
+      )}
+
+      {applications.length > 0 && (
+        <Card backgroundColor="white">
+          <Heading level={4} marginBottom="1rem">Applications ({applications.length})</Heading>
+          <Collection items={getPaginatedItems(applications, pendingPage)} type="list" gap="1rem">
+            {(application) => (
+              <Card key={application.id} variation="outlined">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Flex direction="column" gap="0.5rem" flex="1">
+                    <Text fontWeight="bold">{application.project?.title}</Text>
+                    <Text fontSize="0.9rem">{application.student?.name}</Text>
+                  </Flex>
+                  <View position="relative">
+                    <Button
+                      className="meatball-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
+                      }}
+                    >
+                      <span aria-hidden="true">&#8942;</span>
+                    </Button>
+                    {openKebabMenu === application.id && (
+                      <div
+                        className="meatball-dropdown"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          className="meatball-dropdown-item"
+                          onClick={() => {
+                            setViewingApplication(application);
+                            setOpenKebabMenu(null);
+                          }}
+                        >
+                          View
+                        </button>
+                        <button
+                          className="meatball-dropdown-item"
+                          onClick={() => {
+                            setApplicationToApprove(application);
+                            setShowApproveConfirm(true);
+                            setOpenKebabMenu(null);
+                          }}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="meatball-dropdown-item"
+                          onClick={() => {
+                            setSelectedApplication(application);
+                            setOpenKebabMenu(null);
+                          }}
+                        >
+                          Return
+                        </button>
+                        <button
+                          className="meatball-dropdown-item"
+                          onClick={() => {
+                            setApplicationToReject(application);
+                            setShowRejectConfirm(true);
+                            setOpenKebabMenu(null);
+                          }}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </View>
+                </Flex>
+              </Card>
+            )}
+          </Collection>
+          {renderPagination(applications, pendingPage, setPendingPage)}
+        </Card>
+      )}
+
+      {projects.pending?.length === 0 && applications.length === 0 && (
+        <Card backgroundColor="white">
+          <Text>No items need your review at this time.</Text>
+        </Card>
+      )}
+    </Flex>
+  );
+
+  const approvedItemsContent = (
+    <Flex direction="column" gap="2rem">
+      {approvedApplications.length > 0 && (
+        <Card backgroundColor="white">
+          <Heading level={4} marginBottom="1rem">Applications ({approvedApplications.length})</Heading>
+          <Collection items={getPaginatedItems(approvedApplications, approvedPage)} type="list" gap="1rem">
+            {(application) => (
+              <Card key={application.id} variation="outlined" style={{ cursor: 'pointer' }} onClick={() => setViewingApplication(application)}>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Flex direction="column" gap="0.5rem" flex="1">
+                    <Text fontWeight="bold">{application.project?.title}</Text>
+                    <Text fontSize="0.9rem">{application.student?.name} <span aria-hidden="true">&middot;</span> {application.status}</Text>
+                  </Flex>
+                </Flex>
+              </Card>
+            )}
+          </Collection>
+          {renderPagination(approvedApplications, approvedPage, setApprovedPage)}
+        </Card>
+      )}
+
+      {projects.approved && projects.approved.length > 0 && (
+        <Card backgroundColor="white">
+          <Heading level={4} marginBottom="1rem">Projects ({projects.approved.length})</Heading>
+          <Collection items={getPaginatedItems(projects.approved, approvedPage)} type="list" gap="1rem">
+            {(project) => (
+              <Card key={project.id} variation="outlined" style={{ cursor: 'pointer' }} onClick={() => setViewingProject(project)}>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Flex direction="column" gap="0.5rem" flex="1">
+                    <Text fontWeight="bold">{project.title}</Text>
+                    <Text fontSize="0.9rem">{project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
+                  </Flex>
+                </Flex>
+              </Card>
+            )}
+          </Collection>
+          {renderPagination(projects.approved, approvedPage, setApprovedPage)}
+        </Card>
+      )}
+
+      {approvedApplications.length === 0 && projects.approved?.length === 0 && (
+        <Card backgroundColor="white">
+          <Text>No approved items yet.</Text>
+        </Card>
+      )}
+    </Flex>
+  );
+
+  const rejectedItemsContent = (
+    <Flex direction="column" gap="2rem">
+      {projects.rejected && projects.rejected.length > 0 && (
+        <Card backgroundColor="white">
+          <Heading level={4} marginBottom="1rem">Projects ({projects.rejected.length})</Heading>
+          <Collection items={getPaginatedItems(projects.rejected, rejectedPage)} type="list" gap="1rem">
+            {(project) => (
+              <Card key={project.id} variation="outlined" style={{ cursor: 'pointer' }} onClick={() => setViewingProject(project)}>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Flex direction="column" gap="0.5rem" flex="1">
+                    <Text fontWeight="bold">{project.title}</Text>
+                    <Text fontSize="0.9rem">Faculty: {project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
+                    <Text fontSize="0.8rem" color="gray">
+                      Rejected: {new Date(project.updatedAt).toLocaleDateString()}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Card>
+            )}
+          </Collection>
+          {renderPagination(projects.rejected, rejectedPage, setRejectedPage)}
+        </Card>
+      )}
+
+      {rejectedApplications.length > 0 && (
+        <Card backgroundColor="white">
+          <Heading level={4} marginBottom="1rem">Applications ({rejectedApplications.length})</Heading>
+          <Collection items={getPaginatedItems(rejectedApplications, rejectedPage)} type="list" gap="1rem">
+            {(application) => (
+              <Card key={application.id} variation="outlined" style={{ cursor: 'pointer' }} onClick={() => setViewingApplication(application)}>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Flex direction="column" gap="0.5rem" flex="1">
+                    <Text fontWeight="bold">{application.project?.title}</Text>
+                    <Text fontSize="0.9rem">Student: {application.student?.name}</Text>
+                    <Text fontSize="0.8rem" color="gray">
+                      Rejected: {new Date(application.updatedAt).toLocaleDateString()}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Card>
+            )}
+          </Collection>
+          {renderPagination(rejectedApplications, rejectedPage, setRejectedPage)}
+        </Card>
+      )}
+
+      {projects.rejected?.length === 0 && rejectedApplications.length === 0 && (
+        <Card backgroundColor="white">
+          <Text>No rejected items yet.</Text>
+        </Card>
+      )}
+    </Flex>
+  );
+
+  const coordinatorTabs = [
+    { label: 'Pending Reviews', content: pendingReviewsContent },
+    { label: 'Approved Items', content: approvedItemsContent },
+    { label: 'Rejected Items', content: rejectedItemsContent }
+  ];
+
   return (
-    <View width="100%" backgroundColor="#f5f5f5">
-      <Flex direction="column" padding="2rem" gap="2rem">
+    <DashboardPageShell>
       <Card backgroundColor="white" padding="1.5rem">
         <Flex direction="column" gap="0.5rem">
           <Heading level={2} color="#2d3748">Coordinator Dashboard</Heading>
@@ -401,13 +719,26 @@ const CoordinatorDashboard = ({ user }) => {
       </Card>
       
 
-      <Tabs
-        onChange={() => {
+      <SliderTabs
+        currentIndex={activeTabIndex}
+        onChange={(index) => {
+          setActiveTabIndex(index);
           setPendingPage(1);
           setApprovedPage(1);
           setRejectedPage(1);
         }}
-      >
+        tabs={coordinatorTabs}
+      />
+
+      {false && (
+        <Tabs
+          onChange={() => {
+            setPendingPage(1);
+            setApprovedPage(1);
+            setRejectedPage(1);
+          }}
+          style={{ '--amplify-components-tabs-item-hover-background-color': 'transparent' }}
+        >
         <TabItem title="Pending Reviews">
           <Flex direction="column" gap="2rem">
             {/* Projects Needing Review */}
@@ -420,7 +751,7 @@ const CoordinatorDashboard = ({ user }) => {
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{project.title}</Text>
-                          <Text fontSize="0.9rem">{project.faculty?.name} • {project.department}</Text>
+                          <Text fontSize="0.9rem">{project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
                         </Flex>
                         <View position="relative">
                           <Button 
@@ -430,7 +761,7 @@ const CoordinatorDashboard = ({ user }) => {
                               setOpenKebabMenu(openKebabMenu === project.id ? null : project.id);
                             }}
                           >
-                            ⋯
+                            <span aria-hidden="true">&#8942;</span>
                           </Button>
                           {openKebabMenu === project.id && (
                             <div
@@ -449,13 +780,17 @@ const CoordinatorDashboard = ({ user }) => {
                                 <button
                                   className="meatball-dropdown-item"
                                   onClick={() => {
+                                    const skillIds = resolveTagIds(project.skillsRequired || []);
+                                    const researchIds = resolveTagIds(project.tags || []);
                                     setEditingProject(project);
+                                    setProjectSkillTagIds(skillIds);
+                                    setProjectResearchTagIds(researchIds);
                                     setProjectForm({
                                       title: project.title || '',
                                       description: project.description || '',
                                       department: project.department || '',
-                                      skillsRequired: project.skillsRequired?.join(', ') || '',
-                                      tags: project.tags?.join(', ') || '',
+                                      skillsRequired: tagIdsToDisplayNames(skillIds, tagsById).join(', '),
+                                      tags: tagIdsToDisplayNames(researchIds, tagsById).join(', '),
                                       qualifications: project.qualifications || '',
                                       duration: project.duration || '',
                                       applicationDeadline: project.applicationDeadline ? new Date(project.applicationDeadline).toISOString().split('T')[0] : '',
@@ -527,7 +862,7 @@ const CoordinatorDashboard = ({ user }) => {
                               setOpenKebabMenu(openKebabMenu === application.id ? null : application.id);
                             }}
                           >
-                            ⋯
+                            <span aria-hidden="true">&#8942;</span>
                           </Button>
                           {openKebabMenu === application.id && (
                             <div
@@ -603,7 +938,7 @@ const CoordinatorDashboard = ({ user }) => {
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{application.project?.title}</Text>
-                          <Text fontSize="0.9rem">{application.student?.name} • {application.status}</Text>
+                          <Text fontSize="0.9rem">{application.student?.name} <span aria-hidden="true">&middot;</span> {application.status}</Text>
                         </Flex>
                       </Flex>
                     </Card>
@@ -623,7 +958,7 @@ const CoordinatorDashboard = ({ user }) => {
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{project.title}</Text>
-                          <Text fontSize="0.9rem">{project.faculty?.name} • {project.department}</Text>
+                          <Text fontSize="0.9rem">{project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
                         </Flex>
                       </Flex>
                     </Card>
@@ -653,7 +988,7 @@ const CoordinatorDashboard = ({ user }) => {
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Text fontWeight="bold">{project.title}</Text>
-                          <Text fontSize="0.9rem">Faculty: {project.faculty?.name} • {project.department}</Text>
+                          <Text fontSize="0.9rem">Faculty: {project.faculty?.name} <span aria-hidden="true">&middot;</span> {project.department}</Text>
                           <Text fontSize="0.8rem" color="gray">
                             Rejected: {new Date(project.updatedAt).toLocaleDateString()}
                           </Text>
@@ -696,7 +1031,8 @@ const CoordinatorDashboard = ({ user }) => {
             )}
           </Flex>
         </TabItem>
-      </Tabs>
+        </Tabs>
+      )}
       
       {/* Project Notes Modal */}
       {selectedProject && (
@@ -816,7 +1152,7 @@ const CoordinatorDashboard = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Application Details</Heading>
-                  <Button size="small" onClick={() => setViewingApplication(null)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  <Button size="small" data-close-button="true" onClick={() => setViewingApplication(null)} backgroundColor="#f7fafc" color="#4a5568"><span className="closeButtonGlyph" aria-hidden="true">&times;</span></Button>
                 </Flex>
                 
                 <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
@@ -1075,7 +1411,7 @@ const CoordinatorDashboard = ({ user }) => {
               <Flex direction="column" gap="1.5rem" padding="2rem">
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3} color="#2d3748">Project Details</Heading>
-                  <Button size="small" onClick={() => setViewingProject(null)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
+                  <Button size="small" data-close-button="true" onClick={() => setViewingProject(null)} backgroundColor="#f7fafc" color="#4a5568"><span className="closeButtonGlyph" aria-hidden="true">&times;</span></Button>
                 </Flex>
                 
                 {/* Rejection Reason Banner */}
@@ -1484,7 +1820,11 @@ const CoordinatorDashboard = ({ user }) => {
           height="100vh"
           backgroundColor="rgba(0, 0, 0, 0.5)"
           style={{ zIndex: 1000 }}
-          onClick={() => setEditingProject(null)}
+          onClick={() => {
+            setEditingProject(null);
+            setProjectResearchTagIds([]);
+            setProjectSkillTagIds([]);
+          }}
         >
           <Flex
             justifyContent="center"
@@ -1546,20 +1886,24 @@ const CoordinatorDashboard = ({ user }) => {
                       flex="1"
                     />
                   </Flex>
-                  <TextField
-                    name="skillsRequired"
-                    label="Skills Required (comma-separated)"
-                    value={projectForm.skillsRequired}
-                    onChange={handleProjectFormChange}
-                    placeholder="e.g. Python, Data Analysis, Machine Learning"
-                  />
-                  <TextField
-                    name="tags"
-                    label="Research Tags (comma-separated)"
-                    value={projectForm.tags}
-                    onChange={handleProjectFormChange}
-                    placeholder="e.g. lab, field, geology, code, clinical"
-                  />
+                  <Flex direction="column" gap="0.5rem">
+                    <Text fontWeight="bold">Skills Required</Text>
+                    <TagSelector
+                      selectedTagIds={projectSkillTagIds}
+                      onChange={handleSkillsTagsChange}
+                      placeholder="List skills and experience...(e.g. Python, Data Analysis)"
+                      maxSelections={15}
+                    />
+                  </Flex>
+                  <Flex direction="column" gap="0.5rem">
+                    <Text fontWeight="bold">Research Tags</Text>
+                    <TagSelector
+                      selectedTagIds={projectResearchTagIds}
+                      onChange={handleResearchTagsChange}
+                      placeholder="List research tags...(e.g. Artificial Intelligence, Biomedical Engineering)"
+                      maxSelections={10}
+                    />
+                  </Flex>
                   <TextAreaField
                     name="qualifications"
                     label="Required Qualifications/Prerequisites"
@@ -1588,7 +1932,11 @@ const CoordinatorDashboard = ({ user }) => {
                     <option value="true">Yes</option>
                   </SelectField>
                   <Flex gap="1rem">
-                    <Button onClick={() => setEditingProject(null)}>Cancel</Button>
+                    <Button onClick={() => {
+                      setEditingProject(null);
+                      setProjectResearchTagIds([]);
+                      setProjectSkillTagIds([]);
+                    }}>Cancel</Button>
                     <Button 
                       type="submit"
                       backgroundColor="white"
@@ -1605,8 +1953,7 @@ const CoordinatorDashboard = ({ user }) => {
         </View>
       )}
 
-    </Flex>
-    </View>
+    </DashboardPageShell>
   );
 };
 

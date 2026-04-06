@@ -1,6 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';  
 import { DynamoDBDocumentClient, GetCommand, QueryCommand, BatchGetCommand } from '@aws-sdk/lib-dynamodb';  
-import { normalizeTagName } from './tagUtils.js';
+import { isTagPrefixMatch, normalizeWords } from './tagUtils.js';
 import { fromIni } from '@aws-sdk/credential-provider-ini';
 
 const client = new DynamoDBClient({
@@ -12,6 +12,31 @@ const docClient = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = `Tags-${'dev'}`; 
 
 export class TagRepository {
+  async queryWordPrefix(prefix, tagType = null, limit = 10) {
+    const params = {
+      TableName: TABLE_NAME,
+      IndexName: 'GSI1',
+      KeyConditionExpression: 'GSI1PK = :gsi1pk AND begins_with(GSI1SK, :prefix)',
+      ExpressionAttributeValues: {
+        ':gsi1pk': 'TAG_WORD',
+        ':prefix': prefix,
+        ':status': 'ACTIVE'
+      },
+      FilterExpression: '#status = :status',
+      ExpressionAttributeNames: {
+        '#status': 'status'
+      },
+      Limit: limit
+    };
+
+    if (tagType) {
+      params.FilterExpression += ' AND tag_type = :tagType';
+      params.ExpressionAttributeValues[':tagType'] = tagType;
+    }
+
+    const result = await docClient.send(new QueryCommand(params));
+    return result.Items || [];
+  }
 
    // Get tag by ID
   async getTagById(tagId) {
@@ -34,31 +59,27 @@ export class TagRepository {
 
   //Autocomeplete tags by prefix
   async autocompleteTags(prefix, tagType = null, limit=10) {
-    const normalizedPrefix = normalizeTagName(prefix);
-
-    const params = {
-        TableName: TABLE_NAME,
-        IndexName: 'GSI1',
-        KeyConditionExpression: 'GSI1PK = :gsi1pk AND begins_with(GSI1SK, :prefix)',
-        ExpressionAttributeValues: {
-          ':gsi1pk': 'TAG_NAME',
-          ':prefix': normalizedPrefix,
-          ':status': 'ACTIVE'
-      },  
-      FilterExpression: '#status = :status',
-      ExpressionAttributeNames: {
-        '#status': 'status'
-      },
-      Limit: limit
-    };
-
-    if (tagType) {
-        params.FilterExpression += ' AND tagType = :tagType';
-        params.ExpressionAttributeValues[':tagType'] = tagType;
+    const words = Array.from(new Set(normalizeWords(prefix)));
+    if (!words.length) {
+      return [];
     }
 
-    const result = await docClient.send(new QueryCommand(params));
-    return  result.Items || [];
+    const queryLimit = Math.max(limit, 25);
+    const resultSets = await Promise.all(
+      words.map((word) => this.queryWordPrefix(word, tagType, queryLimit))
+    );
+
+    const byId = new Map();
+    resultSets.flat().forEach((tag) => {
+      if (tag?.tag_id) {
+        byId.set(tag.tag_id, tag);
+      }
+    });
+
+    return Array.from(byId.values())
+      .filter((tag) => isTagPrefixMatch(tag, prefix))
+      .sort((a, b) => a.display_name.localeCompare(b.display_name))
+      .slice(0, limit);
   }
 
   //  Get children of a parent tag

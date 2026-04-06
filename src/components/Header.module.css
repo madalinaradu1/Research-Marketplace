@@ -1,0 +1,558 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #050505 !important;
+  color: #ffffff !important;
+  border-bottom: 0;
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 1.5rem;
+  min-height: 104px;
+  box-sizing: border-box;
+  gap: 1.5rem;
+}
+
+.brandLink {
+  display: flex;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+  flex: 0 0 auto;
+}
+
+.brandRow {
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  align-items: center;
+  max-width: 100%;
+  flex-wrap: nowrap;
+}
+
+.logo {
+  width: auto;
+  max-width: min(100%, 190px);
+  height: 60px;
+  margin: 0;
+  padding: 0;
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.brandTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.brandTitle {
+  display: block;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.brandMeta {
+  display: block;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.15;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.desktopNav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.25rem;
+  padding: 0;
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
+
+.navLink {
+  color: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+}
+
+.navLinkActive {
+  text-decoration: underline;
+  text-decoration-color: #9a4ad7;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 0.12em;
+}
+
+.messagesLink {
+  position: relative;
+}
+
+.navText {
+  display: block;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.96rem;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.navTextActive {
+  display: block;
+  color: #9a4ad7;
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.navLink:hover .navText,
+.navLink:focus-visible .navText,
+.navLink:hover .navTextActive,
+.navLink:focus-visible .navTextActive {
+  color: #9a4ad7;
+}
+
+.unreadBadge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background-color: #d92d20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.unreadBadgeText {
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.searchShell {
+  width: clamp(18rem, 24vw, 33rem);
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid #d6dfef;
+  border-radius: 16px;
+  background-color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: none;
+}
+
+.searchShell:focus-within {
+  border-color: #9a4ad7;
+  box-shadow: 0 0 0 3px rgba(154, 74, 215, 0.16);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 1rem 0 1.05rem;
+  border: 0;
+  background: transparent;
+  color: #111827;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.2;
+  outline: none;
+  appearance: none;
+}
+
+.searchInput::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.searchInput::-webkit-search-decoration,
+.searchInput::-webkit-search-cancel-button,
+.searchInput::-webkit-search-results-button,
+.searchInput::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.searchButton {
+  min-width: 52px;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.95rem 0 0.8rem;
+  border: 0;
+  background: transparent;
+  color: #111827;
+  font: inherit;
+  box-shadow: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.searchButton:hover,
+.searchButton:focus-visible {
+  color: #9a4ad7;
+  background: transparent;
+  outline: none;
+}
+
+.menuAnchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.menuAnchor::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 240px;
+  height: 12px;
+  background: transparent;
+}
+
+.iconButton {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  background-color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: none;
+  outline: none;
+  padding: 0.5rem;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+.iconButton:hover,
+.iconButton:focus {
+  background-color: #f8fafc;
+  color: #111827;
+  border-color: rgba(255, 255, 255, 0.36);
+  box-shadow: none;
+}
+
+.iconButton svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.accessibilityTrigger,
+.accessibilityTrigger:hover,
+.accessibilityTrigger:focus {
+  background-color: #ffffff;
+  color: #6b7280;
+  box-shadow: none;
+}
+
+.accessibilityTrigger:hover,
+.accessibilityTrigger:focus {
+  background-color: #f8fafc;
+  color: #111827;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  min-width: 220px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+  padding: 6px;
+  z-index: 1001;
+}
+
+.dropdownHeader {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 10px 4px;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: #374151;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: none;
+  outline: none;
+}
+
+.dropdownItem:hover,
+.dropdownItem:focus-visible {
+  background: #f7fafc;
+  color: #111827;
+  border: none;
+  box-shadow: none;
+}
+
+.profileDropdown {
+  min-width: 220px;
+  padding: 6px;
+}
+
+.profileGreeting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #111827;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.profileGreeting svg {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.profileGreeting span {
+  min-width: 0;
+  color: #111827;
+}
+
+.profileAction {
+  gap: 0;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.mobileNav {
+  display: none;
+  align-items: center;
+  margin-left: auto;
+}
+
+.mobileMenuAnchor {
+  position: relative;
+}
+
+.mobileMenuButton {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  color: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 0.5rem 0.875rem;
+  box-sizing: border-box;
+}
+
+.mobileMenuButton:hover,
+.mobileMenuButton:focus {
+  background-color: #f8fafc;
+  color: #111827;
+}
+
+.mobileMenuBars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobileMenuBar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: #111827;
+}
+
+.mobileMenuPanel {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  min-width: 220px;
+  z-index: 1001;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background-color: #ffffff;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mobileMenuItem {
+  width: 100%;
+  display: block;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background-color: #ffffff;
+  color: #111827;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.2;
+}
+
+.mobileMenuItem:hover,
+.mobileMenuItem:focus {
+  background-color: #f8fafc;
+}
+
+@media (max-width: 1279px) {
+  .desktopNav {
+    display: none;
+  }
+
+  .mobileNav {
+    display: flex;
+  }
+}
+
+@media (max-width: 1400px) {
+  .headerInner {
+    padding: 1.1rem 1rem 1.3rem;
+    gap: 1rem;
+  }
+
+  .desktopNav {
+    gap: 1rem;
+  }
+
+  .searchShell {
+    width: clamp(17rem, 22vw, 25rem);
+  }
+}
+
+@media (max-width: 1024px) {
+  .headerInner {
+    min-height: 90px;
+    padding: 1rem 0.875rem 1.15rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    border-bottom-width: 0;
+  }
+
+  .headerInner {
+    padding: 0.9rem 0.75rem 1.05rem;
+    gap: 0.75rem;
+  }
+
+  .brandRow {
+    gap: 0.625rem;
+  }
+
+  .logo {
+    height: 46px;
+    max-width: min(100%, 138px);
+  }
+
+  .brandTitle {
+    font-size: 0.82rem;
+    white-space: normal;
+  }
+
+  .brandMeta {
+    font-size: 0.78rem;
+    white-space: normal;
+  }
+}
+
+:global(:root.high-contrast) .header {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-bottom: 2px solid #000000;
+}
+
+:global(:root.high-contrast) .logo {
+  filter: brightness(0);
+}
+
+:global(:root.high-contrast) .brandTitle,
+:global(:root.high-contrast) .brandMeta,
+:global(:root.high-contrast) .navText,
+:global(:root.high-contrast) .navTextActive {
+  color: #000000 !important;
+}
+
+:global(:root.high-contrast) .navLinkActive {
+  text-decoration-color: #000000;
+}
+
+:global(:root.high-contrast) .searchShell,
+:global(:root.high-contrast) .iconButton,
+:global(:root.high-contrast) .mobileMenuButton,
+:global(:root.high-contrast) .dropdown,
+:global(:root.high-contrast) .mobileMenuPanel {
+  background-color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+:global(:root.high-contrast) .searchInput,
+:global(:root.high-contrast) .searchButton,
+:global(:root.high-contrast) .iconButton,
+:global(:root.high-contrast) .mobileMenuButton,
+:global(:root.high-contrast) .dropdownItem,
+:global(:root.high-contrast) .profileGreeting,
+:global(:root.high-contrast) .mobileMenuItem {
+  color: #000000 !important;
+}

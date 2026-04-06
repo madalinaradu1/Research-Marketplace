@@ -10,7 +10,17 @@ export default function TagChip({ label, onRemove }) {
         onClick={onRemove}
         aria-label={`Remove ${label}`}
       >
-        x
+        <span className="tag-chip-remove-glyph" aria-hidden="true">
+          <svg className="tag-chip-remove-icon" viewBox="0 0 16 16">
+            <path
+              d="M4 4l8 8M12 4l-8 8"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </span>
       </button>
     </span>
   );

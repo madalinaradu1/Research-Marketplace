@@ -14,41 +14,19 @@ body {
   min-height: 100vh;
 }
 
-header {
-  background-color: #9a4ad7;
-  color: white;
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-header h2 {
-  margin: 0.5rem 0 1rem;
-  font-size: 1rem;
-  font-weight: normal;
-}
-
-header button {
-  background-color: white;
-  color: #7a3ab0;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-main {
+.appMain {
   flex: 1;
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+}
+
+.appMainFullBleed {
+  max-width: none !important;
+  width: 100%;
+  padding: 0;
 }
 
 footer {
@@ -58,39 +36,112 @@ footer {
   text-align: center;
 }
 
-button.amplify-button--primary {
+.app button.amplify-button--primary {
   background-color: #9a4ad7;
 }
 
-button.amplify-button--primary:hover {
+.app button.amplify-button--primary:hover {
   background-color: #7a3ab0;
 }
 
-/* Light purple hover effect for all buttons */
-button:hover:not(:disabled) {
-  background-color: #f3e5f5 !important;
+.app button.amplify-button--primary:hover:not(:disabled) {
+  background-color: #7a3ab0 !important;
   transition: background-color 0.2s ease;
+  color: white !important;
 }
 
-/* Preserve text color on hover */
-button:hover:not(:disabled) {
-  color: #7b1fa2 !important;
+/* Tab base */
+.app .amplify-tabs-item,
+.app .amplify-tabs [role="tab"],
+.app .amplify-tabs [role="tablist"] button {
+  border-radius: 8px 8px 0 0 !important;
+  background-color: transparent !important;
+  transition: none !important;
+}
+
+.app .amplify-tabs-item:hover,
+.app .amplify-tabs [role="tab"]:hover,
+.app .amplify-tabs [role="tablist"] button:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.app .amplify-tabs-item--active,
+.app .amplify-tabs-item[data-state="active"],
+.app .amplify-tabs [role="tab"][aria-selected="true"],
+.app .amplify-tabs [role="tablist"] button[aria-selected="true"],
+.app .amplify-tabs [role="tab"][data-state="active"],
+.app .amplify-tabs [role="tablist"] button[data-state="active"] {
+  box-shadow: inset 0 -3px 0 0 #9a4ad7 !important;
+  color: #9a4ad7 !important;
 }
 
 /* ReactQuill HTML content normalization */
-.quill-content p:empty {
-  display: none;
+.quill-content p:empty { display: none; }
+.quill-content p { margin: 0 0 1rem 0; }
+.quill-content p:last-child { margin-bottom: 0; }
+.quill-content br { line-height: 1.5; }
+
+/* Accessibility: 3-level large text */
+html.font-level-1 { font-size: 112.5%; }
+html.font-level-2 { font-size: 125%; }
+html.font-level-3 { font-size: 137.5%; }
+
+/* Accessibility: 3-level line spacing */
+html.line-spacing-1 body,
+html.line-spacing-1 p,
+html.line-spacing-1 span,
+html.line-spacing-1 label,
+html.line-spacing-1 li,
+html.line-spacing-1 a,
+html.line-spacing-1 button,
+html.line-spacing-1 input,
+html.line-spacing-1 textarea,
+html.line-spacing-1 select,
+html.line-spacing-1 h1,
+html.line-spacing-1 h2,
+html.line-spacing-1 h3,
+html.line-spacing-1 h4,
+html.line-spacing-1 h5,
+html.line-spacing-1 h6 {
+  line-height: 1.75 !important;
 }
 
-.quill-content p {
-  margin: 0 0 1rem 0;
+html.line-spacing-2 body,
+html.line-spacing-2 p,
+html.line-spacing-2 span,
+html.line-spacing-2 label,
+html.line-spacing-2 li,
+html.line-spacing-2 a,
+html.line-spacing-2 button,
+html.line-spacing-2 input,
+html.line-spacing-2 textarea,
+html.line-spacing-2 select,
+html.line-spacing-2 h1,
+html.line-spacing-2 h2,
+html.line-spacing-2 h3,
+html.line-spacing-2 h4,
+html.line-spacing-2 h5,
+html.line-spacing-2 h6 {
+  line-height: 2.25 !important;
 }
 
-.quill-content p:last-child {
-  margin-bottom: 0;
+html.line-spacing-3 body,
+html.line-spacing-3 p,
+html.line-spacing-3 span,
+html.line-spacing-3 label,
+html.line-spacing-3 li,
+html.line-spacing-3 a,
+html.line-spacing-3 button,
+html.line-spacing-3 input,
+html.line-spacing-3 textarea,
+html.line-spacing-3 select,
+html.line-spacing-3 h1,
+html.line-spacing-3 h2,
+html.line-spacing-3 h3,
+html.line-spacing-3 h4,
+html.line-spacing-3 h5,
+html.line-spacing-3 h6 {
+  line-height: 3 !important;
 }
-
-.quill-content br {
-  line-height: 1.5;
-}
-
