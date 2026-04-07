@@ -24,12 +24,11 @@ const SUB_REASON_DESCRIPTIONS = {
 // Email notification service ready for integration with AWS SES
 export const sendEmailNotification = async (recipientEmail, recipientName, senderName, messageSubject, messageBody, projectTitle) => {
   try {
-    // This function is ready for AWS SES integration
-    // For now, it creates a notification record that can trigger email sending
-    
+    const verifiedEmails = ['madalina.radu1@gcu.edu', 'dlemus4@my.gcu.edu', 'ldycus@my.gcu.edu', 'OFusco@my.gcu.edu', 'bberger7@my.gcu.edu', 'ABrajovic@my.gcu.edu'];
+    const isVerified = verifiedEmails.includes(recipientEmail);
     const emailData = {
-      to: 'madalina.radu1@gcu.edu', // Force to verified email for testing
-      originalRecipient: recipientEmail, // Keep track of intended recipient
+      to: isVerified ? recipientEmail : 'madalina.radu1@gcu.edu',
+      originalRecipient: recipientEmail,
       toName: recipientName,
       from: 'madalina.radu1@gcu.edu', // Use your verified email address
       fromName: 'Research Marketplace',
@@ -37,7 +36,7 @@ export const sendEmailNotification = async (recipientEmail, recipientName, sende
       htmlBody: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #552b9a;">New Message from ${senderName}</h2>
-          <p style="background-color: #fff3cd; padding: 10px; border-radius: 4px;"><strong>Note:</strong> This email was intended for ${recipientEmail} but sent to your verified address for testing.</p>
+          ${!isVerified ? `<p style="background-color: #fff3cd; padding: 10px; border-radius: 4px;"><strong>Note:</strong> This email was intended for ${recipientEmail} but sent to your verified address for testing.</p>` : ''}
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>Project:</strong> ${projectTitle}</p>
             <p><strong>From:</strong> ${senderName}</p>
@@ -118,8 +117,10 @@ export const updateUserEmailPreferences = async (userId, preferences) => {
 // Send status change notification
 export const sendStatusChangeNotification = async (recipientEmail, recipientName, itemType, itemTitle, oldStatus, newStatus, reviewerName, notes = '') => {
   try {
+    const verifiedEmails = ['madalina.radu1@gcu.edu', 'dlemus4@my.gcu.edu', 'ldycus@my.gcu.edu', 'OFusco@my.gcu.edu', 'bberger7@my.gcu.edu', 'ABrajovic@my.gcu.edu'];
+    const isVerified = verifiedEmails.includes(recipientEmail);
     const emailData = {
-      to: 'madalina.radu1@gcu.edu', // Force to verified email for testing
+      to: isVerified ? recipientEmail : 'madalina.radu1@gcu.edu',
       originalRecipient: recipientEmail,
       toName: recipientName,
       from: 'madalina.radu1@gcu.edu',
@@ -128,7 +129,7 @@ export const sendStatusChangeNotification = async (recipientEmail, recipientName
       htmlBody: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #552b9a;">${itemType} Status Update</h2>
-          <p style="background-color: #fff3cd; padding: 10px; border-radius: 4px;"><strong>Note:</strong> This email was intended for ${recipientEmail} but sent to your verified address for testing.</p>
+          ${!isVerified ? `<p style="background-color: #fff3cd; padding: 10px; border-radius: 4px;"><strong>Note:</strong> This email was intended for ${recipientEmail} but sent to your verified address for testing.</p>` : ''}
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>${itemType}:</strong> ${itemTitle}</p>
             <p><strong>Status Changed:</strong> ${oldStatus} → <span style="color: ${newStatus === 'Approved' ? 'green' : newStatus === 'Rejected' ? 'red' : '#552b9a'}; font-weight: bold;">${newStatus}</span></p>
@@ -176,8 +177,10 @@ ${notes ? `Review Notes:\n${notes}\n\n` : ''}View your ${itemType.toLowerCase()}
 // Send new item notification
 export const sendNewItemNotification = async (recipientEmail, recipientName, itemType, itemTitle, submitterName, submitterEmail) => {
   try {
+    const verifiedEmails = ['madalina.radu1@gcu.edu', 'dlemus4@my.gcu.edu', 'ldycus@my.gcu.edu', 'OFusco@my.gcu.edu', 'bberger7@my.gcu.edu', 'ABrajovic@my.gcu.edu'];
+    const isVerified = verifiedEmails.includes(recipientEmail);
     const emailData = {
-      to: 'madalina.radu1@gcu.edu', // Force to verified email for testing
+      to: isVerified ? recipientEmail : 'madalina.radu1@gcu.edu',
       originalRecipient: recipientEmail,
       toName: recipientName,
       from: 'madalina.radu1@gcu.edu',
@@ -186,7 +189,7 @@ export const sendNewItemNotification = async (recipientEmail, recipientName, ite
       htmlBody: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #552b9a;">New ${itemType} Submitted</h2>
-          <p style="background-color: #fff3cd; padding: 10px; border-radius: 4px;"><strong>Note:</strong> This email was intended for ${recipientEmail} but sent to your verified address for testing.</p>
+          ${!isVerified ? `<p style="background-color: #fff3cd; padding: 10px; border-radius: 4px;"><strong>Note:</strong> This email was intended for ${recipientEmail} but sent to your verified address for testing.</p>` : ''}
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>${itemType}:</strong> ${itemTitle}</p>
             <p><strong>Submitted by:</strong> ${submitterName} (${submitterEmail})</p>

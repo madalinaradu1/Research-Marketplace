@@ -16,7 +16,7 @@ import {
   Alert
 } from '@aws-amplify/ui-react';
 import { createApplication, updateUser, listApplications } from '../graphql/operations';
-import { sendNewItemNotification } from '../utils/emailNotifications';
+import { sendNewItemNotification, sendApplicationSubmissionEmail } from '../utils/emailNotifications';
 import { useTags } from '../contexts/TagContext';
 import { mapTagIdsToDisplayNames } from '../lib/tags/tagDisplay';
 import buttonStyles from '../styles/dashboardButtons.module.css';
@@ -207,10 +207,24 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       // Clear draft after successful submission
       clearDraft();
       
+      // Send confirmation email to student
+      try {
+        console.log('Sending student confirmation to:', user.email, user.name);
+        await sendApplicationSubmissionEmail(
+          user.email || currentUser.attributes?.email,
+          user.name || currentUser.attributes?.name || 'Student',
+          project.title,
+          applicationInput.studentID
+        );
+        console.log('Student confirmation email sent successfully');
+      } catch (emailError) {
+        console.log('Student confirmation email failed:', emailError);
+      }
+
       // Send notification to coordinator about new application
       try {
         await sendNewItemNotification(
-          'coordinator@gcu.edu', // Replace with actual coordinator email
+          'coordinator@gcu.edu',
           'Coordinator',
           'Application',
           project.title,
@@ -218,7 +232,7 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
           user.email
         );
       } catch (emailError) {
-        console.log('Email notification prepared (SES integration pending):', emailError);
+        console.log('Coordinator notification failed:', emailError);
       }
 
       onSuccess();

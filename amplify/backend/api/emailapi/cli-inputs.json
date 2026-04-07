@@ -42,6 +42,20 @@
       "permissions": {
         "setting": "open"
       }
+    },
+    "/send-email": {
+      "name": "/send-email",
+      "lambdaFunction": "emailApiHandler",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/update-project": {
+      "name": "/update-project",
+      "lambdaFunction": "emailApiHandler",
+      "permissions": {
+        "setting": "open"
+      }
     }
   }
 }

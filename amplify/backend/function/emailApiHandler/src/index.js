@@ -12,7 +12,7 @@ export const handler = async (event) => {
     const headers = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT"
     };
 
     if (event.httpMethod === 'OPTIONS') {
@@ -21,7 +21,7 @@ export const handler = async (event) => {
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT"
             }
         };
     }
@@ -415,7 +415,7 @@ export const handler = async (event) => {
                 };
                 
             case '/send-email':
-                const { to, subject, message, type } = body;
+                const { to, subject, message, type, htmlBody, textBody } = body;
                 
                 try {
                     // List of verified SES identities
@@ -432,6 +432,12 @@ export const handler = async (event) => {
                     const isVerified = verifiedEmails.includes(to);
                     const recipientEmail = isVerified ? to : 'madalina.radu1@gcu.edu';
                     
+                    const emailBody = {};
+                    if (htmlBody) {
+                        emailBody.Html = { Data: htmlBody, Charset: 'UTF-8' };
+                    }
+                    emailBody.Text = { Data: textBody || message || '', Charset: 'UTF-8' };
+
                     const emailParams = {
                         Source: 'madalina.radu1@gcu.edu',
                         Destination: {
@@ -442,12 +448,7 @@ export const handler = async (event) => {
                                 Data: subject || 'Research Marketplace Notification',
                                 Charset: 'UTF-8'
                             },
-                            Body: {
-                                Text: {
-                                    Data: isVerified ? message : `Note: This email was intended for ${to} but sent to your verified address for testing.\n\n${message}`,
-                                    Charset: 'UTF-8'
-                                }
-                            }
+                            Body: emailBody
                         }
                     };
                     
