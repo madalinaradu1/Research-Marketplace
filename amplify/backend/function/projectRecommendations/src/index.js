@@ -41,6 +41,7 @@ const MAX_RELATED_TAGS_PER_SOURCE = Number(process.env.MAX_RELATED_TAGS_PER_SOUR
 const DEFAULT_RELATED_WEIGHT = Number(process.env.DEFAULT_RELATED_WEIGHT || '0.40');
 const RECOMMENDATION_DEBUG_LOGS = process.env.RECOMMENDATION_DEBUG_LOGS === 'true';
 
+// No-op deployment marker to force republishing after cloud drift.
 exports.handler = async (event) => {
   const args = event.arguments || {};
   const limit = Math.min(Math.max(args.limit || 10, 1), MAX_LIMIT);
