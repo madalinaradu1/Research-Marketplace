@@ -12,20 +12,92 @@
 .tag-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  background: #e8eefc;
+  gap: 0.3rem;
+  background: #c7b3ef;
+  color: #ffffff;
   border-radius: 999px;
-  padding: 0.2rem 0.65rem;
+  padding: 0.2rem 0.7rem;
   font-size: 0.95rem;
 }
 
-.tag-chip-remove {
+.tag-chip:hover,
+.tag-chip:focus-within {
+  background: #c7b3ef;
+}
+
+.tag-chip-remove,
+[data-amplify-theme] .tag-chip-remove,
+[data-amplify-theme] button.tag-chip-remove,
+[data-amplify-theme] .amplify-card .tag-chip-remove,
+[data-amplify-theme] .amplify-card button.tag-chip-remove {
+  all: unset;
   border: none;
-  background: transparent;
+  background: transparent !important;
+  background-color: transparent !important;
+  color: inherit !important;
   cursor: pointer;
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
   padding: 0;
+  margin-left: 0.05rem;
   line-height: 1;
+  flex-shrink: 0;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  font: inherit;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.tag-chip-remove-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: currentColor !important;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.92;
+}
+
+.tag-chip-remove-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: block;
+}
+
+.tag-chip-remove:hover,
+.tag-chip-remove:focus,
+.tag-chip-remove:active,
+[data-amplify-theme] .tag-chip-remove:hover,
+[data-amplify-theme] .tag-chip-remove:focus,
+[data-amplify-theme] .tag-chip-remove:active,
+[data-amplify-theme] button.tag-chip-remove:hover,
+[data-amplify-theme] button.tag-chip-remove:focus,
+[data-amplify-theme] button.tag-chip-remove:active {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+}
+
+.tag-chip-remove:hover .tag-chip-remove-glyph,
+.tag-chip-remove:focus .tag-chip-remove-glyph,
+.tag-chip-remove:active .tag-chip-remove-glyph {
+  opacity: 1;
 }
 
 .tag-selector-input {

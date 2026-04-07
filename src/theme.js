@@ -3,6 +3,24 @@ import { createTheme } from '@aws-amplify/ui-react';
 export const theme = createTheme({
   name: 'urafTheme',
   tokens: {
+    components: {
+      tabs: {
+        item: {
+          _hover: {
+            backgroundColor: { value: 'transparent' },
+            color: { value: 'inherit' },
+            boxShadow: { value: 'none' }
+          },
+          _active: {
+            borderColor: { value: '#9a4ad7' },
+            color: { value: '#9a4ad7' }
+          },
+          _focus: {
+            color: { value: '#9a4ad7' }
+          }
+        }
+      }
+    },
     colors: {
       primary: {
         10: '#f5e8ff',

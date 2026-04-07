@@ -19,6 +19,8 @@ import { listUsers, listApplications, listProjects } from '../graphql/operations
 import { listMessages, createMessage, getMessageThread, updateMessage, deleteMessage } from '../graphql/message-operations';
 import { sendEmailNotification } from '../utils/emailNotifications';
 import { useNavigate } from 'react-router-dom';
+import buttonStyles from '../styles/dashboardButtons.module.css';
+import '../styles/unifiedFormModal.css';
 
 
 // Clean HTML content to remove excessive spacing
@@ -45,6 +47,9 @@ const getConversationColor = (conversationId) => {
 
 
 const MessagesPage = ({ user }) => {
+  const primaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonIcon}`;
   const [locallyReadMessages, setLocallyReadMessages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
@@ -512,8 +517,7 @@ const saveEdit = async (messageId) => {
           </Flex>
           {(user.role === 'Admin' || user.role === 'Faculty') && (
             <Button 
-              backgroundColor="#4299e1"
-              color="white"
+              className={primaryActionButtonClassName}
               size="small"
               onClick={() => setShowNewMessage(true)}
               isDisabled={availableRecipients.length === 0}
@@ -966,87 +970,95 @@ const saveEdit = async (messageId) => {
 
       {/* New Message Modal - Only for Admin/Faculty */}
       {showNewMessage && (
-        <View
-          position="fixed"
-          top="0"
-          left="0"
-          width="100vw"
-          height="100vh"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          style={{ zIndex: 1000 }}
-          onClick={() => setShowNewMessage(false)}
-        >
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-            padding="1rem"
-          >
-            <Card
-              maxWidth="600px"
-              width="90%"
-              backgroundColor="white"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Flex direction="column" gap="1.5rem" padding="2rem">
-                <Flex justifyContent="space-between" alignItems="center">
-                  <Heading level={3} color="#2d3748">Send New Message</Heading>
-                  <Button size="small" onClick={() => setShowNewMessage(false)} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
-                </Flex>
-                
-                <Flex direction="column" gap="1rem">
-                  <SelectField
-                    label={`Select ${user.role === 'Admin' ? 'User' : 'Student'}`}
-                    value={newMessage.recipient}
-                    onChange={(e) => setNewMessage(prev => ({ ...prev, recipient: e.target.value }))}
-                    required
-                  >
-                    <option value="">Choose recipient...</option>
-                    {availableRecipients.map(recipient => (
-                      <option key={recipient.id} value={recipient.id}>
-                        {recipient.name} ({recipient.email})
-                      </option>
-                    ))}
-                  </SelectField>
-                  
-                  <TextField
-                    label="Subject"
-                    value={newMessage.subject}
-                    onChange={(e) => setNewMessage(prev => ({ ...prev, subject: e.target.value }))}
-                    required
-                  />
-                  
-                  <div style={{ height: '120px' }}>
-                    <Text fontSize="0.9rem" fontWeight="600" color="#374151" marginBottom="0.5rem">Message</Text>
-                    <ReactQuill
-                      value={newMessage.body}
-                      onChange={(value) => setNewMessage(prev => ({ ...prev, body: value }))}
-                      placeholder="Type your message here..."
-                      modules={{
-                        toolbar: [
-                          ['bold', 'italic', 'underline'],
-                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                          ['clean']
-                        ]
-                      }}
-                      style={{ height: '80px' }}
+        <div className="unified-form-modal" onClick={() => setShowNewMessage(false)}>
+          <div className="ufm-card" style={{ maxWidth: '700px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="ufm-body">
+
+              <div className="ufm-header">
+                <div className="ufm-header-text">
+                  <h2 className="ufm-title">Send New Message</h2>
+                  <p className="ufm-subtitle">Compose and send a message to a user.</p>
+                </div>
+                <Button
+                  type="button"
+                  data-dashboard-button="true"
+                  data-close-button="true"
+                  className={iconActionButtonClassName}
+                  aria-label="Close new message modal"
+                  onClick={() => setShowNewMessage(false)}
+                >
+                  <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                </Button>
+              </div>
+
+              <div className="ufm-form">
+                <div className="ufm-section">
+                  <div className="ufm-section-header">
+                    <p className="ufm-section-title">Message Details</p>
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Recipient <span className="ufm-required">*</span></label>
+                    <select
+                      className="ufm-select"
+                      value={newMessage.recipient}
+                      onChange={(e) => setNewMessage(prev => ({ ...prev, recipient: e.target.value }))}
+                      required
+                    >
+                      <option value="">Choose recipient...</option>
+                      {availableRecipients.map(recipient => (
+                        <option key={recipient.id} value={recipient.id}>
+                          {recipient.name} ({recipient.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Subject <span className="ufm-required">*</span></label>
+                    <input
+                      className="ufm-input"
+                      type="text"
+                      value={newMessage.subject}
+                      onChange={(e) => setNewMessage(prev => ({ ...prev, subject: e.target.value }))}
+                      required
+                      placeholder="Message subject"
                     />
                   </div>
-                </Flex>
-                
-                <Flex gap="1rem" justifyContent="flex-end" marginTop="1rem">
-                  <Button 
+                  <div className="ufm-field">
+                    <label className="ufm-label">Message <span className="ufm-required">*</span></label>
+                    <div className="ufm-editor-wrap">
+                      <ReactQuill
+                        value={newMessage.body}
+                        onChange={(value) => setNewMessage(prev => ({ ...prev, body: value }))}
+                        placeholder="Type your message here..."
+                        modules={{
+                          toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['clean']
+                          ]
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="ufm-footer">
+                  <button
+                    type="button"
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
                     onClick={() => {
                       setShowNewMessage(false);
                       setNewMessage({ recipient: '', subject: '', body: '' });
                     }}
-                    backgroundColor="white"
-                    color="#4a5568"
-                    border="1px solid #e2e8f0"
                   >
                     Cancel
-                  </Button>
-                  <Button 
+                  </button>
+                  <button
+                    type="button"
+                    data-dashboard-button="true"
+                    className={primaryActionButtonClassName}
+                    disabled={isSendingNew || !newMessage.recipient || !newMessage.subject || !newMessage.body}
                     onClick={async () => {
                       if (!newMessage.recipient || !newMessage.subject || !newMessage.body) return;
                       
@@ -1066,7 +1078,6 @@ const saveEdit = async (messageId) => {
                         
                         await API.graphql(graphqlOperation(createMessage, { input: messageInput }));
                         
-                        // Send email notification
                         try {
                           await sendEmailNotification(
                             recipient?.email,
@@ -1082,7 +1093,7 @@ const saveEdit = async (messageId) => {
                         
                         setShowNewMessage(false);
                         setNewMessage({ recipient: '', subject: '', body: '' });
-                        fetchData(); // Refresh messages
+                        fetchData();
                       } catch (err) {
                         console.error('Error sending message:', err);
                         setError('Failed to send message. Please try again.');
@@ -1090,18 +1101,15 @@ const saveEdit = async (messageId) => {
                         setIsSendingNew(false);
                       }
                     }}
-                    backgroundColor="#4299e1"
-                    color="white"
-                    isLoading={isSendingNew}
-                    isDisabled={!newMessage.recipient || !newMessage.subject || !newMessage.body}
                   >
-                    Send Message
-                  </Button>
-                </Flex>
-              </Flex>
-            </Card>
-          </Flex>
-        </View>
+                    {isSendingNew ? 'Sending...' : 'Send Message'}
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
       )}
        {showDeleteConfirmation && (
       <View

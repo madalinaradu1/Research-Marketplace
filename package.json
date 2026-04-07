@@ -23,7 +23,8 @@
     "seed:tags:additional": "node --experimental-modules scripts/seed-additional-tags.js",
     "test:tags": "node --experimental-modules scripts/test-tags.js",
     "seed:tags:test": "node --experimental-modules scripts/seed-tags-test.js",
-    "test:recommendations": "node scripts/test-recommendation-scoring.js"
+    "test:recommendations": "node scripts/test-recommendation-scoring.js",
+    "seed:tag-relations": "node --experimental-modules scripts/seed-tag-relations.js"
   },
   "eslintConfig": {
     "extends": [

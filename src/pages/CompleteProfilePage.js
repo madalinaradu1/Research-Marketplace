@@ -4,6 +4,7 @@ import {
   Flex, 
   Heading, 
   TextField, 
+  SelectField,
   Button, 
   Card,
   Text,
@@ -39,7 +40,7 @@ const TagInput = ({
               onClick={() => onRemove(tag)}
               aria-label={`Remove ${tag}`}
             >
-              x
+              <span className="tag-chip-remove-glyph" aria-hidden="true">×</span>
             </button>
           </span>
         ))}
@@ -53,6 +54,19 @@ const TagInput = ({
     />
   </Flex>
 );
+
+const COLLEGE_OPTIONS = [
+  'College of the Arts and Sciences',
+  'Collangelo College of Business',
+  'College of Education',
+  'College of Nursing and Health Care Professions',
+  'College of Science, Engineering, and Technology',
+  'College of Theology',
+  'College of Doctoral Studies',
+  'College of Health Sciences',
+  'College of Graduate Studies'
+];
+
 const CompleteProfilePage = ({ user }) => {
   const { tokens } = useTheme();
   const { tagsById, resolveTagIds } = useTags();
@@ -104,6 +118,14 @@ const CompleteProfilePage = ({ user }) => {
     const { name, value } = e.target;
     setFormState(prev => ({ ...prev, [name]: value }));
   };
+  
+  const handleGpaChange = (e) => {
+        const value = e.target.value;
+
+        if (value === '' || /^(?:[0-3](?:\.\d{0,2})?|4(?:\.0{0,2})?)$/.test(value)) {
+          setFormState(prev => ({ ...prev, gpa: value }));
+        }
+      };
 
   const createTagHandlers = useCallback((input, tags, setTags, setInput) => ({
     onKeyDown: (e) => {
@@ -146,6 +168,17 @@ const CompleteProfilePage = ({ user }) => {
 
       if (lockedRole === 'Student' && skills.length === 0) {
         setError('Please select at least one skill.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const gpaValue = Number.parseFloat(formState.gpa);
+
+      if (
+        lockedRole === 'Student' &&
+        (!Number.isFinite(gpaValue) || gpaValue < 0 || gpaValue > 4)
+      ) {
+        setError('GPA must be between 0.00 and 4.00.');
         setIsSubmitting(false);
         return;
       }
@@ -258,7 +291,7 @@ const CompleteProfilePage = ({ user }) => {
                   min="0"
                   max="4.0"
                   value={formState.gpa || ''}
-                  onChange={handleChange}
+                  onChange={handleGpaChange}
                   required
                 />
                 
@@ -325,14 +358,18 @@ const CompleteProfilePage = ({ user }) => {
             {/* Faculty-specific fields */}
             {lockedRole === 'Faculty' && (
               <>
-                <TextField
+                <SelectField
                   name="college"
                   label="College/Department *"
-                  placeholder="e.g., College of Science, Engineering and Technology"
                   value={formState.college}
                   onChange={handleChange}
                   required
-                />
+                >
+                  <option value="">Select College</option>
+                  {COLLEGE_OPTIONS.map((college) => (
+                    <option key={college} value={college}>{college}</option>
+                  ))}
+                </SelectField>
 
                 <TagInput
                   label="Classes Taught"

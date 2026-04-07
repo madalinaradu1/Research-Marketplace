@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { API, graphqlOperation } from 'aws-amplify';
 import {
   Flex,
@@ -6,56 +6,93 @@ import {
   Text,
   Button,
   Card,
-  Collection,
   Loader,
-  Tabs,
-  TabItem,
-  TextField,
-  TextAreaField,
-  SelectField,
   Badge,
   View,
-  Divider
+  Tabs,
+  TabItem
 } from '@aws-amplify/ui-react';
 import { listStudentPosts, createStudentPost, updateStudentPost, deleteStudentPost } from '../graphql/student-post-operations';
+import SliderTabs from '../components/SliderTabs';
+import TagSelector from '../components/TagSelector';
+import '../components/TagSelector/tagSelector.css';
+import { useTags } from '../contexts/TagContext';
+import { tagIdsToDisplayNames, toStringArray } from '../components/TagSelector/tagHelpers';
+import { hasWordPrefixMatch } from '../lib/tags/normalize';
+import buttonStyles from '../styles/dashboardButtons.module.css';
+import '../styles/unifiedFormModal.css';
+
+const COLLEGE_OPTIONS = [
+  'College of the Arts and Sciences',
+  'Collangelo College of Business',
+  'College of Education',
+  'College of Nursing and Health Care Professions',
+  'College of Science, Engineering, and Technology',
+  'College of Theology',
+  'College of Doctoral Studies',
+  'College of Health Sciences',
+  'College of Graduate Studies'
+];
+
+const EMPTY_FORM_DATA = {
+  type: 'RESEARCH_INTEREST',
+  title: '',
+  description: '',
+  department: '',
+  timeCommitment: ''
+};
+
+function splitResolvedAndLegacyValues(values, resolveTagIds) {
+  const resolvedIds = [];
+  const legacyValues = [];
+
+  toStringArray(values).forEach((value) => {
+    const nextIds = resolveTagIds([value]);
+
+    if (nextIds.length > 0) {
+      resolvedIds.push(...nextIds);
+      return;
+    }
+
+    legacyValues.push(value);
+  });
+
+  return {
+    resolvedIds: Array.from(new Set(resolvedIds)),
+    legacyValues: Array.from(new Set(legacyValues))
+  };
+}
+
+function combineSelectedAndLegacyValues(selectedTagIds, legacyValues, tagsById) {
+  return Array.from(
+    new Set([
+      ...tagIdsToDisplayNames(selectedTagIds, tagsById),
+      ...toStringArray(legacyValues)
+    ])
+  );
+}
 
 const StudentPostsPage = ({ user }) => {
+  const { tagsById, resolveTagIds } = useTags();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [formData, setFormData] = useState({
-    type: 'RESEARCH_INTEREST',
-    title: '',
-    description: '',
-    department: '',
-    researchAreas: '',
-    skillsOffered: '',
-    skillsNeeded: '',
-    timeCommitment: ''
-  });
+  const [formData, setFormData] = useState(EMPTY_FORM_DATA);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [openKebabMenu, setOpenKebabMenu] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
-
-  const colleges = [
-    'Computer Science',
-    'Biology',
-    'Chemistry',
-    'Physics',
-    'Psychology',
-    'Social Sciences',
-    'Engineering',
-    'Mathematics',
-    'Business',
-    'Education',
-    'Nursing',
-    'Technology',
-    'Other'
-  ];
+  const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
+  const [debouncedCollegeQuery, setDebouncedCollegeQuery] = useState('');
+  const [researchAreaTagIds, setResearchAreaTagIds] = useState([]);
+  const [skillsOfferedTagIds, setSkillsOfferedTagIds] = useState([]);
+  const [skillsNeededTagIds, setSkillsNeededTagIds] = useState([]);
+  const [legacyResearchAreas, setLegacyResearchAreas] = useState([]);
+  const [legacySkillsOffered, setLegacySkillsOffered] = useState([]);
+  const [legacySkillsNeeded, setLegacySkillsNeeded] = useState([]);
 
   const postTypes = [
     { value: 'RESEARCH_INTEREST', label: 'Research Interest' },
@@ -78,6 +115,21 @@ const StudentPostsPage = ({ user }) => {
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [openKebabMenu]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedCollegeQuery(formData.department || '');
+    }, 250);
+
+    return () => clearTimeout(t);
+  }, [formData.department]);
+
+  const collegeSuggestions = useMemo(() => {
+    const query = (debouncedCollegeQuery || '').trim();
+    return COLLEGE_OPTIONS
+      .filter((college) => !query || hasWordPrefixMatch(college, query))
+      .slice(0, 8);
+  }, [debouncedCollegeQuery]);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -125,6 +177,49 @@ const StudentPostsPage = ({ user }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleCollegeChange = (e) => {
+    const { value } = e.target;
+    setFormData((prev) => ({ ...prev, department: value }));
+    setShowCollegeDropdown(true);
+  };
+
+  const handleCollegeSelect = (college) => {
+    setFormData((prev) => ({ ...prev, department: college }));
+    setShowCollegeDropdown(false);
+  };
+
+  const resetCreateForm = () => {
+    setFormData(EMPTY_FORM_DATA);
+    setEditingPost(null);
+    setResearchAreaTagIds([]);
+    setSkillsOfferedTagIds([]);
+    setSkillsNeededTagIds([]);
+    setLegacyResearchAreas([]);
+    setLegacySkillsOffered([]);
+    setLegacySkillsNeeded([]);
+    setShowCollegeDropdown(false);
+  };
+
+  const closeCreateForm = () => {
+    setShowCreateForm(false);
+    resetCreateForm();
+  };
+
+  const handleResearchAreasChange = (nextIds) => {
+    setResearchAreaTagIds(nextIds);
+    setLegacyResearchAreas([]);
+  };
+
+  const handleSkillsOfferedChange = (nextIds) => {
+    setSkillsOfferedTagIds(nextIds);
+    setLegacySkillsOffered([]);
+  };
+
+  const handleSkillsNeededChange = (nextIds) => {
+    setSkillsNeededTagIds(nextIds);
+    setLegacySkillsNeeded([]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -137,9 +232,9 @@ const StudentPostsPage = ({ user }) => {
         title: formData.title,
         description: formData.description,
         department: formData.department || null,
-        researchAreas: formData.researchAreas ? formData.researchAreas.split(',').map(s => s.trim()) : [],
-        skillsOffered: formData.skillsOffered ? formData.skillsOffered.split(',').map(s => s.trim()) : [],
-        skillsNeeded: formData.skillsNeeded ? formData.skillsNeeded.split(',').map(s => s.trim()) : [],
+        researchAreas: combineSelectedAndLegacyValues(researchAreaTagIds, legacyResearchAreas, tagsById),
+        skillsOffered: combineSelectedAndLegacyValues(skillsOfferedTagIds, legacySkillsOffered, tagsById),
+        skillsNeeded: combineSelectedAndLegacyValues(skillsNeededTagIds, legacySkillsNeeded, tagsById),
         timeCommitment: formData.timeCommitment || null
       };
 
@@ -154,18 +249,7 @@ const StudentPostsPage = ({ user }) => {
 
       await fetchPosts();
       setShowCreateForm(false);
-      setEditingPost(null);
-      setFormData({
-        type: 'RESEARCH_INTEREST',
-        title: '',
-        description: '',
-        department: '',
-        researchAreas: '',
-        skillsOffered: '',
-        skillsNeeded: '',
-        timeCommitment: ''
-      });
-      fetchPosts();
+      resetCreateForm();
     } catch (error) {
       console.error('Error creating post:', error);
       console.error('Full error object:', JSON.stringify(error, null, 2));
@@ -183,17 +267,24 @@ const StudentPostsPage = ({ user }) => {
   };
 
   const handleEdit = (post) => {
+    const resolvedResearchAreas = splitResolvedAndLegacyValues(post.researchAreas, resolveTagIds);
+    const resolvedSkillsOffered = splitResolvedAndLegacyValues(post.skillsOffered, resolveTagIds);
+    const resolvedSkillsNeeded = splitResolvedAndLegacyValues(post.skillsNeeded, resolveTagIds);
+
     setEditingPost(post);
     setFormData({
       type: post.type,
       title: post.title,
       description: post.description,
       department: post.department || '',
-      researchAreas: post.researchAreas ? post.researchAreas.join(', ') : '',
-      skillsOffered: post.skillsOffered ? post.skillsOffered.join(', ') : '',
-      skillsNeeded: post.skillsNeeded ? post.skillsNeeded.join(', ') : '',
       timeCommitment: post.timeCommitment || ''
     });
+    setResearchAreaTagIds(resolvedResearchAreas.resolvedIds);
+    setSkillsOfferedTagIds(resolvedSkillsOffered.resolvedIds);
+    setSkillsNeededTagIds(resolvedSkillsNeeded.resolvedIds);
+    setLegacyResearchAreas(resolvedResearchAreas.legacyValues);
+    setLegacySkillsOffered(resolvedSkillsOffered.legacyValues);
+    setLegacySkillsNeeded(resolvedSkillsNeeded.legacyValues);
     setShowCreateForm(true);
   };
 
@@ -214,21 +305,57 @@ const StudentPostsPage = ({ user }) => {
     return posts.filter(post => post.student?.id === userId);
   };
 
-  const getPostsByType = (type) => {
-    return posts.filter(post => post.type === type);
-  };
-
   const getPostTypeLabel = (type) => {
     return postTypes.find(pt => pt.value === type)?.label || type;
   };
 
-  const getPostTypeColor = (type) => {
+  const getPostTypeBadgeTheme = (type) => {
     switch (type) {
-      case 'RESEARCH_INTEREST': return 'blue';
-      case 'MENTOR_WANTED': return 'orange';
-      case 'RESEARCH_IDEA': return 'green';
-      default: return 'gray';
+      case 'RESEARCH_INTEREST':
+        return {
+          backgroundColor: '#e8efff',
+          borderColor: '#c7d6ff',
+          color: '#315ea8'
+        };
+      case 'MENTOR_WANTED':
+        return {
+          backgroundColor: '#fff0de',
+          borderColor: '#f3d1aa',
+          color: '#b46b18'
+        };
+      case 'RESEARCH_IDEA':
+        return {
+          backgroundColor: '#e6f6ed',
+          borderColor: '#bddfc9',
+          color: '#2f7c56'
+        };
+      default:
+        return {
+          backgroundColor: '#f1f5f9',
+          borderColor: '#d8e0ea',
+          color: '#52606f'
+        };
     }
+  };
+
+  const renderPostTypeBadge = (type) => {
+    const badgeTheme = getPostTypeBadgeTheme(type);
+
+    return (
+      <Badge
+        backgroundColor={badgeTheme.backgroundColor}
+        color={badgeTheme.color}
+        fontSize="0.8rem"
+        padding="0.3rem 0.85rem"
+        borderRadius="999px"
+        style={{
+          border: `1px solid ${badgeTheme.borderColor}`,
+          fontWeight: 700
+        }}
+      >
+        {getPostTypeLabel(type)}
+      </Badge>
+    );
   };
 
   if (loading) {
@@ -238,6 +365,242 @@ const StudentPostsPage = ({ user }) => {
       </Flex>
     );
   }
+
+  const validPosts = posts.filter(post => post.student);
+  const myPosts = getMyPosts().filter(post => post.student);
+  const createPostButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonWide}`;
+  const submitPostButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonIcon}`;
+
+  const allPostsContent = (
+    <Card backgroundColor="white" padding="1.5rem">
+      {validPosts.length === 0 ? (
+        <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
+          <Text fontSize="3rem" aria-hidden="true">&#128172;</Text>
+          <Text fontSize="1.1rem" color="#4a5568">No posts yet</Text>
+          <Text fontSize="0.9rem" color="#718096">Be the first to share your research interests!</Text>
+        </Flex>
+      ) : (
+        <Flex direction="column" gap="0.75rem">
+          {validPosts.map((post) => (
+            <Card key={post.id} backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+              <Flex direction="column" gap="1rem">
+                <Flex justifyContent="space-between" alignItems="flex-start">
+                  <Flex direction="column" gap="0.5rem" flex="1">
+                    <Flex alignItems="center" gap="1rem">
+                      <Heading level={4} color="#2d3748">{post.title}</Heading>
+                      {renderPostTypeBadge(post.type)}
+                    </Flex>
+                    <Text fontSize="0.9rem" color="#4a5568">
+                      {(user.id || user.username) === post.student?.id || ['Admin', 'Faculty', 'Coordinator'].includes(user.role)
+                        ? post.student?.name
+                        : 'GCU Student'} <span aria-hidden="true"> | </span> {post.department || 'No College'}
+                    </Text>
+                  </Flex>
+                  <Flex alignItems="center" gap="1rem">
+                    <Text fontSize="0.8rem" color="gray">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </Text>
+                    {((user.id || user.username) === post.student?.id || ['Admin', 'Coordinator'].includes(user.role)) && (
+                      <View position="relative">
+                        <Button
+                          size="medium"
+                          backgroundColor="transparent"
+                          color="black"
+                          border="none"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenKebabMenu(openKebabMenu === post.id ? null : post.id);
+                          }}
+                          style={{ padding: '0.75rem' }}
+                        >
+                          <span aria-hidden="true">&#8942;</span>
+                        </Button>
+                        {openKebabMenu === post.id && (
+                          <Card
+                            position="absolute"
+                            top="100%"
+                            left="0"
+                            style={{ zIndex: 100, minWidth: '120px' }}
+                            backgroundColor="white"
+                            border="1px solid black"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Flex direction="column" gap="0">
+                              <Button
+                                size="small"
+                                backgroundColor="white"
+                                color="black"
+                                border="none"
+                                style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                onClick={() => {
+                                  handleEdit(post);
+                                  setOpenKebabMenu(null);
+                                }}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                size="small"
+                                backgroundColor="white"
+                                color="black"
+                                border="none"
+                                style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                onClick={() => {
+                                  setPostToDelete(post);
+                                  setShowDeleteConfirm(true);
+                                  setOpenKebabMenu(null);
+                                }}
+                                isLoading={isDeleting}
+                              >
+                                Delete
+                              </Button>
+                            </Flex>
+                          </Card>
+                        )}
+                      </View>
+                    )}
+                  </Flex>
+                </Flex>
+
+                <Text color="#4a5568">{post.description}</Text>
+
+                {post.researchAreas && post.researchAreas.length > 0 && (
+                  <Text fontSize="0.9rem" color="#4a5568">
+                    <strong>Research Areas:</strong> {post.researchAreas.join(', ')}
+                  </Text>
+                )}
+
+                {post.skillsOffered && post.skillsOffered.length > 0 && (
+                  <Text fontSize="0.9rem" color="#4a5568">
+                    <strong>Skills Offered:</strong> {post.skillsOffered.join(', ')}
+                  </Text>
+                )}
+
+                {post.skillsNeeded && post.skillsNeeded.length > 0 && (
+                  <Text fontSize="0.9rem" color="#4a5568">
+                    <strong>Skills Needed:</strong> {post.skillsNeeded.join(', ')}
+                  </Text>
+                )}
+
+                {post.timeCommitment && (
+                  <Text fontSize="0.9rem" color="#4a5568">
+                    <strong>Time Commitment:</strong> {post.timeCommitment}
+                  </Text>
+                )}
+              </Flex>
+            </Card>
+          ))}
+        </Flex>
+      )}
+    </Card>
+  );
+
+  const myPostsContent = (
+    <Card backgroundColor="white" padding="1.5rem">
+      {myPosts.length === 0 ? (
+        <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
+          <Text fontSize="1.1rem" color="#4a5568">You haven't created any posts yet</Text>
+          <Button
+            type="button"
+            className={createPostButtonClassName}
+            onClick={() => {
+              resetCreateForm();
+              setShowCreateForm(true);
+            }}
+          >
+            Create Your First Post
+          </Button>
+        </Flex>
+      ) : (
+        <Flex direction="column" gap="0.75rem">
+          {myPosts.map((post) => (
+            <Card key={post.id} backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
+              <Flex direction="column" gap="1rem">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Flex alignItems="center" gap="1rem">
+                    <Heading level={4} color="#2d3748">{post.title}</Heading>
+                    {renderPostTypeBadge(post.type)}
+                  </Flex>
+                  <Flex alignItems="center" gap="1rem">
+                    <Text fontSize="0.8rem" color="gray">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </Text>
+                    {((user.id || user.username) === post.student?.id || ['Admin', 'Coordinator'].includes(user.role)) && (
+                      <View position="relative">
+                        <Button
+                          size="medium"
+                          backgroundColor="transparent"
+                          color="black"
+                          border="none"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenKebabMenu(openKebabMenu === post.id ? null : post.id);
+                          }}
+                          style={{ padding: '0.75rem' }}
+                        >
+                          <span aria-hidden="true">&#8942;</span>
+                        </Button>
+                        {openKebabMenu === post.id && (
+                          <Card
+                            position="absolute"
+                            top="100%"
+                            left="0"
+                            style={{ zIndex: 100, minWidth: '120px' }}
+                            backgroundColor="white"
+                            border="1px solid black"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Flex direction="column" gap="0">
+                              <Button
+                                size="small"
+                                backgroundColor="white"
+                                color="black"
+                                border="none"
+                                style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                onClick={() => {
+                                  handleEdit(post);
+                                  setOpenKebabMenu(null);
+                                }}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                size="small"
+                                backgroundColor="white"
+                                color="black"
+                                border="none"
+                                style={{ textAlign: 'left', justifyContent: 'flex-start', borderRadius: '0' }}
+                                onClick={() => {
+                                  setPostToDelete(post);
+                                  setShowDeleteConfirm(true);
+                                  setOpenKebabMenu(null);
+                                }}
+                                isLoading={isDeleting}
+                              >
+                                Delete
+                              </Button>
+                            </Flex>
+                          </Card>
+                        )}
+                      </View>
+                    )}
+                  </Flex>
+                </Flex>
+                <Text color="#4a5568">{post.description}</Text>
+              </Flex>
+            </Card>
+          ))}
+        </Flex>
+      )}
+    </Card>
+  );
+
+  const communityTabs = [
+    { label: 'All Posts', content: allPostsContent },
+    { label: 'My Posts', content: myPostsContent }
+  ];
 
   return (
     <View width="100%" backgroundColor="#f5f5f5">
@@ -251,24 +614,33 @@ const StudentPostsPage = ({ user }) => {
               </Text>
             </Flex>
             <Button
-              backgroundColor="#4299e1"
-              color="white"
-              size="small"
-              onClick={() => setShowCreateForm(true)}
+              type="button"
+              className={createPostButtonClassName}
+              onClick={() => {
+                resetCreateForm();
+                setShowCreateForm(true);
+              }}
             >
-              ➕ Create Post
+              Create Post
             </Button>
           </Flex>
         </Card>
 
-      <Tabs currentIndex={activeTabIndex} onChange={setActiveTabIndex}>
+      <SliderTabs
+        currentIndex={activeTabIndex}
+        onChange={setActiveTabIndex}
+        tabs={communityTabs}
+      />
+
+      {false && (
+        <Tabs currentIndex={activeTabIndex} onChange={setActiveTabIndex}>
         <TabItem title="All Posts">
           <Card backgroundColor="white" padding="1.5rem">
             {(() => {
               const validPosts = posts.filter(post => post.student);
               return validPosts.length === 0 ? (
                 <Flex direction="column" alignItems="center" gap="1rem" padding="2rem">
-                  <Text fontSize="3rem">💬</Text>
+                  <Text fontSize="3rem" aria-hidden="true">&#128172;</Text>
                   <Text fontSize="1.1rem" color="#4a5568">No posts yet</Text>
                   <Text fontSize="0.9rem" color="#718096">Be the first to share your research interests!</Text>
                 </Flex>
@@ -281,14 +653,12 @@ const StudentPostsPage = ({ user }) => {
                         <Flex direction="column" gap="0.5rem" flex="1">
                           <Flex alignItems="center" gap="1rem">
                             <Heading level={4} color="#2d3748">{post.title}</Heading>
-                            <Badge backgroundColor={getPostTypeColor(post.type)} color="white" fontSize="0.8rem">
-                              {getPostTypeLabel(post.type)}
-                            </Badge>
+                            {renderPostTypeBadge(post.type)}
                           </Flex>
                           <Text fontSize="0.9rem" color="#4a5568">
                             {(user.id || user.username) === post.student?.id || ['Admin', 'Faculty', 'Coordinator'].includes(user.role) 
                               ? post.student?.name 
-                              : 'GCU Student'} • {post.department || 'No College'}
+                              : 'GCU Student'} <span aria-hidden="true">&middot;</span> {post.department || 'No College'}
                           </Text>
                         </Flex>
                       <Flex alignItems="center" gap="1rem">
@@ -308,7 +678,7 @@ const StudentPostsPage = ({ user }) => {
                               }}
                               style={{ padding: '0.75rem' }}
                             >
-                              ⋯
+                              <span aria-hidden="true">&#8942;</span>
                             </Button>
                             {openKebabMenu === post.id && (
                               <Card
@@ -413,9 +783,7 @@ const StudentPostsPage = ({ user }) => {
                       <Flex justifyContent="space-between" alignItems="center">
                         <Flex alignItems="center" gap="1rem">
                           <Heading level={4} color="#2d3748">{post.title}</Heading>
-                          <Badge backgroundColor={getPostTypeColor(post.type)} color="white" fontSize="0.8rem">
-                            {getPostTypeLabel(post.type)}
-                          </Badge>
+                          {renderPostTypeBadge(post.type)}
                         </Flex>
                       <Flex alignItems="center" gap="1rem">
                         <Text fontSize="0.8rem" color="gray">
@@ -434,7 +802,7 @@ const StudentPostsPage = ({ user }) => {
                               }}
                               style={{ padding: '0.75rem' }}
                             >
-                              ⋯
+                              <span aria-hidden="true">&#8942;</span>
                             </Button>
                             {openKebabMenu === post.id && (
                               <Card
@@ -490,152 +858,129 @@ const StudentPostsPage = ({ user }) => {
             )}
           </Card>
         </TabItem>
-      </Tabs>
+        </Tabs>
+      )}
       
       {/* Create Post Modal */}
       {showCreateForm && (
-        <View
-          position="fixed"
-          top="0"
-          left="0"
-          width="100vw"
-          height="100vh"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          style={{ zIndex: 1000 }}
-          onClick={() => {
-            setShowCreateForm(false);
-            setEditingPost(null);
-          }}
-        >
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-            padding="2rem"
-          >
-            <Card
-              maxWidth="900px"
-              width="100%"
-              maxHeight="100vh"
-              backgroundColor="white"
-              style={{ overflow: 'auto' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Flex direction="column" gap="1.5rem" padding="2rem">
-                <Flex justifyContent="space-between" alignItems="center">
-                  <Heading level={3} color="#2d3748">{editingPost ? 'Edit Post' : 'Create New Post'}</Heading>
-                  <Button size="small" onClick={() => {
-                    setShowCreateForm(false);
-                    setEditingPost(null);
-                  }} backgroundColor="#f7fafc" color="#4a5568">✕</Button>
-                </Flex>
+        <div className="unified-form-modal" onClick={closeCreateForm}>
+          <div className="ufm-card" onClick={(e) => e.stopPropagation()}>
+            <div className="ufm-body">
 
-              <form onSubmit={handleSubmit}>
-                <Flex direction="column" gap="1rem">
-                  <SelectField
-                    name="type"
-                    label="Post Type *"
-                    value={formData.type}
-                    onChange={handleFormChange}
-                    required
-                  >
-                    {postTypes.map(type => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </SelectField>
+              <div className="ufm-header">
+                <div className="ufm-header-text">
+                  <h2 className="ufm-title">{editingPost ? 'Edit Post' : 'Create New Post'}</h2>
+                  {!editingPost && (
+                    <p className="ufm-subtitle">Share your research interests and connect with the community.</p>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  data-dashboard-button="true"
+                  data-close-button="true"
+                  className={iconActionButtonClassName}
+                  aria-label="Close create post modal"
+                  onClick={closeCreateForm}
+                >
+                  <span className="closeButtonGlyph" aria-hidden="true">&times;</span>
+                </Button>
+              </div>
 
-                  <TextField
-                    name="title"
-                    label="Title *"
-                    value={formData.title}
-                    onChange={handleFormChange}
-                    required
-                    placeholder="Brief, descriptive title"
-                  />
+              <form onSubmit={handleSubmit} className="ufm-form">
 
-                  <TextAreaField
-                    name="description"
-                    label="Description *"
-                    value={formData.description}
-                    onChange={handleFormChange}
-                    required
-                    rows={5}
-                    placeholder="Detailed description of your research interest, mentor needs, or research idea"
-                  />
+                {/* Section 1: Basic Information */}
+                <div className="ufm-section">
+                  <div className="ufm-section-header">
+                    <p className="ufm-section-title">Basic Information</p>
+                    <p className="ufm-section-desc">Give your post a clear title and description so others know what you're looking for.</p>
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Post Type <span className="ufm-required">*</span></label>
+                    <select className="ufm-select" name="type" value={formData.type} onChange={handleFormChange} required>
+                      {postTypes.map(type => (
+                        <option key={type.value} value={type.value}>{type.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Title <span className="ufm-required">*</span></label>
+                    <input className="ufm-input" type="text" name="title" value={formData.title} onChange={handleFormChange} required placeholder="Brief, descriptive title" />
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Description <span className="ufm-required">*</span></label>
+                    <textarea className="ufm-textarea" name="description" value={formData.description} onChange={handleFormChange} required rows={5} placeholder="Detailed description of your research interest, mentor needs, or research idea" />
+                  </div>
+                </div>
 
-                  <SelectField
-                    name="department"
-                    label="College"
-                    value={formData.department}
-                    onChange={handleFormChange}
-                  >
-                    <option value="">Select College</option>
-                    {colleges.map(college => (
-                      <option key={college} value={college}>{college}</option>
-                    ))}
-                  </SelectField>
+                {/* Section 2: Post Details */}
+                <div className="ufm-section">
+                  <div className="ufm-section-header">
+                    <p className="ufm-section-title">Post Details</p>
+                    <p className="ufm-section-desc">Specify the college, timeline, and other details for this post.</p>
+                  </div>
+                  <div className="ufm-field" style={{ position: 'relative' }}>
+                    <label className="ufm-label">College</label>
+                    <input className="ufm-input" type="text" name="department" value={formData.department} onChange={handleCollegeChange} onFocus={() => setShowCollegeDropdown(true)} onBlur={() => setTimeout(() => setShowCollegeDropdown(false), 120)} placeholder="Start typing to search..." />
+                    {showCollegeDropdown && collegeSuggestions.length > 0 && (
+                      <ul className="tag-dropdown" style={{ zIndex: 20, maxHeight: '220px', overflowY: 'auto' }}>
+                        {collegeSuggestions.map((college) => (
+                          <li key={college} className="tag-dropdown-option" onMouseDown={(e) => e.preventDefault()} onClick={() => handleCollegeSelect(college)}>{college}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Time Commitment</label>
+                    <input className="ufm-input" type="text" name="timeCommitment" value={formData.timeCommitment} onChange={handleFormChange} placeholder="e.g. 10 hours/week, Flexible, Summer only" />
+                  </div>
+                </div>
 
-                  <TextField
-                    name="researchAreas"
-                    label="Research Areas (comma-separated)"
-                    value={formData.researchAreas}
-                    onChange={handleFormChange}
-                    placeholder="e.g. Machine Learning, Data Analysis, Bioinformatics"
-                  />
+                {/* Section 3: Research Profile */}
+                <div className="ufm-section">
+                  <div className="ufm-section-header">
+                    <p className="ufm-section-title">Research Profile</p>
+                    <p className="ufm-section-desc">Help others find your post by tagging relevant research areas and skills.</p>
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Research Areas</label>
+                    <p className="ufm-hint">Add research areas that describe your idea.</p>
+                    <TagSelector selectedTagIds={researchAreaTagIds} onChange={handleResearchAreasChange} placeholder="Type to search and add research interests..." maxSelections={10} />
+                    {legacyResearchAreas.length > 0 && (
+                      <p className="ufm-hint" style={{ color: '#8a6d3b' }}>Existing values not in the tag library: {legacyResearchAreas.join(', ')}</p>
+                    )}
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Skills You Offer</label>
+                    <p className="ufm-hint">Add skills you can contribute.</p>
+                    <TagSelector selectedTagIds={skillsOfferedTagIds} onChange={handleSkillsOfferedChange} placeholder="Type to search and add offered skills..." maxSelections={15} />
+                    {legacySkillsOffered.length > 0 && (
+                      <p className="ufm-hint" style={{ color: '#8a6d3b' }}>Existing values not in the tag library: {legacySkillsOffered.join(', ')}</p>
+                    )}
+                  </div>
+                  <div className="ufm-field">
+                    <label className="ufm-label">Skills You Need</label>
+                    <p className="ufm-hint">Add the skills or experience you want collaborators to bring.</p>
+                    <TagSelector selectedTagIds={skillsNeededTagIds} onChange={handleSkillsNeededChange} placeholder="Type to search and add needed skills..." maxSelections={15} />
+                    {legacySkillsNeeded.length > 0 && (
+                      <p className="ufm-hint" style={{ color: '#8a6d3b' }}>Existing values not in the tag library: {legacySkillsNeeded.join(', ')}</p>
+                    )}
+                  </div>
+                </div>
 
-                  <TextField
-                    name="skillsOffered"
-                    label="Skills You Offer (comma-separated)"
-                    value={formData.skillsOffered}
-                    onChange={handleFormChange}
-                    placeholder="e.g. Python, Statistics, Lab Experience"
-                  />
+                {/* Footer */}
+                <div className="ufm-footer">
+                  <button type="button" data-dashboard-button="true" className={secondaryActionButtonClassName} onClick={closeCreateForm}>
+                    Cancel
+                  </button>
+                  <button type="submit" data-dashboard-button="true" className={submitPostButtonClassName} disabled={isSubmitting}>
+                    {isSubmitting ? 'Saving...' : (editingPost ? 'Update Post' : 'Create Post')}
+                  </button>
+                </div>
 
-                  <TextField
-                    name="skillsNeeded"
-                    label="Skills You Need (comma-separated)"
-                    value={formData.skillsNeeded}
-                    onChange={handleFormChange}
-                    placeholder="e.g. R Programming, Literature Review, Data Visualization"
-                  />
-
-                  <TextField
-                    name="timeCommitment"
-                    label="Time Commitment"
-                    value={formData.timeCommitment}
-                    onChange={handleFormChange}
-                    placeholder="e.g. 10 hours/week, Flexible, Summer only"
-                  />
-
-                  <Flex gap="1rem" marginTop="1rem" justifyContent="flex-end">
-                    <Button 
-                      onClick={() => {
-                        setShowCreateForm(false);
-                        setEditingPost(null);
-                      }}
-                      backgroundColor="white"
-                      color="#4a5568"
-                      border="1px solid #e2e8f0"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      backgroundColor="#4299e1"
-                      color="white"
-                      isLoading={isSubmitting}
-                    >
-                      {editingPost ? 'Update Post' : 'Create Post'}
-                    </Button>
-                  </Flex>
-                </Flex>
               </form>
-              </Flex>
-            </Card>
-          </Flex>
-        </View>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}
@@ -699,3 +1044,4 @@ const StudentPostsPage = ({ user }) => {
 };
 
 export default StudentPostsPage;
+

@@ -15,8 +15,11 @@ import {
 } from '@aws-amplify/ui-react';
 import { updateApplication, updateProject } from '../graphql/operations';
 import { sendStatusChangeNotification } from '../utils/emailNotifications';
+import buttonStyles from '../styles/dashboardButtons.module.css';
 
 const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourses = false, hideStatusUpdate = false }) => {
+  const primaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
   const [notes, setNotes] = useState('');
   const [statusUpdate, setStatusUpdate] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
@@ -265,9 +268,10 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
             <Flex direction="column" gap="0.75rem">
               {application.resumeKey && (
                 <Button 
-                  size="small" 
-                  backgroundColor="#4299e1" 
-                  color="white"
+                  size="small"
+                  data-dashboard-button="true"
+                  className={secondaryActionButtonClassName}
+                  alignSelf="flex-start"
                   onClick={downloadProposal}
                 >
                   Download Resume
@@ -275,9 +279,10 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
               )}
               {application.documentKey && (
                 <Button 
-                  size="small" 
-                  backgroundColor="#4299e1" 
-                  color="white"
+                  size="small"
+                  data-dashboard-button="true"
+                  className={primaryActionButtonClassName}
+                  alignSelf="flex-start"
                   onClick={async () => {
                     try {
                       const url = await Storage.get(application.documentKey, { 
@@ -296,9 +301,10 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
               )}
               {application.transcriptLink && (
                 <Button 
-                  size="small" 
-                  backgroundColor="#4299e1" 
-                  color="white"
+                  size="small"
+                  data-dashboard-button="true"
+                  className={secondaryActionButtonClassName}
+                  alignSelf="flex-start"
                   onClick={() => window.open(application.transcriptLink, '_blank')}
                 >
                   View Transcript
@@ -412,9 +418,9 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
               
               <Flex justifyContent="flex-end">
                 <Button 
+                  data-dashboard-button="true"
+                  className={primaryActionButtonClassName}
                   onClick={updateStatus}
-                  backgroundColor="#4299e1"
-                  color="white"
                   size="small"
                   isLoading={isSubmitting}
                 >
@@ -458,7 +464,11 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
                   <Flex justifyContent="space-between" alignItems="center" padding="1rem">
                     <Heading level={4}>Supporting Document</Heading>
                     <Flex gap="0.5rem">
-                      <Button size="small" onClick={() => {
+                      <Button
+                        size="small"
+                        data-dashboard-button="true"
+                        className={secondaryActionButtonClassName}
+                        onClick={() => {
                         const link = document.createElement('a');
                         link.href = documentUrl;
                         link.download = 'supporting-document';
@@ -466,11 +476,21 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
-                      }}>Download</Button>
-                      <Button size="small" onClick={() => {
+                      }}
+                      >
+                        Download
+                      </Button>
+                      <Button
+                        size="small"
+                        data-dashboard-button="true"
+                        className={secondaryActionButtonClassName}
+                        onClick={() => {
                         setViewingDocument(false);
                         setDocumentUrl(null);
-                      }}>Close</Button>
+                      }}
+                      >
+                        Close
+                      </Button>
                     </Flex>
                   </Flex>
                   <Divider />
@@ -498,7 +518,10 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
                     ) : (
                       <Flex direction="column" alignItems="center" justifyContent="center" height="100%" gap="1rem">
                         <Text>Document preview not available for this file type.</Text>
-                        <Button onClick={() => {
+                        <Button
+                          data-dashboard-button="true"
+                          className={primaryActionButtonClassName}
+                          onClick={() => {
                           const link = document.createElement('a');
                           link.href = documentUrl;
                           link.download = 'supporting-document';
@@ -506,7 +529,10 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
                           document.body.appendChild(link);
                           link.click();
                           document.body.removeChild(link);
-                        }}>Download Document</Button>
+                        }}
+                        >
+                          Download Document
+                        </Button>
                       </Flex>
                     )}
                   </View>

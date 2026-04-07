@@ -162,25 +162,30 @@
   font-weight: 600;
   transition: all 0.2s ease;
   cursor: pointer;
-  border: none;
+  border: 1px solid #cdb7ef;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 6px 16px rgba(154, 74, 215, 0.08);
 }
 
 .action-button-primary {
-  background: #4a5568;
-  color: white;
+  background: #ffffff;
+  color: #111827;
+  border-color: #cdb7ef;
 }
 
 .action-button-primary:hover {
-  background: #5a6578;
+  background: #faf7ff;
+  border-color: #bc9ce9;
 }
 
 .action-button-secondary {
-  background: transparent;
-  color: #94A3B8;
-  border: 1px solid #2a3142;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #cdb7ef;
 }
 
 .action-button-secondary:hover {
-  background: #1a1f2e;
-  border-color: #3a4152;
+  background: #faf7ff;
+  border-color: #bc9ce9;
 }

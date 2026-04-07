@@ -87,7 +87,15 @@
             },
             "INDEX_TABLE": {
               "Ref": "indexTable"
-            }
+            },
+            "TAG_RELATIONS_TABLE": {
+              "Fn::Sub": "TagRelations-${env}"
+            },
+            "ENABLE_RELATED_TAG_EXPANSION": "true",
+            "MIN_RELATION_WEIGHT": "0.35",
+            "MAX_RELATED_TAGS_PER_SOURCE": "4",
+            "DEFAULT_RELATED_WEIGHT": "0.40",
+            "RECOMMENDATION_DEBUG_LOGS": "true"
           }
         },
         "Role": {
@@ -201,7 +209,8 @@
                 "arn:aws:dynamodb:*:*:table/User-*",
                 "arn:aws:dynamodb:*:*:table/Project-*",
                 "arn:aws:dynamodb:*:*:table/ProjectTagIndex-*",
-                "arn:aws:dynamodb:*:*:table/ProjectTagIndex-*/index/*"
+                "arn:aws:dynamodb:*:*:table/ProjectTagIndex-*/index/*",
+                "arn:aws:dynamodb:*:*:table/TagRelations-*"
               ],
               "Effect": "Allow"
             }

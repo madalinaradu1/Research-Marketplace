@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation } from 'aws-amplify';
-import { Flex, Heading, Card, TextField, Button, Text, View, Divider } from '@aws-amplify/ui-react';
+import { Flex, Heading, Card, TextField, Button, Text, View, Divider, TextAreaField, useTheme } from '@aws-amplify/ui-react';
 import { updateUser, listApplications, listProjects, updateApplication } from '../graphql/operations';
 import { useNavigate } from 'react-router-dom';
 import TagSelector from '../components/TagSelector';
 import { useTags } from '../contexts/TagContext';
+import buttonStyles from '../styles/dashboardButtons.module.css';
 
 
 const ProfilePage = ({ user, refreshProfile }) => {
+  const { tokens } = useTheme();
   const navigate = useNavigate();
+  const primaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`;
+  const secondaryActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const iconActionButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact} ${buttonStyles.actionButtonIcon}`;
+  const fieldLabelProps = {
+    fontSize: tokens.fontSizes.medium,
+    fontWeight: tokens.fontWeights.medium,
+    color: tokens.colors.font.primary
+  };
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -44,9 +54,15 @@ const ProfilePage = ({ user, refreshProfile }) => {
   const [deleteAction, setDeleteAction] = useState(null);
   const [applications, setApplications] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [researchInterestTagIds, setResearchInterestTagIds] = useState([]);
-  const [skillsTagIds, setSkillsTagIds] = useState([]);
-  const [certificateTagIds, setCertificateTagIds] = useState([]);
+  const [researchInterestTagIds, setResearchInterestTagIds] = useState(
+    Array.isArray(user?.researchInterests) ? user.researchInterests : []
+  );
+  const [skillsTagIds, setSkillsTagIds] = useState(
+    Array.isArray(user?.skills) ? user.skills : []
+  );
+  const [certificateTagIds, setCertificateTagIds] = useState(
+    Array.isArray(user?.certificates) ? user.certificates : []
+  );
   const { tagsById, resolveTagIds } = useTags();
   
   // Initialize form with user data and load calendar events
@@ -67,10 +83,11 @@ const ProfilePage = ({ user, refreshProfile }) => {
   }, [user]);
 
   useEffect(() => {
-    if (tagsById.size === 0) return;
-    setResearchInterestTagIds((prev) => resolveTagIds(prev));
-    setSkillsTagIds((prev) => resolveTagIds(prev));
-  }, [tagsById, resolveTagIds]);
+    if (!user || tagsById.size === 0) return;
+    setResearchInterestTagIds(resolveTagIds(user.researchInterests || []));
+    setSkillsTagIds(resolveTagIds(user.skills || []));
+    setCertificateTagIds(resolveTagIds(user.certificates || []));
+  }, [user, tagsById, resolveTagIds]);
 
   
   const loadCalendarEvents = async () => {
@@ -235,43 +252,59 @@ const ProfilePage = ({ user, refreshProfile }) => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
           }}
         >
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="student-profile-form">
           <Flex direction="column" gap="1rem">
-            <TextField
-              name="studentId"
-              label="Student ID"
-              placeholder="Your student ID"
-              value={formState.studentId}
-              onChange={handleChange}
-              isReadOnly
-            />
-            
-            <TextField
-              name="currentProgram"
-              label="Current Academic Program"
-              placeholder="e.g., Computer Science, Biology"
-              value={formState.currentProgram}
-              onChange={handleChange}
-            />
-            
-            <TextField
-              name="degreeType"
-              label="Degree Pursued"
-              placeholder="e.g., Bachelor's, Master's, PhD"
-              value={formState.degreeType}
-              onChange={handleChange}
-            />
-            
-            <TextField
-              name="expectedGraduation"
-              label="Expected Graduation Date"
-              placeholder="e.g., Spring 2025"
-              value={formState.expectedGraduation}
-              onChange={handleChange}
-            />
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Student ID</Text>
+              <TextField
+                name="studentId"
+                label="Student ID"
+                labelHidden
+                placeholder="Your student ID"
+                value={formState.studentId}
+                onChange={handleChange}
+                isReadOnly
+              />
+            </Flex>
             
             <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">Research Interests</Text>
+              <Text {...fieldLabelProps}>Current Academic Program</Text>
+              <TextField
+                name="currentProgram"
+                label="Current Academic Program"
+                labelHidden
+                placeholder="e.g., Computer Science, Biology"
+                value={formState.currentProgram}
+                onChange={handleChange}
+              />
+            </Flex>
+            
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Degree Pursued</Text>
+              <TextField
+                name="degreeType"
+                label="Degree Pursued"
+                labelHidden
+                placeholder="e.g., Bachelor's, Master's, PhD"
+                value={formState.degreeType}
+                onChange={handleChange}
+              />
+            </Flex>
+            
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Expected Graduation Date</Text>
+              <TextField
+                name="expectedGraduation"
+                label="Expected Graduation Date"
+                labelHidden
+                placeholder="e.g., Spring 2025"
+                value={formState.expectedGraduation}
+                onChange={handleChange}
+              />
+            </Flex>
+            
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Research Interests</Text>
               <TagSelector
                 selectedTagIds={researchInterestTagIds}
                 onChange={setResearchInterestTagIds}
@@ -281,7 +314,7 @@ const ProfilePage = ({ user, refreshProfile }) => {
             </Flex>
 
             <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">Skills and Experience</Text>
+              <Text {...fieldLabelProps}>Skills and Experience</Text>
               <TagSelector
                 selectedTagIds={skillsTagIds}
                 onChange={setSkillsTagIds}
@@ -290,24 +323,33 @@ const ProfilePage = ({ user, refreshProfile }) => {
               />
             </Flex>
 
-            <TextField
-              name="availability"
-              label="Availability"
-              placeholder="e.g., Fall 2024, Spring 2025"
-              value={formState.availability}
-              onChange={handleChange}
-            />
-            
-            <TextField
-              name="personalStatement"
-              label="Personal Statement"
-              placeholder="Brief description of your motivation for research"
-              value={formState.personalStatement}
-              onChange={handleChange}
-            />
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Availability</Text>
+              <TextField
+                name="availability"
+                label="Availability"
+                labelHidden
+                placeholder="e.g., Fall 2024, Spring 2025"
+                value={formState.availability}
+                onChange={handleChange}
+              />
+            </Flex>
             
             <Flex direction="column" gap="0.5rem">
-              <Text fontWeight="bold">Certifications</Text>
+              <Text {...fieldLabelProps}>Personal Statement</Text>
+              <TextAreaField
+                name="personalStatement"
+                label="Personal Statement"
+                labelHidden
+                placeholder="Brief description of your motivation for research"
+                value={formState.personalStatement}
+                onChange={handleChange}
+                rows={4}
+              />
+            </Flex>
+            
+            <Flex direction="column" gap="0.5rem">
+              <Text {...fieldLabelProps}>Certifications</Text>
               <TagSelector
                 selectedTagIds={certificateTagIds}
                 onChange={setCertificateTagIds}
@@ -321,10 +363,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
             
             <Flex justifyContent="flex-end">
               <Button 
-                type="submit" 
-                backgroundColor="white"
-                color="black"
-                border="1px solid black"
+                type="submit"
+                data-dashboard-button="true"
+                className={primaryActionButtonClassName}
                 size="small"
                 isLoading={isSubmitting}
                 loadingText="Saving..."
@@ -351,10 +392,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
             <Flex justifyContent="space-between" alignItems="center">
               <Heading level={4} color="#2d3748">My Calendar</Heading>
               <Button
+                data-dashboard-button="true"
+                className={secondaryActionButtonClassName}
                 size="small"
-                backgroundColor="white"
-                color="black"
-                border="1px solid black"
                 onClick={() => setShowCalendarModal(true)}
               >
                 View Full Calendar
@@ -366,10 +406,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
             <Card variation="outlined" padding="1rem">
               <Flex justifyContent="space-between" alignItems="center" marginBottom="0.5rem">
                 <Button
+                  data-dashboard-button="true"
+                  className={iconActionButtonClassName}
                   size="small"
-                  backgroundColor="white"
-                  color="black"
-                  border="1px solid black"
                   onClick={() => {
                     const newDate = new Date(miniCalendarDate);
                     newDate.setMonth(newDate.getMonth() - 1);
@@ -382,10 +421,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                   {miniCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </Text>
                 <Button
+                  data-dashboard-button="true"
+                  className={iconActionButtonClassName}
                   size="small"
-                  backgroundColor="white"
-                  color="black"
-                  border="1px solid black"
                   onClick={() => {
                     const newDate = new Date(miniCalendarDate);
                     newDate.setMonth(newDate.getMonth() + 1);
@@ -505,12 +543,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                           <Text fontSize="0.7rem" color="green">Research Project</Text>
                         </Flex>
                         <Button
+                          data-dashboard-button="true"
+                          className={secondaryActionButtonClassName}
                           size="small"
-                          backgroundColor="white"
-                          color="black"
-                          border="1px solid black"
-                          fontSize="0.7rem"
-                          padding="0.25rem 0.5rem"
                           onClick={() => {
                             setDeleteAction(() => async () => {
                               try {
@@ -560,12 +595,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                         </Flex>
                         <Flex direction="column" gap="0.25rem">
                           <Button
+                            data-dashboard-button="true"
+                            className={secondaryActionButtonClassName}
                             size="small"
-                            backgroundColor="white"
-                            color="black"
-                            border="1px solid black"
-                            fontSize="0.7rem"
-                            padding="0.25rem 0.5rem"
                             onClick={() => {
                               setEditingEvent(event);
                               setEventForm({ title: event.title, description: event.description, startDate: event.startDate, endDate: event.endDate, allDay: event.allDay });
@@ -576,12 +608,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                             Edit
                           </Button>
                           <Button
+                            data-dashboard-button="true"
+                            className={secondaryActionButtonClassName}
                             size="small"
-                            backgroundColor="white"
-                            color="black"
-                            border="1px solid black"
-                            fontSize="0.7rem"
-                            padding="0.25rem 0.5rem"
                             onClick={() => {
                               setDeleteAction(() => () => {
                                 const updatedEvents = scheduledEvents.filter(e => e.id !== event.id);
@@ -636,10 +665,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                 <Flex justifyContent="space-between" alignItems="center">
                   <Heading level={3}>My Academic Calendar</Heading>
                   <Button 
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
                     onClick={() => setShowCalendarModal(false)}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                   >
                     Close
                   </Button>
@@ -652,19 +680,17 @@ const ProfilePage = ({ user, refreshProfile }) => {
                   <Flex justifyContent="space-between" alignItems="center" marginBottom="1rem">
                     <Flex gap="0.5rem">
                       <Button 
+                        data-dashboard-button="true"
+                        className={iconActionButtonClassName}
                         onClick={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear() - 1, currentCalendarDate.getMonth(), 1))}
-                        backgroundColor="white"
-                        color="black"
-                        border="1px solid black"
                         size="small"
                       >
                         ««
                       </Button>
                       <Button 
+                        data-dashboard-button="true"
+                        className={iconActionButtonClassName}
                         onClick={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() - 1, 1))}
-                        backgroundColor="white"
-                        color="black"
-                        border="1px solid black"
                         size="small"
                       >
                         ←
@@ -675,19 +701,17 @@ const ProfilePage = ({ user, refreshProfile }) => {
                     </Text>
                     <Flex gap="0.5rem">
                       <Button 
+                        data-dashboard-button="true"
+                        className={iconActionButtonClassName}
                         onClick={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + 1, 1))}
-                        backgroundColor="white"
-                        color="black"
-                        border="1px solid black"
                         size="small"
                       >
                         →
                       </Button>
                       <Button 
+                        data-dashboard-button="true"
+                        className={iconActionButtonClassName}
                         onClick={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear() + 1, currentCalendarDate.getMonth(), 1))}
-                        backgroundColor="white"
-                        color="black"
-                        border="1px solid black"
                         size="small"
                       >
                         »»
@@ -886,10 +910,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                     })}
                   </Heading>
                   <Button 
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
                     onClick={() => setShowDayModal(false)}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                     size="small"
                   >
                     Close
@@ -909,27 +932,25 @@ const ProfilePage = ({ user, refreshProfile }) => {
                         <Text fontSize="0.8rem" color="gray">Duration: Active during this period</Text>
                         <Flex gap="0.5rem">
                           <Button 
+                            data-dashboard-button="true"
+                            className={secondaryActionButtonClassName}
                             onClick={() => {
                               setShowDayModal(false);
                               navigate('/messages');
                             }}
-                            backgroundColor="white"
-                            color="black"
-                            border="1px solid black"
                             size="small"
                           >
                             Message Faculty
                           </Button>
                           <Button 
+                            data-dashboard-button="true"
+                            className={primaryActionButtonClassName}
                             onClick={() => {
                               setSelectedDate(selectedDayEvents.date);
                               setEventForm({ title: '', description: '', startDate: selectedDayEvents.date.toISOString().split('T')[0], endDate: selectedDayEvents.date.toISOString().split('T')[0], allDay: true });
                               setShowDayModal(false);
                               setShowScheduleForm(true);
                             }}
-                            backgroundColor="white"
-                            color="black"
-                            border="1px solid black"
                             size="small"
                           >
                             Schedule Research Opportunity
@@ -1031,9 +1052,8 @@ const ProfilePage = ({ user, refreshProfile }) => {
                   
                   <Flex gap="0.5rem" justifyContent="flex-end">
                     <Button 
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
+                      data-dashboard-button="true"
+                      className={primaryActionButtonClassName}
                       size="small"
                       onClick={() => {
                         const newEvent = {
@@ -1069,10 +1089,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                       {editingEvent ? 'Update Event' : 'Add to Calendar'}
                     </Button>
                     <Button 
+                      data-dashboard-button="true"
+                      className={secondaryActionButtonClassName}
                       onClick={() => setShowScheduleForm(false)}
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
                       size="small"
                     >
                       Close
@@ -1136,10 +1155,9 @@ const ProfilePage = ({ user, refreshProfile }) => {
                   
                   <Flex gap="0.5rem" justifyContent="flex-end">
                     <Button 
+                      data-dashboard-button="true"
+                      className={secondaryActionButtonClassName}
                       onClick={() => setShowProjectEditModal(false)}
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
                       size="small"
                     >
                       Close
@@ -1182,15 +1200,16 @@ const ProfilePage = ({ user, refreshProfile }) => {
                 
                 <Flex gap="0.5rem" justifyContent="flex-end">
                   <Button 
+                    data-dashboard-button="true"
+                    className={secondaryActionButtonClassName}
                     onClick={() => setShowDeleteConfirm(false)}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                     size="small"
                   >
                     No
                   </Button>
                   <Button 
+                    data-dashboard-button="true"
+                    className={primaryActionButtonClassName}
                     onClick={() => {
                       if (deleteAction) {
                         deleteAction();
@@ -1198,9 +1217,6 @@ const ProfilePage = ({ user, refreshProfile }) => {
                       setShowDeleteConfirm(false);
                       setDeleteAction(null);
                     }}
-                    backgroundColor="white"
-                    color="black"
-                    border="1px solid black"
                     size="small"
                   >
                     Yes
