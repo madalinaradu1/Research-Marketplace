@@ -48,6 +48,10 @@
   padding: 1.25rem 2rem 0 !important;
 }
 
+[data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-confirmsignup][data-amplify-form] {
+  padding-bottom: 1.75rem !important;
+}
+
 [data-amplify-theme] [data-amplify-authenticator] [data-amplify-footer] {
   background-color: transparent !important;
   padding: 0 2rem 1.75rem !important;
@@ -202,12 +206,37 @@
 }
 
 [data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-verifyuser] button[type="submit"],
+[data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-confirmsignup] button[type="submit"],
 [data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-confirmverifyuser] button[type="submit"],
 [data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-verifyuser] .amplify-button--primary,
+[data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-confirmsignup] .amplify-button--primary,
 [data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-confirmverifyuser] .amplify-button--primary {
   margin-top: 0rem !important;
   margin-bottom: 0rem !important;
   padding: 0rem !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-confirmsignup] button[type="button"].amplify-button {
+  background-color: white !important;
+  border: 1px solid var(--auth-border) !important;
+  border-radius: var(--auth-control-radius) !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+  color: var(--auth-text) !important;
+  cursor: pointer !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  margin-top: 0rem !important;
+  margin-bottom: 0rem !important;
+  min-height: 3.35rem !important;
+  padding: 0rem !important;
+  width: 100% !important;
+}
+
+[data-amplify-theme] [data-amplify-authenticator] form[data-amplify-authenticator-confirmsignup] button[type="button"].amplify-button:hover {
+  background-color: var(--auth-filled-bg) !important;
+  border-color: var(--auth-border-strong) !important;
+  color: var(--auth-text) !important;
 }
 
 [data-amplify-theme] [data-amplify-authenticator] .amplify-tabs {

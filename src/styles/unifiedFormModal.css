@@ -402,6 +402,91 @@
   font-style: normal;
 }
 
+/* Tag selector and autocomplete dropdowns */
+.unified-form-modal .ufm-field .tag-dropdown {
+  top: calc(100% + 4px);
+  left: 0;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin: 0;
+}
+
+.unified-form-modal .ufm-field .tag-dropdown-option {
+  color: #1e293b !important;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.unified-form-modal .ufm-field .tag-dropdown-option:hover,
+.unified-form-modal .ufm-field .tag-dropdown-option.is-highlighted {
+  background: #f1f5f9 !important;
+}
+
+.unified-form-modal .ufm-field .tag-selector .tag-selector-input {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px;
+  color: #1e293b !important;
+  font-size: 0.875rem;
+  padding: 0.55rem 0.75rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.unified-form-modal .ufm-field .tag-selector .tag-selector-input::placeholder {
+  color: #a0aec0;
+}
+
+.unified-form-modal .ufm-field .tag-selector .tag-selector-input:hover {
+  border-color: #cbd5e0 !important;
+}
+
+.unified-form-modal .ufm-field .tag-selector .tag-selector-input:focus {
+  outline: none !important;
+  border-color: #64748b !important;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1) !important;
+}
+
+.unified-form-modal .ufm-field .tag-selector .tag-selector-input:disabled {
+  background: #f8fafc !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed;
+}
+
+.unified-form-modal .ufm-field .tag-chip {
+  background: #edf2f7 !important;
+  color: #1e293b !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.8rem;
+}
+
+.unified-form-modal .ufm-field .tag-chip-remove,
+[data-amplify-theme] .unified-form-modal .ufm-field .tag-chip-remove {
+  color: #6b7280 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.unified-form-modal .ufm-field .tag-chip-remove:hover,
+.unified-form-modal .ufm-field .tag-chip-remove:focus,
+[data-amplify-theme] .unified-form-modal .ufm-field .tag-chip-remove:hover,
+[data-amplify-theme] .unified-form-modal .ufm-field .tag-chip-remove:focus {
+  color: #4b5563 !important;
+  background: transparent !important;
+}
+
+.unified-form-modal .ufm-field .tag-selector .tag-dropdown-empty {
+  color: #94a3b8 !important;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.85rem;
+}
+
 /* ─── Course card (application form) ───────────────────────── */
 .unified-form-modal .ufm-course-card {
   background: #ffffff !important;

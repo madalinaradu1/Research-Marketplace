@@ -7,9 +7,6 @@ import {
   Button,
   Card,
   Loader,
-  TextField,
-  TextAreaField,
-  SelectField,
   Badge,
   View,
   Tabs,
@@ -22,7 +19,6 @@ import '../components/TagSelector/tagSelector.css';
 import { useTags } from '../contexts/TagContext';
 import { tagIdsToDisplayNames, toStringArray } from '../components/TagSelector/tagHelpers';
 import { hasWordPrefixMatch } from '../lib/tags/normalize';
-import dashboardStyles from './StudentDashboard.module.css';
 import buttonStyles from '../styles/dashboardButtons.module.css';
 import '../styles/unifiedFormModal.css';
 
@@ -399,7 +395,7 @@ const StudentPostsPage = ({ user }) => {
                     <Text fontSize="0.9rem" color="#4a5568">
                       {(user.id || user.username) === post.student?.id || ['Admin', 'Faculty', 'Coordinator'].includes(user.role)
                         ? post.student?.name
-                        : 'GCU Student'} <span aria-hidden="true">&middot;</span> {post.department || 'No College'}
+                        : 'GCU Student'} <span aria-hidden="true"> | </span> {post.department || 'No College'}
                     </Text>
                   </Flex>
                   <Flex alignItems="center" gap="1rem">
@@ -947,7 +943,7 @@ const StudentPostsPage = ({ user }) => {
                   </div>
                   <div className="ufm-field">
                     <label className="ufm-label">Research Areas</label>
-                    <p className="ufm-hint">Type to search and add research areas from the shared tag library.</p>
+                    <p className="ufm-hint">Add research areas that describe your idea.</p>
                     <TagSelector selectedTagIds={researchAreaTagIds} onChange={handleResearchAreasChange} placeholder="Type to search and add research interests..." maxSelections={10} />
                     {legacyResearchAreas.length > 0 && (
                       <p className="ufm-hint" style={{ color: '#8a6d3b' }}>Existing values not in the tag library: {legacyResearchAreas.join(', ')}</p>
@@ -955,7 +951,7 @@ const StudentPostsPage = ({ user }) => {
                   </div>
                   <div className="ufm-field">
                     <label className="ufm-label">Skills You Offer</label>
-                    <p className="ufm-hint">Add skills you can contribute using the same tag autocomplete as faculty projects.</p>
+                    <p className="ufm-hint">Add skills you can contribute.</p>
                     <TagSelector selectedTagIds={skillsOfferedTagIds} onChange={handleSkillsOfferedChange} placeholder="Type to search and add offered skills..." maxSelections={15} />
                     {legacySkillsOffered.length > 0 && (
                       <p className="ufm-hint" style={{ color: '#8a6d3b' }}>Existing values not in the tag library: {legacySkillsOffered.join(', ')}</p>
