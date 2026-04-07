@@ -17,6 +17,7 @@ import {
 import { updateApplication } from '../graphql/operations';
 import EnhancedApplicationForm from './EnhancedApplicationForm';
 import EditApplicationForm from './EditApplicationForm';
+import { sendApplicationStatusChangeEmail } from '../utils/emailNotifications';
 import { getStatusColorValue } from '../utils/statusColors';
 import buttonStyles from '../styles/dashboardButtons.module.css';
 
@@ -76,6 +77,21 @@ const ApplicationStatus = ({ application, isStudent = true, onUpdate, showReturn
       
       await API.graphql(graphqlOperation(updateApplication, { input }));
       setIsWithdrawing(false);
+
+      try {
+        await sendApplicationStatusChangeEmail(
+          application.student?.email || '',
+          application.student?.name || '',
+          application.project?.title || '',
+          application.id,
+          'Cancelled',
+          'Cancelled by Student',
+          withdrawReason
+        );
+      } catch (emailError) {
+        console.log('Withdrawal email notification failed:', emailError);
+      }
+
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Error withdrawing application:', err);
