@@ -14,18 +14,18 @@ import {
 import { listUsers } from '../graphql/operations';
 import { listMessages } from '../graphql/message-operations';
 import { useNavigate } from 'react-router-dom';
+import RichTextContent from '../components/common/RichTextContent';
+import { richTextToPlainText } from '../utils/richText';
 import buttonStyles from '../styles/dashboardButtons.module.css';
 
-// Clean HTML content to remove excessive spacing
-const cleanHtmlContent = (html) => {
-  if (!html) return '';
-  return html
-    .replace(/<p><br><\/p>/g, '')
-    .replace(/<p>\s*<\/p>/g, '')
-    .replace(/<br\s*\/?>/g, ' ')
-    .replace(/<\/p>\s*<p>/g, '</p><p>')
-    .replace(/\s+/g, ' ')
-    .trim();
+const getMessagePreview = (html = '', maxLength = 60) => {
+  const text = richTextToPlainText(html);
+
+  if (!text) {
+    return 'No content';
+  }
+
+  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
 };
 
 // Color for heading
@@ -226,7 +226,7 @@ const OldMessagesPage = ({ user }) => {
                         const searchLower = searchTerm.toLowerCase();
                         const personName = (conversation.otherPerson.name || '').toLowerCase();
                         const messageContent = conversation.thread
-                          .map(msg => (msg.body || '').replace(/<[^>]*>/g, ''))
+                          .map(msg => richTextToPlainText(msg.body || msg.content || ''))
                           .join(' ')
                           .toLowerCase();
                         return personName.includes(searchLower) || messageContent.includes(searchLower);
@@ -264,7 +264,7 @@ const OldMessagesPage = ({ user }) => {
                                 textOverflow: 'ellipsis', 
                                 whiteSpace: 'nowrap'
                               }}>
-                                {(conversation.latestMessage.body || '').replace(/<[^>]*>/g, '').substring(0, 60)}...
+                                {getMessagePreview(conversation.latestMessage.body || conversation.latestMessage.content || '')}
                               </Text>
                             </Flex>
                           </View>
@@ -330,15 +330,14 @@ const OldMessagesPage = ({ user }) => {
                           }}
                         >
                           <Flex direction="column" gap="0rem">
-                            <div 
+                            <RichTextContent
+                              html={msg.body || msg.content}
+                              fallback={<span>No content</span>}
                               style={{ 
                                 color: msg.senderID === (user.id || user.username) ? '#ffffff !important' : '#2d3748',
                                 fontSize: '0.9rem',
                                 lineHeight: '1'
-                              }} 
-                              dangerouslySetInnerHTML={{ 
-                                __html: cleanHtmlContent(msg.body || msg.content) || 'No content' 
-                              }} 
+                              }}
                             />
                             <Text 
                               fontSize="0.7rem" 

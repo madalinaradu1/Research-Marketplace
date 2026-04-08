@@ -17,6 +17,7 @@ import {
 import { listProjects, listUsers } from '../graphql/operations';
 import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 import DashboardPagination from '../components/DashboardPagination';
+import RichTextContent from '../components/common/RichTextContent';
 import { tagPillProps } from '../styles/tagPills';
 import buttonStyles from '../styles/dashboardButtons.module.css';
 
@@ -421,7 +422,7 @@ const SearchPage = ({ user }) => {
                   </Flex>
                 </Flex>
                 
-                <div dangerouslySetInnerHTML={{ __html: project.description }} />
+                <RichTextContent html={project.description} className="quill-content" />
                 
                 {project.skillsRequired && project.skillsRequired.length > 0 && (
                   <Flex direction="column" gap="0.5rem">

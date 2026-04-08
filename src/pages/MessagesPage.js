@@ -19,21 +19,21 @@ import { listUsers, listApplications, listProjects } from '../graphql/operations
 import { listMessages, createMessage, getMessageThread, updateMessage, deleteMessage } from '../graphql/message-operations';
 import { sendEmailNotification } from '../utils/emailNotifications';
 import { useNavigate } from 'react-router-dom';
+import RichTextContent from '../components/common/RichTextContent';
+import { richTextToPlainText, sanitizeRichText } from '../utils/richText';
 import buttonStyles from '../styles/dashboardButtons.module.css';
 import '../styles/unifiedFormModal.css';
 
+const getMessagePreview = (html = '', maxLength = 60) => {
+  const text = richTextToPlainText(html);
 
-// Clean HTML content to remove excessive spacing
-const cleanHtmlContent = (html) => {
-  if (!html) return '';
-  return html
-    .replace(/<p><br><\/p>/g, '')
-    .replace(/<p>\s*<\/p>/g, '')
-    .replace(/<br\s*\/?>/g, ' ')
-    .replace(/<\/p>\s*<p>/g, '</p><p>')
-    .replace(/\s+/g, ' ')
-    .trim();
+  if (!text) {
+    return 'No content';
+  }
+
+  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
 };
+
 // Color for heading
 const getConversationColor = (conversationId) => {
   const colors = [
@@ -309,7 +309,8 @@ const displayedConversations = (user.role === 'Student' && showArchivedConversat
   };
 
   const sendReply = async () => {
-    if (!replyText.trim() || !selectedConversation) return;
+    const sanitizedReplyText = sanitizeRichText(replyText);
+    if (!sanitizedReplyText || !selectedConversation) return;
     
     setIsReplying(true);
     try {
@@ -322,7 +323,7 @@ const displayedConversations = (user.role === 'Student' && showArchivedConversat
         subject: selectedConversation.latestMessage.subject.startsWith('Re:') ? 
           selectedConversation.latestMessage.subject : 
           `Re: ${selectedConversation.latestMessage.subject}`,
-        body: replyText,
+        body: sanitizedReplyText,
         isRead: false,
         sentAt: new Date().toISOString()
       };
@@ -337,7 +338,7 @@ const displayedConversations = (user.role === 'Student' && showArchivedConversat
           recipient?.name,
           user.name,
           `Re: ${selectedConversation.latestMessage.subject}`,
-          replyText,
+          richTextToPlainText(sanitizedReplyText),
           'Direct Message'
         );
       } catch (emailError) {
@@ -352,7 +353,7 @@ const newMessage = {
   senderID: userId,
   receiverID: recipientId,
   subject: messageInput.subject,
-  body: replyText,
+  body: sanitizedReplyText,
   sentAt: new Date().toISOString(),
   isRead: false
 };
@@ -431,15 +432,21 @@ setMessages(prev => prev.map(conversation =>
 
 const startEdit = (message) => {
   setEditingMessage(message.id);
-  setEditText(message.body);
+  setEditText(message.body || '');
 };
 
 const saveEdit = async (messageId) => {
+  const sanitizedEditText = sanitizeRichText(editText);
+  if (!sanitizedEditText) {
+    setError('Message content cannot be empty.');
+    return;
+  }
+
   try {
     await API.graphql(graphqlOperation(updateMessage, {
       input: { 
         id: messageId, 
-        body: editText 
+        body: sanitizedEditText 
       }
     }));
     
@@ -447,7 +454,7 @@ const saveEdit = async (messageId) => {
     setSelectedConversation(prev => ({
       ...prev,
       thread: prev.thread.map(msg => 
-        msg.id === messageId ? { ...msg, body: editText } : msg
+        msg.id === messageId ? { ...msg, body: sanitizedEditText } : msg
       )
     }));
     
@@ -456,7 +463,7 @@ const saveEdit = async (messageId) => {
         ? {
             ...conversation,
             thread: conversation.thread.map(msg => 
-              msg.id === messageId ? { ...msg, body: editText } : msg
+              msg.id === messageId ? { ...msg, body: sanitizedEditText } : msg
             )
           }
         : conversation
@@ -607,16 +614,16 @@ const saveEdit = async (messageId) => {
                 </Flex>
               ) : (
                 <Flex direction="column">
-               {messages
-  .filter(conversation => {
-    if (!searchTerm) return true;
-    const searchLower = searchTerm.toLowerCase();
-    const personName = (conversation.otherPerson.name || '').toLowerCase();
-    const messageContent = conversation.thread
-      .map(msg => (msg.body || '').replace(/<[^>]*>/g, ''))
-      .join(' ')
-      .toLowerCase();
-    return personName.includes(searchLower) || messageContent.includes(searchLower);
+                    {messages
+                      .filter(conversation => {
+                        if (!searchTerm) return true;
+                        const searchLower = searchTerm.toLowerCase();
+                        const personName = (conversation.otherPerson.name || '').toLowerCase();
+                        const messageContent = conversation.thread
+                          .map(msg => richTextToPlainText(msg.body || msg.content || ''))
+                          .join(' ')
+                          .toLowerCase();
+                        return personName.includes(searchLower) || messageContent.includes(searchLower);
   })
   .map((conversation) => (
     // ... rest of the existing conversation mapping code stays the same
@@ -654,14 +661,14 @@ const saveEdit = async (messageId) => {
         </Flex>
 
                   <Flex justifyContent="space-between" alignItems="center">
-                      <Text fontSize="0.8rem" color="#718096" style={{ 
+                          <Text fontSize="0.8rem" color="#718096" style={{ 
                             overflow: 'hidden', 
                             textOverflow: 'ellipsis', 
                             whiteSpace: 'nowrap',
                             flex: 1,
                             marginRight: '8px'
                           }}>
-                            {(conversation.latestMessage.body || '').replace(/<[^>]*>/g, '').substring(0, 60)}...
+                            {getMessagePreview(conversation.latestMessage.body || conversation.latestMessage.content || '')}
                           </Text>
                           
                           {(user.role === 'Admin' || user.role === 'Faculty') && (
@@ -853,7 +860,9 @@ const saveEdit = async (messageId) => {
           </div>
         ) : (
           <>
-            <div 
+            <RichTextContent
+              html={msg.body || msg.content}
+              fallback={<span>No content</span>}
               style={{ 
                 color: msg.senderID === (user.id || user.username) ? '#ffffff !important' : '#2d3748',
                 fontSize: '0.9rem',
@@ -862,10 +871,7 @@ const saveEdit = async (messageId) => {
                 WebkitUserSelect: 'none',
                 MozUserSelect: 'none',
                 msUserSelect: 'none'
-              }} 
-              dangerouslySetInnerHTML={{ 
-                __html: cleanHtmlContent(msg.body || msg.content) || 'No content' 
-              }} 
+              }}
             />
             <Text 
               fontSize="0.7rem" 
@@ -940,7 +946,7 @@ const saveEdit = async (messageId) => {
        color="white"
        size="small"
        isLoading={isReplying}
-       isDisabled={!replyText.trim() || isArchivedConversation}
+       isDisabled={!richTextToPlainText(replyText) || isArchivedConversation}
        style={{
          borderRadius: '8px',
          padding: '8px 16px',
@@ -1058,9 +1064,10 @@ const saveEdit = async (messageId) => {
                     type="button"
                     data-dashboard-button="true"
                     className={primaryActionButtonClassName}
-                    disabled={isSendingNew || !newMessage.recipient || !newMessage.subject || !newMessage.body}
+                    disabled={isSendingNew || !newMessage.recipient || !newMessage.subject || !richTextToPlainText(newMessage.body)}
                     onClick={async () => {
-                      if (!newMessage.recipient || !newMessage.subject || !newMessage.body) return;
+                      const sanitizedNewMessageBody = sanitizeRichText(newMessage.body);
+                      if (!newMessage.recipient || !newMessage.subject || !sanitizedNewMessageBody) return;
                       
                       setIsSendingNew(true);
                       try {
@@ -1071,7 +1078,7 @@ const saveEdit = async (messageId) => {
                           senderID: userId,
                           receiverID: newMessage.recipient,
                           subject: newMessage.subject,
-                          body: newMessage.body,
+                          body: sanitizedNewMessageBody,
                           isRead: false,
                           sentAt: new Date().toISOString(),
                         };
@@ -1084,7 +1091,7 @@ const saveEdit = async (messageId) => {
                             recipient?.name,
                             user.name,
                             newMessage.subject,
-                            newMessage.body,
+                            richTextToPlainText(sanitizedNewMessageBody),
                             'Research Project'
                           );
                         } catch (emailError) {

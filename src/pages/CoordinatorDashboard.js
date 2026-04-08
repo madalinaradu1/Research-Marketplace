@@ -32,6 +32,8 @@ import { syncProjectTagIndex } from '../lib/recommendations/projectTagIndexSync'
 import SliderTabs from '../components/SliderTabs';
 import DashboardPageShell from '../components/DashboardPageShell';
 import DashboardPagination from '../components/DashboardPagination';
+import RichTextContent from '../components/common/RichTextContent';
+import { sanitizeRichText } from '../utils/richText';
 import buttonStyles from '../styles/dashboardButtons.module.css';
 
 const CoordinatorDashboard = ({ user }) => {
@@ -295,7 +297,7 @@ const CoordinatorDashboard = ({ user }) => {
       const input = {
         id: editingProject.id,
         title: projectForm.title,
-        description: projectForm.description,
+        description: sanitizeRichText(projectForm.description),
         department: projectForm.department,
         skillsRequired: skillsArray,
         tags: tagsArray,
@@ -1233,7 +1235,7 @@ const CoordinatorDashboard = ({ user }) => {
                   <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
                     <Heading level={5} color="#2d3748" marginBottom="1rem">Statement of Interest</Heading>
                     <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
-                      <div dangerouslySetInnerHTML={{ __html: viewingApplication.statement }} />
+                      <RichTextContent html={viewingApplication.statement} className="quill-content" />
                     </Card>
                   </Card>
                 )}
@@ -1496,10 +1498,7 @@ const CoordinatorDashboard = ({ user }) => {
                 <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
                   <Heading level={5} color="#2d3748" marginBottom="1rem">Project Description</Heading>
                   <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
-                    <div 
-                      className="quill-content"
-                      dangerouslySetInnerHTML={{ __html: viewingProject.description }} 
-                    />
+                    <RichTextContent html={viewingProject.description} className="quill-content" />
                   </Card>
                 </Card>
                 

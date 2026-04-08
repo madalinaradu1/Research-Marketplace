@@ -15,6 +15,7 @@ import {
 } from '@aws-amplify/ui-react';
 import { updateApplication, updateProject } from '../graphql/operations';
 import { sendStatusChangeNotification } from '../utils/emailNotifications';
+import RichTextContent from './common/RichTextContent';
 import buttonStyles from '../styles/dashboardButtons.module.css';
 
 const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourses = false, hideStatusUpdate = false }) => {
@@ -236,7 +237,7 @@ const ApplicationReview = ({ application, userRole, onUpdate, hideRelevantCourse
           <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
             <Heading level={5} color="#2d3748" marginBottom="1rem">Statement of Interest</Heading>
             <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
-              <div dangerouslySetInnerHTML={{ __html: application.statement }} />
+              <RichTextContent html={application.statement} className="quill-content" />
             </Card>
           </Card>
         )}

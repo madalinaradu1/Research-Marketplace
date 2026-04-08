@@ -34,6 +34,7 @@ import { deleteUserCompletely, bulkDeleteUsers, canDeleteUser } from '../utils/a
 import SliderTabs from '../components/SliderTabs';
 import DashboardPageShell from '../components/DashboardPageShell';
 import DashboardPagination from '../components/DashboardPagination';
+import { richTextToPlainText, sanitizeRichText } from '../utils/richText';
 
 // GraphQL queries for audit logs
 const createAuditLogMutation = `
@@ -902,7 +903,9 @@ const AdminDashboard = ({ user }) => {
   };
   
   const sendAnnouncement = async () => {
-    if (!announcement.title || !announcement.message) {
+    const sanitizedAnnouncementMessage = sanitizeRichText(announcement.message);
+
+    if (!announcement.title || !sanitizedAnnouncementMessage) {
       setError('Title and message are required.');
       return;
     }
@@ -943,7 +946,7 @@ const AdminDashboard = ({ user }) => {
               senderID: user.id,
               receiverID: targetUser.id,
               subject: `[Announcement to ${targetAudience}] ${announcement.title}`,
-              body: announcement.message,
+              body: sanitizedAnnouncementMessage,
               messageType: 'SYSTEM'
             }
           }));
@@ -1743,7 +1746,7 @@ const AdminDashboard = ({ user }) => {
                   <Button 
                     onClick={sendAnnouncement}
                     isLoading={isSendingAnnouncement}
-                    isDisabled={!announcement.title || !announcement.message}
+                    isDisabled={!announcement.title || !richTextToPlainText(announcement.message)}
                   >
                     Send Announcement
                   </Button>

@@ -5,6 +5,7 @@ import { listApplications, listProjects, listUsers } from '../graphql/operations
 import ApplicationStatus from '../components/ApplicationStatus';
 import DashboardPagination from '../components/DashboardPagination';
 import SliderTabs from '../components/SliderTabs';
+import RichTextContent from '../components/common/RichTextContent';
 
 const ActivityPage = ({ user }) => {
   const [applications, setApplications] = useState([]);
@@ -249,7 +250,7 @@ const ActivityPage = ({ user }) => {
                 </Badge>
               </Flex>
               <Text fontWeight="bold" color="#2d3748">Department: {project.department}</Text>
-              <div dangerouslySetInnerHTML={{ __html: project.description }} />
+              <RichTextContent html={project.description} className="quill-content" />
               {user.role === 'Faculty' && (
                 <Text fontSize="0.9rem" color="#4a5568">
                   <strong>Deadline:</strong> {project.applicationDeadline ? new Date(project.applicationDeadline).toLocaleDateString() : 'Not specified'}

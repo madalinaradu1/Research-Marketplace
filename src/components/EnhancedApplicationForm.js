@@ -19,6 +19,8 @@ import { createApplication, updateUser, listApplications } from '../graphql/oper
 import { sendNewItemNotification } from '../utils/emailNotifications';
 import { useTags } from '../contexts/TagContext';
 import { mapTagIdsToDisplayNames } from '../lib/tags/tagDisplay';
+import RichTextContent from './common/RichTextContent';
+import { countWordsFromRichText, sanitizeRichText } from '../utils/richText';
 import buttonStyles from '../styles/dashboardButtons.module.css';
 import '../styles/unifiedFormModal.css';
 
@@ -123,8 +125,10 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
     setIsSubmitting(true);
     setError(null);
 
+    const sanitizedStatement = sanitizeRichText(statement);
+
     // Validate required fields
-    if (!statement || statement.trim() === '') {
+    if (!sanitizedStatement) {
       setError('Please fill out the required Statement of Interest field.');
       setIsSubmitting(false);
       return;
@@ -149,13 +153,15 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       
       if (userApplications.length >= 3) {
         setError('You have reached the maximum of 3 applications.');
+        setIsSubmitting(false);
         return;
       }
 
       // Validate statement length (around 450 words)
-      const wordCount = statement.replace(/<[^>]*>/g, '').trim().split(/\s+/).length;
+      const wordCount = countWordsFromRichText(sanitizedStatement);
       if (wordCount < 300) {
         setError('Your statement should be at least 300 words. Current count: ' + wordCount);
+        setIsSubmitting(false);
         return;
       }
 
@@ -196,7 +202,7 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
       const applicationInput = {
         studentID: userId,
         projectID: project.id,
-        statement,
+        statement: sanitizedStatement,
         relevantCourses: validCourses,
         documentKey,
         status: 'Coordinator Review'
@@ -272,7 +278,11 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
           <div className="ufm-section-header">
             <p className="ufm-section-title">Research Project</p>
           </div>
-          <div dangerouslySetInnerHTML={{ __html: project.description }} style={{ fontSize: '0.875rem', lineHeight: 1.6, color: '#1e293b' }} />
+          <RichTextContent
+            html={project.description}
+            className="quill-content"
+            style={{ fontSize: '0.875rem', lineHeight: 1.6, color: '#1e293b' }}
+          />
           {project.department && <p className="ufm-meta">College: {project.department}</p>}
           {project.faculty?.name && <p className="ufm-meta">Faculty: {project.faculty.name}</p>}
           {project.duration && <p className="ufm-meta">Duration: {project.duration}</p>}
@@ -321,7 +331,7 @@ const EnhancedApplicationForm = ({ project, user, onClose, onSuccess }) => {
             />
           </div>
           <p className="ufm-meta">
-            Word count: {statement.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(word => word).length} (aim for ~450 words)
+            Word count: {countWordsFromRichText(statement)} (aim for ~450 words)
           </p>
         </div>
 

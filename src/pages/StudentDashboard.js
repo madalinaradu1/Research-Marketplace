@@ -23,6 +23,7 @@ import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 import DashboardPagination from '../components/DashboardPagination';
 import { getRecommendedProjects } from '../graphql/recommendation-operations';
 import { useTags } from '../contexts/TagContext';
+import RichTextContent from '../components/common/RichTextContent';
 import styles from './StudentDashboard.module.css';
 import buttonStyles from '../styles/dashboardButtons.module.css';
 import { tagPillProps } from '../styles/tagPills';
@@ -412,7 +413,7 @@ const StudentDashboard = ({ user }) => {
                 </Flex>
 
                 <Text fontWeight="bold">{project.department}</Text>
-                <div dangerouslySetInnerHTML={{ __html: project.description }} />
+                <RichTextContent html={project.description} className="quill-content" />
 
                 {project.qualifications && (
                   <Text><strong>Required Qualifications/Prerequisites:</strong> {project.qualifications}</Text>
@@ -761,7 +762,7 @@ const StudentDashboard = ({ user }) => {
                 <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
                   <Heading level={5} color="#2d3748" marginBottom="1rem">Project Description</Heading>
                   <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
-                    <div dangerouslySetInnerHTML={{ __html: selectedProject.description }} />
+                    <RichTextContent html={selectedProject.description} className="quill-content" />
                   </Card>
                 </Card>
                 

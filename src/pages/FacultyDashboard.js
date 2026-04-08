@@ -27,7 +27,9 @@ import ApplicationStatusGuide from '../components/ApplicationStatusGuide';
 import DashboardPagination from '../components/DashboardPagination';
 import SliderTabs from '../components/SliderTabs';
 import DashboardPageShell from '../components/DashboardPageShell';
+import RichTextContent from '../components/common/RichTextContent';
 import { getStatusColorValue } from '../utils/statusColors';
+import { richTextToPlainText, sanitizeRichText } from '../utils/richText';
 import '../components/TagSelector/tagSelector.css';
 import '../styles/facultyCreateProjectModal.css';
 import '../styles/unifiedFormModal.css';
@@ -190,20 +192,8 @@ const FacultyDashboard = ({ user }) => {
   const createProjectQuillRef = useRef(null);
   const editProjectQuillRef = useRef(null);
   const resubmitQuillRef = useRef(null);
-  
-  // Clean HTML content - minimal cleaning to preserve user formatting
-  const cleanHtmlContent = (html) => {
-    if (!html || html === '<p><br></p>') return '';
-    return html.trim();
-  };
-  
-  // Strip HTML tags for plain text editing
-  const stripHtmlTags = (html) => {
-    if (!html) return '';
-    return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
-  };
-  
 
+  
   
   useEffect(() => {
     fetchData();
@@ -461,7 +451,7 @@ const FacultyDashboard = ({ user }) => {
       // Prepare input with proper types and new workflow status
       const input = {
         title: projectForm.title,
-        description: cleanHtmlContent(projectForm.description),
+        description: sanitizeRichText(projectForm.description),
         department: projectForm.department,
         skillsRequired: skillsArray,
         tags: tagsArray,
@@ -2031,9 +2021,10 @@ const FacultyDashboard = ({ user }) => {
                     type="button"
                     data-dashboard-button="true"
                     className={primaryActionButtonClassName}
-                    disabled={isSendingMessage || !messageText.trim()}
+                    disabled={isSendingMessage || !richTextToPlainText(messageText)}
                     onClick={async () => {
-                      if (!messageText.trim()) return;
+                      const sanitizedMessageBody = sanitizeRichText(messageText);
+                      if (!sanitizedMessageBody) return;
                       
                       setIsSendingMessage(true);
                       try {
@@ -2044,7 +2035,7 @@ const FacultyDashboard = ({ user }) => {
                           senderID: userId,
                           receiverID: messagingStudent.student.id,
                           subject: `Message about ${messagingStudent.application.project?.title}`,
-                          body: messageText,
+                          body: sanitizedMessageBody,
                           isRead: false,
                           sentAt: new Date().toISOString()
                         };
@@ -2056,7 +2047,7 @@ const FacultyDashboard = ({ user }) => {
                           messagingStudent.student.name,
                           user.name,
                           `Message about ${messagingStudent.application.project?.title}`,
-                          messageText,
+                          richTextToPlainText(sanitizedMessageBody),
                           messagingStudent.application.project?.title
                         );
                         
@@ -2347,7 +2338,7 @@ const FacultyDashboard = ({ user }) => {
                 <Card backgroundColor="#f8fafc" padding="1.5rem" border="1px solid #e2e8f0">
                   <Heading level={5} color="#2d3748" marginBottom="1rem">Project Description</Heading>
                   <Card backgroundColor="white" padding="1rem" border="1px solid #e2e8f0">
-                    <div dangerouslySetInnerHTML={{ __html: selectedProject.description }} />
+                    <RichTextContent html={selectedProject.description} className="quill-content" />
                   </Card>
                 </Card>
                 
