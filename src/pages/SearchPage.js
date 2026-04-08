@@ -12,14 +12,13 @@ import {
   Badge,
   Collection,
   Loader,
-  Divider,
-  CheckboxField,
-  View
+  Divider
 } from '@aws-amplify/ui-react';
 import { listProjects, listUsers } from '../graphql/operations';
 import EnhancedApplicationForm from '../components/EnhancedApplicationForm';
 import DashboardPagination from '../components/DashboardPagination';
 import { tagPillProps } from '../styles/tagPills';
+import buttonStyles from '../styles/dashboardButtons.module.css';
 
 const SearchPage = ({ user }) => {
   const [searchParams] = useSearchParams();
@@ -36,6 +35,8 @@ const SearchPage = ({ user }) => {
   const resultsPerPage = 10;
   const [selectedProject, setSelectedProject] = useState(null);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const filterControlButtonClassName = `${buttonStyles.actionButton} ${buttonStyles.actionButtonGhost} ${buttonStyles.actionButtonCompact}`;
+  const filterSelectInputStyles = { className: `search-page-filter-select ${filterControlButtonClassName}` };
 
   const departments = [
     'Computer Science',
@@ -65,9 +66,7 @@ const SearchPage = ({ user }) => {
   
   useEffect(() => {
     const queryTerm = searchParams.get('q');
-    if (queryTerm) {
-      setSearchTerm(queryTerm);
-    }
+    setSearchTerm(queryTerm || '');
   }, [searchParams]);
 
   useEffect(() => {
@@ -227,6 +226,11 @@ const SearchPage = ({ user }) => {
           .search-page-search-field svg {
             fill: gray !important;
           }
+          .search-page-filter-select {
+            width: 100% !important;
+            text-align: left !important;
+            padding-right: 2.25rem !important;
+          }
         `}
       </style>
       <Flex direction="column" padding="2rem" gap="2rem">
@@ -276,6 +280,7 @@ const SearchPage = ({ user }) => {
               value={selectedCollege}
               onChange={(e) => setSelectedCollege(e.target.value)}
               width="250px"
+              inputStyles={filterSelectInputStyles}
             >
               <option value="">All Colleges</option>
               {departments.map(dept => (
@@ -288,6 +293,7 @@ const SearchPage = ({ user }) => {
               value={selectedDuration}
               onChange={(e) => setSelectedDuration(e.target.value)}
               width="180px"
+              inputStyles={filterSelectInputStyles}
             >
               <option value="">Any Duration</option>
               {durations.map(duration => (
@@ -300,6 +306,7 @@ const SearchPage = ({ user }) => {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               width="180px"
+              inputStyles={filterSelectInputStyles}
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -309,9 +316,10 @@ const SearchPage = ({ user }) => {
             </SelectField>
             
             <Button 
-              onClick={clearFilters} 
-              variation="link"
-              color="black"
+              type="button"
+              data-dashboard-button="true"
+              className={filterControlButtonClassName}
+              onClick={clearFilters}
             >
               Clear Filters
             </Button>
@@ -448,10 +456,7 @@ const SearchPage = ({ user }) => {
                   
                   {user?.role === 'Student' && (
                     <Button 
-                      size="small" 
-                      backgroundColor="white"
-                      color="black"
-                      border="1px solid black"
+                      className={`${buttonStyles.actionButton} ${buttonStyles.actionButtonPrimary} ${buttonStyles.actionButtonCompact}`}
                       onClick={() => {
                         setSelectedProject(project);
                         setShowApplicationForm(true);
@@ -493,42 +498,22 @@ const SearchPage = ({ user }) => {
       
       {/* Application Form Modal */}
       {showApplicationForm && selectedProject && (
-        <View
-          position="fixed"
-          top="0"
-          left="0"
-          width="100vw"
-          height="100vh"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          style={{ zIndex: 1000 }}
-          onClick={() => setShowApplicationForm(false)}
-        >
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-            padding="2rem"
-          >
-            <Card
-              maxWidth="800px"
-              width="100%"
-              maxHeight="100vh"
-              style={{ overflow: 'auto' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <EnhancedApplicationForm 
-                project={selectedProject}
-                user={user}
-                onClose={() => setShowApplicationForm(false)}
-                onSuccess={() => {
-                  setShowApplicationForm(false);
-                  setSelectedProject(null);
-                  // Optionally refresh data or show success message
-                }}
-              />
-            </Card>
-          </Flex>
-        </View>
+        <div className="unified-form-modal" onClick={() => { setShowApplicationForm(false); setSelectedProject(null); }}>
+          <div className="ufm-card" onClick={(e) => e.stopPropagation()}>
+            <EnhancedApplicationForm
+              project={selectedProject}
+              user={user}
+              onClose={() => {
+                setShowApplicationForm(false);
+                setSelectedProject(null);
+              }}
+              onSuccess={() => {
+                setShowApplicationForm(false);
+                setSelectedProject(null);
+              }}
+            />
+          </div>
+        </div>
       )}
       </Flex>
     </>

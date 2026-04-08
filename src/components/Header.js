@@ -134,6 +134,7 @@ const Header = ({ user, signOut }) => {
     event.preventDefault();
     const trimmedSearch = searchTerm.trim();
     navigate(trimmedSearch ? `/search?q=${encodeURIComponent(trimmedSearch)}` : '/search');
+    setSearchTerm('');
   };
 
   return (
